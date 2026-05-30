@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaFacebookF, FaGooglePlusG, FaLinkedinIn } from "react-icons/fa";
+import instructorImage from "../assets/LoginImage.png";
 
 const InstructorLogin = () => {
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState("");
@@ -17,6 +21,27 @@ const InstructorLogin = () => {
       alert("Please enter email and password");
       return;
     }
+
+    const newOtp = "123456"; // Demo OTP
+
+    setGeneratedOtp(newOtp);
+    setShowOtpInput(true);
+  };
+
+  const verifyOtp = () => {
+    if (otp !== generatedOtp) {
+      alert("Invalid OTP");
+      return;
+    }
+
+    sessionStorage.setItem(
+      "instructorSession",
+      JSON.stringify({
+        email: loginEmail,
+        isLoggedIn: true,
+      })
+    );
+
     navigate("/instructor/dashboard");
   };
 
@@ -34,25 +59,10 @@ const InstructorLogin = () => {
 
         {/* Sign In Panel */}
         <div
-          className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-14 transition-all duration-700 ${
-            isSignUp ? "translate-x-full opacity-0 z-10" : "z-20"
-          }`}
+          className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-14 transition-all duration-700 ${isSignUp ? "translate-x-full opacity-0 z-10" : "z-20"
+            }`}
         >
           <h1 className="text-3xl font-extrabold mb-6">Instructor Sign In</h1>
-
-          <div className="flex gap-4 mb-5">
-            <button className="w-11 h-11 border rounded-full flex items-center justify-center">
-              <FaFacebookF />
-            </button>
-            <button className="w-11 h-11 border rounded-full flex items-center justify-center">
-              <FaGooglePlusG />
-            </button>
-            <button className="w-11 h-11 border rounded-full flex items-center justify-center">
-              <FaLinkedinIn />
-            </button>
-          </div>
-
-          <p className="text-xs text-gray-500 mb-4">or use your account</p>
 
           <input
             type="email"
@@ -70,6 +80,25 @@ const InstructorLogin = () => {
             onChange={(e) => setLoginPassword(e.target.value)}
           />
 
+          {showOtpInput && (
+            <div className="mt-4 w-full">
+              <input
+                type="text"
+                placeholder="Enter OTP"
+                className="w-full bg-gray-100 px-4 py-3 mb-3 outline-none text-sm"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+
+              <button
+                onClick={verifyOtp}
+                className="w-full py-3 bg-green-600 text-white rounded-full text-xs font-bold uppercase mb-5"
+              >
+                Verify OTP
+              </button>
+            </div>
+          )}
+
           <a href="#" className="text-sm text-gray-600 mb-5">
             Forgot your password?
           </a>
@@ -80,13 +109,13 @@ const InstructorLogin = () => {
           >
             Sign In
           </button>
+
         </div>
 
         {/* Sign Up Panel */}
         <div
-          className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-14 transition-all duration-700 ${
-            isSignUp ? "translate-x-full opacity-100 z-20" : "opacity-0 z-10"
-          }`}
+          className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-14 transition-all duration-700 ${isSignUp ? "translate-x-full opacity-100 z-20" : "opacity-0 z-10"
+            }`}
         >
           <h1 className="text-3xl font-extrabold mb-6">Create Account</h1>
 
@@ -140,37 +169,16 @@ const InstructorLogin = () => {
 
         {/* Overlay */}
         <div
-          className={`absolute top-0 left-1/2 w-1/2 h-full bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white flex items-center justify-center text-center px-12 transition-all duration-700 z-30 ${
-            isSignUp ? "-translate-x-full" : ""
-          }`}
+          className={`absolute top-0 left-1/2 w-1/2 h-full transition-all duration-700 z-30 ${isSignUp ? "-translate-x-full" : ""
+            }`}
         >
-          {!isSignUp ? (
-            <div>
-              <h1 className="text-3xl font-extrabold mb-5">Hello, Instructor!</h1>
-              <p className="text-sm mb-8">
-                Enter your personal details and start your teaching journey with us
-              </p>
-              <button
-                onClick={() => setIsSignUp(true)}
-                className="px-12 py-3 border border-white rounded-full text-xs font-bold uppercase"
-              >
-                Sign Up
-              </button>
-            </div>
-          ) : (
-            <div>
-              <h1 className="text-3xl font-extrabold mb-5">Welcome Back!</h1>
-              <p className="text-sm mb-8">
-                To keep connected with us please login with your personal info
-              </p>
-              <button
-                onClick={() => setIsSignUp(false)}
-                className="px-12 py-3 border border-white rounded-full text-xs font-bold uppercase"
-              >
-                Sign In
-              </button>
-            </div>
-          )}
+          <img
+            src={instructorImage}
+            alt="Instructor"
+            className="w-full h-full object-cover"
+          />
+
+          
         </div>
       </div>
     </div>

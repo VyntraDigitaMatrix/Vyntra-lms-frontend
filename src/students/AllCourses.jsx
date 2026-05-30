@@ -10,12 +10,19 @@ import S7 from "../assets/S7.jpg";
 import S8 from "../assets/S8.jpg";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const AllCourses = () => {
+<<<<<<< Updated upstream
     const [sortBy, setSortBy] = useState("Popular");
     const [currentPage, setCurrentPage] = useState(1);
     const coursesPerPage = 4;
   const courses = [
     {
      id: 1,
+=======
+  const [sortBy, setSortBy] = useState("Popular");
+  const courses = [
+    {
+      id: 1,
+>>>>>>> Stashed changes
       title: "Digital Marketing Fundamentals",
       badge: "Bestseller",
       image: S1,
@@ -29,7 +36,7 @@ const AllCourses = () => {
       priceValue: 999,
     },
     {
-        id: 2,
+      id: 2,
       title: "Search Engine Optimization (SEO)",
       badge: "Popular",
       image: S2,
@@ -43,7 +50,7 @@ const AllCourses = () => {
       priceValue: 1199,
     },
     {
-        id: 3,
+      id: 3,
       title: "Social Media Marketing Mastery",
       badge: "Trending",
       image: S3,
@@ -57,7 +64,7 @@ const AllCourses = () => {
       priceValue: 1299,
     },
     {
-        id: 4,
+      id: 4,
       title: "Email Marketing Essentials",
       badge: "",
       image: S4,
@@ -71,7 +78,7 @@ const AllCourses = () => {
       priceValue: 899,
     },
     {
-        id: 5,
+      id: 5,
       title: "YouTube Marketing Success",
       badge: "",
       image: S5,
@@ -85,7 +92,7 @@ const AllCourses = () => {
       priceValue: 1099,
     },
     {
-        id: 6,
+      id: 6,
       title: "Google Ads Campaigns",
       badge: "",
       image: S6,
@@ -99,7 +106,7 @@ const AllCourses = () => {
       priceValue: 1299,
     },
     {
-        id: 7,
+      id: 7,
       title: "Google Analytics Mastery",
       badge: "",
       image: S7,
@@ -113,7 +120,7 @@ const AllCourses = () => {
       priceValue: 899,
     },
     {
-     id: 8,
+      id: 8,
       title: "E-commerce Marketing Strategies",
       badge: "",
       image: S8,
@@ -128,6 +135,7 @@ const AllCourses = () => {
     },
   ];
   const sortedCourses = [...courses].sort((a, b) => {
+<<<<<<< Updated upstream
   if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
   if (sortBy === "Latest") return b.id - a.id;
   if (sortBy === "Price Low") return a.priceValue - b.priceValue;
@@ -146,41 +154,56 @@ const changePage = (page) => {
     setCurrentPage(page);
   }
 };
+=======
+    if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
+    if (sortBy === "Latest") return b.id - a.id;
+    if (sortBy === "Price Low") return a.priceValue - b.priceValue;
+    if (sortBy === "Price High") return b.priceValue - a.priceValue;
+    return 0;
+  });
+>>>>>>> Stashed changes
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-7xl mx-auto">
-    <div className="flex items-center justify-between mb-5">
-  
-  {/* Left Side */}
-  <div>
-    <p className="text-sm text-gray-400 mb-1">
-      <Link
-        to="/student/dashboard"
-        className="hover:text-blue-600 transition"
-      >
-        Dashboard
-      </Link>
+        <div className="flex items-center justify-between mb-5">
 
-      <span className="mx-2">&gt;</span>
+          {/* Left Side */}
+          <div>
+            <p className="text-sm text-gray-400 mb-1">
+              <Link
+                to="/student/dashboard"
+                className="hover:text-blue-600 transition"
+              >
+                Dashboard
+              </Link>
 
-      <span className="text-gray-600 font-medium">
-        All Courses
-      </span>
-    </p>
+              <span className="mx-2">&gt;</span>
 
+<<<<<<< Updated upstream
     <h1 className="text-xl font-bold text-gray-900">
       All Courses
     </h1>
+=======
+              <span className="text-gray-600 font-medium">
+                All Courses
+              </span>
+            </p>
+>>>>>>> Stashed changes
 
-    <p className="text-sm text-gray-500 mt-2">
-      Explore our comprehensive digital marketing courses and enhance your skills.
-    </p>
-  </div>
-</div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              All Courses
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Explore our comprehensive digital marketing courses and enhance your skills.
+            </p>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between -mt-4 mb-3">
           <p className="text-sm text-gray-500">Showing 1-8 of 24 courses</p>
 
+<<<<<<< Updated upstream
          <select
   value={sortBy}
  onChange={(e) => {
@@ -194,6 +217,18 @@ const changePage = (page) => {
   <option value="Price Low">Sort by: Price Low</option>
   <option value="Price High">Sort by: Price High</option>
 </select>
+=======
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200"
+          >
+            <option value="Popular">Sort by: Popular</option>
+            <option value="Latest">Sort by: Latest</option>
+            <option value="Price Low">Sort by: Price Low</option>
+            <option value="Price High">Sort by: Price High</option>
+          </select>
+>>>>>>> Stashed changes
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
