@@ -167,14 +167,15 @@ const changePage = (page) => {
       All Courses
     </h1>
 
-            <h1 className="text-2xl font-bold text-gray-900">
-              All Courses
-            </h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                All Courses
+              </h1>
 
-            <p className="text-sm text-gray-500 mt-2">
-              Explore our comprehensive digital marketing courses and enhance your skills.
+              <p className="text-sm text-gray-500 mt-2">
+                Explore our comprehensive digital marketing courses and enhance your skills.
+              </p>
             </p>
-          </p>
+          
           </div>
         </div>
 
@@ -249,36 +250,35 @@ const changePage = (page) => {
           ))}
         </div>
         <div className="flex justify-center items-center gap-4 mt-7">
-  <button
-    onClick={() => changePage(currentPage - 1)}
-    disabled={currentPage === 1}
-    className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
-  >
-    <FaChevronLeft />
-  </button>
+          <button
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
+          >
+            <FaChevronLeft />
+          </button>
 
-  {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-    <button
-      key={page}
-      onClick={() => changePage(page)}
-      className={`w-9 h-9 rounded-md text-sm font-semibold ${
-        currentPage === page
-          ? "bg-blue-600 text-white"
-          : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
-      }`}
-    >
-      {page}
-    </button>
-  ))}
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => changePage(page)}
+              className={`w-9 h-9 rounded-md text-sm font-semibold ${currentPage === page
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
+                }`}
+            >
+              {page}
+            </button>
+          ))}
 
-  <button
-    onClick={() => changePage(currentPage + 1)}
-    disabled={currentPage === totalPages}
-    className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
-  >
-    <FaChevronRight />
-  </button>
-</div>
+          <button
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,8 @@ import {
   FaChevronDown,
   FaKey,
   FaBookOpen,
-  FaReadme,
+  FaCertificate,
+  FaBriefcase,
 } from "react-icons/fa";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
@@ -24,24 +25,14 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/student/dashboard" },
-    { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
-    {
-      icon: <FaBookOpen />,
-      label: "All Courses",
-      path: "/student/all-courses",
-    },
-    {
-      icon: <FaClipboardList />,
-      label: "Assignments",
-      path: "/student/assignments",
-    },
+     { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
+     { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
+     
+    { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
-    {
-      icon: <FaComments />,
-      label: "Discussions",
-      path: "/student/discussions",
-    },
+    { icon: <FaVideo />, label: "Recordings", path: "/student/recordings" },
+    {icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
+    { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaDownload />, label: "Downloads", path: "/student/downloads" },

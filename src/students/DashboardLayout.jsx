@@ -40,7 +40,7 @@ import ContactSupport from "./ContactSupport";const DashboardLayout = ({ childre
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />
 
-       <main className="flex-1 overflow-y-auto scrollbar-hide bg-white p-0">
+       <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
           {children}
         </main>
       </div>
