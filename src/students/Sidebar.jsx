@@ -18,6 +18,7 @@ import {
   FaCertificate,
   FaBriefcase,
 } from "react-icons/fa";
+import { MdQuiz } from "react-icons/md";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
@@ -30,7 +31,6 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
      
     { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    { icon: <FaVideo />, label: "Recordings", path: "/student/recordings" },
     {icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
     { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
