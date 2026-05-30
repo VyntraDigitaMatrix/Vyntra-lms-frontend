@@ -15,12 +15,10 @@ import {
   FaChevronDown,
   FaKey,
   FaBookOpen,
-<<<<<<< Updated upstream
   FaReadme,
-=======
+
   FaCertificate,
   FaBriefcase,
->>>>>>> Stashed changes
 } from "react-icons/fa";
 import { MdQuiz } from "react-icons/md";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -31,13 +29,11 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/student/dashboard" },
-<<<<<<< Updated upstream
     { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
     { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
     { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
     { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
-=======
      { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
      { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
      { icon: <FaUsers />, label: "Live Classes", path: "/student/classes" },
@@ -45,17 +41,13 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/student/recordings" },
     {icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
->>>>>>> Stashed changes
     { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaDownload />, label: "Downloads", path: "/student/downloads" },
-<<<<<<< Updated upstream
-=======
     {icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
     {icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
    
->>>>>>> Stashed changes
   ];
 
   return (
