@@ -10,19 +10,12 @@ import S7 from "../assets/S7.jpg";
 import S8 from "../assets/S8.jpg";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const AllCourses = () => {
-<<<<<<< Updated upstream
     const [sortBy, setSortBy] = useState("Popular");
     const [currentPage, setCurrentPage] = useState(1);
     const coursesPerPage = 4;
   const courses = [
     {
      id: 1,
-=======
-  const [sortBy, setSortBy] = useState("Popular");
-  const courses = [
-    {
-      id: 1,
->>>>>>> Stashed changes
       title: "Digital Marketing Fundamentals",
       badge: "Bestseller",
       image: S1,
@@ -135,7 +128,6 @@ const AllCourses = () => {
     },
   ];
   const sortedCourses = [...courses].sort((a, b) => {
-<<<<<<< Updated upstream
   if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
   if (sortBy === "Latest") return b.id - a.id;
   if (sortBy === "Price Low") return a.priceValue - b.priceValue;
@@ -154,14 +146,6 @@ const changePage = (page) => {
     setCurrentPage(page);
   }
 };
-=======
-    if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
-    if (sortBy === "Latest") return b.id - a.id;
-    if (sortBy === "Price Low") return a.priceValue - b.priceValue;
-    if (sortBy === "Price High") return b.priceValue - a.priceValue;
-    return 0;
-  });
->>>>>>> Stashed changes
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-7xl mx-auto">
@@ -179,16 +163,9 @@ const changePage = (page) => {
 
               <span className="mx-2">&gt;</span>
 
-<<<<<<< Updated upstream
     <h1 className="text-xl font-bold text-gray-900">
       All Courses
     </h1>
-=======
-              <span className="text-gray-600 font-medium">
-                All Courses
-              </span>
-            </p>
->>>>>>> Stashed changes
 
             <h1 className="text-2xl font-bold text-gray-900">
               All Courses
@@ -203,7 +180,6 @@ const changePage = (page) => {
         <div className="flex items-center justify-between -mt-4 mb-3">
           <p className="text-sm text-gray-500">Showing 1-8 of 24 courses</p>
 
-<<<<<<< Updated upstream
          <select
   value={sortBy}
  onChange={(e) => {
@@ -217,18 +193,6 @@ const changePage = (page) => {
   <option value="Price Low">Sort by: Price Low</option>
   <option value="Price High">Sort by: Price High</option>
 </select>
-=======
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200"
-          >
-            <option value="Popular">Sort by: Popular</option>
-            <option value="Latest">Sort by: Latest</option>
-            <option value="Price Low">Sort by: Price Low</option>
-            <option value="Price High">Sort by: Price High</option>
-          </select>
->>>>>>> Stashed changes
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
