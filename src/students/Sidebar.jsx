@@ -15,8 +15,6 @@ import {
   FaChevronDown,
   FaKey,
   FaBookOpen,
-  FaReadme,
-
   FaCertificate,
   FaBriefcase,
 } from "react-icons/fa";
@@ -29,14 +27,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/student/dashboard" },
-    { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
-    { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
-    { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
-    { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
      { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
      { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
-     { icon: <FaUsers />, label: "Live Classes", path: "/student/classes" },
+     
     { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/student/recordings" },
