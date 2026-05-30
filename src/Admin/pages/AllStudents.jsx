@@ -176,7 +176,7 @@ const AllStudents = () => {
             <div className="mt-2 text-xs text-green-600">↑ 8% improvement</div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-[#2BB2A9] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Avg. Grade</p>
@@ -232,7 +232,7 @@ const AllStudents = () => {
                 <select
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2BB2A9] focus:border-transparent bg-white text-gray-700 appearance-none cursor-pointer transition-all duration-300 hover:border-[#2BB2A9]"
+                  className="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2BB2A9] focus:border-transparent bg-white text-gray-700 appearance-none cursor-pointer transition-all duration-300 hover:border-[#2BB2A9]"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232BB2A9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                     backgroundRepeat: 'no-repeat',

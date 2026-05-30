@@ -16,12 +16,7 @@ import {
   FaKey,
   FaBookOpen,
   FaReadme,
-
-  FaCertificate,
-  FaBriefcase,
 } from "react-icons/fa";
-import { MdQuiz } from "react-icons/md";
-import { IoNotificationsOutline } from "react-icons/io5";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
@@ -30,24 +25,26 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/student/dashboard" },
     { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
-    { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
-    { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
+    {
+      icon: <FaBookOpen />,
+      label: "All Courses",
+      path: "/student/all-courses",
+    },
+    {
+      icon: <FaClipboardList />,
+      label: "Assignments",
+      path: "/student/assignments",
+    },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
     { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
-     { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
-     { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
-     { icon: <FaUsers />, label: "Live Classes", path: "/student/classes" },
-    { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
-    { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    { icon: <FaVideo />, label: "Recordings", path: "/student/recordings" },
-    {icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
-    { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
+    {
+      icon: <FaComments />,
+      label: "Discussions",
+      path: "/student/discussions",
+    },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaDownload />, label: "Downloads", path: "/student/downloads" },
-    {icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
-    {icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
-   
   ];
 
   return (
@@ -84,7 +81,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             to={item.path}
             className={({ isActive }) =>
               `flex items-center ${
-                isCollapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
+                isCollapsed
+                  ? "justify-center py-3 mx-2"
+                  : "gap-3 px-4 py-3 mx-2"
               } rounded-xl cursor-pointer transition text-sm font-medium ${
                 isActive
                   ? "bg-blue-600 text-white"
@@ -99,31 +98,31 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
         {/* Live Classes Parent */}
         <button
-  type="button"
-  onClick={() => setOpenClasses(!openClasses)}
-  className={`flex items-center ${
-  isCollapsed
-    ? "justify-center py-3 mx-2"
-    : "justify-between px-4 py-3 mx-2"
-} rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
->
-  <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
-    <span className="text-[14px]">
-      <FaUsers />
-    </span>
+          type="button"
+          onClick={() => setOpenClasses(!openClasses)}
+          className={`flex items-center ${
+            isCollapsed
+              ? "justify-center py-3 mx-2"
+              : "justify-between px-4 py-3 mx-2"
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
+        >
+          <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+            <span className="text-[14px]">
+              <FaUsers />
+            </span>
 
-    {!isCollapsed && <span>Live Classes</span>}
-  </div>
+            {!isCollapsed && <span>Live Classes</span>}
+          </div>
 
-  {!isCollapsed && (
-    <FaChevronDown
-      size={12}
-      className={`transition-transform duration-300 ${
-        openClasses ? "rotate-180" : ""
-      }`}
-    />
-  )}
-</button>
+          {!isCollapsed && (
+            <FaChevronDown
+              size={12}
+              className={`transition-transform duration-300 ${
+                openClasses ? "rotate-180" : ""
+              }`}
+            />
+          )}
+        </button>
 
         {openClasses && !isCollapsed && (
           <div className="ml-8 mr-4 flex flex-col gap-1">
@@ -163,7 +162,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             to={item.path}
             className={({ isActive }) =>
               `flex items-center ${
-                isCollapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
+                isCollapsed
+                  ? "justify-center py-3 mx-2"
+                  : "gap-3 px-4 py-3 mx-2"
               } rounded-xl cursor-pointer transition text-sm font-medium ${
                 isActive
                   ? "bg-blue-600 text-white"
@@ -181,7 +182,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           type="button"
           onClick={() => setOpenSettings(!openSettings)}
           className={`flex items-center ${
-            isCollapsed ? "justify-center py-3 mx-2" : "justify-between px-4 py-3 mx-2"
+            isCollapsed
+              ? "justify-center py-3 mx-2"
+              : "justify-between px-4 py-3 mx-2"
           } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
