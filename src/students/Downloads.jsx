@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaSearch,
   FaFilePdf,
@@ -12,15 +13,33 @@ import {
   FaPlay,
   FaStar,
   FaFolderOpen,
+  FaArrowDown,
+  FaCheckCircle,
+  FaSpinner,
+  FaClock,
+  FaFilter,
+  FaChevronDown,
+  FaTimes,
+  FaDatabase,
 } from "react-icons/fa";
+import { MdQuiz, MdAssignment, MdFolder } from "react-icons/md";
 
 function Downloads() {
   const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [messageModal, setMessageModal] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
 
-  const downloads = [
+  const [downloads, setDownloads] = useState([
     {
       id: 1,
-      fileName: "React Hooks Notes",
+      fileName: "React Hooks Complete Guide",
       course: "React JS",
       type: "PDF",
       size: 2.4,
@@ -29,6 +48,7 @@ function Downloads() {
       date: "May 24, 2026",
       favorite: true,
       icon: <FaFilePdf />,
+      description: "Comprehensive guide to React Hooks with practical examples",
     },
     {
       id: 2,
@@ -41,10 +61,11 @@ function Downloads() {
       date: "Today",
       favorite: false,
       icon: <FaVideo />,
+      description: "Step-by-step video tutorial on React Router",
     },
     {
       id: 3,
-      fileName: "JavaScript Basics PPT",
+      fileName: "JavaScript ES6+ Mastery",
       course: "JavaScript",
       type: "PPT",
       size: 5.1,
@@ -53,6 +74,7 @@ function Downloads() {
       date: "May 22, 2026",
       favorite: false,
       icon: <FaFilePowerpoint />,
+      description: "Advanced JavaScript concepts and modern features",
     },
     {
       id: 4,
@@ -65,12 +87,41 @@ function Downloads() {
       date: "May 20, 2026",
       favorite: true,
       icon: <FaCertificate />,
+      description: "Official certification for completing the course",
     },
-  ];
+  ]);
 
-  const filteredDownloads = downloads.filter((item) =>
-    item.fileName.toLowerCase().includes(search.toLowerCase())
-  );
+  const typeOptions = ["All", "PDF", "Video", "PPT", "Certificate"];
+  const statusOptions = ["All", "Completed", "Downloading", "Paused"];
+
+  const getIconBg = (type) => {
+    switch(type) {
+      case "PDF": return "bg-red-50 text-red-500";
+      case "Video": return "bg-purple-50 text-purple-500";
+      case "PPT": return "bg-orange-50 text-orange-500";
+      case "Certificate": return "bg-green-50 text-green-500";
+      default: return "bg-blue-50 text-blue-500";
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch(status) {
+      case "Completed":
+        return { bg: "bg-green-50", text: "text-green-700", icon: <FaCheckCircle className="text-green-600 text-xs" /> };
+      case "Downloading":
+        return { bg: "bg-blue-50", text: "text-blue-700", icon: <FaSpinner className="text-blue-600 text-xs animate-spin" /> };
+      default:
+        return { bg: "bg-gray-100", text: "text-gray-600", icon: <FaClock className="text-gray-500 text-xs" /> };
+    }
+  };
+
+  const filteredDownloads = downloads.filter((item) => {
+    const matchesSearch = item.fileName.toLowerCase().includes(search.toLowerCase()) ||
+                         item.description.toLowerCase().includes(search.toLowerCase());
+    const matchesType = filterType === "All" || item.type === filterType;
+    const matchesStatus = filterStatus === "All" || item.status === filterStatus;
+    return matchesSearch && matchesType && matchesStatus;
+  });
 
   const stats = useMemo(() => {
     return {
@@ -81,193 +132,453 @@ function Downloads() {
     };
   }, [downloads]);
 
+  const handleFavoriteToggle = (id) => {
+    setDownloads(prev => prev.map(item =>
+      item.id === id ? { ...item, favorite: !item.favorite } : item
+    ));
+    setMessageModal({
+      show: true,
+      type: "success",
+      message: "Item updated successfully!",
+    });
+    setTimeout(() => {
+      setMessageModal({ show: false, type: "", message: "" });
+    }, 2000);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      setDownloads(prev => prev.filter(item => item.id !== id));
+      setMessageModal({
+        show: true,
+        type: "success",
+        message: "Item deleted successfully!",
+      });
+      setTimeout(() => {
+        setMessageModal({ show: false, type: "", message: "" });
+      }, 2000);
+    }
+  };
+
+  const handlePauseResume = (id) => {
+    setDownloads(prev => prev.map(item =>
+      item.id === id 
+        ? { ...item, status: item.status === "Downloading" ? "Paused" : "Downloading" }
+        : item
+    ));
+  };
+
   return (
-    <div className="min-h-screen bg-[#f7f7f7] px-6 pt-3 pb-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-[34px] font-bold text-[#241b4b]">Downloads</h1>
-          <p className="text-[18px] text-gray-400 mt-2">
-            Manage offline files, videos, notes, and certificates
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header Section */}
+      <div className="flex items-center justify-between -mb-5 px-6 pt-6 ">
+                <p className="text-sm text-gray-400">
+                  <Link to="/student/dashboard" className="hover:text-blue-600 transition">
+                    Dashboard
+                  </Link>
+                  <span className="mx-2">&gt;</span>
+                  <span className="text-gray-600 font-medium">Resources</span>
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
+                </div>
+              </div>
+        <div className="max-w-7xl mx-auto px-5 py-4 -mb-2">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">Downloads Manager</h1>
+                  <p className="text-sm text-gray-500">Manage your offline files, videos, notes, and certificates</p>
+                </div>
+              </div>
+            </div>
+
+            <button className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold flex items-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg">
+              <FaDownload className="text-sm" />
+              Download All
+            </button>
+          </div>
         </div>
-
-        <button className="h-[46px] px-5 bg-orange-600 text-white rounded-xl flex items-center gap-2 hover:bg-orange-700">
-          <FaDownload />
-          Download All
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Total Downloads</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.total}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Completed</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.completed}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Active Downloads</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.active}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Storage Used</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.storage} MB
-          </h2>
-        </div>
-      </div>
-
-      {/* Search + Filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 mb-6 flex items-center gap-4">
-        <div className="flex-1 h-[46px] border border-gray-200 rounded-xl px-4 flex items-center gap-3">
-          <FaSearch className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search downloads..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full outline-none text-gray-700"
-          />
-        </div>
-
-        <select className="h-[46px] px-4 border border-gray-200 rounded-xl outline-none text-gray-600">
-          <option>All Types</option>
-          <option>PDF</option>
-          <option>Video</option>
-          <option>PPT</option>
-          <option>Certificate</option>
-        </select>
-
-        <select className="h-[46px] px-4 border border-gray-200 rounded-xl outline-none text-gray-600">
-          <option>All Status</option>
-          <option>Completed</option>
-          <option>Downloading</option>
-          <option>Paused</option>
-        </select>
-      </div>
-
-      {/* Storage Box */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="text-[22px] font-bold text-[#241b4b]">
-              Storage Management
-            </h3>
-            <p className="text-gray-400 text-sm">
-              Used {stats.storage} MB of 500 MB available storage
-            </p>
+      <div className="max-w-7xl mx-auto px-5 py-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3">
+              <div className="w-[52px] h-[52px] rounded-xl bg-blue-50 flex items-center justify-center">
+                <FaArrowDown className="text-blue-600 text-[24px]" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Total Downloads</p>
+                <h2 className="text-2xl font-bold text-gray-800">{stats.total}</h2>
+              </div>
+            </div>
           </div>
 
-          <FaFolderOpen className="text-orange-500 text-3xl" />
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3">
+              <div className="w-[52px] h-[52px] rounded-xl bg-green-50 flex items-center justify-center">
+                <FaCheckCircle className="text-green-600 text-[24px]" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Completed</p>
+                <h2 className="text-2xl font-bold text-gray-800">{stats.completed}</h2>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3">
+              <div className="w-[52px] h-[52px] rounded-xl bg-purple-50 flex items-center justify-center">
+                <FaSpinner className="text-purple-600 text-[24px]" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Active Downloads</p>
+                <h2 className="text-2xl font-bold text-gray-800">{stats.active}</h2>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3">
+              <div className="w-[52px] h-[52px] rounded-xl bg-orange-50 flex items-center justify-center">
+                <FaDatabase className="text-orange-600 text-[24px]" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Storage Used</p>
+                <h2 className="text-2xl font-bold text-gray-800">{stats.storage} MB</h2>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-orange-500 rounded-full"
-            style={{ width: `${Math.min((stats.storage / 500) * 100, 100)}%` }}
-          ></div>
+        {/* Search and Filters Bar */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1 relative">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search downloads by name, course, or description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+              />
+            </div>
+            
+            {/* Type Filter Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setShowTypeDropdown(!showTypeDropdown);
+                  setShowStatusDropdown(false);
+                }}
+                className="h-11 px-5 border border-gray-200 rounded-lg flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition"
+              >
+                <FaFilter className="text-sm" />
+                <span className="font-medium">Type: {filterType}</span>
+                <FaChevronDown className={`text-xs transition-transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showTypeDropdown && (
+                <div className="absolute top-12 left-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-2 animate-fadeIn">
+                  {typeOptions.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setFilterType(type);
+                        setShowTypeDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
+                        filterType === type
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Status Filter Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setShowStatusDropdown(!showStatusDropdown);
+                  setShowTypeDropdown(false);
+                }}
+                className="h-11 px-5 border border-gray-200 rounded-lg flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition"
+              >
+                <FaFilter className="text-sm" />
+                <span className="font-medium">Status: {filterStatus}</span>
+                <FaChevronDown className={`text-xs transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showStatusDropdown && (
+                <div className="absolute top-12 left-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-2 animate-fadeIn">
+                  {statusOptions.map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setFilterStatus(status);
+                        setShowStatusDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
+                        filterStatus === status
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Download Cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-  {filteredDownloads.map((item) => (
-    <div
-      key={item.id}
-      className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition min-h-[250px] flex flex-col overflow-hidden"
-    >
-      <div className="flex items-start gap-4 flex-1">
-        <div className="w-[54px] h-[54px] shrink-0 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl">
-          {item.icon}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-[20px] font-bold text-[#241b4b] whitespace-nowrap overflow-hidden text-ellipsis">
-                {item.fileName}
-              </h2>
-
-              <p className="text-gray-400 text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                {item.course} • {item.type} • {item.size} MB
+        {/* Storage Management Card */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 shadow-sm mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaFolderOpen className="text-blue-600" />
+                Storage Management
+              </h3>
+              <p className="text-gray-600 text-sm mt-1">
+                Used <span className="font-semibold text-blue-600">{stats.storage} MB</span> of 500 MB available storage
               </p>
             </div>
-
-            <span
-              className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium ${
-                item.status === "Completed"
-                  ? "bg-green-100 text-green-600"
-                  : "bg-orange-100 text-orange-600"
-              }`}
-            >
-              {item.status}
-            </span>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-400 mb-1">
-              <span>Progress</span>
-              <span>{item.progress}%</span>
-            </div>
-
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-orange-500 rounded-full"
-                style={{ width: `${item.progress}%` }}
-              ></div>
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <FaDatabase className="text-blue-500 text-2xl" />
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4 text-gray-500 text-sm">
-            <span>{item.date}</span>
-            <span>{item.favorite ? "Favorite" : "Normal"}</span>
+          <div className="w-full h-3 bg-white/50 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min((stats.storage / 500) * 100, 100)}%` }}
+            ></div>
+          </div>
+          
+          <div className="flex justify-between mt-2 text-xs text-gray-500">
+            <span>0 MB</span>
+            <span>250 MB</span>
+            <span>500 MB</span>
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-end gap-2 mt-4 flex-wrap">
-        <button className="h-[36px] px-3 bg-orange-50 text-orange-600 rounded-xl flex items-center gap-2 text-sm">
-          <FaEye />
-          Preview
-        </button>
+        {/* Downloads Grid */}
+        {filteredDownloads.length > 0 ? (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {filteredDownloads.map((item) => {
+              const statusBadge = getStatusBadge(item.status);
+              return (
+                <div
+                  key={item.id}
+                  className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                  
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className={`w-[54px] h-[54px] rounded-xl ${getIconBg(item.type)} flex items-center justify-center text-2xl shrink-0`}>
+                        {item.icon}
+                      </div>
 
-        {item.status === "Downloading" ? (
-          <button className="h-[36px] px-3 bg-gray-100 text-gray-600 rounded-xl flex items-center gap-2 text-sm">
-            <FaPause />
-            Pause
-          </button>
+                      <div className="flex-1 min-w-0">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-lg font-bold text-gray-800 truncate hover:text-blue-600 transition">
+                              {item.fileName}
+                            </h2>
+                            <p className="text-gray-500 text-xs mt-1">
+                              {item.course} • {item.type} • {item.size} MB
+                            </p>
+                          </div>
+
+                          <div className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${statusBadge.bg} ${statusBadge.text}`}>
+                            {statusBadge.icon}
+                            <span>{item.status}</span>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                          {item.description}
+                        </p>
+
+                        {/* Progress Bar */}
+                        <div className="mb-3">
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Download Progress</span>
+                            <span className="font-medium text-blue-600">{item.progress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+                              style={{ width: `${item.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Meta Info */}
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                          <div className="flex items-center gap-2">
+                            <FaClock className="text-gray-400" />
+                            <span>{item.date}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <FaStar className={`text-xs ${item.favorite ? 'text-yellow-500' : 'text-gray-300'}`} />
+                            <span>{item.favorite ? "Saved" : "Not saved"}</span>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-2">
+                          <button className="h-[34px] px-3 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-blue-100 transition">
+                            <FaEye size={12} />
+                            Preview
+                          </button>
+
+                          {item.status === "Downloading" ? (
+                            <button 
+                              onClick={() => handlePauseResume(item.id)}
+                              className="h-[34px] px-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-200 transition"
+                            >
+                              <FaPause size={12} />
+                              Pause
+                            </button>
+                          ) : item.status === "Paused" ? (
+                            <button 
+                              onClick={() => handlePauseResume(item.id)}
+                              className="h-[34px] px-3 bg-blue-100 text-blue-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-blue-200 transition"
+                            >
+                              <FaPlay size={12} />
+                              Resume
+                            </button>
+                          ) : (
+                            <button className="h-[34px] px-3 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-200 transition">
+                              <FaPlay size={12} />
+                              Open
+                            </button>
+                          )}
+
+                          <button 
+                            onClick={() => handleFavoriteToggle(item.id)}
+                            className={`h-[34px] px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 transition ${
+                              item.favorite
+                                ? "bg-yellow-50 text-yellow-600 hover:bg-yellow-100"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                          >
+                            <FaStar size={12} />
+                            {item.favorite ? "Saved" : "Save"}
+                          </button>
+
+                          <button 
+                            onClick={() => handleDelete(item.id)}
+                            className="h-[34px] px-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-red-100 transition"
+                          >
+                            <FaTrash size={12} />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
-          <button className="h-[36px] px-3 bg-gray-100 text-gray-600 rounded-xl flex items-center gap-2 text-sm">
-            <FaPlay />
-            Open
-          </button>
+          <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-200">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaDownload className="text-4xl text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">No downloads found</h3>
+            <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+            <button
+              onClick={() => {
+                setSearch("");
+                setFilterType("All");
+                setFilterStatus("All");
+              }}
+              className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+            >
+              Clear all filters
+            </button>
+          </div>
         )}
-
-        <button className="h-[36px] px-3 bg-yellow-50 text-yellow-600 rounded-xl flex items-center gap-2 text-sm">
-          <FaStar />
-          Save
-        </button>
-
-        <button className="h-[36px] px-3 bg-red-50 text-red-500 rounded-xl flex items-center gap-2 text-sm">
-          <FaTrash />
-          Delete
-        </button>
       </div>
-    </div>
-  ))}
-</div>
+
+      {/* Message Modal */}
+      {messageModal.show && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="w-96 bg-white rounded-2xl p-6 shadow-xl text-center animate-fadeIn">
+            <div
+              className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 ${
+                messageModal.type === "success"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              {messageModal.type === "success" ? "✓" : "!"}
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {messageModal.type === "success" ? "Success!" : "Error!"}
+            </h2>
+
+            <p className="text-gray-500 mb-6">{messageModal.message}</p>
+
+            <button
+              type="button"
+              onClick={() =>
+                setMessageModal({
+                  show: false,
+                  type: "",
+                  message: "",
+                })
+              }
+              className={`w-full py-2.5 rounded-lg text-white font-semibold ${
+                messageModal.type === "success"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              } transition`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
     </div>
   );
 }

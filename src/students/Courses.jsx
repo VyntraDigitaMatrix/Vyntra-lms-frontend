@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import S6 from "../assets/s6.jpg";
 import S7 from "../assets/s7.jpg";
 import S8 from "../assets/s8.jpg";
@@ -135,11 +136,28 @@ const Courses = () => {
   const wishlistCount = courses.filter((course) => course.wishlist).length;
 
   return (
-    <div className="min-h-screen bg-[#f7f8fc] p-6">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
+  <p className="text-sm text-gray-400 mb-1">
+    <Link
+      to="/student/dashboard"
+      className="hover:text-blue-600 transition"
+    >
+      Dashboard
+    </Link>
+
+    <span className="mx-2">&gt;</span>
+
+    <span className="text-gray-600 font-medium">
+      My Courses
+    </span>
+  </p>
+
+  <h1 className="text-xl font-bold text-gray-900">
+    My Courses
+  </h1>
 
             <div className="flex gap-8 mt-5 text-sm font-semibold">
               {tabs.map((tab) => (
@@ -211,7 +229,7 @@ const Courses = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredCourses.map((course, index) => (
             <div
               key={index}

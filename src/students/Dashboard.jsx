@@ -51,7 +51,7 @@ const [showDays, setShowDays] = React.useState(false);
   ];
 
   return (
-    <div className="bg-[#f6f7fb] min-h-screen p-4">
+    <div className="bg-[#f6f7fb] min-h-screen p-5">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-[#111827]">

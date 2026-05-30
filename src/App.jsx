@@ -40,6 +40,7 @@ import InstructorReports from "./Instructor/pages/Reports";
 import InstructorChangePassword from "./Instructor/pages/ChangePassword";
 import InstructorAssignments from "./Instructor/pages/Assignments";
 import StudentAllCourses from "./students/AllCourses";
+import Resume from "./students/Resume";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -102,6 +103,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="contact-support" element={<ContactSupport />} />
+          <Route path="resume" element={<Resume />} />
         </Route>
 
         {/* Admin Dashboard */}

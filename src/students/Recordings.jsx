@@ -1,299 +1,294 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaSearch,
-  FaPlay,
+  FaCalendarAlt,
   FaDownload,
+  FaPlay,
+  FaVideo,
   FaClock,
-  FaBookOpen,
-  FaChevronLeft,
-  FaChevronRight,
-  FaChevronDown,
+  FaEye,
+  FaHeadset,
+  FaFilter,
 } from "react-icons/fa";
 
-function Recordings() {
-  const recordingsData = [
-    {
-      id: 1,
-      title: "Color styles - 02",
-      duration: "1:30hrs",
-      lessons: "02 Lessons",
-      category: "Design",
-      date: "2024-05-01",
-      image:
-        "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Design Thinking",
-      duration: "2:30hrs",
-      lessons: "01 Lessons",
-      category: "Thinking",
-      date: "2024-05-04",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 3,
-      title: "Visual Designs Briefs",
-      duration: "3:30hrs",
-      lessons: "03 Lessons",
-      category: "Design",
-      date: "2024-05-06",
-      image:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Curiosity for terminology",
-      duration: "4:00hrs",
-      lessons: "02 Lessons",
-      category: "Research",
-      date: "2024-05-09",
-      image:
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 5,
-      title: "Color styles - 01",
-      duration: "2:30hrs",
-      lessons: "02 Lessons",
-      category: "Design",
-      date: "2024-05-11",
-      image:
-        "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1200&auto=format&fit=crop",
-    },
-  ];
-
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [rowsPerPage, setRowsPerPage] = useState(2);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-const [showCourseDropdown, setShowCourseDropdown] = useState(false);
-
-  const filteredRecordings = useMemo(() => {
-    return recordingsData.filter((item) => {
-      const matchesSearch = item.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-      const matchesFilter =
-        filter === "All" || item.category === filter;
-
-      return matchesSearch && matchesFilter;
-    });
-  }, [search, filter]);
-
-  const totalPages =
-    Math.ceil(filteredRecordings.length / rowsPerPage) || 1;
-
-  const paginatedData = filteredRecordings.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
-  const changePage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+const Recordings = () => {
+ const recordings = [
+  {
+    module: "Module 1",
+    title: "Introduction to Digital Marketing",
+    date: "20 May 2024",
+    time: "07:00 PM - 08:15 PM",
+    duration: "01:15:30",
+    video: "/videos/recording1.mp4",
+  },
+  {
+    module: "Module 2",
+    title: "Understanding the Customer Journey",
+    date: "22 May 2024",
+    time: "07:00 PM - 08:02 PM",
+    duration: "01:02:45",
+    video: "/videos/recording2.mp4",
+  },
+];
+const [activeTab, setActiveTab] = useState("all");
 
   return (
-<div className="bg-[#f7f7f7] min-h-screen px-6 pb-6 pt-2">      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
+      <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+  <Link
+    to="/student/dashboard"
+    className="hover:text-blue-600 transition font-medium"
+  >
+    Dashboard
+  </Link>
+
+  <span>›</span>
+
+  <Link
+    to="/student/classes"
+    className="hover:text-blue-600 transition font-medium"
+  >
+    Live Classes
+  </Link>
+
+  <span>›</span>
+
+  <span className="text-blue-600 font-semibold">Recordings</span>
+</div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
+        {/* Left */}
         <div>
-          <h1 className="text-[36px] font-bold text-[#241b4b] leading-none">
-            Class Recordings
+          <h1 className="text-xl font-bold text-gray-900">
+            Live Class Recordings
           </h1>
-
-          <p className="text-[22px] text-gray-400 mt-3">
-            Access and review past class sessions
+          <p className="text-sm text-gray-500 mt-1 mb-6">
+            Watch recorded sessions anytime to revise and enhance your learning.
           </p>
-        </div>
 
-        <div className="flex items-center gap-4 mt-2">
-          <div className="w-[50px] h-[50px] rounded-2xl border border-gray-200 bg-white flex items-center justify-center">
-            <FaSearch className="text-black text-xl" />
+          {/* Course Header */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-5 flex items-center gap-5">
+         <div className="relative w-[210px] h-[95px] rounded-xl overflow-hidden">  
+              <img
+                src=""
+                alt="Digital Marketing"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Digital Marketing Fundamentals
+                </h2>
+                <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-semibold">
+                  Ongoing
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-600 mt-2">
+                Instructor: <b>Rohit Sharma</b>
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                28 Live Classes Conducted
+              </p>
+
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-sm text-gray-600 font-medium">
+                  Course Progress
+                </span>
+                <div className="w-[220px] h-2 bg-gray-200 rounded-full">
+                  <div className="w-[65%] h-full bg-blue-600 rounded-full"></div>
+                </div>
+                <span className="text-sm text-green-600 font-bold">65%</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-  <span className="text-[18px] text-gray-400">Filter by</span>
+          {/* Tabs */}
+          <div className="flex gap-8 border-b border-gray-200 mb-4">
+  <button
+    onClick={() => setActiveTab("all")}
+    className={`pb-3 text-sm font-semibold border-b-2 transition ${
+      activeTab === "all"
+        ? "text-blue-600 border-blue-600"
+        : "text-gray-500 border-transparent"
+    }`}
+  >
+    All Recordings
+  </button>
 
-  {/* Category Dropdown */}
-  <div className="relative">
-    <button
-      onClick={() => {
-        setShowCategoryDropdown(!showCategoryDropdown);
-        setShowCourseDropdown(false);
-      }}
-      className="h-[42px] px-5 border border-orange-500 rounded-xl flex items-center gap-3 text-orange-600 hover:bg-orange-50 transition"
+  <button
+    onClick={() => setActiveTab("module")}
+    className={`pb-3 text-sm font-semibold border-b-2 transition ${
+      activeTab === "module"
+        ? "text-blue-600 border-blue-600"
+        : "text-gray-500 border-transparent"
+    }`}
+  >
+    By Module
+  </button>
+
+  <button
+    onClick={() => setActiveTab("date")}
+    className={`pb-3 text-sm font-semibold border-b-2 transition ${
+      activeTab === "date"
+        ? "text-blue-600 border-blue-600"
+        : "text-gray-500 border-transparent"
+    }`}
+  >
+    By Date
+  </button>
+</div>
+
+          {/* Recording List */}
+          <div className="space-y-3">
+  {(activeTab === "all"
+    ? recordings
+    : activeTab === "module"
+    ? [...recordings].sort((a, b) =>
+        a.module.localeCompare(b.module)
+      )
+    : [...recordings].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      )
+  ).map((item, index) => (
+    <div
+      key={index}
+      className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-4 shadow-sm"
     >
-      {filter}
-      <FaChevronDown className="text-sm" />
-    </button>
+      <div className="relative w-[130px] h-[65px] rounded-lg overflow-hidden bg-black">
+        <video
+          src={item.video}
+          className="w-full h-full object-cover"
+          muted
+          preload="metadata"
+        />
 
-    {showCategoryDropdown && (
-      <div className="absolute top-12 left-0 w-[180px] bg-white border border-gray-200 rounded-xl shadow-lg z-30 p-2">
-        {["All", "Design", "Thinking", "Research"].map((item) => (
-          <button
-            key={item}
-            onClick={() => {
-              setFilter(item);
-              setCurrentPage(1);
-              setShowCategoryDropdown(false);
-            }}
-            className={`w-full text-left px-4 py-2 rounded-lg transition ${
-              filter === item
-                ? "bg-orange-600 text-white"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"
-            }`}
-          >
-            {item}
-          </button>
-        ))}
+        <div className="absolute inset-0 bg-black/20 flex items-center justify-center text-white">
+          <FaPlay />
+        </div>
+
+        <span className="absolute bottom-1 right-1 bg-black text-white text-[10px] px-2 py-0.5 rounded">
+          {item.duration}
+        </span>
       </div>
-    )}
-  </div>
 
-  {/* Course Dropdown */}
-  <div className="relative">
-    <button
-      onClick={() => {
-        setShowCourseDropdown(!showCourseDropdown);
-        setShowCategoryDropdown(false);
-      }}
-      className="h-[42px] px-5 border border-orange-500 rounded-xl flex items-center gap-3 text-orange-600 hover:bg-orange-50 transition"
-    >
-      Course
-      <FaChevronDown className="text-sm" />
-    </button>
+      <div className="flex-1">
+        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-semibold">
+          {item.module}
+        </span>
 
-    {showCourseDropdown && (
-      <div className="absolute top-12 left-0 w-[180px] bg-white border border-gray-200 rounded-xl shadow-lg z-30 p-2">
-        {["UI/UX", "Frontend", "Research"].map((item) => (
-          <button
-            key={item}
-            onClick={() => {
-              setShowCourseDropdown(false);
-            }}
-            className="w-full text-left px-4 py-2 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition"
-          >
-            {item}
-          </button>
-        ))}
+        <h3 className="font-bold text-gray-900 mt-1">
+          {item.title}
+        </h3>
+
+        <p className="text-xs text-gray-500 mt-1">
+          {item.date}
+          <span className="mx-2">•</span>
+          {item.time}
+        </p>
       </div>
-    )}
-  </div>
+
+      <button className="text-blue-600 text-sm font-semibold flex items-center gap-2">
+        <FaDownload size={13} /> Download
+      </button>
+
+      <button className="px-5 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100">
+        Watch Now
+      </button>
+    </div>
+  ))}
 </div>
         </div>
-      </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {paginatedData.map((item) => (
-        <div
-  key={item.id}
-  className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 hover:shadow-lg transition max-w-[320px]"
->
-            <img
-              src={item.image}
-              alt={item.title}
-             className="w-full h-[140px] object-cover rounded-lg"
-            />
+        {/* Right */}
+        <div className="space-y-3 mt-20">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 ">
+            <h2 className="font-bold text-gray-900 mb-3">Filter Recordings</h2>
 
-           <h2 className="text-[20px] font-bold text-[#241b4b] mt-3 leading-tight min-h-[50px]">
-              {item.title}
-            </h2>
-
-            <div className="flex items-center gap-5 text-gray-400 mt-3 text-[15px]">
-              <div className="flex items-center gap-2">
-                <FaClock className="text-xs" />
-                {item.duration}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FaBookOpen className="text-xs" />
-                {item.lessons}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 mt-5">
-              <button className="h-[38px] px-4 text-sm bg-orange-600 text-white rounded-lg flex items-center gap-2 hover:bg-orange-700 transition">
-                <FaPlay className="text-xs" />
-                Watch Now
-              </button>
-
-              <button className="h-[38px] px-4 text-sm bg-orange-50 text-orange-600 rounded-lg flex items-center gap-2 hover:bg-orange-100 transition">
-                <FaDownload className="text-xs" />
-                Download
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between mt-12">
-        <div className="flex items-center gap-4">
-          <span className="text-[18px]">Show</span>
-
-          <div className="relative">
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="w-[90px] h-[40px] border border-gray-300 rounded-xl px-5 appearance-none outline-none text-[22px] bg-white"
-            >
-              <option value={2}>2</option>
-              <option value={4}>4</option>
-              <option value={6}>6</option>
+            <label className="text-xs font-bold text-gray-600">Module</label>
+            <select className="w-full mt-1 mb-2 h-11 border border-gray-200 rounded-lg px-3 text-sm outline-none">
+              <option>All Modules</option>
+              <option>Module 1</option>
+              <option>Module 2</option>
+              <option>Module 3</option>
             </select>
 
-            <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            <label className="text-xs font-bold text-gray-600">Search</label>
+            <div className="w-full mt-1 mb-2 h-11 border border-gray-200 rounded-lg px-3 flex items-center gap-2">
+              <input
+                placeholder="Search by title..."
+                className="flex-1 outline-none text-sm"
+              />
+              <FaSearch className="text-gray-400" />
+            </div>
+
+            <label className="text-xs font-bold text-gray-600">From Date</label>
+            <div className="w-full mt-1 mb-2 h-11 border border-gray-200 rounded-lg px-3 flex items-center justify-between text-sm text-gray-500">
+              Select date <FaCalendarAlt />
+            </div>
+
+            <label className="text-xs font-bold text-gray-600">To Date</label>
+            <div className="w-full mt-1 mb-2 h-11 border border-gray-200 rounded-lg px-3 flex items-center justify-between text-sm text-gray-500">
+              Select date <FaCalendarAlt />
+            </div>
+
+            <button className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-700">
+              <FaFilter size={12} /> Apply Filters
+            </button>
           </div>
 
-          <span className="text-[18px]">Row</span>
-        </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <h2 className="font-bold text-gray-900 mb-5">Recording Overview</h2>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => changePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-[54px] h-[54px] rounded-xl bg-gray-100 flex items-center justify-center text-gray-400"
-          >
-            <FaChevronLeft />
-          </button>
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between">
+                <span className="flex items-center gap-3 text-gray-600">
+                  <FaVideo className="text-blue-500" /> Total Recordings
+                </span>
+                <b className="text-blue-600">28</b>
+              </div>
 
-          {Array.from(
-            { length: totalPages },
-            (_, index) => index + 1
-          ).map((page) => (
-            <button
-              key={page}
-              onClick={() => changePage(page)}
-              className={`w-[50px] h-[40px] rounded-xl text-[20px]  ${
-                currentPage === page
-                  ? "bg-orange-600 text-white"
-                  : "bg-gray-100 text-black"
-              }`}
-            >
-              {page}
+              <div className="flex justify-between">
+                <span className="flex items-center gap-3 text-gray-600">
+                  <FaClock className="text-green-500" /> Total Watch Time
+                </span>
+                <b className="text-green-600">18h 45m</b>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="flex items-center gap-3 text-gray-600">
+                  <FaDownload className="text-orange-500" /> Downloaded
+                </span>
+                <b className="text-orange-500">12</b>
+              </div>
+
+              <div>
+                <span className="flex items-center gap-3 text-gray-600">
+                  <FaEye className="text-purple-500" /> Last Watched
+                </span>
+                <p className="font-semibold text-gray-800 mt-1 ml-7">
+                  Social Media Marketing Overview
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <h2 className="font-bold text-gray-900 mb-2">Need Help?</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              If you have any issues accessing the recordings, our support team is here to help.
+            </p>
+            <button className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-blue-100">
+              <FaHeadset /> Contact Support
             </button>
-          ))}
-
-          <button
-            onClick={() => changePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-[54px] h-[54px] rounded-xl bg-gray-100 flex items-center justify-center"
-          >
-            <FaChevronRight />
-          </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Recordings;

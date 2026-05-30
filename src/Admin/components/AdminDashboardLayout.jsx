@@ -20,7 +20,7 @@ const AdminDashboardLayout = ({ children }) => {
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar />
 
-          <main className="flex-1 overflow-y-auto scrollbar-hide bg-gray-50 p-2">
+          <main className="flex-1 overflow-y-auto scrollbar-hide bg-gray-50 p-0">
             {children}
           </main>
         </div>

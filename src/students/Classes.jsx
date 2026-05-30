@@ -1,250 +1,200 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import S1 from "../assets/s1.jpg";
+import S2 from "../assets/s2.jpg";
+import S3 from "../assets/s3.jpg";
+import S4 from "../assets/s4.jpg";
 import {
-  FaSearch,
   FaVideo,
   FaCalendarAlt,
-  FaUserCheck,
+  FaClock,
+  FaComments,
+  FaUsers,
   FaCheckCircle,
-  FaPlay,
-  FaDownload,
-  FaClipboardList,
-  FaBell,
-  FaLink,
 } from "react-icons/fa";
 
-function Classes() {
-  const [search, setSearch] = useState("");
+const Classes = () => {
+  const [tab, setTab] = useState("upcoming");
 
   const classes = [
     {
-      id: 1,
-      title: "React Routing Live Class",
-      course: "React JS",
-      instructor: "Shankar",
-      date: "Today",
-      time: "11:30 AM - 12:30 PM",
-      status: "Live",
-      type: "Google Meet",
-      attendance: "Present",
-      materials: 3,
+      img: S1,
+      date: "20",
+      day: "MON",
+      title: "Introduction to Digital Marketing",
+      subject: "Digital Marketing Fundamentals",
+      time: "07:00 PM - 08:00 PM",
+      teacher: "Rohit Sharma",
+      color: "bg-purple-600",
     },
     {
-      id: 2,
-      title: "JavaScript Functions",
-      course: "JavaScript",
-      instructor: "Rahul",
-      date: "May 26, 2026",
-      time: "10:00 AM - 11:00 AM",
-      status: "Upcoming",
-      type: "Zoom",
-      attendance: "Pending",
-      materials: 2,
+      img: S2,
+      date: "22",
+      day: "WED",
+      title: "Keyword Research Techniques",
+      subject: "Search Engine Optimization (SEO)",
+      time: "07:00 PM - 08:30 PM",
+      teacher: "Rohit Sharma",
+      color: "bg-green-600",
     },
     {
-      id: 3,
-      title: "CSS Flexbox Layout",
-      course: "Frontend Design",
-      instructor: "Priya",
-      date: "May 20, 2026",
-      time: "02:00 PM - 03:00 PM",
-      status: "Completed",
-      type: "Recorded",
-      attendance: "Present",
-      materials: 5,
+      img: S3,
+      date: "24",
+      day: "FRI",
+      title: "Google Ads Campaign Structure",
+      subject: "Google Ads & PPC",
+      time: "06:00 PM - 07:30 PM",
+      teacher: "Anjali Verma",
+      color: "bg-orange-500",
+    },
+    {
+      img: S4,
+      date: "27",
+      day: "MON",
+      title: "Email Marketing Best Practices",
+      subject: "Email Marketing",
+      time: "07:00 PM - 08:00 PM",
+      teacher: "Anjali Verma",
+      color: "bg-pink-600",
     },
   ];
 
-  const filteredClasses = classes.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const stats = useMemo(() => {
-    return {
-      total: classes.length,
-      live: classes.filter((item) => item.status === "Live").length,
-      completed: classes.filter((item) => item.status === "Completed").length,
-      attendance: 86,
-    };
-  }, [classes]);
-
   return (
-    <div className="min-h-screen bg-[#f7f7f7] px-6 pt-3 pb-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
+      <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+  <Link
+    to="/student/dashboard"
+    className="hover:text-blue-600 transition font-medium"
+  >
+    Dashboard
+  </Link>
+
+  <span>›</span>
+
+  <span className="text-blue-600 font-semibold">
+    Live Classes
+  </span>
+</div>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-900">Live Classes</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Join live sessions, interact with instructors and clear your doubts in real-time.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-4">
         <div>
-          <h1 className="text-[34px] font-bold text-[#241b4b]">Classes</h1>
-          <p className="text-[18px] text-gray-400 mt-2">
-            Manage live classes, schedules, attendance, and recordings
-          </p>
-        </div>
+          <div className="flex gap-8 border-b border-gray-200 mb-4">
+            <button
+              onClick={() => setTab("upcoming")}
+              className={`pb-3 text-sm font-semibold ${
+                tab === "upcoming"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500"
+              }`}
+            >
+              Upcoming Classes
+            </button>
 
-        <button className="h-[46px] px-5 bg-orange-600 text-white rounded-xl flex items-center gap-2 hover:bg-orange-700">
-          <FaCalendarAlt />
-          Schedule Class
-        </button>
-      </div>
+            <button
+              onClick={() => setTab("previous")}
+              className={`pb-3 text-sm font-semibold ${
+                tab === "previous"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500"
+              }`}
+            >
+              Previous Classes
+            </button>
+          </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Total Classes</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.total}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Live Classes</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.live}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Completed</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.completed}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-          <p className="text-gray-400">Attendance</p>
-          <h2 className="text-[28px] font-bold text-[#241b4b]">
-            {stats.attendance}%
-          </h2>
-        </div>
-      </div>
-
-      {/* Live Banner */}
-      <div className="bg-[#241b4b] text-white rounded-2xl p-5 mb-6 flex items-center justify-between">
-        <div>
-          <p className="text-orange-400 font-semibold mb-1">Live Now</p>
-          <h2 className="text-[26px] font-bold">React Routing Live Class</h2>
-          <p className="text-gray-300 mt-1">
-            Instructor: Shankar • Google Meet • 11:30 AM
-          </p>
-        </div>
-
-        <button className="h-[44px] px-5 bg-orange-600 rounded-xl flex items-center gap-2 hover:bg-orange-700">
-          <FaVideo />
-          Join Class
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 mb-6 flex items-center gap-4">
-        <div className="flex-1 h-[46px] border border-gray-200 rounded-xl px-4 flex items-center gap-3">
-          <FaSearch className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search classes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full outline-none text-gray-700"
-          />
-        </div>
-
-        <select className="h-[46px] px-4 border border-gray-200 rounded-xl outline-none text-gray-600">
-          <option>All Status</option>
-          <option>Live</option>
-          <option>Upcoming</option>
-          <option>Completed</option>
-        </select>
-      </div>
-
-      {/* Class Cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {filteredClasses.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-[21px] font-bold text-[#241b4b]">
-                  {item.title}
-                </h2>
-
-                <p className="text-gray-400 text-sm mt-1">
-                  {item.course} • {item.type}
-                </p>
-              </div>
-
-              <span
-                className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium ${
-                  item.status === "Live"
-                    ? "bg-red-100 text-red-600"
-                    : item.status === "Completed"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-orange-100 text-orange-600"
-                }`}
+          <div className="space-y-3">
+            {classes.map((item, index) => (
+              <div
+                key={index}
+                 className="bg-white rounded-xl border border-gray-200 shadow-sm p-2.5 flex items-center gap-3 max-w-[900px]"
               >
-                {item.status}
-              </span>
-            </div>
+                <div className="relative w-[140px] h-[62px] rounded-lg overflow-hidden">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                    LIVE
+                  </span>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-5 text-gray-500 text-sm">
-              <div className="flex items-center gap-2">
-                <FaCalendarAlt className="text-orange-500" />
-                {item.date}
+                <div className="w-[60px] h-[68px] rounded-lg bg-gray-50 border border-gray-200 flex flex-col items-center justify-center">
+                  <span className="text-xs font-bold text-gray-500">MAY</span>
+                  <span className="text-2xl font-bold text-gray-900">{item.date}</span>
+                  <span className="text-xs font-bold text-gray-500">{item.day}</span>
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">{item.time}</p>
+                  <h3 className="font-semibold text-[15px] text-gray-900">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.subject}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="w-6 h-6 rounded-full bg-orange-200"></div>
+                    <span className="text-xs font-semibold text-gray-600">
+                      {item.teacher}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-[150px] space-y-1.5">
+                  <button className="w-full h-8 bg-blue-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-700">
+                    <FaVideo /> Join Live Class
+                  </button>
+                  <button className="w-full h-8 bg-white text-blue-600 border border-blue-500 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-50">
+                    <FaCalendarAlt /> Add to Calendar
+                  </button>
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="flex items-center gap-2">
-                <FaBell className="text-orange-500" />
-                {item.time}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FaUserCheck className="text-orange-500" />
-                {item.instructor}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FaClipboardList className="text-orange-500" />
-                {item.materials} Materials
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mt-5 text-sm">
-              <span className="text-gray-500">
-                Attendance:{" "}
-                <b className="text-[#241b4b]">{item.attendance}</b>
-              </span>
-
-              <button className="text-orange-600 flex items-center gap-2">
-                <FaLink />
-                Copy Link
-              </button>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-4 flex-wrap">
-              {item.status === "Live" || item.status === "Upcoming" ? (
-                <button className="h-[38px] px-4 bg-orange-600 text-white rounded-xl flex items-center gap-2">
-                  <FaVideo />
-                  Join Class
-                </button>
-              ) : (
-                <button className="h-[38px] px-4 bg-orange-50 text-orange-600 rounded-xl flex items-center gap-2">
-                  <FaPlay />
-                  Recording
-                </button>
-              )}
-
-              <button className="h-[38px] px-4 bg-gray-100 text-gray-600 rounded-xl flex items-center gap-2">
-                <FaDownload />
-                Notes
-              </button>
-
-              <button className="h-[38px] px-4 bg-[#241b4b] text-white rounded-xl flex items-center gap-2">
-                <FaCheckCircle />
-                Attendance
-              </button>
+        <div className="space-y-4 mt-13">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <h2 className="font-bold text-gray-900 mb-4">Live Class Rules</h2>
+            <div className="space-y-4 text-sm text-gray-600 font-medium">
+              <p className="flex gap-3"><FaClock className="text-blue-500" /> Join the class 5 minutes before start time.</p>
+              <p className="flex gap-3"><FaVideo className="text-blue-500" /> Keep your microphone muted.</p>
+              <p className="flex gap-3"><FaComments className="text-blue-500" /> Use chat to ask your questions.</p>
+              <p className="flex gap-3"><FaUsers className="text-blue-500" /> Be respectful and follow the guidelines.</p>
             </div>
           </div>
-        ))}
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <h2 className="font-bold text-gray-900 mb-2">Time Zone</h2>
+            <p className="text-sm text-gray-600 font-medium">
+              All timings are in <br />
+              <b>India Standard Time (IST)</b>
+            </p>
+          </div>
+
+          <div className="bg-blue-50 rounded-xl p-5 overflow-hidden">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10  rounded-full flex items-center justify-center">
+                <FaCheckCircle className="text-blue-600 text-2xl" />
+              </div>
+              <div>
+                <h2 className="font-bold text-blue-700 mb-2">Can't Attend Live?</h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  You can watch the recorded session later from My Learning section.
+                </p>
+                <button className="px-5 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100">
+                  Go to My Learning
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default Classes;

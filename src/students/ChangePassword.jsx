@@ -1,11 +1,19 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import CP from "../assets/cp.jpg";
 import {
   FaRegEyeSlash,
   FaRegEye,
   FaCheckCircle,
   FaCircle,
+  FaShieldAlt,
+  FaLock,
+  FaKey,
+  FaArrowLeft,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
+import { MdVerified, MdSecurity } from "react-icons/md";
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -19,13 +27,15 @@ const ChangePassword = () => {
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const getBorderClass = (status) => {
-    if (status === "success") return "border-green-500";
-    if (status === "error") return "border-red-500";
-    return "border-gray-300";
+    if (status === "success") return "border-green-500 ring-2 ring-green-500/20";
+    if (status === "error") return "border-red-500 ring-2 ring-red-500/20";
+    return "border-gray-200 focus:ring-2 focus:ring-blue-500/20";
   };
 
   const validatePassword = (password) => {
@@ -40,21 +50,39 @@ const ChangePassword = () => {
 
   const rules = validatePassword(newPassword);
   const isNewPasswordValid = Object.values(rules).every(Boolean);
+  const passwordStrength = Object.values(rules).filter(Boolean).length;
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength === 0) return "No password";
+    if (passwordStrength <= 2) return "Weak";
+    if (passwordStrength <= 4) return "Medium";
+    return "Strong";
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 2) return "bg-red-500";
+    if (passwordStrength <= 4) return "bg-yellow-500";
+    return "bg-green-500";
+  };
 
   const handleChangePassword = async () => {
     setErrorMessage("");
+    setSuccessMessage("");
+    setOldStatus(null);
+    setNewStatus(null);
+    setConfirmStatus(null);
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      setOldStatus(!oldPassword ? "error" : null);
-      setNewStatus(!newPassword ? "error" : null);
-      setConfirmStatus(!confirmPassword ? "error" : null);
+      if (!oldPassword) setOldStatus("error");
+      if (!newPassword) setNewStatus("error");
+      if (!confirmPassword) setConfirmStatus("error");
       setErrorMessage("Please fill all password fields.");
       return;
     }
 
     if (!isNewPasswordValid) {
       setNewStatus("error");
-      setErrorMessage("Please add all necessary characters to create safe password.");
+      setErrorMessage("Please add all necessary characters to create a safe password.");
       return;
     }
 
@@ -64,232 +92,352 @@ const ChangePassword = () => {
       return;
     }
 
+    setIsLoading(true);
+
     try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Replace this with your real backend API
       // await axios.post("/api/change-password", {
       //   oldPassword,
       //   newPassword,
-      //   confirmPassword,
       // });
 
       setOldStatus("success");
       setNewStatus("success");
       setConfirmStatus("success");
-      setErrorMessage("");
+      setSuccessMessage("Password changed successfully!");
+      
+      // Clear form
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+        setOldStatus(null);
+        setNewStatus(null);
+        setConfirmStatus(null);
+      }, 3000);
     } catch (error) {
       setOldStatus("error");
-      setNewStatus("error");
-      setConfirmStatus("error");
       setErrorMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-   
-      <main className="flex-1 bg-[#f8f8f8] px-5 py-1">
-        <div className="flex items-center justify-between mt-1 mb-1"></div>
-
-        <h2 className="text-3xl font-bold mb-4">Change Password</h2>
-
-       <div className="bg-white p-8 w-full min-h-[520px] rounded-2xl border border-gray-200">
-  <div className="flex flex-col lg:flex-row items-start gap-12">
-
-    {/* Left Content */}
-    <div className="w-full lg:w-[420px] space-y-7">
-
-            <div>
-              <label className="text-sm font-semibold flex items-center gap-2 mb-2">
-                Old Password
-                {oldStatus === "success" && (
-                  <FaCheckCircle className="text-green-500" size={14} />
-                )}
-              </label>
-
-              <div
-                className={`h-12 border ${getBorderClass(
-                  oldStatus
-                )} rounded-lg flex items-center px-4`}
-              >
-                <input
-                  type={showOld ? "text" : "password"}
-                  value={oldPassword}
-                  onChange={(e) => {
-                    setOldPassword(e.target.value);
-                    setOldStatus(null);
-                    setErrorMessage("");
-                  }}
-                  placeholder="Enter old password"
-                  className="flex-1 outline-none text-sm bg-transparent"
-                />
-
-                <button type="button" onClick={() => setShowOld(!showOld)}>
-                  {showOld ? (
-                    <FaRegEye className="text-gray-700" />
-                  ) : (
-                    <FaRegEyeSlash className="text-gray-700" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold mb-2 block">
-                New Password
-              </label>
-
-              <div
-                className={`h-12 border ${getBorderClass(
-                  newStatus
-                )} rounded-lg flex items-center px-4`}
-              >
-                <input
-                  type={showNew ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    setNewStatus(null);
-                    setErrorMessage("");
-                  }}
-                  placeholder="Enter new password"
-                  className="flex-1 outline-none text-sm bg-transparent"
-                />
-
-                <button type="button" onClick={() => setShowNew(!showNew)}>
-                  {showNew ? (
-                    <FaRegEye className="text-gray-700" />
-                  ) : (
-                    <FaRegEyeSlash className="text-gray-700" />
-                  )}
-                </button>
-              </div>
-
-              {newStatus === "error" && (
-                <p className="text-red-500 text-xs font-semibold mt-2">
-                  Please add all necessary characters to create safe password.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <main className="max-w-7xl mx-auto px-5 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between   mb-5">
+                <p className="text-sm text-gray-400">
+                  <Link to="/student/dashboard" className="hover:text-blue-600 transition">
+                    Dashboard
+                  </Link>
+                  <span className="mx-2">&gt;</span>
+                  <span className="text-gray-600 font-medium">Change Password</span>
                 </p>
-              )}
-
-              {newPassword && (
-                <ul className="mt-3 space-y-2 text-xs">
-                  <li
-                    className={`flex items-center gap-2 ${
-                      rules.minLength ? "text-blue-500" : "text-gray-400"
-                    }`}
-                  >
-                    <FaCircle size={7} /> Minimum characters 12
-                  </li>
-
-                  <li
-                    className={`flex items-center gap-2 ${
-                      rules.uppercase ? "text-blue-500" : "text-gray-400"
-                    }`}
-                  >
-                    <FaCircle size={7} /> One uppercase character
-                  </li>
-
-                  <li
-                    className={`flex items-center gap-2 ${
-                      rules.lowercase ? "text-blue-500" : "text-gray-400"
-                    }`}
-                  >
-                    <FaCircle size={7} /> One lowercase character
-                  </li>
-
-                  <li
-                    className={`flex items-center gap-2 ${
-                      rules.special ? "text-blue-500" : "text-gray-400"
-                    }`}
-                  >
-                    <FaCircle size={7} /> One special character
-                  </li>
-
-                  <li
-                    className={`flex items-center gap-2 ${
-                      rules.number ? "text-blue-500" : "text-gray-400"
-                    }`}
-                  >
-                    <FaCircle size={7} /> One number
-                  </li>
-                </ul>
-              )}
-            </div>
-
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
+                </div>
+              </div>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 -mb-2 -mt-3">
             <div>
-              <label className="text-sm font-semibold mb-2 block">
-                Confirm New Password
-              </label>
+              <h1 className="text-xl font-bold text-gray-800">Change Password</h1>
+              <p className="text-gray-500 mt-1">Update your password to keep your account secure</p>
+            </div>
+          </div>
+        </div>
 
-              <div
-                className={`h-12 border ${getBorderClass(
-                  confirmStatus
-                )} rounded-lg flex items-center px-4`}
-              >
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    setConfirmStatus(null);
-                    setErrorMessage("");
-                  }}
-                  placeholder="Enter confirm new password"
-                  className="flex-1 outline-none text-sm bg-transparent"
-                />
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="flex flex-col lg:flex-row">
+            {/* Left Form Section */}
+            <div className="flex-1 p-8 lg:p-10">
+              <div className="max-w-md mx-auto lg:mx-0">
+                {/* Success Message */}
+                {successMessage && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-slideDown">
+                    <FaCheckCircle className="text-green-600 text-xl" />
+                    <div>
+                      <p className="text-green-800 font-semibold">Success!</p>
+                      <p className="text-green-600 text-sm">{successMessage}</p>
+                    </div>
+                  </div>
+                )}
 
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                >
-                  {showConfirm ? (
-                    <FaRegEye className="text-gray-400" />
-                  ) : (
-                    <FaRegEyeSlash className="text-gray-400" />
+                {/* Old Password Field */}
+                <div className="mb-6">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
+                    <FaKey className="text-gray-500 text-xs" />
+                    Old Password
+                    {oldStatus === "success" && (
+                      <FaCheckCircle className="text-green-500 text-sm" />
+                    )}
+                  </label>
+
+                  <div
+                    className={`h-12 border ${getBorderClass(
+                      oldStatus
+                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                  >
+                    <input
+                      type={showOld ? "text" : "password"}
+                      value={oldPassword}
+                      onChange={(e) => {
+                        setOldPassword(e.target.value);
+                        setOldStatus(null);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      placeholder="Enter your current password"
+                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowOld(!showOld)}
+                      className="text-gray-400 hover:text-gray-600 transition"
+                    >
+                      {showOld ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* New Password Field */}
+                <div className="mb-6">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
+                    <FaShieldAlt className="text-gray-500 text-xs" />
+                    New Password
+                    {newStatus === "success" && (
+                      <FaCheckCircle className="text-green-500 text-sm" />
+                    )}
+                  </label>
+
+                  <div
+                    className={`h-12 border ${getBorderClass(
+                      newStatus
+                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                  >
+                    <input
+                      type={showNew ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        setNewStatus(null);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      placeholder="Create a strong password"
+                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowNew(!showNew)}
+                      className="text-gray-400 hover:text-gray-600 transition"
+                    >
+                      {showNew ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                    </button>
+                  </div>
+
+                  {/* Password Strength Indicator */}
+                  {newPassword && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-500">Password Strength</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          passwordStrength <= 2 ? "bg-red-100 text-red-600" :
+                          passwordStrength <= 4 ? "bg-yellow-100 text-yellow-600" :
+                          "bg-green-100 text-green-600"
+                        }`}>
+                          {getPasswordStrengthText()}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${getPasswordStrengthColor()} rounded-full transition-all duration-300`}
+                          style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                        />
+                      </div>
+                    </div>
                   )}
-                </button>
+
+                  {/* Password Rules */}
+                  {newPassword && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <p className="text-xs font-semibold text-gray-700 mb-3">Password Requirements:</p>
+                      <ul className="space-y-2">
+                        {[
+                          { key: "minLength", text: "Minimum 12 characters" },
+                          { key: "uppercase", text: "At least one uppercase letter" },
+                          { key: "lowercase", text: "At least one lowercase letter" },
+                          { key: "special", text: "At least one special character" },
+                          { key: "number", text: "At least one number" },
+                        ].map((rule) => (
+                          <li
+                            key={rule.key}
+                            className="flex items-center gap-2 text-xs"
+                          >
+                            {rules[rule.key] ? (
+                              <FaCheck className="text-green-500 text-xs" />
+                            ) : (
+                              <FaTimes className="text-gray-300 text-xs" />
+                            )}
+                            <span className={rules[rule.key] ? "text-gray-700" : "text-gray-400"}>
+                              {rule.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Confirm Password Field */}
+                <div className="mb-8">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
+                    <MdVerified className="text-gray-500 text-sm" />
+                    Confirm New Password
+                    {confirmStatus === "success" && (
+                      <FaCheckCircle className="text-green-500 text-sm" />
+                    )}
+                  </label>
+
+                  <div
+                    className={`h-12 border ${getBorderClass(
+                      confirmStatus
+                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                  >
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setConfirmStatus(null);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      placeholder="Confirm your new password"
+                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="text-gray-400 hover:text-gray-600 transition"
+                    >
+                      {showConfirm ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {errorMessage && (
+                  <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+                      <FaTimes className="text-red-500" />
+                      {errorMessage}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={handleChangePassword}
+                    disabled={isLoading}
+                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Updating Password...
+                      </>
+                    ) : (
+                      <>
+                        <FaLock size={16} />
+                        Change Password
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="w-full text-blue-600 text-sm font-semibold hover:text-blue-700 transition flex items-center justify-center gap-2"
+                  >
+                    <FaArrowLeft size={12} />
+                    Forgot Password?
+                  </button>
+                </div>
               </div>
             </div>
 
-            {errorMessage && (
-              <p className="text-red-500 text-sm font-semibold">
-                {errorMessage}
-              </p>
-            )}
-
-            <button
-              type="button"
-              onClick={handleChangePassword}
-              className="w-full h-14 bg-blue-600 text-white rounded-lg font-semibold shadow-xl hover:bg-blue-700 transition"
-            >
-              Change Password
-            </button>
-
-            <button
-              type="button"
-              className="text-none text-xs font-semibold underline"
-            >
-              Forgot Password?
-            </button>
+            {/* Right Illustration Section */}
+            <div className="lg:w-[45%] bg-gradient-to-br from-blue-50 to-indigo-50 p-8 flex flex-col items-center justify-center">
+              <img
+                src={CP}
+                alt="Change Password Illustration"
+                className="w-64 h-64 object-contain mb-6"
+              />
+              
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4">
+                  <MdSecurity className="text-blue-600 text-lg" />
+                  <span className="text-sm font-semibold text-gray-700">Account Security</span>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                  Secure Your Account
+                </h3>
+                
+                <p className="text-gray-600 text-sm leading-relaxed max-w-md">
+                  Create a strong, unique password to protect your account from unauthorized access and keep your personal data safe.
+                </p>
+                
+                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span>Strong</span>
+                  </div>
+                  <div className="w-px h-3 bg-gray-300" />
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    <span>Medium</span>
+                  </div>
+                  <div className="w-px h-3 bg-gray-300" />
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    <span>Weak</span>
+                  </div>
+                </div>
+              </div>
             </div>
-
-    {/* Right Content */}
-   <div className="flex-1 flex flex-col items-center justify-center">
-     <img
-  src={CP}
-  alt="Change Password"
-  className="w-[320px] h-[320px] object-contain"
-/>
-<h3 className="text-[28px] font-bold text-blue-600 mt-0">
-  Secure Your Account
-</h3>
-
-<p className="text-gray-500 text-[16px] leading-8 text-center max-w-[450px] mt-4">
-  Create a strong password to protect your account and personal data.
-</p>
-    </div>
           </div>
         </div>
       </main>
-    
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
+      `}</style>
+    </div>
   );
 };
 

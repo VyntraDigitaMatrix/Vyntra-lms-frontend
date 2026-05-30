@@ -1,13 +1,24 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import S1 from "../assets/S1.jpg";
+import S2 from "../assets/S2.jpg";
+import S3 from "../assets/S3.jpg";
+import S4 from "../assets/S4.jpg";
+import S5 from "../assets/S5.jpg";
+import S6 from "../assets/S6.jpg";
+import S7 from "../assets/S7.jpg";
+import S8 from "../assets/S8.jpg";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const AllCourses = () => {
     const [sortBy, setSortBy] = useState("Popular");
+    const [currentPage, setCurrentPage] = useState(1);
+    const coursesPerPage = 4;
   const courses = [
     {
-        id: 1,
+     id: 1,
       title: "Digital Marketing Fundamentals",
       badge: "Bestseller",
-      image: "https://images.unsplash.com/photo-1557838923-2985c318be48?q=80&w=1200&auto=format&fit=crop",
+      image: S1,
       rating: "4.7",
       reviews: "1,250",
       lessons: "28 Lessons",
@@ -21,7 +32,7 @@ const AllCourses = () => {
         id: 2,
       title: "Search Engine Optimization (SEO)",
       badge: "Popular",
-      image: "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?q=80&w=1200&auto=format&fit=crop",
+      image: S2,
       rating: "4.6",
       reviews: "980",
       lessons: "26 Lessons",
@@ -35,7 +46,7 @@ const AllCourses = () => {
         id: 3,
       title: "Social Media Marketing Mastery",
       badge: "Trending",
-      image: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1200&auto=format&fit=crop",
+      image: S3,
       rating: "4.8",
       reviews: "1,450",
       lessons: "30 Lessons",
@@ -49,7 +60,7 @@ const AllCourses = () => {
         id: 4,
       title: "Email Marketing Essentials",
       badge: "",
-      image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1200&auto=format&fit=crop",
+      image: S4,
       rating: "4.5",
       reviews: "760",
       lessons: "18 Lessons",
@@ -63,7 +74,7 @@ const AllCourses = () => {
         id: 5,
       title: "YouTube Marketing Success",
       badge: "",
-      image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1200&auto=format&fit=crop",
+      image: S5,
       rating: "4.7",
       reviews: "820",
       lessons: "22 Lessons",
@@ -77,7 +88,7 @@ const AllCourses = () => {
         id: 6,
       title: "Google Ads Campaigns",
       badge: "",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop",
+      image: S6,
       rating: "4.6",
       reviews: "650",
       lessons: "20 Lessons",
@@ -91,7 +102,7 @@ const AllCourses = () => {
         id: 7,
       title: "Google Analytics Mastery",
       badge: "",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop",
+      image: S7,
       rating: "4.6",
       reviews: "540",
       lessons: "16 Lessons",
@@ -105,7 +116,7 @@ const AllCourses = () => {
      id: 8,
       title: "E-commerce Marketing Strategies",
       badge: "",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1200&auto=format&fit=crop",
+      image: S8,
       rating: "4.7",
       reviews: "610",
       lessons: "24 Lessons",
@@ -123,8 +134,20 @@ const AllCourses = () => {
   if (sortBy === "Price High") return b.priceValue - a.priceValue;
   return 0;
 });
+const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
+
+const paginatedCourses = sortedCourses.slice(
+  (currentPage - 1) * coursesPerPage,
+  currentPage * coursesPerPage
+);
+
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages) {
+    setCurrentPage(page);
+  }
+};
   return (
-    <div className="min-h-screen bg-[#f7f8fc] p-6">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-7xl mx-auto">
     <div className="flex items-center justify-between mb-5">
   
@@ -145,7 +168,7 @@ const AllCourses = () => {
       </span>
     </p>
 
-    <h1 className="text-2xl font-bold text-gray-900">
+    <h1 className="text-xl font-bold text-gray-900">
       All Courses
     </h1>
 
@@ -160,7 +183,10 @@ const AllCourses = () => {
 
          <select
   value={sortBy}
-  onChange={(e) => setSortBy(e.target.value)}
+ onChange={(e) => {
+  setSortBy(e.target.value);
+  setCurrentPage(1);
+}}
   className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200"
 >
   <option value="Popular">Sort by: Popular</option>
@@ -170,8 +196,8 @@ const AllCourses = () => {
 </select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          {sortedCourses.map((course, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {paginatedCourses.map((course, index) => (
             <div
               key={index}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300"
@@ -222,6 +248,37 @@ const AllCourses = () => {
             </div>
           ))}
         </div>
+        <div className="flex justify-center items-center gap-4 mt-7">
+  <button
+    onClick={() => changePage(currentPage - 1)}
+    disabled={currentPage === 1}
+    className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
+  >
+    <FaChevronLeft />
+  </button>
+
+  {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+    <button
+      key={page}
+      onClick={() => changePage(page)}
+      className={`w-9 h-9 rounded-md text-sm font-semibold ${
+        currentPage === page
+          ? "bg-blue-600 text-white"
+          : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
+      }`}
+    >
+      {page}
+    </button>
+  ))}
+
+  <button
+    onClick={() => changePage(currentPage + 1)}
+    disabled={currentPage === totalPages}
+    className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50"
+  >
+    <FaChevronRight />
+  </button>
+</div>
       </div>
     </div>
   );

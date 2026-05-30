@@ -22,15 +22,16 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openCourses, setOpenCourses] = useState(false);
   const [openClasses, setOpenClasses] = useState(false);
   const [openAssignments, setOpenAssignments] = useState(false);
+  
   useEffect(() => {
-  if (isCollapsed) {
-    setOpenStudents(false);
-    setOpenInstructors(false);
-    setOpenCourses(false);
-    setOpenClasses(false);
-    setOpenAssignments(false);
-  }
-}, [isCollapsed]);
+    if (isCollapsed) {
+      setOpenStudents(false);
+      setOpenInstructors(false);
+      setOpenCourses(false);
+      setOpenClasses(false);
+      setOpenAssignments(false);
+    }
+  }, [isCollapsed]);
 
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/admin/dashboard" },
@@ -50,7 +51,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     >
       <button
         onClick={toggleSidebar}
-        className="absolute top-6 -right-4 w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-400 hover:text-[#ff4b0b] hover:border-[#ff4b0b] transition z-50"
+        className="absolute top-6 -right-4 w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-400 hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition z-50"
       >
         {isCollapsed ? "›" : "‹"}
       </button>
@@ -60,7 +61,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           isCollapsed ? "justify-center" : "justify-center gap-2"
         }`}
       >
-        <div className="w-5 h-5 border-4 border-[#ff4b0b] rounded-md"></div>
+        <div className="w-5 h-5 border-4 border-[#2BB2A9] rounded-md"></div>
 
         {!isCollapsed && (
           <h1 className="text-[20px] font-bold tracking-[4px] text-[#111]">
@@ -78,8 +79,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               isCollapsed ? "justify-center py-4 mx-2" : "gap-3 px-5 py-4 mx-2"
             } rounded-xl cursor-pointer transition text-sm font-medium ${
               isActive
-                ? "bg-[#ff4b0b] text-white"
-                : "text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                ? "bg-[#2BB2A9] text-white"
+                : "text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
             }`
           }
         >
@@ -95,7 +96,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             isCollapsed
               ? "justify-center py-4 mx-2"
               : "justify-between px-5 py-4 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
             <FaPeopleGroup className="text-[14px]" />
@@ -119,8 +120,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#ff4b0b] text-white"
-                    : "text-gray-500 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                    ? "bg-[#2BB2A9] text-white"
+                    : "text-gray-500 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
                 }`
               }
             >
@@ -129,7 +130,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             </NavLink>
           </div>
         )}
-         {/* Instructors Dropdown */}
+        
+        {/* Instructors Dropdown */}
         <button
           type="button"
           onClick={() => setOpenInstructors(!openInstructors)}
@@ -137,7 +139,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             isCollapsed
               ? "justify-center py-4 mx-2"
               : "justify-between px-5 py-4 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
             <FaUserSecret className="text-[14px]" />
@@ -161,8 +163,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#ff4b0b] text-white"
-                    : "text-gray-500 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                    ? "bg-[#2BB2A9] text-white"
+                    : "text-gray-500 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
                 }`
               }
             >
@@ -171,7 +173,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             </NavLink>
           </div>
         )}
-          {/* Courses Dropdown */}
+        
+        {/* Courses Dropdown */}
         <button
           type="button"
           onClick={() => setOpenCourses(!openCourses)}
@@ -179,7 +182,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             isCollapsed
               ? "justify-center py-4 mx-2"
               : "justify-between px-5 py-4 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
             <FaBook className="text-[14px]" />
@@ -203,8 +206,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#ff4b0b] text-white"
-                    : "text-gray-500 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                    ? "bg-[#2BB2A9] text-white"
+                    : "text-gray-500 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
                 }`
               }
             >
@@ -214,7 +217,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           </div>
         )}
           
-   {/* Classes Dropdown */}
+        {/* Classes Dropdown */}
         <button
           type="button"
           onClick={() => setOpenClasses(!openClasses)}
@@ -222,7 +225,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             isCollapsed
               ? "justify-center py-4 mx-2"
               : "justify-between px-5 py-4 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
             <FaBook className="text-[14px]" />
@@ -246,8 +249,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#ff4b0b] text-white"
-                    : "text-gray-500 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                    ? "bg-[#2BB2A9] text-white"
+                    : "text-gray-500 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
                 }`
               }
             >
@@ -256,7 +259,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             </NavLink>
           </div>
         )}
-            {/* Assignments Dropdown */}
+        
+        {/* Assignments Dropdown */}
         <button
           type="button"
           onClick={() => setOpenAssignments(!openAssignments)}
@@ -264,7 +268,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             isCollapsed
               ? "justify-center py-4 mx-2"
               : "justify-between px-5 py-4 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
             <FaClipboardList className="text-[14px]" />
@@ -288,8 +292,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#ff4b0b] text-white"
-                    : "text-gray-500 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                    ? "bg-[#2BB2A9] text-white"
+                    : "text-gray-500 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
                 }`
               }
             >
@@ -298,7 +302,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             </NavLink>
           </div>
         )}
-        {/* Remaining menu */}
+        
+        {/* Remaining menu items */}
         {menuItems.slice(1).map((item, index) => (
           <NavLink
             key={index}
@@ -310,8 +315,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
                   : "gap-3 px-5 py-4 mx-2"
               } rounded-xl cursor-pointer transition text-sm font-medium ${
                 isActive
-                  ? "bg-[#ff4b0b] text-white"
-                  : "text-gray-600 hover:bg-[#fff1ec] hover:text-[#ff4b0b]"
+                  ? "bg-[#2BB2A9] text-white"
+                  : "text-gray-600 hover:bg-[#e6f4f3] hover:text-[#2BB2A9]"
               }`
             }
           >

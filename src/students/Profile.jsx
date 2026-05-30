@@ -16,14 +16,14 @@ const AdminProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] p-5">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-md overflow-hidden">
         
         {/* Header */}
-        <div className="h-40 bg-[#ff4b0b] relative">
+       <div className="h-40 bg-blue-600 relative">
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="absolute top-5 right-5 bg-white text-[#ff4b0b] px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-purple-50"
+            className="absolute top-5 right-5 bg-white text-blue-500 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-purple-50"
           >
             {isEditing ? <FaTimes /> : <FaEdit />}
             {isEditing ? "Cancel" : "Edit Profile"}
@@ -40,7 +40,7 @@ const AdminProfile = () => {
                 className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
               />
               {isEditing && (
-                <button className="absolute bottom-2 right-2 bg-[#ff4b0b] text-white p-3 rounded-full hover:bg-purple-700">
+                <button className="absolute bottom-2 right-2 bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600">
                   <FaCamera />
                 </button>
               )}
@@ -51,7 +51,7 @@ const AdminProfile = () => {
                 Shankar Admin
               </h2>
               <p className="text-gray-500">LMS Administrator</p>
-              <span className="inline-block mt-2 bg-[#ff4b0b] text-white px-3 py-1 rounded-full text-sm">
+              <span className="inline-block mt-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
                 Active Account
               </span>
             </div>
@@ -62,15 +62,15 @@ const AdminProfile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
               <div className="lg:col-span-2 bg-gray-50 rounded-xl p-6">
                 <h3 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
-                  <FaUser className="text-[#ff4b0b]" />
+                  <FaUser className="text-blue-500" />
                   Profile Information
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <Info icon={<FaEnvelope className="text-[#ff4b0b]"/>} style={{ color: "#ff4b0b" }} label="Email" value="admin@lms.com" />
-                  <Info icon={<FaPhone className="text-[#ff4b0b]"/>} style={{ color: "#ff4b0b" }} label="Mobile" value="+91 98765 43210" />
-                  <Info icon={<FaMapMarkerAlt className="text-[#ff4b0b]"/>} style={{ color: "#ff4b0b" }} label="Location" value="Bangalore, India" />
-                  <Info icon={<FaShieldAlt className="text-[#ff4b0b]"/>} style={{ color: "#ff4b0b" }} label="Role" value="Super Admin" />
+                  <Info icon={<FaEnvelope className="text-blue-500"/>} style={{ color: "blue" }} label="Email" value="admin@lms.com" />
+                  <Info icon={<FaPhone className="text-blue-500"/>} style={{ color: "rgb(11, 105, 255)" }} label="Mobile" value="+91 98765 43210" />
+                  <Info icon={<FaMapMarkerAlt className="text-blue-500"/>} style={{ color: "rgb(11, 105, 255)" }} label="Location" value="Bangalore, India" />
+                  <Info icon={<FaShieldAlt className="text-blue-500"/>} style={{ color: "blue" }} label="Role" value="Super Admin" />
                 </div>
 
                 <div className="mt-6">
@@ -97,7 +97,7 @@ const AdminProfile = () => {
             /* Edit Profile Form */
             <div className="mt-8 bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <FaEdit className="text-[#ff4b0b]" />
+                <FaEdit className="text-blue-500" />
                 Edit Profile
               </h3>
 
@@ -130,7 +130,7 @@ const AdminProfile = () => {
                 </button>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 bg-[#ff4b0b] text-white rounded-lg flex items-center gap-2 hover:bg-none"
+                  className="px-5 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 hover:bg-blue-600"
                 >
                   <FaSave />
                   Save Changes
