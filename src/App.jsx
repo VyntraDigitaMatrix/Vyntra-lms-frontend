@@ -43,11 +43,8 @@ import InstructorChangePassword from "./Instructor/pages/ChangePassword";
 import InstructorAssignments from "./Instructor/pages/Assignments";
 import InstructorProfile from "./Instructor/pages/InstructorProfile";
 import StudentAllCourses from "./students/AllCourses";
-<<<<<<< Updated upstream
 import Resume from "./students/Resume";
-=======
 import JobNotifications from "./students/JobNotification";
->>>>>>> Stashed changes
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -110,13 +107,10 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="contact-support" element={<ContactSupport />} />
-<<<<<<< Updated upstream
           <Route path="resume" element={<Resume />} />
-=======
           <Route path="certificates" element={<Certificate />} />
           <Route path="quiz" element={<Quizzes />} />
           <Route path="job-notifications" element={<JobNotifications />} />
->>>>>>> Stashed changes
         </Route>
 
         {/* Admin Dashboard */}
