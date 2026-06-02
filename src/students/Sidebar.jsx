@@ -17,6 +17,7 @@ import {
   FaBookOpen,
   FaCertificate,
   FaBriefcase,
+  FaReadme,
 } from "react-icons/fa";
 import { MdQuiz } from "react-icons/md";
 
@@ -24,18 +25,23 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
   const [openClasses, setOpenClasses] = useState(false);
 
-  const menuItems = [
+  const topMenuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/student/dashboard" },
-     { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
-     { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
-     
+    { icon: <FaBook />, label: "My Courses", path: "/student/courses" },
+    { icon: <FaBookOpen />, label: "All Courses", path: "/student/all-courses" },
+  ];
+
+  const menuItems = [
     { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    {icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
+    { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
+    { icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
     { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaDownload />, label: "Downloads", path: "/student/downloads" },
+    { icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
+    { icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
   ];
 
   return (
@@ -66,15 +72,13 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
       </div>
 
       <nav className="flex-1 flex flex-col gap-1 mt-2 overflow-y-auto overflow-x-hidden scrollbar-hide pb-6">
-        {menuItems.slice(0, 3).map((item, index) => (
+        {topMenuItems.map((item, index) => (
           <NavLink
             key={index}
             to={item.path}
             className={({ isActive }) =>
               `flex items-center ${
-                isCollapsed
-                  ? "justify-center py-3 mx-2"
-                  : "gap-3 px-4 py-3 mx-2"
+                isCollapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
               } rounded-xl cursor-pointer transition text-sm font-medium ${
                 isActive
                   ? "bg-blue-600 text-white"
@@ -87,21 +91,15 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           </NavLink>
         ))}
 
-        {/* Live Classes Parent */}
         <button
           type="button"
           onClick={() => setOpenClasses(!openClasses)}
           className={`flex items-center ${
-            isCollapsed
-              ? "justify-center py-3 mx-2"
-              : "justify-between px-4 py-3 mx-2"
+            isCollapsed ? "justify-center py-3 mx-2" : "justify-between px-4 py-3 mx-2"
           } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
-            <span className="text-[14px]">
-              <FaUsers />
-            </span>
-
+            <FaUsers className="text-[14px]" />
             {!isCollapsed && <span>Live Classes</span>}
           </div>
 
@@ -147,15 +145,13 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           </div>
         )}
 
-        {menuItems.slice(3).map((item, index) => (
+        {menuItems.map((item, index) => (
           <NavLink
             key={index}
             to={item.path}
             className={({ isActive }) =>
               `flex items-center ${
-                isCollapsed
-                  ? "justify-center py-3 mx-2"
-                  : "gap-3 px-4 py-3 mx-2"
+                isCollapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
               } rounded-xl cursor-pointer transition text-sm font-medium ${
                 isActive
                   ? "bg-blue-600 text-white"
@@ -168,14 +164,11 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           </NavLink>
         ))}
 
-        {/* Settings Parent */}
         <button
           type="button"
           onClick={() => setOpenSettings(!openSettings)}
           className={`flex items-center ${
-            isCollapsed
-              ? "justify-center py-3 mx-2"
-              : "justify-between px-4 py-3 mx-2"
+            isCollapsed ? "justify-center py-3 mx-2" : "justify-between px-4 py-3 mx-2"
           } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
         >
           <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>

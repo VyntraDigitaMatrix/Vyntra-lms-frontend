@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Search,
   UserPlus,
@@ -28,6 +29,13 @@ const AllStudents = () => {
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+const [showStudentModal, setShowStudentModal] = useState(false);
+
+const handleViewStudent = (student) => {
+  setSelectedStudent(student);
+  setShowStudentModal(true);
+};
 
   // Mock Students Data
   const studentsData = [
@@ -124,6 +132,23 @@ const AllStudents = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="p-6">
         {/* Header */}
+        {/* Left Side */}
+         <div>
+  <p className="text-sm text-gray-400 mb-1 flex items-center">
+    <Link
+      to="/admin/dashboard"
+      className="hover:text-[#2BB2A9] transition"
+    >
+      Dashboard
+    </Link>
+
+    <span className="mx-2">&gt;</span>
+
+    <span className="text-none font-medium">
+      All Students
+    </span>
+  </p>
+</div>
         <div className="mb-6">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
             All Students
@@ -275,7 +300,7 @@ const AllStudents = () => {
         )}
 
         {/* Students Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-x-auto hover:shadow-md transition-all duration-300">
+        <div className="bg-white rounded-xl shadow-sm overflow-x-auto scrollbar-hide hover:shadow-md transition-all duration-300">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
@@ -401,9 +426,12 @@ const AllStudents = () => {
                   <td className="px-6 py-4">
                     <div className="min-w-[100px]">
                       <div className="flex space-x-2">
-                        <button className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110">
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <button
+  onClick={() => handleViewStudent(student)}
+  className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110"
+>
+  <Eye className="w-4 h-4" />
+</button>
                         <button className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110">
                           <Edit className="w-4 h-4" />
                         </button>
@@ -503,6 +531,74 @@ const AllStudents = () => {
           ring-color: #2BB2A9 !important;
         }
       `}</style>
+      {showStudentModal && selectedStudent && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+    <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 relative">
+      <button
+        onClick={() => setShowStudentModal(false)}
+        className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+      >
+        ✕
+      </button>
+
+      <div className="text-center mb-5">
+        <div className="w-20 h-20 mx-auto rounded-full bg-[#e6f4f3] flex items-center justify-center text-[#2BB2A9] text-2xl font-bold">
+          {selectedStudent.name.charAt(0)}
+        </div>
+
+        <h2 className="text-xl font-bold text-gray-800 mt-3">
+          {selectedStudent.name}
+        </h2>
+
+        <p className="text-sm text-gray-500">{selectedStudent.email}</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Course</p>
+          <p className="font-semibold">{selectedStudent.course}</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Status</p>
+          <p className="font-semibold capitalize">{selectedStudent.status}</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Progress</p>
+          <p className="font-semibold">{selectedStudent.progress}%</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Average Grade</p>
+          <p className="font-semibold">{selectedStudent.averageGrade}%</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Completed Courses</p>
+          <p className="font-semibold">
+            {selectedStudent.completedCourses} / {selectedStudent.totalCourses}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Country</p>
+          <p className="font-semibold">{selectedStudent.country}</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Phone</p>
+          <p className="font-semibold">{selectedStudent.phone}</p>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-500">Last Active</p>
+          <p className="font-semibold">{selectedStudent.lastActive}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

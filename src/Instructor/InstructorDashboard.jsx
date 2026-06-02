@@ -5,16 +5,17 @@ const InstructorDashboard = () => {
   const navigate = useNavigate();
 
   const session = JSON.parse(
-    sessionStorage.getItem("instructorSession")
+    sessionStorage.getItem("instructorSession") || "{}"
   );
 
-  if (!session?.isLoggedIn) {
-    return <Navigate to="/instructor/login" />;
-  }
+  // Commented out to make dashboard visible without login during development
+  // if (!session?.isLoggedIn) {
+  //   return <Navigate to="/InstructorLogin" />;
+  // }
 
   const handleLogout = () => {
     sessionStorage.removeItem("instructorSession");
-    navigate("/instructor/login");
+    navigate("/InstructorLogin");
   };
 
   return (

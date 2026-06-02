@@ -167,10 +167,6 @@ const changePage = (page) => {
       All Courses
     </h1>
 
-              <h1 className="text-2xl font-bold text-gray-900">
-                All Courses
-              </h1>
-
               <p className="text-sm text-gray-500 mt-2">
                 Explore our comprehensive digital marketing courses and enhance your skills.
               </p>

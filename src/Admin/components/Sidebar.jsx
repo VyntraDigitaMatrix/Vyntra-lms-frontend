@@ -40,7 +40,6 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaComments />, label: "Discussions", path: "/admin/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/admin/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/admin/notes" },
-    { icon: <FaDownload />, label: "Downloads", path: "/admin/downloads" },
   ];
 
   return (

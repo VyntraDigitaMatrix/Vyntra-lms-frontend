@@ -160,30 +160,10 @@ const AdminDashboard = () => {
             </div>
           </div>
        </div>
-
-      {/* Navigation Tabs */}
-        <div className="px-6 -mt-4">
-          <div className="flex space-x-8">
-            {["overview", "students", "instructors", "activities", "analytics", "settings"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-3 px-1 text-sm font-medium border-b-2 transition-all duration-200 ${
-                  activeTab === tab
-                    ? "border-[#2BB2A9] text-[#2BB2A9]"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-       </div>
-
-      <div className="p-6">
+      <div className="p-5 -mt-3">
         {/* Overview Dashboard */}
         {activeTab === "overview" && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
               {stats.map((stat, index) => {
@@ -423,85 +403,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
-
-        {/* Instructors Management */}
-        {activeTab === "instructors" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="relative flex-1 max-w-md w-full">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search instructors by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button className="flex items-center space-x-2 px-5 py-2 bg-[#2BB2A9] text-white rounded-lg hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                <UserPlus className="w-4 h-4" />
-                <span>Add New Instructor</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredInstructors.map((instructor) => (
-                <div key={instructor.id} className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
-                  <div className="relative">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-bl-full opacity-10"></div>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          <span className="text-white font-semibold text-xl">
-                            {instructor.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1 bg-yellow-50 px-2 py-1 rounded-full">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="text-sm font-medium text-gray-700">{instructor.rating}</span>
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-gray-800 text-lg">{instructor.name}</h3>
-                      <p className="text-sm text-gray-500 mb-1">{instructor.department}</p>
-                      <p className="text-xs text-gray-400 mb-3">{instructor.specialization}</p>
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-gray-50 rounded-lg p-2 text-center">
-                          <p className="text-xs text-gray-500">Courses</p>
-                          <p className="font-semibold text-gray-800">{instructor.courses}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-2 text-center">
-                          <p className="text-xs text-gray-500">Students</p>
-                          <p className="font-semibold text-gray-800">{instructor.students}</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          instructor.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {instructor.status}
-                        </span>
-                        <div className="flex space-x-2">
-                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                            <Mail className="w-4 h-4" />
-                          </button>
-                          <button className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Activities Log */}
         {activeTab === "activities" && (
           <div className="bg-white rounded-xl shadow-sm">
