@@ -10,12 +10,12 @@ import S7 from "../assets/S7.jpg";
 import S8 from "../assets/S8.jpg";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const AllCourses = () => {
-    const [sortBy, setSortBy] = useState("Popular");
-    const [currentPage, setCurrentPage] = useState(1);
-    const coursesPerPage = 4;
+  const [sortBy, setSortBy] = useState("Popular");
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 4;
   const courses = [
     {
-     id: 1,
+      id: 1,
       title: "Digital Marketing Fundamentals",
       badge: "Bestseller",
       image: S1,
@@ -128,24 +128,24 @@ const AllCourses = () => {
     },
   ];
   const sortedCourses = [...courses].sort((a, b) => {
-  if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
-  if (sortBy === "Latest") return b.id - a.id;
-  if (sortBy === "Price Low") return a.priceValue - b.priceValue;
-  if (sortBy === "Price High") return b.priceValue - a.priceValue;
-  return 0;
-});
-const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
+    if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
+    if (sortBy === "Latest") return b.id - a.id;
+    if (sortBy === "Price Low") return a.priceValue - b.priceValue;
+    if (sortBy === "Price High") return b.priceValue - a.priceValue;
+    return 0;
+  });
+  const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
 
-const paginatedCourses = sortedCourses.slice(
-  (currentPage - 1) * coursesPerPage,
-  currentPage * coursesPerPage
-);
+  const paginatedCourses = sortedCourses.slice(
+    (currentPage - 1) * coursesPerPage,
+    currentPage * coursesPerPage
+  );
 
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages) {
-    setCurrentPage(page);
-  }
-};
+  const changePage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-5">
       <div className="max-w-7xl mx-auto">
@@ -162,35 +162,37 @@ const changePage = (page) => {
               </Link>
 
               <span className="mx-2">&gt;</span>
-
-    <h1 className="text-xl font-bold text-gray-900">
-      All Courses
-    </h1>
-
-              <p className="text-sm text-gray-500 mt-2">
-                Explore our comprehensive digital marketing courses and enhance your skills.
-              </p>
+              <span className="text-gray-700 font-medium">All Courses</span>
             </p>
-          
+
+            <h1 className="text-xl font-bold text-gray-900 mt-3">
+              All Courses
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Explore our comprehensive digital marketing courses and enhance your skills.
+            </p>
+
+
           </div>
         </div>
 
         <div className="flex items-center justify-between -mt-4 mb-3">
           <p className="text-sm text-gray-500">Showing 1-8 of 24 courses</p>
 
-         <select
-  value={sortBy}
- onChange={(e) => {
-  setSortBy(e.target.value);
-  setCurrentPage(1);
-}}
-  className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200"
->
-  <option value="Popular">Sort by: Popular</option>
-  <option value="Latest">Sort by: Latest</option>
-  <option value="Price Low">Sort by: Price Low</option>
-  <option value="Price High">Sort by: Price High</option>
-</select>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200"
+          >
+            <option value="Popular">Sort by: Popular</option>
+            <option value="Latest">Sort by: Latest</option>
+            <option value="Price Low">Sort by: Price Low</option>
+            <option value="Price High">Sort by: Price High</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -238,9 +240,12 @@ const changePage = (page) => {
                   </span>
                 </div>
 
-                <button className="w-full h-10 mt-4 rounded-lg border border-blue-500 text-blue-600 text-sm font-semibold hover:bg-blue-600 hover:text-white transition">
-                  View Details
-                </button>
+                <Link
+                  to={`/student/course-preview/${course.id}`}
+                  className="block mt-4 text-center text-sm font-medium text-white bg-blue-600 px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  View Course
+                </Link>
               </div>
             </div>
           ))}
@@ -259,8 +264,8 @@ const changePage = (page) => {
               key={page}
               onClick={() => changePage(page)}
               className={`w-9 h-9 rounded-md text-sm font-semibold ${currentPage === page
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
+                ? "bg-blue-600 text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
                 }`}
             >
               {page}

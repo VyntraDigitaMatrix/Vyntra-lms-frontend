@@ -19,6 +19,10 @@ import Downloads from "./students/Downloads";
 import Settings from "./students/Settings";
 import Profile from "./students/Profile";
 import ContactSupport from "./students/ContactSupport";
+import ViewCourse from "./students/ViewCourse";
+import ModuleView from "./students/ModuleView";
+import ModuleLesson from "./students/ModuleLesson";
+import ContinueLearning from "./students/ContinueLearning"
 import AllStudents from "./Admin/pages/AllStudents";
 import AllInstructors from "./Admin/pages/AllInstructors";
 import AllCourses from "./Admin/pages/AllCourses";
@@ -43,6 +47,8 @@ import InstructorChangePassword from "./Instructor/pages/ChangePassword";
 import InstructorAssignments from "./Instructor/pages/Assignments";
 import InstructorProfile from "./Instructor/pages/InstructorProfile";
 import StudentAllCourses from "./students/AllCourses";
+import CourseViewDetails from "./Instructor/pages/CourseViewDetails";
+import LessonView from "./Instructor/pages/LessonView";
 import Resume from "./students/Resume";
 import JobNotifications from "./students/JobNotification";
 // create these admin files
@@ -94,6 +100,8 @@ function App() {
         <Route path="/student" element={<StudentLayoutRoutes />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="/student/all-courses" element={<StudentAllCourses />} />
+          <Route path="/student/course-preview/:courseId" element={<ViewCourse />} />
+          
           <Route path="assignments" element={<Assignments />} />
           <Route path="courses" element={<Courses />} />
           <Route path="classes" element={<Classes />} />
@@ -111,6 +119,7 @@ function App() {
           <Route path="certificates" element={<Certificate />} />
           <Route path="quiz" element={<Quizzes />} />
           <Route path="job-notifications" element={<JobNotifications />} />
+          <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
         </Route>
 
         {/* Admin Dashboard */}
@@ -133,6 +142,7 @@ function App() {
         <Route path="/instructor" element={<InstructorLayoutRoutes />}>
           <Route path="dashboard" element={<InstructorDashboard />} />
           <Route path="courses" element={<MyCourses />} />
+          <Route path="course-preview/:id" element={<CourseViewDetails />} />
           <Route path="students" element={<InstructorStudents />} />
           <Route path="schedule" element={<InstructorSchedules />} />
           <Route path="recordings" element={<InstructorRecordings />} />
@@ -143,7 +153,14 @@ function App() {
           <Route path="change-password" element={<InstructorChangePassword />} />
           <Route path="assignments" element={<InstructorAssignments />} />
           <Route path="profile" element={<InstructorProfile />} />
+          
         </Route>
+
+        <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
+        <Route
+  path="/student/course/:courseId/module/:moduleId/lesson/:lessonId"
+  element={<ModuleLesson />}
+/>
       </Routes>
     </BrowserRouter>
   );

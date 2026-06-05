@@ -40,8 +40,10 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaDownload />, label: "Downloads", path: "/student/downloads" },
-    { icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
-    { icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
+    {icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
+    {icon: <FaStickyNote />, label: "Resume", path: "/student/resume" },
+    {icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
+   
   ];
 
   return (

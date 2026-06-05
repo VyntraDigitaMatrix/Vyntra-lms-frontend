@@ -37,7 +37,7 @@ const DashboardLayout = ({ children }) => {
 
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar />
-          <main className="flex-1 overflow-y-auto scrollbar-hide bg-white p-2">
+          <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
             {children}
           </main>
         </div>

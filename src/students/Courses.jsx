@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import S6 from "../assets/s6.jpg";
 import S7 from "../assets/s7.jpg";
 import S8 from "../assets/s8.jpg";
@@ -9,12 +9,14 @@ import S11 from "../assets/s11.jpg";
 import S12 from "../assets/s12.jpg";
 import S13 from "../assets/s13.jpg";
 const Courses = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All Courses");
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("All");
 
   const courses = [
     {
+      id: 1,
       title: "Digital Marketing ",
       instructor: "Sarah Johnson",
       progress: 65,
@@ -26,6 +28,7 @@ const Courses = () => {
       button: "Continue Learning",
     },
     {
+      id: 2,
       title: "SEO Mastery Course",
       instructor: "Alex Thompson",
       progress: 40,
@@ -37,6 +40,7 @@ const Courses = () => {
       button: "Continue Learning",
     },
     {
+      id: 3,
       title: "Google Ads for Beginners",
       instructor: "Michael Smith",
       progress: 20,
@@ -48,6 +52,7 @@ const Courses = () => {
       button: "Continue Learning",
     },
     {
+      id: 4,
       title: "Email Marketing Strategy",
       instructor: "Priya Sharma",
       progress: 100,
@@ -59,6 +64,7 @@ const Courses = () => {
       button: "Review Course",
     },
     {
+      id: 5,
       title: "Social Media Marketing",
       instructor: "Neha Patel",
       progress: 75,
@@ -70,6 +76,7 @@ const Courses = () => {
       button: "Continue Learning",
     },
     {
+      id: 6,
       title: "Web Analytics with GA4",
       instructor: "David Wilson",
       progress: 0,
@@ -81,6 +88,7 @@ const Courses = () => {
       button: "Start Learning",
     },
     {
+      id: 7,
       title: "Content Marketing Basics",
       instructor: "Anjali Mehta",
       progress: 100,
@@ -92,6 +100,7 @@ const Courses = () => {
       button: "Review Course",
     },
     {
+      id: 8,
       title: "Marketing Automation",
       instructor: "Kiran Rao",
       progress: 0,
@@ -140,35 +149,34 @@ const Courses = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-  <p className="text-sm text-gray-400 mb-1">
-    <Link
-      to="/student/dashboard"
-      className="hover:text-blue-600 transition"
-    >
-      Dashboard
-    </Link>
+            <p className="text-sm text-gray-400 mb-1">
+              <Link
+                to="/student/dashboard"
+                className="hover:text-blue-600 transition"
+              >
+                Dashboard
+              </Link>
 
-    <span className="mx-2">&gt;</span>
+              <span className="mx-2">&gt;</span>
 
-    <span className="text-gray-600 font-medium">
-      My Courses
-    </span>
-  </p>
+              <span className="text-gray-600 font-medium">
+                My Courses
+              </span>
+            </p>
 
-  <h1 className="text-xl font-bold text-gray-900">
-    My Courses
-  </h1>
+            <h1 className="text-xl font-bold text-gray-900">
+              My Courses
+            </h1>
 
             <div className="flex gap-8 mt-5 text-sm font-semibold">
               {tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`pb-2 transition ${
-                    activeTab === tab
+                  className={`pb-2 transition ${activeTab === tab
                       ? "text-blue-600 border-b-2 border-blue-600"
                       : "text-gray-500 hover:text-blue-600"
-                  }`}
+                    }`}
                 >
                   {tab}
                 </button>
@@ -287,7 +295,12 @@ const Courses = () => {
                   </div>
                 </div>
 
-                <button className="w-full mt-4 h-10 rounded-lg border border-blue-200 text-blue-600 text-sm font-semibold hover:bg-blue-600 hover:text-white transition">
+                <button
+                  onClick={() =>
+                    navigate(`/student/continue-learning/${course.id}`)
+                  }
+                  className="w-full mt-4 h-10 rounded-lg border border-blue-200 text-blue-600 text-sm font-semibold hover:bg-blue-600 hover:text-white transition"
+                >
                   {course.button}
                 </button>
               </div>
