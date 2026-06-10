@@ -95,24 +95,13 @@ const ChangePassword = () => {
     setIsLoading(true);
 
     try {
-<<<<<<< Updated upstream
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setOldStatus("success");
-      setNewStatus("success");
-      setConfirmStatus("success");
-      setSuccessMessage("Password changed successfully!");
-      
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      
-=======
       await studentAuth.changePassword({
         oldPassword,
         newPassword,
         confirmPassword,
       });
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       setOldStatus("success");
       setNewStatus("success");
@@ -125,7 +114,6 @@ const ChangePassword = () => {
       setConfirmPassword("");
 
       // Clear storage and redirect to login after 2.5 seconds
->>>>>>> Stashed changes
       setTimeout(() => {
         localStorage.removeItem("student_accessToken");
         localStorage.removeItem("student_refreshToken");
@@ -143,7 +131,6 @@ const ChangePassword = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-<<<<<<< Updated upstream
       <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 py-4 sm:py-6 md:py-8">
         {/* Breadcrumb */}
         <div className="mb-4 sm:mb-5">
@@ -154,29 +141,6 @@ const ChangePassword = () => {
             <span className="mx-1 sm:mx-2">&gt;</span>
             <span className="text-gray-600 font-medium">Change Password</span>
           </p>
-=======
-      <main className="max-w-7xl mx-auto px-5 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between   mb-5">
-          <p className="text-sm text-gray-400">
-            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
-              Dashboard
-            </Link>
-            <span className="mx-2">&gt;</span>
-            <span className="text-gray-600 font-medium">Change Password</span>
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
-          </div>
-        </div>
-        <div className="mb-8">
-          <div className="flex items-center gap-3 -mb-2 -mt-3">
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">Change Password</h1>
-              <p className="text-gray-500 mt-1">Update your password to keep your account secure</p>
-            </div>
-          </div>
->>>>>>> Stashed changes
         </div>
 
         {/* Header */}
@@ -277,24 +241,13 @@ const ChangePassword = () => {
 
                   {/* Password Strength Indicator */}
                   {newPassword && (
-<<<<<<< Updated upstream
-                    <div className="mt-2 sm:mt-3">
-                      <div className="flex items-center justify-between mb-1 sm:mb-2">
-                        <span className="text-[10px] sm:text-xs text-gray-500">Password Strength</span>
-                        <span className={`text-[9px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full ${
-                          passwordStrength <= 2 ? "bg-red-100 text-red-600" :
-                          passwordStrength <= 4 ? "bg-yellow-100 text-yellow-600" :
-                          "bg-green-100 text-green-600"
-                        }`}>
-=======
                     <div className="mt-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-gray-500">Password Strength</span>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${passwordStrength <= 2 ? "bg-red-100 text-red-600" :
-                            passwordStrength <= 4 ? "bg-yellow-100 text-yellow-600" :
-                              "bg-green-100 text-green-600"
+                          passwordStrength <= 4 ? "bg-yellow-100 text-yellow-600" :
+                            "bg-green-100 text-green-600"
                           }`}>
->>>>>>> Stashed changes
                           {getPasswordStrengthText()}
                         </span>
                       </div>
@@ -430,33 +383,18 @@ const ChangePassword = () => {
                   <MdSecurity className="text-blue-600 text-base md:text-lg" />
                   <span className="text-xs md:text-sm font-semibold text-gray-700">Account Security</span>
                 </div>
-<<<<<<< Updated upstream
-                
+
                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 md:mb-3">
                   Secure Your Account
                 </h3>
-                
+
                 <p className="text-gray-600 text-xs md:text-sm leading-relaxed max-w-md">
                   Create a strong, unique password to protect your account from unauthorized access and keep your personal data safe.
                 </p>
-                
+
                 <div className="mt-4 md:mt-6 flex items-center justify-center gap-1.5 md:gap-2 text-[10px] md:text-xs text-gray-500">
                   <div className="flex items-center gap-0.5 md:gap-1">
                     <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full" />
-=======
-
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  Secure Your Account
-                </h3>
-
-                <p className="text-gray-600 text-sm leading-relaxed max-w-md">
-                  Create a strong, unique password to protect your account from unauthorized access and keep your personal data safe.
-                </p>
-
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
->>>>>>> Stashed changes
                     <span>Strong</span>
                   </div>
                   <div className="w-px h-2 md:h-3 bg-gray-300" />

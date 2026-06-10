@@ -26,11 +26,7 @@ const Navbar = () => {
     { icon: <FaQuestionCircle />, label: "Help & Support" },
     { icon: <FaSignOutAlt />, label: "Logout" },
   ];
-<<<<<<< Updated upstream
-  const navigate = useNavigate();
-=======
 
->>>>>>> Stashed changes
   return (
     <nav className="relative w-full h-[70px] bg-white border-b border-gray-200 flex items-center justify-end px-6">
       {/* Right */}
@@ -56,14 +52,9 @@ const Navbar = () => {
             </span>
 
             <FaChevronDown
-<<<<<<< Updated upstream
-              className={`text-xs text-gray-600 transition ${showProfileMenu ? "rotate-180" : ""
-                }`}
-=======
               className={`text-xs text-gray-600 transition duration-300 ${
                 showProfileMenu ? "rotate-180" : ""
               }`}
->>>>>>> Stashed changes
             />
           </button>
 
@@ -84,13 +75,9 @@ const Navbar = () => {
                     } else if (item.label === "Notifications") {
                       navigate("/student/notifications");
                     } else if (item.label === "Help & Support") {
-<<<<<<< Updated upstream
-                      navigate("/students/contact-support");
-=======
                       navigate("/student/contact-support");
                     } else if (item.label === "Logout") {
                       logout();
->>>>>>> Stashed changes
                     }
 
                     setShowProfileMenu(false);

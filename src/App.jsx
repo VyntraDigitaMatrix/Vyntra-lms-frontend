@@ -1,18 +1,22 @@
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
+import Home from "./Home";
 import { AuthProvider } from "./students/auth/AuthContext";
 import PrivateRoute from "./students/auth/PrivateRoute";
 import OAuth2RedirectHandler from "./students/auth/OAuth2RedirectHandler";
 import ForgotPassword from "./students/ForgotPassword";
 import ResetPassword from "./students/ResetPassword";
 
+
 import { AdminAuthProvider } from "./Admin/auth/AuthContext";
 import AdminPrivateRoute from "./Admin/auth/PrivateRoute";
+
 import AdminLogin from "./Admin/components/AdminLogin";
 
 import { InstructorAuthProvider } from "./Instructor/auth/AuthContext";
 import InstructorPrivateRoute from "./Instructor/auth/PrivateRoute";
 import InstructorForgotPassword from "./Instructor/InstructorForgotPassword";
 import InstructorResetPassword from "./Instructor/InstructorResetPassword";
+
 
 import UserLogin from "./students/UserLogin";
 import Certificate from "./students/Certificate";
@@ -106,46 +110,16 @@ function App() {
           <InstructorAuthProvider>
             <Routes>
               {/* Default route */}
-              <Route path="/" element={<Navigate to="/UserLogin" replace />} />
+              <Route path="/" element={<Home />} />
 
               {/* Login pages */}
               <Route path="/AdminLogin" element={<AdminLogin />} />
               <Route path="/UserLogin" element={<UserLogin />} />
               <Route path="/InstructorLogin" element={<InstructorLogin />} />
 
-<<<<<<< Updated upstream
-        {/* Student Dashboard */}
-        <Route path="/student" element={<StudentLayoutRoutes />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="/student/all-courses" element={<StudentAllCourses />} />
-          <Route path="/student/course-preview/:courseId" element={<ViewCourse />} />
-          
-          <Route path="assignments" element={<Assignments />} />
-          <Route path="courses" element={<Courses />} />
-          <Route path="classes" element={<Classes />} />
-          <Route path="change-password" element={<ChangePassword />} />
-          <Route path="schedule" element={<Schedule />} />
-          <Route path="recordings" element={<Recordings />} />
-          <Route path="discussions" element={<Discussions />} />
-          <Route path="resources" element={<Resources />} />
-          <Route path="notes" element={<Notes />} />
-          <Route path="downloads" element={<Downloads />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="contact-support" element={<ContactSupport />} />
-          <Route path="resume" element={<Resume />} />
-          <Route path="certificates" element={<Certificate />} />
-          <Route path="quiz" element={<Quizzes />} />
-          <Route path="job-notifications" element={<JobNotifications />} />
-          <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
-          <Route path="/student/notes/new" element={<NoteEditor />} />
-          <Route path="notifications" element={<Notifications />} />
-        </Route>
-=======
               {/* Forgot & Reset Password */}
               <Route path="/ForgotPassword" element={<ForgotPassword />} />
               <Route path="/ResetPassword" element={<ResetPassword />} />
->>>>>>> Stashed changes
 
               {/* Instructor Forgot & Reset Password */}
               <Route path="/instructor/forgot-password" element={<InstructorForgotPassword />} />
@@ -161,7 +135,6 @@ function App() {
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="/student/all-courses" element={<StudentAllCourses />} />
                   <Route path="/student/course-preview/:courseId" element={<ViewCourse />} />
-
                   <Route path="assignments" element={<Assignments />} />
                   <Route path="courses" element={<Courses />} />
                   <Route path="classes" element={<Classes />} />
@@ -180,6 +153,8 @@ function App() {
                   <Route path="quiz" element={<Quizzes />} />
                   <Route path="job-notifications" element={<JobNotifications />} />
                   <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
+                  <Route path="/student/notes/new" element={<NoteEditor />} />
+                  <Route path="notifications" element={<Notifications />} />
                 </Route>
 
                 <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
