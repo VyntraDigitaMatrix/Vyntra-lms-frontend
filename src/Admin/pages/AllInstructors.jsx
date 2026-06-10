@@ -1,468 +1,405 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
   UserPlus,
-  Star,
   Edit,
   Trash2,
   X,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  Copy,
-  Archive,
-  Download,
+  ChevronUp,
+  Mail,
   Eye,
   CheckSquare,
   Square,
   Users,
-  BookOpen,
-  Award,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  User,
-  Mail,
+  ShieldCheck,
   Phone,
-  Briefcase,
-  GraduationCap,
+  Image,
+  Lock,
+  RefreshCw
 } from "lucide-react";
+import { adminManagement } from "../auth/api";
 
-// ------------------------------------------------------------
-// Professional Instructors Management - Table Format
-// Matches AllCourses styling: clean table, reduced spacing
-// ------------------------------------------------------------
 const InstructorsManagement = () => {
-  // ---------- Mock Data ----------
-  const [instructors, setInstructors] = useState([
-    {
-      id: 1,
-      name: "Dr. Rahul Sharma",
-      email: "rahul.sharma@example.com",
-      phone: "+91 98765 43210",
-      department: "Computer Science",
-      specialization: "React, Node.js, TypeScript",
-      courses: 6,
-      students: 3240,
-      rating: 4.8,
-      experience: "8 years",
-      location: "Mumbai, India",
-      status: "active",
-      joinedDate: "Jan 15, 2022",
-      avatar: "RS",
-      trend: "+12%",
-    },
-    {
-      id: 2,
-      name: "Prof. Priya Reddy",
-      email: "priya.reddy@example.com",
-      phone: "+91 87654 32109",
-      department: "Design",
-      specialization: "UI/UX Design, Figma, Adobe XD",
-      courses: 4,
-      students: 1890,
-      rating: 4.6,
-      experience: "5 years",
-      location: "Hyderabad, India",
-      status: "active",
-      joinedDate: "Mar 10, 2022",
-      avatar: "PR",
-      trend: "+8%",
-    },
-    {
-      id: 3,
-      name: "Mr. Arjun Kumar",
-      email: "arjun.kumar@example.com",
-      phone: "+91 76543 21098",
-      department: "Data Science",
-      specialization: "Python, Machine Learning, AI",
-      courses: 5,
-      students: 2780,
-      rating: 4.7,
-      experience: "6 years",
-      location: "Bangalore, India",
-      status: "inactive",
-      joinedDate: "Jun 05, 2022",
-      avatar: "AK",
-      trend: "-3%",
-    },
-    {
-      id: 4,
-      name: "Ms. Sneha Patel",
-      email: "sneha.patel@example.com",
-      phone: "+91 65432 10987",
-      department: "Marketing",
-      specialization: "Digital Marketing, SEO, Analytics",
-      courses: 3,
-      students: 1450,
-      rating: 4.5,
-      experience: "4 years",
-      location: "Ahmedabad, India",
-      status: "active",
-      joinedDate: "Aug 20, 2022",
-      avatar: "SP",
-      trend: "+15%",
-    },
-    {
-      id: 5,
-      name: "Dr. Vikram Mehta",
-      email: "vikram.mehta@example.com",
-      phone: "+91 54321 09876",
-      department: "Business",
-      specialization: "Leadership, Management, Strategy",
-      courses: 7,
-      students: 4520,
-      rating: 4.9,
-      experience: "12 years",
-      location: "Delhi, India",
-      status: "active",
-      joinedDate: "Jan 10, 2021",
-      avatar: "VM",
-      trend: "+22%",
-    },
-    {
-      id: 6,
-      name: "Prof. Anjali Desai",
-      email: "anjali.desai@example.com",
-      phone: "+91 99887 66554",
-      department: "Computer Science",
-      specialization: "Cybersecurity, Network Security",
-      courses: 4,
-      students: 2100,
-      rating: 4.7,
-      experience: "7 years",
-      location: "Pune, India",
-      status: "active",
-      joinedDate: "Feb 18, 2022",
-      avatar: "AD",
-      trend: "+10%",
-    },
-  ]);
-
-  // ---------- UI State ----------
+  // ---------- API State ----------
+  const [instructors, setInstructors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
-  const [statusFilter, setStatusFilter] = useState("All Status");
-  const [sortBy, setSortBy] = useState("Newest");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(8);
-  const [showModal, setShowModal] = useState(false);
-  const [editInstructor, setEditInstructor] = useState(null);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [sortField, setSortField] = useState("fullName");
+  const [sortDirection, setSortDirection] = useState("asc");
   const [selectedInstructors, setSelectedInstructors] = useState([]);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  
+  // Modals state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [viewInstructor, setViewInstructor] = useState(null);
-  const [actionMenu, setActionMenu] = useState(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: "",
+  // Form states
+  const [addForm, setAddForm] = useState({
+    fullName: "",
     email: "",
-    phone: "",
-    department: "Computer Science",
-    specialization: "",
-    experience: "",
-    location: "",
-    status: "active",
+    mobileNumber: "",
+    password: ""
+  });
+  const [editForm, setEditForm] = useState({
+    instructorCode: "",
+    fullName: "",
+    mobileNumber: "",
+    profileImage: ""
+  });
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  // Stats states
+  const [totalCount, setTotalCount] = useState(0);
+  const [activeCount, setActiveCount] = useState(0);
+
+  const fetchStats = async () => {
+    try {
+      const [totalRes, activeRes] = await Promise.all([
+        adminManagement.getAllInstructors(null, 0, 1),
+        adminManagement.getAllInstructors(true, 0, 1)
+      ]);
+      if (totalRes.data && totalRes.data.data) {
+        setTotalCount(totalRes.data.data.totalElements);
+      }
+      if (activeRes.data && activeRes.data.data) {
+        setActiveCount(activeRes.data.data.totalElements);
+      }
+    } catch (err) {
+      console.error("Failed to fetch instructor stats", err);
+    }
+  };
+
+  const fetchInstructors = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      let res;
+      const springPage = currentPage - 1;
+      if (searchTerm.trim()) {
+        res = await adminManagement.searchInstructors(searchTerm.trim(), springPage, itemsPerPage);
+      } else {
+        const activeParam = statusFilter === "active" ? true : statusFilter === "inactive" ? false : null;
+        res = await adminManagement.getAllInstructors(activeParam, springPage, itemsPerPage);
+      }
+
+      if (res.data && res.data.data) {
+        setInstructors(res.data.data.content || []);
+        setTotalPages(res.data.data.totalPages || 0);
+        setTotalElements(res.data.data.totalElements || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching instructors:", err);
+      setError("Failed to fetch instructors list.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debounced query when filters/page changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchInstructors();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm, statusFilter, currentPage, itemsPerPage]);
+
+  // Fetch stats on mount
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleOpenAddModal = () => {
+    setAddForm({
+      fullName: "",
+      email: "",
+      mobileNumber: "",
+      password: ""
+    });
+    setFormError("");
+    setShowAddModal(true);
+  };
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setFormError("");
+    try {
+      const res = await adminManagement.createInstructor(addForm);
+      if (res.data) {
+        setShowAddModal(false);
+        fetchInstructors();
+        fetchStats();
+      }
+    } catch (err) {
+      console.error("Error creating instructor:", err);
+      setFormError(err.response?.data?.message || "Failed to register new instructor.");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const handleOpenEditModal = (instructor) => {
+    setEditForm({
+      instructorCode: instructor.instructorCode,
+      fullName: instructor.fullName || "",
+      mobileNumber: instructor.mobileNumber || "",
+      profileImage: instructor.profileImage || ""
+    });
+    setFormError("");
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setFormError("");
+    try {
+      const res = await adminManagement.updateInstructor(editForm.instructorCode, {
+        fullName: editForm.fullName,
+        mobileNumber: editForm.mobileNumber,
+        profileImage: editForm.profileImage
+      });
+      if (res.data) {
+        setShowEditModal(false);
+        fetchInstructors();
+        fetchStats();
+      }
+    } catch (err) {
+      console.error("Error updating instructor:", err);
+      setFormError(err.response?.data?.message || "Failed to update instructor profile.");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const handleToggleStatus = async (instructorCode) => {
+    if (!window.confirm("Are you sure you want to toggle this instructor's active status?")) {
+      return;
+    }
+    try {
+      const res = await adminManagement.toggleInstructorStatus(instructorCode);
+      if (res.data) {
+        fetchInstructors();
+        fetchStats();
+      }
+    } catch (err) {
+      console.error("Error toggling instructor status:", err);
+      alert("Failed to update status.");
+    }
+  };
+
+  const handleViewInstructor = async (instructorCode) => {
+    try {
+      const res = await adminManagement.getInstructorByCode(instructorCode);
+      if (res.data && res.data.data) {
+        setViewInstructor(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching instructor details:", err);
+      alert("Failed to load instructor profile details.");
+    }
+  };
+
+  // Sort instructors (client side sorting on current page)
+  const sortedInstructors = [...instructors].sort((a, b) => {
+    let aVal = a[sortField] || "";
+    let bVal = b[sortField] || "";
+    
+    if (typeof aVal === "string") {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
+    }
+    
+    if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+    return 0;
   });
 
-  // ---------- Data Lists ----------
-  const departments = [
-    "Computer Science",
-    "Design",
-    "Data Science",
-    "Marketing",
-    "Business",
-  ];
-
-  // Helper functions
-  const resetFilters = () => {
-    setSearchTerm("");
-    setDepartmentFilter("All Departments");
-    setStatusFilter("All Status");
-    setCurrentPage(1);
-  };
-
-  const openAddModal = () => {
-    setEditInstructor(null);
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      department: "Computer Science",
-      specialization: "",
-      experience: "",
-      location: "",
-      status: "active",
-    });
-    setShowModal(true);
-  };
-
-  const openEditModal = (instructor) => {
-    setEditInstructor(instructor);
-    setFormData(instructor);
-    setShowModal(true);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editInstructor) {
-      setInstructors(
-        instructors.map((inst) =>
-          inst.id === editInstructor.id
-            ? { ...formData, id: editInstructor.id, avatar: formData.name.charAt(0) + (formData.name.split(" ")[1]?.charAt(0) || "") }
-            : inst
-        )
-      );
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      const newInstructor = {
-        ...formData,
-        id: Date.now(),
-        courses: 0,
-        students: 0,
-        rating: 0,
-        joinedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        avatar: formData.name.charAt(0) + (formData.name.split(" ")[1]?.charAt(0) || ""),
-        trend: "0%",
-      };
-      setInstructors([newInstructor, ...instructors]);
+      setSortField(field);
+      setSortDirection("asc");
     }
-    setShowModal(false);
   };
 
-  const handleDeleteClick = (id) => {
-    setDeleteConfirm({ type: "single", id });
-  };
-
-  const confirmDelete = () => {
-    if (!deleteConfirm) return;
-    if (deleteConfirm.type === "single") {
-      setInstructors(instructors.filter((i) => i.id !== deleteConfirm.id));
-      setSelectedInstructors(selectedInstructors.filter((id) => id !== deleteConfirm.id));
-    } else if (deleteConfirm.type === "bulk") {
-      setInstructors(instructors.filter((i) => !deleteConfirm.ids.includes(i.id)));
-      setSelectedInstructors([]);
-    }
-    setDeleteConfirm(null);
-  };
-
-  const duplicateInstructor = (instructor) => {
-    const newInstructor = {
-      ...instructor,
-      id: Date.now(),
-      name: `${instructor.name} (Copy)`,
-      email: `copy_${instructor.email}`,
-      courses: 0,
-      students: 0,
-      joinedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      trend: "0%",
-    };
-    setInstructors([newInstructor, ...instructors]);
-    setActionMenu(null);
-  };
-
-  const archiveInstructor = (id) => {
-    setInstructors(instructors.map(i => i.id === id ? { ...i, status: "archived" } : i));
-    setActionMenu(null);
-  };
-
-  const toggleSelectInstructor = (id) => {
+  const toggleSelectInstructor = (code) => {
     setSelectedInstructors((prev) =>
-      prev.includes(id) ? prev.filter((iid) => iid !== id) : [...prev, id]
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
   };
 
   const toggleSelectAll = () => {
-    if (selectedInstructors.length === paginatedInstructors.length && paginatedInstructors.length > 0) {
+    if (selectedInstructors.length === instructors.length && instructors.length > 0) {
       setSelectedInstructors([]);
     } else {
-      setSelectedInstructors(paginatedInstructors.map((i) => i.id));
+      setSelectedInstructors(instructors.map((i) => i.instructorCode));
     }
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedInstructors.length === 0) return;
-    setDeleteConfirm({ type: "bulk", ids: [...selectedInstructors] });
-  };
-
-  const exportToCSV = () => {
-    const headers = ["ID", "Name", "Email", "Department", "Specialization", "Courses", "Students", "Rating", "Status", "Experience", "Location"];
-    const rows = filteredInstructors.map((i) => [
-      i.id,
-      i.name,
-      i.email,
-      i.department,
-      i.specialization,
-      i.courses,
-      i.students,
-      i.rating,
-      i.status,
-      i.experience,
-      i.location,
-    ]);
-    const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "instructors_export.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Filtering & Sorting
-  const filteredInstructors = useMemo(() => {
-    let result = [...instructors.filter(i => i.status !== "archived")];
-
-    result = result.filter((instructor) => {
-      const matchesSearch =
-        instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        instructor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        instructor.department.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDepartment = departmentFilter === "All Departments" || instructor.department === departmentFilter;
-      const matchesStatus = statusFilter === "All Status" || instructor.status === statusFilter;
-      return matchesSearch && matchesDepartment && matchesStatus;
-    });
-
-    if (sortBy === "Students") {
-      result.sort((a, b) => b.students - a.students);
-    } else if (sortBy === "Courses") {
-      result.sort((a, b) => b.courses - a.courses);
-    } else if (sortBy === "Rating") {
-      result.sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "Newest") {
-      result.sort((a, b) => new Date(b.joinedDate) - new Date(a.joinedDate));
-    }
-    return result;
-  }, [instructors, searchTerm, departmentFilter, statusFilter, sortBy]);
-
-  const totalPages = Math.ceil(filteredInstructors.length / itemsPerPage);
-  const paginatedInstructors = filteredInstructors.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Stats
-  const totalInstructors = instructors.filter(i => i.status !== "archived").length;
-  const activeInstructors = instructors.filter(i => i.status === "active").length;
-  const inactiveInstructors = instructors.filter(i => i.status === "inactive").length;
-  const totalStudents = instructors.reduce((sum, i) => sum + i.students, 0);
-
-  const getTrendIcon = (trend) => {
-    const val = parseFloat(trend);
-    if (val > 0) return <TrendingUp size={12} className="text-green-600" />;
-    if (val < 0) return <TrendingDown size={12} className="text-red-600" />;
-    return null;
-  };
-
-  const getDepartmentColor = (department) => {
-    const map = {
-      "Computer Science": "bg-teal-50 text-teal-700",
-      "Design": "bg-amber-50 text-amber-700",
-      "Data Science": "bg-purple-50 text-purple-700",
-      "Marketing": "bg-pink-50 text-pink-700",
-      "Business": "bg-blue-50 text-blue-700",
-    };
-    return map[department] || "bg-gray-50 text-gray-700";
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-       <div>
-  <p className="text-sm text-gray-400 mb-1 flex items-center pl-5 mt-4">
-    <Link
-      to="/admin/dashboard"
-      className="hover:text-[#2BB2A9] transition"
-    >
-      Dashboard
-    </Link>
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto mb-4">
+        <p className="text-sm text-gray-400 mb-1 flex items-center">
+          <Link to="/admin/dashboard" className="hover:text-teal-600 transition">
+            Dashboard
+          </Link>
+          <span className="mx-2">&gt;</span>
+          <span className="text-none font-medium text-gray-600">All Instructors</span>
+        </p>
+      </div>
 
-    <span className="mx-2">&gt;</span>
-
-    <span className="text-none font-medium">
-      All Instructors
-    </span>
-  </p>
-</div>
       {/* Header */}
-        <div className="max-w-7xl mx-auto px-6 py-4 -mt-4">
+      <div className="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Instructors Management</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage your teaching staff, track status, and register instructors</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => { fetchInstructors(); fetchStats(); }}
+            className="p-2 text-gray-600 hover:text-teal-600 border border-gray-200 bg-white rounded-lg transition"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <button 
+            onClick={handleOpenAddModal} 
+            className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow-sm font-semibold text-sm"
+          >
+            <UserPlus size={18} />
+            Add Instructor
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Instructors Management</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Manage your teaching staff, track performance, and monitor engagement</p>
+            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+              <Users size={18} />
             </div>
-            <button onClick={openAddModal} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow-sm">
-              <UserPlus size={18} />
-              Add Instructor
-            </button>
+          </div>
+          <div className="mt-2">
+            <p className="text-gray-500 text-xs">Total Instructors</p>
+            <h3 className="text-xl font-bold text-gray-800">{totalCount}</h3>
           </div>
         </div>
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-5 py-6 -mt-4">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={<Users size={18} />} title="Total Instructors" value={totalInstructors} trend="+3" color="teal" />
-          <StatCard icon={<Award size={18} />} title="Active" value={activeInstructors} trend="+2" color="green" />
-          <StatCard icon={<UserPlus size={18} />} title="Inactive" value={inactiveInstructors} trend="-1" color="amber" />
-          <StatCard icon={<GraduationCap size={18} />} title="Total Students" value={totalStudents} trend="+18%" color="blue" />
+
+        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+              <ShieldCheck size={18} />
+            </div>
+          </div>
+          <div className="mt-2">
+            <p className="text-gray-500 text-xs">Active Instructors</p>
+            <h3 className="text-xl font-bold text-gray-800">{activeCount}</h3>
+          </div>
         </div>
 
-        {/* Filter Bar & Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden   shadow-sm">
-          {/* Filters */}
-          <div className="p-4 flex flex-wrap items-center gap-3 border-b border-gray-100">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-2 text-gray-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search by name, email or department..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
-              />
+        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <X size={18} className="text-amber-600" />
             </div>
-            <SelectBox value={departmentFilter} onChange={setDepartmentFilter}>
-              <option>All Departments</option>
-              {departments.map(dept => <option key={dept}>{dept}</option>)}
-            </SelectBox>
-            <SelectBox value={statusFilter} onChange={setStatusFilter}>
-              <option>All Status</option>
-              <option>active</option>
-              <option>inactive</option>
-            </SelectBox>
-            <SelectBox value={sortBy} onChange={setSortBy}>
-              <option>Newest</option>
-              <option>Students</option>
-              <option>Courses</option>
-              <option>Rating</option>
-            </SelectBox>
-            <button onClick={resetFilters} className="flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm text-gray-600 transition">
-              <X size={14} />
-              Clear
-            </button>
-            <button onClick={exportToCSV} className="flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm text-gray-600 transition">
-              <Download size={14} />
-              Export
+          </div>
+          <div className="mt-2">
+            <p className="text-gray-500 text-xs">Inactive Instructors</p>
+            <h3 className="text-xl font-bold text-gray-800">{totalCount - activeCount}</h3>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <ShieldCheck size={18} className="text-blue-600" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <p className="text-gray-500 text-xs">Verified (Page)</p>
+            <h3 className="text-xl font-bold text-gray-800">
+              {instructors.filter(i => i.emailVerified).length}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="max-w-7xl mx-auto bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 mb-6 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Filter Bar & Table */}
+      <div className="max-w-7xl mx-auto bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        {/* Filters */}
+        <div className="p-4 flex flex-wrap items-center gap-3 border-b border-gray-100">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+            />
+          </div>
+          <div className="relative">
+            <select 
+              value={statusFilter} 
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }} 
+              className="appearance-none border border-gray-200 rounded-lg px-3 py-1.5 pr-7 bg-white focus:ring-1 focus:ring-teal-500 outline-none text-sm cursor-pointer"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+            <ChevronDown size={12} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedInstructors.length > 0 && (
+          <div className="bg-teal-50/40 px-4 py-2 flex items-center justify-between border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-teal-800">{selectedInstructors.length} instructor(s) selected</span>
+            </div>
+            <button className="text-xs text-teal-700 bg-white border border-teal-200 px-3 py-1 rounded hover:bg-teal-50 transition">
+              Group Message
             </button>
           </div>
+        )}
 
-          {/* Bulk Actions Bar */}
-          {selectedInstructors.length > 0 && (
-            <div className="bg-teal-50/40 px-4 py-2 flex items-center justify-between border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <CheckSquare size={14} className="text-teal-700" />
-                <span className="text-xs font-medium text-teal-800">{selectedInstructors.length} instructor(s) selected</span>
-              </div>
-              <button onClick={handleBulkDelete} className="flex items-center gap-1 text-xs bg-white border border-red-200 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition">
-                <Trash2 size={12} />
-                Delete Selected
-              </button>
+        {/* Instructors Table */}
+        <div className="overflow-x-auto scrollbar-hide">
+          {loading ? (
+            <div className="p-20 text-center text-gray-500">
+              <div className="w-10 h-10 border-4 border-t-teal-600 border-gray-200 rounded-full animate-spin mx-auto mb-4"></div>
+              <span>Fetching instructors...</span>
             </div>
-          )}
-
-          {/* Instructors Table */}
-          <div className="overflow-x-auto scrollbar-hide">
+          ) : (
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -470,241 +407,298 @@ const InstructorsManagement = () => {
                     <button 
                       onClick={toggleSelectAll} 
                       className="text-gray-400 hover:text-teal-600 transition"
-                      disabled={paginatedInstructors.length === 0}
+                      disabled={instructors.length === 0}
                     >
-                      {selectedInstructors.length === paginatedInstructors.length && paginatedInstructors.length > 0 ? 
-                        <CheckSquare size={14} /> : <Square size={14} />
+                      {selectedInstructors.length === instructors.length && instructors.length > 0 ? 
+                        <CheckSquare size={14} className="text-teal-600" /> : <Square size={14} />
                       }
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Instructor</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Specialization</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Courses</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Students</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[15%]">Instructor Code</th>
+                  <th 
+                    className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:text-teal-600 w-[25%]"
+                    onClick={() => handleSort('fullName')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Instructor Name
+                      {sortField === 'fullName' && (
+                        sortDirection === 'asc' ? <ChevronUp size={12} className="text-teal-600" /> : <ChevronDown size={12} className="text-teal-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">Email</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[15%]">Mobile</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Email Verified</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {paginatedInstructors.map((instructor) => (
-                  <tr key={instructor.id} className="hover:bg-gray-50 transition group">
+                {sortedInstructors.map((instructor) => (
+                  <tr key={instructor.instructorCode} className="hover:bg-gray-50 transition group">
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleSelectInstructor(instructor.id)} className="text-gray-400 hover:text-teal-600 transition">
-                        {selectedInstructors.includes(instructor.id) ? <CheckSquare size={14} /> : <Square size={14} />}
+                      <button onClick={() => toggleSelectInstructor(instructor.instructorCode)} className="text-gray-400 hover:text-teal-600 transition">
+                        {selectedInstructors.includes(instructor.instructorCode) ? (
+                          <CheckSquare size={14} className="text-teal-600" />
+                        ) : (
+                          <Square size={14} />
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-gray-600 text-xs">
+                      {instructor.instructorCode}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900 text-sm group-hover:text-teal-600 transition-colors">
+                        {instructor.fullName}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 text-sm">
+                      {instructor.email}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 text-sm">
+                      {instructor.mobileNumber || "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {instructor.emailVerified ? (
+                        <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                          <ShieldCheck size={14} /> Yes
+                        </span>
+                      ) : (
+                        <span className="text-red-500 text-xs font-semibold">
+                          ✕ No
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleToggleStatus(instructor.instructorCode)}
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center cursor-pointer transition ${
+                          instructor.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        }`}
+                        title="Click to toggle status"
+                      >
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${
+                          instructor.isActive ? 'bg-green-500' : 'bg-red-500'
+                        }`}></span>
+                        <span>{instructor.isActive ? "Active" : "Inactive"}</span>
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center shadow-sm">
-                          <span className="text-white font-semibold text-sm">{instructor.avatar}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 text-sm">{instructor.name}</h3>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <Mail size={11} className="text-gray-400" />
-                            <span className="text-xs text-gray-500">{instructor.email}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getDepartmentColor(instructor.department)}`}>
-                        {instructor.department}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{instructor.specialization}</td>
-                    <td className="px-4 py-3 font-medium text-gray-700 text-sm">{instructor.courses}</td>
-                    <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-gray-700 text-sm">{instructor.students.toLocaleString()}</span>
-                        {instructor.trend && (
-                          <div className="flex items-center gap-0.5">
-                            {getTrendIcon(instructor.trend)}
-                            <span className={`text-xs ${parseFloat(instructor.trend) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {instructor.trend}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <Star size={12} className="text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-700">{instructor.rating}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        instructor.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                      }`}>
-                        {instructor.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{instructor.joinedDate}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
                         <button 
-                          onClick={() => setViewInstructor(instructor)} 
-                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition" 
-                          title="View details"
+                          onClick={() => handleViewInstructor(instructor.instructorCode)} 
+                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-teal-600 transition" 
+                          title="View Details"
                         >
                           <Eye size={14} />
                         </button>
                         <button 
-                          onClick={() => openEditModal(instructor)} 
-                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition" 
-                          title="Edit instructor"
+                          onClick={() => handleOpenEditModal(instructor)} 
+                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-teal-600 transition" 
+                          title="Edit Instructor"
                         >
                           <Edit size={14} />
                         </button>
-                        <div className="relative">
-                          <button 
-                            onClick={() => setActionMenu(actionMenu === instructor.id ? null : instructor.id)} 
-                            className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition"
-                          >
-                            <MoreVertical size={14} />
-                          </button>
-                          {actionMenu === instructor.id && (
-                            <div className="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-100 z-20 py-1">
-                              <button onClick={() => { duplicateInstructor(instructor); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                <Copy size={12} /> Duplicate
-                              </button>
-                              <button onClick={() => { archiveInstructor(instructor.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                <Archive size={12} /> Archive
-                              </button>
-                              <button onClick={() => { handleDeleteClick(instructor.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                <Trash2 size={12} /> Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {paginatedInstructors.length === 0 && (
+                {sortedInstructors.length === 0 && (
                   <tr>
-                    <td colSpan="10" className="text-center py-16 text-gray-400">
-                      <div className="flex flex-col items-center gap-3">
-                        <Users size={48} strokeWidth={1} />
-                        <p className="text-sm">No instructors found. Try adjusting your filters or add a new instructor.</p>
-                        <button onClick={resetFilters} className="text-teal-600 text-sm hover:text-teal-700 font-medium">Clear all filters</button>
-                      </div>
+                    <td colSpan="8" className="text-center py-10 text-gray-400">
+                      No instructors found.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredInstructors.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
-              <div className="text-xs text-gray-500">
-                Showing {paginatedInstructors.length} of {filteredInstructors.length} instructors
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-gray-500">Rows per page:</span>
-                  <select 
-                    value={itemsPerPage} 
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))} 
-                    className="border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-teal-500"
-                  >
-                    {[8, 16, 24, 32].map(num => <option key={num}>{num}</option>)}
-                  </select>
-                </div>
-                <div className="flex gap-1.5">
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.max(p-1, 1))} 
-                    disabled={currentPage === 1} 
-                    className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition"
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  <span className="px-3 py-1 bg-teal-600 text-white rounded text-xs font-medium">{currentPage}</span>
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} 
-                    disabled={currentPage === totalPages || totalPages === 0} 
-                    className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition"
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="px-4 py-3 border-t border-gray-100 flex justify-between items-center">
+            <div className="text-xs text-gray-500">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalElements)} of {totalElements} instructors
+            </div>
+            <div className="flex gap-1.5">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
+                disabled={currentPage === 1} 
+                className="p-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-gray-50 transition"
+              >
+                Previous
+              </button>
+              <span className="px-3 py-1 bg-teal-600 text-white rounded text-xs font-medium">{currentPage}</span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
+                disabled={currentPage === totalPages} 
+                className="p-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-gray-50 transition"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Add/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md shadow-xl">
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-xl overflow-hidden">
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">{editInstructor ? "Edit Instructor" : "Add New Instructor"}</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 transition"><X size={18} /></button>
+              <h2 className="text-lg font-bold text-gray-800">Add New Instructor</h2>
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                className="text-gray-400 hover:text-gray-600 transition"
+                disabled={formSubmitting}
+              >
+                <X size={18} />
+              </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-4 space-y-3">
-              <input 
-                required 
-                placeholder="Full name" 
-                value={formData.name} 
-                onChange={e => setFormData({...formData, name: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
-              />
-              <input 
-                required 
-                type="email" 
-                placeholder="Email address" 
-                value={formData.email} 
-                onChange={e => setFormData({...formData, email: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-              <input 
-                placeholder="Phone number" 
-                value={formData.phone} 
-                onChange={e => setFormData({...formData, phone: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-              <select 
-                value={formData.department} 
-                onChange={e => setFormData({...formData, department: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
+            {formError && (
+              <div className="bg-red-50 text-red-600 text-xs p-3 m-4 rounded-lg">
+                {formError}
+              </div>
+            )}
+            <form onSubmit={handleAddSubmit} className="p-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name</label>
+                <input 
+                  required 
+                  placeholder="Enter full name" 
+                  value={addForm.fullName} 
+                  onChange={e => setAddForm({...addForm, fullName: e.target.value})} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                  disabled={formSubmitting}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Email Address</label>
+                <input 
+                  required 
+                  type="email" 
+                  placeholder="Enter email address" 
+                  value={addForm.email} 
+                  onChange={e => setAddForm({...addForm, email: e.target.value})} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                  disabled={formSubmitting}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mobile Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    required
+                    placeholder="Enter mobile number" 
+                    value={addForm.mobileNumber} 
+                    onChange={e => setAddForm({...addForm, mobileNumber: e.target.value})} 
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    disabled={formSubmitting}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    required 
+                    type="password"
+                    placeholder="Password for verification" 
+                    value={addForm.password} 
+                    onChange={e => setAddForm({...addForm, password: e.target.value})} 
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    disabled={formSubmitting}
+                  />
+                </div>
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-teal-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-teal-700 hover:shadow-md transition"
+                disabled={formSubmitting}
               >
-                {departments.map(dept => <option key={dept}>{dept}</option>)}
-              </select>
-              <input 
-                placeholder="Specialization (e.g., React, Python)" 
-                value={formData.specialization} 
-                onChange={e => setFormData({...formData, specialization: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-              <input 
-                placeholder="Experience (e.g., 5 years)" 
-                value={formData.experience} 
-                onChange={e => setFormData({...formData, experience: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-              <input 
-                placeholder="Location" 
-                value={formData.location} 
-                onChange={e => setFormData({...formData, location: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-              <select 
-                value={formData.status} 
-                onChange={e => setFormData({...formData, status: e.target.value})} 
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
+                {formSubmitting ? "Registering Instructor..." : "Register Instructor"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-xl overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-bold text-gray-800">Edit Instructor Profile</h2>
+              <button 
+                onClick={() => setShowEditModal(false)} 
+                className="text-gray-400 hover:text-gray-600 transition"
+                disabled={formSubmitting}
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <button type="submit" className="w-full bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition mt-2">
-                {editInstructor ? "Update Instructor" : "Add Instructor"}
+                <X size={18} />
+              </button>
+            </div>
+            {formError && (
+              <div className="bg-red-50 text-red-600 text-xs p-3 m-4 rounded-lg">
+                {formError}
+              </div>
+            )}
+            <form onSubmit={handleEditSubmit} className="p-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Instructor Code</label>
+                <input 
+                  type="text"
+                  value={editForm.instructorCode} 
+                  disabled 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name</label>
+                <input 
+                  required 
+                  placeholder="Enter full name" 
+                  value={editForm.fullName} 
+                  onChange={e => setEditForm({...editForm, fullName: e.target.value})} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                  disabled={formSubmitting}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mobile Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    placeholder="Enter mobile number" 
+                    value={editForm.mobileNumber} 
+                    onChange={e => setEditForm({...editForm, mobileNumber: e.target.value})} 
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    disabled={formSubmitting}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Profile Image URL</label>
+                <div className="relative">
+                  <Image className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    placeholder="Enter image URL" 
+                    value={editForm.profileImage} 
+                    onChange={e => setEditForm({...editForm, profileImage: e.target.value})} 
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    disabled={formSubmitting}
+                  />
+                </div>
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-teal-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-teal-700 hover:shadow-md transition"
+                disabled={formSubmitting}
+              >
+                {formSubmitting ? "Saving Changes..." : "Save Changes"}
               </button>
             </form>
           </div>
@@ -713,96 +707,57 @@ const InstructorsManagement = () => {
 
       {/* View Details Modal */}
       {viewInstructor && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full shadow-xl">
-            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-800">Instructor Details</h2>
-              <button onClick={() => setViewInstructor(null)} className="text-gray-400 hover:text-gray-600 transition"><X size={18} /></button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-4 pb-3 border-b">
-                <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-sm">
-                  <span className="text-white font-bold text-xl">{viewInstructor.avatar}</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-lg">{viewInstructor.name}</h3>
-                  <p className="text-sm text-gray-500">{viewInstructor.department}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star size={14} className="text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium">{viewInstructor.rating}</span>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden relative">
+            <button 
+              onClick={() => setViewInstructor(null)} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-lg transition"
+            >
+              ✕
+            </button>
+            <div className="p-6">
+              <div className="text-center mb-6">
+                {viewInstructor.profileImage ? (
+                  <img 
+                    src={viewInstructor.profileImage} 
+                    alt={viewInstructor.fullName} 
+                    className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-teal-600"
+                  />
+                ) : (
+                  <div className="w-20 h-20 mx-auto rounded-full bg-teal-50 flex items-center justify-center text-teal-600 text-2xl font-bold">
+                    {viewInstructor.fullName?.charAt(0)}
                   </div>
-                </div>
+                )}
+                <h3 className="font-bold text-gray-900 text-lg mt-3">{viewInstructor.fullName}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{viewInstructor.email}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Mail size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Email:</span> {viewInstructor.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Phone:</span> {viewInstructor.phone || "—"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Briefcase size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Specialization:</span> {viewInstructor.specialization}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Experience:</span> {viewInstructor.experience || "—"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Location:</span> {viewInstructor.location || "—"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Joined:</span> {viewInstructor.joinedDate}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Courses:</span> {viewInstructor.courses}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users size={14} className="text-gray-400" />
-                  <span><span className="font-medium">Students:</span> {viewInstructor.students.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-gray-50 flex justify-end gap-2 rounded-b-lg">
-              <button 
-                onClick={() => { setViewInstructor(null); openEditModal(viewInstructor); }} 
-                className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 transition"
-              >
-                Edit Instructor
-              </button>
-              <button onClick={() => setViewInstructor(null)} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Delete Confirmation */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-sm w-full p-5 text-center shadow-xl">
-            <div className="mx-auto w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mb-3">
-              <Trash2 className="text-red-600" size={20} />
-            </div>
-            <h3 className="text-md font-semibold text-gray-800">Confirm Deletion</h3>
-            <p className="text-gray-500 mt-1 text-sm">
-              {deleteConfirm.type === "bulk" 
-                ? `Are you sure you want to delete ${deleteConfirm.ids.length} instructor(s)? This action cannot be undone.` 
-                : "Are you sure you want to delete this instructor? This action cannot be undone."}
-            </p>
-            <div className="flex gap-2 mt-5">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">
-                Cancel
-              </button>
-              <button onClick={confirmDelete} className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm hover:bg-red-700 transition">
-                Delete
-              </button>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Instructor Code</p>
+                  <p className="font-semibold font-mono">{viewInstructor.instructorCode}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Username</p>
+                  <p className="font-semibold">{viewInstructor.username}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Mobile Number</p>
+                  <p className="font-semibold">{viewInstructor.mobileNumber || "—"}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Active Status</p>
+                  <p className="font-semibold capitalize">{viewInstructor.isActive ? "Active" : "Inactive"}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Email Verified</p>
+                  <p className="font-semibold">{viewInstructor.emailVerified ? "Verified" : "Unverified"}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-gray-500 text-xs">Auth Type</p>
+                  <p className="font-semibold uppercase">{viewInstructor.authType}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -810,50 +765,5 @@ const InstructorsManagement = () => {
     </div>
   );
 };
-
-// StatCard Component
-const StatCard = ({ icon, title, value, trend, color }) => {
-  const colorMap = {
-    teal: "bg-teal-50 text-teal-600",
-    green: "bg-green-50 text-green-600",
-    amber: "bg-amber-50 text-amber-600",
-    blue: "bg-blue-50 text-blue-600",
-  };
-  const trendValue = parseFloat(trend);
-  const isPositive = trendValue > 0;
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className={`w-8 h-8 rounded-lg ${colorMap[color]} flex items-center justify-center`}>
-          {icon}
-        </div>
-        {trend && (
-          <div className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? 'text-green-600' : 'text-red-600'} bg-gray-50 px-1.5 py-0.5 rounded`}>
-            {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-            {trend}%
-          </div>
-        )}
-      </div>
-      <div className="mt-2">
-        <p className="text-gray-500 text-xs">{title}</p>
-        <h3 className="text-xl font-bold text-gray-800">{value.toLocaleString()}</h3>
-      </div>
-    </div>
-  );
-};
-
-// SelectBox Component
-const SelectBox = ({ value, onChange, children }) => (
-  <div className="relative">
-    <select 
-      value={value} 
-      onChange={(e) => onChange(e.target.value)} 
-      className="appearance-none border border-gray-200 rounded-lg px-3 py-1.5 pr-7 bg-white focus:ring-1 focus:ring-teal-500 outline-none text-sm cursor-pointer"
-    >
-      {children}
-    </select>
-    <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
-  </div>
-);
 
 export default InstructorsManagement;

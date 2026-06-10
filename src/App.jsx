@@ -1,6 +1,18 @@
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { AuthProvider } from "./students/auth/AuthContext";
+import PrivateRoute from "./students/auth/PrivateRoute";
+import OAuth2RedirectHandler from "./students/auth/OAuth2RedirectHandler";
+import ForgotPassword from "./students/ForgotPassword";
+import ResetPassword from "./students/ResetPassword";
 
+import { AdminAuthProvider } from "./Admin/auth/AuthContext";
+import AdminPrivateRoute from "./Admin/auth/PrivateRoute";
 import AdminLogin from "./Admin/components/AdminLogin";
+
+import { InstructorAuthProvider } from "./Instructor/auth/AuthContext";
+import InstructorPrivateRoute from "./Instructor/auth/PrivateRoute";
+import InstructorForgotPassword from "./Instructor/InstructorForgotPassword";
+import InstructorResetPassword from "./Instructor/InstructorResetPassword";
 
 import UserLogin from "./students/UserLogin";
 import Certificate from "./students/Certificate";
@@ -89,15 +101,19 @@ function InstructorLayoutRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Default route */}
-        <Route path="/" element={<Navigate to="/UserLogin" replace />} />
+      <AuthProvider>
+        <AdminAuthProvider>
+          <InstructorAuthProvider>
+            <Routes>
+              {/* Default route */}
+              <Route path="/" element={<Navigate to="/UserLogin" replace />} />
 
-        {/* Login pages */}
-        <Route path="/AdminLogin" element={<AdminLogin />} />
-        <Route path="/UserLogin" element={<UserLogin />} />
-        <Route path="/InstructorLogin" element={<InstructorLogin />} />
+              {/* Login pages */}
+              <Route path="/AdminLogin" element={<AdminLogin />} />
+              <Route path="/UserLogin" element={<UserLogin />} />
+              <Route path="/InstructorLogin" element={<InstructorLogin />} />
 
+<<<<<<< Updated upstream
         {/* Student Dashboard */}
         <Route path="/student" element={<StudentLayoutRoutes />}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -125,47 +141,95 @@ function App() {
           <Route path="/student/notes/new" element={<NoteEditor />} />
           <Route path="notifications" element={<Notifications />} />
         </Route>
+=======
+              {/* Forgot & Reset Password */}
+              <Route path="/ForgotPassword" element={<ForgotPassword />} />
+              <Route path="/ResetPassword" element={<ResetPassword />} />
+>>>>>>> Stashed changes
 
-        {/* Admin Dashboard */}
-        <Route path="/admin" element={<AdminLayoutRoutes />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="all-students" element={<AllStudents />} />
-          <Route path="all-instructors" element={<AllInstructors />} />
-          <Route path="all-courses" element={<AllCourses />} />
-          <Route path="all-classes" element={<AllClasses />} />
-          <Route path="all-assignments" element={<AllAssignments />} />
-          <Route path="schedule" element={<Schedule1 />} />
-          <Route path="recordings" element={<Recordings1 />} />
-          <Route path="discussions" element={<Discussions1 />} />
-          <Route path="resources" element={<Resources1 />} />
-          <Route path="notes" element={<Notes1 />} />
-          <Route path="downloads" element={<Downloads1 />} />
-        </Route>
+              {/* Instructor Forgot & Reset Password */}
+              <Route path="/instructor/forgot-password" element={<InstructorForgotPassword />} />
+              <Route path="/instructor/reset-password" element={<InstructorResetPassword />} />
 
-        {/* Instructor Dashboard */}
-        <Route path="/instructor" element={<InstructorLayoutRoutes />}>
-          <Route path="dashboard" element={<InstructorDashboard />} />
-          <Route path="courses" element={<MyCourses />} />
-          <Route path="course-preview/:id" element={<CourseViewDetails />} />
-          <Route path="students" element={<InstructorStudents />} />
-          <Route path="schedule" element={<InstructorSchedules />} />
-          <Route path="recordings" element={<InstructorRecordings />} />
-          <Route path="discussions" element={<InstructorDiscussions />} />
-          <Route path="resources" element={<InstructorResources />} />
-          <Route path="notes" element={<InstructorNotes />} />
-          <Route path="reports" element={<InstructorReports />} />
-          <Route path="change-password" element={<InstructorChangePassword />} />
-          <Route path="assignments" element={<InstructorAssignments />} />
-          <Route path="profile" element={<InstructorProfile />} />
-          
-        </Route>
+              {/* Google OAuth redirect handler */}
+              <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+              <Route path="/login/oauth2/code/google" element={<OAuth2RedirectHandler />} />
 
-        <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
-        <Route
-  path="/student/course/:courseId/module/:moduleId/lesson/:lessonId"
-  element={<ModuleLesson />}
-/>
-      </Routes>
+              {/* Protected Student Routes */}
+              <Route element={<PrivateRoute />}>
+                <Route path="/student" element={<StudentLayoutRoutes />}>
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="/student/all-courses" element={<StudentAllCourses />} />
+                  <Route path="/student/course-preview/:courseId" element={<ViewCourse />} />
+
+                  <Route path="assignments" element={<Assignments />} />
+                  <Route path="courses" element={<Courses />} />
+                  <Route path="classes" element={<Classes />} />
+                  <Route path="change-password" element={<ChangePassword />} />
+                  <Route path="schedule" element={<Schedule />} />
+                  <Route path="recordings" element={<Recordings />} />
+                  <Route path="discussions" element={<Discussions />} />
+                  <Route path="resources" element={<Resources />} />
+                  <Route path="notes" element={<Notes />} />
+                  <Route path="downloads" element={<Downloads />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="contact-support" element={<ContactSupport />} />
+                  <Route path="resume" element={<Resume />} />
+                  <Route path="certificates" element={<Certificate />} />
+                  <Route path="quiz" element={<Quizzes />} />
+                  <Route path="job-notifications" element={<JobNotifications />} />
+                  <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
+                </Route>
+
+                <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
+                <Route
+                  path="/student/course/:courseId/module/:moduleId/lesson/:lessonId"
+                  element={<ModuleLesson />}
+                />
+              </Route>
+
+              {/* Protected Admin Routes */}
+              <Route element={<AdminPrivateRoute />}>
+                <Route path="/admin" element={<AdminLayoutRoutes />}>
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="all-students" element={<AllStudents />} />
+                  <Route path="all-instructors" element={<AllInstructors />} />
+                  <Route path="all-courses" element={<AllCourses />} />
+                  <Route path="all-classes" element={<AllClasses />} />
+                  <Route path="all-assignments" element={<AllAssignments />} />
+                  <Route path="schedule" element={<Schedule1 />} />
+                  <Route path="recordings" element={<Recordings1 />} />
+                  <Route path="discussions" element={<Discussions1 />} />
+                  <Route path="resources" element={<Resources1 />} />
+                  <Route path="notes" element={<Notes1 />} />
+                  <Route path="downloads" element={<Downloads1 />} />
+                </Route>
+              </Route>
+
+              {/* Protected Instructor Routes */}
+              <Route element={<InstructorPrivateRoute />}>
+                <Route path="/instructor" element={<InstructorLayoutRoutes />}>
+                  <Route path="dashboard" element={<InstructorDashboard />} />
+                  <Route path="courses" element={<MyCourses />} />
+                  <Route path="course-preview/:id" element={<CourseViewDetails />} />
+                  <Route path="students" element={<InstructorStudents />} />
+                  <Route path="schedule" element={<InstructorSchedules />} />
+                  <Route path="recordings" element={<InstructorRecordings />} />
+                  <Route path="discussions" element={<InstructorDiscussions />} />
+                  <Route path="resources" element={<InstructorResources />} />
+                  <Route path="notes" element={<InstructorNotes />} />
+                  <Route path="reports" element={<InstructorReports />} />
+                  <Route path="change-password" element={<InstructorChangePassword />} />
+                  <Route path="assignments" element={<InstructorAssignments />} />
+                  <Route path="profile" element={<InstructorProfile />} />
+                </Route>
+                <Route path="/instructor/course/:courseId/lesson/:lessonId" element={<LessonView />} />
+              </Route>
+            </Routes>
+          </InstructorAuthProvider>
+        </AdminAuthProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

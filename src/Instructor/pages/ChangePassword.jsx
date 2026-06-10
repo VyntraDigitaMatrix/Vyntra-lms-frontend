@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { instructorAuth } from "../auth/api";
 import {
   FaRegEyeSlash,
   FaRegEye,
@@ -95,14 +96,11 @@ const InstructorChangePassword = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call - Replace with your actual instructor password change API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Example API call structure:
-      // await axios.put("/api/instructor/change-password", {
-      //   oldPassword,
-      //   newPassword,
-      // });
+      await instructorAuth.changePassword({
+        currentPassword: oldPassword,
+        newPassword,
+        confirmPassword,
+      });
 
       setOldStatus("success");
       setNewStatus("success");

@@ -1,92 +1,190 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
-  UserPlus,
   Eye,
   Edit,
-  Trash2,
   Filter,
-  Download,
   Mail,
   MoreVertical,
   GraduationCap,
-  Calendar,
-  Clock,
   CheckCircle,
   XCircle,
   ChevronDown,
   ChevronUp,
-  Users
+  Users,
+  ShieldCheck,
+  Phone,
+  Image,
+  RefreshCw
 } from "lucide-react";
+import { adminManagement } from "../auth/api";
 
 const AllStudents = () => {
+  const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedCourse, setSelectedCourse] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState("name");
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [sortField, setSortField] = useState("fullName");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
-const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
 
-const handleViewStudent = (student) => {
-  setSelectedStudent(student);
-  setShowStudentModal(true);
-};
-
-  // Mock Students Data
-  const studentsData = [
-    { id: 1, name: "Alice Johnson", email: "alice@example.com", course: "Web Development", progress: 75, status: "active", enrollmentDate: "2024-01-15", lastActive: "2024-03-20", completedCourses: 3, totalCourses: 5, averageGrade: 85, phone: "+1 234-567-8901", country: "USA" },
-    { id: 2, name: "Bob Smith", email: "bob@example.com", course: "Data Science", progress: 45, status: "active", enrollmentDate: "2024-02-01", lastActive: "2024-03-19", completedCourses: 2, totalCourses: 6, averageGrade: 78, phone: "+1 234-567-8902", country: "Canada" },
-    { id: 3, name: "Carol Davis", email: "carol@example.com", course: "UI/UX Design", progress: 90, status: "inactive", enrollmentDate: "2023-12-10", lastActive: "2024-03-15", completedCourses: 4, totalCourses: 4, averageGrade: 92, phone: "+1 234-567-8903", country: "UK" },
-    { id: 4, name: "David Wilson", email: "david@example.com", course: "Web Development", progress: 60, status: "active", enrollmentDate: "2024-01-20", lastActive: "2024-03-18", completedCourses: 3, totalCourses: 5, averageGrade: 82, phone: "+1 234-567-8904", country: "Australia" },
-    { id: 5, name: "Emma Brown", email: "emma@example.com", course: "Data Science", progress: 85, status: "active", enrollmentDate: "2024-01-10", lastActive: "2024-03-21", completedCourses: 5, totalCourses: 6, averageGrade: 88, phone: "+1 234-567-8905", country: "USA" },
-    { id: 6, name: "Frank Miller", email: "frank@example.com", course: "UI/UX Design", progress: 30, status: "suspended", enrollmentDate: "2024-02-15", lastActive: "2024-03-10", completedCourses: 1, totalCourses: 4, averageGrade: 65, phone: "+1 234-567-8906", country: "Canada" },
-    { id: 7, name: "Grace Lee", email: "grace@example.com", course: "Web Development", progress: 95, status: "active", enrollmentDate: "2023-11-01", lastActive: "2024-03-21", completedCourses: 4, totalCourses: 5, averageGrade: 94, phone: "+1 234-567-8907", country: "UK" },
-    { id: 8, name: "Henry Taylor", email: "henry@example.com", course: "Data Science", progress: 55, status: "active", enrollmentDate: "2024-01-25", lastActive: "2024-03-17", completedCourses: 3, totalCourses: 6, averageGrade: 75, phone: "+1 234-567-8908", country: "Australia" },
-  ];
-
-  const courses = ["Web Development", "Data Science", "UI/UX Design"];
-  const statuses = ["active", "inactive", "suspended"];
-
-  // Filter students
-  const filteredStudents = studentsData.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === "all" || student.status === selectedStatus;
-    const matchesCourse = selectedCourse === "all" || student.course === selectedCourse;
-    return matchesSearch && matchesStatus && matchesCourse;
+  // Edit modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    studentCode: "",
+    fullName: "",
+    mobileNumber: "",
+    profileImage: ""
   });
+  const [updating, setUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState("");
 
-  // Sort students
-  const sortedStudents = [...filteredStudents].sort((a, b) => {
-    let aVal = a[sortField];
-    let bVal = b[sortField];
+  // Stats states
+  const [totalStudentsCount, setTotalStudentsCount] = useState(0);
+  const [activeStudentsCount, setActiveStudentsCount] = useState(0);
+
+  const fetchStats = async () => {
+    try {
+      const [totalRes, activeRes] = await Promise.all([
+        adminManagement.getAllStudents(null, 0, 1),
+        adminManagement.getAllStudents(true, 0, 1)
+      ]);
+      if (totalRes.data && totalRes.data.data) {
+        setTotalStudentsCount(totalRes.data.data.totalElements);
+      }
+      if (activeRes.data && activeRes.data.data) {
+        setActiveStudentsCount(activeRes.data.data.totalElements);
+      }
+    } catch (err) {
+      console.error("Failed to fetch student counts", err);
+    }
+  };
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      let res;
+      const springPage = currentPage - 1;
+      if (searchTerm.trim()) {
+        res = await adminManagement.searchStudents(searchTerm.trim(), springPage, itemsPerPage);
+      } else {
+        const activeParam = selectedStatus === "active" ? true : selectedStatus === "inactive" ? false : null;
+        res = await adminManagement.getAllStudents(activeParam, springPage, itemsPerPage);
+      }
+
+      if (res.data && res.data.data) {
+        setStudents(res.data.data.content || []);
+        setTotalPages(res.data.data.totalPages || 0);
+        setTotalElements(res.data.data.totalElements || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError("Failed to fetch students. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debounced fetch when filters or page changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm, selectedStatus, currentPage]);
+
+  // Fetch stats on mount
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleViewStudent = async (studentCode) => {
+    try {
+      const res = await adminManagement.getStudentByCode(studentCode);
+      if (res.data && res.data.data) {
+        setSelectedStudent(res.data.data);
+        setShowStudentModal(true);
+      }
+    } catch (err) {
+      console.error("Error fetching student details:", err);
+      alert("Failed to load student details.");
+    }
+  };
+
+  const handleEditClick = (student) => {
+    setEditForm({
+      studentCode: student.studentCode,
+      fullName: student.fullName || "",
+      mobileNumber: student.mobileNumber || "",
+      profileImage: student.profileImage || ""
+    });
+    setUpdateError("");
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+    setUpdateError("");
+    try {
+      const res = await adminManagement.updateStudent(editForm.studentCode, {
+        fullName: editForm.fullName,
+        mobileNumber: editForm.mobileNumber,
+        profileImage: editForm.profileImage
+      });
+      if (res.data) {
+        setShowEditModal(false);
+        fetchStudents();
+        fetchStats();
+      }
+    } catch (err) {
+      console.error("Error updating student:", err);
+      setUpdateError(err.response?.data?.message || "Failed to update student profile.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleToggleStatus = async (studentCode) => {
+    if (!window.confirm("Are you sure you want to toggle this student's active status?")) {
+      return;
+    }
+    try {
+      const res = await adminManagement.toggleStudentStatus(studentCode);
+      if (res.data) {
+        fetchStudents();
+        fetchStats();
+      }
+    } catch (err) {
+      console.error("Error toggling student status:", err);
+      alert("Failed to toggle student status.");
+    }
+  };
+
+  // Sort students (client side sorting on current page content)
+  const sortedStudents = [...students].sort((a, b) => {
+    let aVal = a[sortField] || "";
+    let bVal = b[sortField] || "";
     
-    if (sortField === "name") {
-      aVal = a.name;
-      bVal = b.name;
-    } else if (sortField === "progress") {
-      aVal = a.progress;
-      bVal = b.progress;
-    } else if (sortField === "enrollmentDate") {
-      aVal = new Date(a.enrollmentDate);
-      bVal = new Date(b.enrollmentDate);
+    if (typeof aVal === "string") {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
     }
     
     if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
     if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
-
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStudents = sortedStudents.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(sortedStudents.length / itemsPerPage);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -98,62 +196,52 @@ const handleViewStudent = (student) => {
   };
 
   const handleSelectAll = () => {
-    if (selectedStudents.length === currentStudents.length) {
+    if (selectedStudents.length === students.length) {
       setSelectedStudents([]);
     } else {
-      setSelectedStudents(currentStudents.map(s => s.id));
+      setSelectedStudents(students.map(s => s.studentCode));
     }
   };
 
-  const handleSelectStudent = (id) => {
-    if (selectedStudents.includes(id)) {
-      setSelectedStudents(selectedStudents.filter(sid => sid !== id));
+  const handleSelectStudent = (studentCode) => {
+    if (selectedStudents.includes(studentCode)) {
+      setSelectedStudents(selectedStudents.filter(code => code !== studentCode));
     } else {
-      setSelectedStudents([...selectedStudents, id]);
+      setSelectedStudents([...selectedStudents, studentCode]);
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      case 'suspended': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getProgressColor = (progress) => {
-    if (progress >= 70) return 'from-[#2BB2A9] to-[#249b93]';
-    if (progress >= 40) return 'from-yellow-500 to-yellow-600';
-    return 'from-red-500 to-red-600';
+  const getStatusColor = (isActive) => {
+    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="p-6">
-        {/* Header */}
-        {/* Left Side */}
-         <div>
-  <p className="text-sm text-gray-400 mb-1 flex items-center">
-    <Link
-      to="/admin/dashboard"
-      className="hover:text-[#2BB2A9] transition"
-    >
-      Dashboard
-    </Link>
-
-    <span className="mx-2">&gt;</span>
-
-    <span className="text-none font-medium">
-      All Students
-    </span>
-  </p>
-</div>
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-            All Students
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and monitor all students in the system</p>
+        {/* Breadcrumbs */}
+        <div>
+          <p className="text-sm text-gray-400 mb-1 flex items-center">
+            <Link to="/admin/dashboard" className="hover:text-[#2BB2A9] transition">
+              Dashboard
+            </Link>
+            <span className="mx-2">&gt;</span>
+            <span className="text-none font-medium text-gray-600">All Students</span>
+          </p>
+        </div>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              All Students
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">Manage and monitor all registered students</p>
+          </div>
+          <button 
+            onClick={() => { fetchStudents(); fetchStats(); }}
+            className="p-2 text-gray-600 hover:text-[#2BB2A9] transition"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
 
         {/* Stats Overview */}
@@ -162,58 +250,58 @@ const handleViewStudent = (student) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Total Students</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">{studentsData.length}</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">{totalStudentsCount}</p>
               </div>
-              <div className="bg-[#e6f4f3] p-3 rounded-lg group-hover:scale-110 transition-transform">
+              <div className="bg-[#e6f4f3] p-3 rounded-lg">
                 <Users className="w-6 h-6 text-[#2BB2A9]" />
               </div>
             </div>
-            <div className="mt-2 text-xs text-green-600">↑ 12% from last month</div>
+            <div className="mt-2 text-xs text-gray-400">Total registered in the system</div>
           </div>
           
           <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Active Students</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">
-                  {studentsData.filter(s => s.status === 'active').length}
-                </p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">{activeStudentsCount}</p>
               </div>
               <div className="bg-green-50 p-3 rounded-lg">
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <div className="mt-2 text-xs text-green-600">↑ 5% from last month</div>
+            <div className="mt-2 text-xs text-green-600">
+              {totalStudentsCount > 0 ? Math.round((activeStudentsCount / totalStudentsCount) * 100) : 0}% Active Rate
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Inactive Students</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">
+                  {totalStudentsCount - activeStudentsCount}
+                </p>
+              </div>
+              <div className="bg-red-50 p-3 rounded-lg">
+                <XCircle className="w-6 h-6 text-red-500" />
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-red-500">Suspended or inactive status</div>
           </div>
           
           <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Avg. Progress</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Email Verified</p>
                 <p className="text-2xl font-bold text-gray-800 mt-1">
-                  {Math.round(studentsData.reduce((acc, s) => acc + s.progress, 0) / studentsData.length)}%
+                  {students.filter(s => s.emailVerified).length}
                 </p>
               </div>
               <div className="bg-purple-50 p-3 rounded-lg">
-                <GraduationCap className="w-6 h-6 text-purple-600" />
+                <ShieldCheck className="w-6 h-6 text-purple-600" />
               </div>
             </div>
-            <div className="mt-2 text-xs text-green-600">↑ 8% improvement</div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Avg. Grade</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">
-                  {Math.round(studentsData.reduce((acc, s) => acc + s.averageGrade, 0) / studentsData.length)}%
-                </p>
-              </div>
-              <div className="bg-[#e6f4f3] p-3 rounded-lg">
-                <Award className="w-6 h-6 text-[#2BB2A9]" />
-              </div>
-            </div>
-            <div className="mt-2 text-xs text-green-600">↑ 3% from last month</div>
+            <div className="mt-2 text-xs text-purple-600">On current page</div>
           </div>
         </div>
 
@@ -226,7 +314,10 @@ const handleViewStudent = (student) => {
                 type="text"
                 placeholder="Search students by name or email..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2BB2A9] focus:border-transparent transition-all duration-300 hover:border-[#2BB2A9]"
               />
             </div>
@@ -235,7 +326,10 @@ const handleViewStudent = (student) => {
               <div className="relative">
                 <select
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedStatus(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2BB2A9] focus:border-transparent bg-white text-gray-700 appearance-none cursor-pointer transition-all duration-300 hover:border-[#2BB2A9]"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232BB2A9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
@@ -245,42 +339,15 @@ const handleViewStudent = (student) => {
                   }}
                 >
                   <option value="all">All Status</option>
-                  {statuses.map(status => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
+                  <option value="active">Active Only</option>
+                  <option value="inactive">Inactive Only</option>
                 </select>
               </div>
-              
-              <div className="relative">
-                <select
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2BB2A9] focus:border-transparent bg-white text-gray-700 appearance-none cursor-pointer transition-all duration-300 hover:border-[#2BB2A9]"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232BB2A9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.75rem center',
-                    backgroundSize: '1rem'
-                  }}
-                >
-                  <option value="all">All Courses</option>
-                  {courses.map(course => (
-                    <option key={course} value={course}>{course}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#2BB2A9] to-[#249b93] text-white rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0">
-                <Filter className="w-4 h-4" />
-                <span>Filter</span>
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Actions Bar */}
+        {/* Bulk Actions Bar */}
         {selectedStudents.length > 0 && (
           <div className="bg-[#e6f4f3] rounded-lg p-3 mb-6 flex items-center justify-between animate-fadeIn">
             <span className="text-sm font-medium text-[#2BB2A9]">
@@ -289,207 +356,171 @@ const handleViewStudent = (student) => {
             <div className="flex gap-2">
               <button className="px-3 py-1 bg-white text-[#2BB2A9] rounded-md hover:bg-gray-50 hover:shadow-md transition-all duration-300 text-sm">
                 <Mail className="w-4 h-4 inline mr-1" />
-                Email
-              </button>
-              <button className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 hover:shadow-md transition-all duration-300 text-sm">
-                <Trash2 className="w-4 h-4 inline mr-1" />
-                Delete
+                Email Group
               </button>
             </div>
           </div>
         )}
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-sm border border-red-100 flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
+
         {/* Students Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-x-auto scrollbar-hide hover:shadow-md transition-all duration-300">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-              <tr>
-                <th className="px-6 py-4 text-left w-12">
-                  <input
-                    type="checkbox"
-                    checked={selectedStudents.length === currentStudents.length && currentStudents.length > 0}
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 text-[#2BB2A9] focus:ring-[#2BB2A9] rounded border-gray-300 cursor-pointer hover:scale-110 transition-transform"
-                  />
-                </th>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-[#2BB2A9] w-[20%] transition-colors duration-300 group"
-                  onClick={() => handleSort('name')}
-                >
-                  <div className="flex items-center gap-1">
-                    Student
-                    {sortField === 'name' && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-[#2BB2A9]" /> : <ChevronDown className="w-3 h-3 text-[#2BB2A9]" />
-                    )}
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Course</th>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-[#2BB2A9] w-[15%] transition-colors duration-300"
-                  onClick={() => handleSort('progress')}
-                >
-                  <div className="flex items-center gap-1">
-                    Progress
-                    {sortField === 'progress' && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-[#2BB2A9]" /> : <ChevronDown className="w-3 h-3 text-[#2BB2A9]" />
-                    )}
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Status</th>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-[#2BB2A9] w-[12%] transition-colors duration-300"
-                  onClick={() => handleSort('enrollmentDate')}
-                >
-                  <div className="flex items-center gap-1">
-                    Enrolled
-                    {sortField === 'enrollmentDate' && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-[#2BB2A9]" /> : <ChevronDown className="w-3 h-3 text-[#2BB2A9]" />
-                    )}
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">Last Active</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Avg. Grade</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50 transition-colors duration-200 group">
-                  <td className="px-6 py-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedStudents.includes(student.id)}
-                      onChange={() => handleSelectStudent(student.id)}
-                      className="w-4 h-4 text-[#2BB2A9] focus:ring-[#2BB2A9] rounded border-gray-300 cursor-pointer hover:scale-110 transition-transform"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[200px]">
-                      <div className="font-medium text-gray-900 truncate group-hover:text-[#2BB2A9] transition-colors duration-200">{student.name}</div>
-                      <div className="text-sm text-gray-500 truncate">{student.email}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[130px]">
-                      <span className="px-2 py-1 bg-[#e6f4f3] text-[#2BB2A9] text-xs rounded-full whitespace-nowrap hover:bg-[#2BB2A9] hover:text-white transition-all duration-300 cursor-pointer">
-                        {student.course}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[120px]">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className={`bg-gradient-to-r ${getProgressColor(student.progress)} h-2 rounded-full transition-all duration-500 transform hover:scale-x-105`} 
-                            style={{ width: `${student.progress}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-gray-600 min-w-[40px]">{student.progress}%</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[90px]">
-                      <span className={`px-2 py-1 text-xs rounded-full whitespace-nowrap inline-flex items-center ${getStatusColor(student.status)} transition-all duration-300 hover:scale-105 cursor-pointer`}>
-                        <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${
-                          student.status === 'active' ? 'bg-green-500' : 
-                          student.status === 'inactive' ? 'bg-red-500' : 'bg-yellow-500'
-                        }`}></span>
-                        <span className="capitalize">{student.status}</span>
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[100px]">
-                      <div className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#2BB2A9] transition-colors duration-200">
-                        <Calendar className="w-3 h-3 flex-shrink-0" />
-                        <span className="whitespace-nowrap">{student.enrollmentDate}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[100px]">
-                      <div className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#2BB2A9] transition-colors duration-200">
-                        <Clock className="w-3 h-3 flex-shrink-0" />
-                        <span className="whitespace-nowrap">{student.lastActive}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[70px]">
-                      <div className="flex items-center gap-1">
-                        <span className="font-semibold text-gray-800 group-hover:text-[#2BB2A9] transition-colors duration-200">{student.averageGrade}%</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="min-w-[100px]">
-                      <div className="flex space-x-2">
-                        <button
-  onClick={() => handleViewStudent(student)}
-  className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110"
->
-  <Eye className="w-4 h-4" />
-</button>
-                        <button className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-red-600 hover:bg-red-50 rounded transition-all duration-200 hover:scale-110">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-all duration-200 hover:scale-110">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedStudents.length)} of {sortedStudents.length} students
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6f4f3] hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition-all duration-300 text-gray-700"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1 bg-[#2BB2A9] text-white rounded-md text-sm hover:bg-[#249b93] transition-all duration-300">
-                  {currentPage}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6f4f3] hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition-all duration-300 text-gray-700"
-                >
-                  Next
-                </button>
-              </div>
+          {loading ? (
+            <div className="p-20 text-center text-gray-500">
+              <div className="w-10 h-10 border-4 border-t-[#2BB2A9] border-gray-200 rounded-full animate-spin mx-auto mb-4"></div>
+              <span>Fetching students from servers...</span>
             </div>
-          )}
-        </div>
+          ) : (
+            <>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedStudents.length === students.length && students.length > 0}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 text-[#2BB2A9] focus:ring-[#2BB2A9] rounded border-gray-300 cursor-pointer hover:scale-110 transition-transform"
+                      />
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Code</th>
+                    <th 
+                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-[#2BB2A9] w-[25%] transition-colors duration-300 group"
+                      onClick={() => handleSort('fullName')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Student Name
+                        {sortField === 'fullName' && (
+                          sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-[#2BB2A9]" /> : <ChevronDown className="w-3 h-3 text-[#2BB2A9]" />
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[25%]">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Mobile</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Verified</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {sortedStudents.map((student) => (
+                    <tr key={student.studentCode} className="hover:bg-gray-50 transition-colors duration-200 group">
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedStudents.includes(student.studentCode)}
+                          onChange={() => handleSelectStudent(student.studentCode)}
+                          className="w-4 h-4 text-[#2BB2A9] focus:ring-[#2BB2A9] rounded border-gray-300 cursor-pointer hover:scale-110 transition-transform"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                        {student.studentCode}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900 group-hover:text-[#2BB2A9] transition-colors duration-200">
+                          {student.fullName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {student.email}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {student.mobileNumber || "—"}
+                      </td>
+                      <td className="px-6 py-4">
+                        {student.emailVerified ? (
+                          <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                            <ShieldCheck className="w-4 h-4" /> Yes
+                          </span>
+                        ) : (
+                          <span className="text-red-500 text-xs font-semibold flex items-center gap-1">
+                            ✕ No
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleToggleStatus(student.studentCode)}
+                          className={`px-2 py-1 text-xs rounded-full whitespace-nowrap inline-flex items-center ${getStatusColor(student.isActive)} transition-all duration-300 hover:scale-105 cursor-pointer`}
+                          title="Click to toggle status"
+                        >
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${
+                            student.isActive ? 'bg-green-500' : 'bg-red-500'
+                          }`}></span>
+                          <span>{student.isActive ? "Active" : "Inactive"}</span>
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleViewStudent(student.studentCode)}
+                            className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110"
+                            title="View Student Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditClick(student)}
+                            className="p-1 text-[#2BB2A9] hover:bg-[#e6f4f3] rounded transition-all duration-200 hover:scale-110"
+                            title="Edit Profile"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {sortedStudents.length === 0 && (
+                    <tr>
+                      <td colSpan="8" className="p-10 text-center text-gray-400">
+                        No students found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
 
-        {/* Export Button */}
-        <div className="mt-6 flex justify-end">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-[#e6f4f3] hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition-all duration-300 transform hover:-translate-y-0.5">
-            <Download className="w-4 h-4" />
-            <span>Export Student Data</span>
-          </button>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalElements)} of {totalElements} students
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6f4f3] hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition-all duration-300 text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-3 py-1 bg-[#2BB2A9] text-white rounded-md text-sm hover:bg-[#249b93] transition-all duration-300">
+                      {currentPage}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6f4f3] hover:text-[#2BB2A9] hover:border-[#2BB2A9] transition-all duration-300 text-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Custom styles for dropdown hover - This is the key fix */}
+      {/* Global CSS Styles */}
       <style jsx global>{`
-        /* Remove default blue highlight from select dropdown options */
         select option:hover,
         select option:focus,
         select option:active,
@@ -497,131 +528,183 @@ const handleViewStudent = (student) => {
           background-color: #2BB2A9 !important;
           color: white !important;
         }
-        
-        /* For Firefox */
-        select option:hover,
-        select option:focus {
-          background-color: #2BB2A9 !important;
-          color: white !important;
-        }
-        
-        /* For Chrome/Safari/Edge */
-        select option:checked {
-          background-color: #2BB2A9 !important;
-          color: white !important;
-        }
-        
-        /* Custom select focus styles */
         select:focus {
           outline: none;
           border-color: #2BB2A9 !important;
-          ring-color: #2BB2A9 !important;
         }
-        
-        /* Remove blue default outline from all elements */
         *:focus {
           outline: none;
         }
-        
         input:focus, 
         select:focus, 
-        button:focus,
-        textarea:focus {
+        button:focus {
           outline: none;
           ring-color: #2BB2A9 !important;
         }
       `}</style>
+
+      {/* View Modal */}
       {showStudentModal && selectedStudent && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-    <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 relative">
-      <button
-        onClick={() => setShowStudentModal(false)}
-        className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
-      >
-        ✕
-      </button>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4 animate-fadeIn">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 relative">
+            <button
+              onClick={() => setShowStudentModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg"
+            >
+              ✕
+            </button>
 
-      <div className="text-center mb-5">
-        <div className="w-20 h-20 mx-auto rounded-full bg-[#e6f4f3] flex items-center justify-center text-[#2BB2A9] text-2xl font-bold">
-          {selectedStudent.name.charAt(0)}
+            <div className="text-center mb-5">
+              {selectedStudent.profileImage ? (
+                <img 
+                  src={selectedStudent.profileImage} 
+                  alt={selectedStudent.fullName} 
+                  className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-[#2BB2A9]"
+                />
+              ) : (
+                <div className="w-20 h-20 mx-auto rounded-full bg-[#e6f4f3] flex items-center justify-center text-[#2BB2A9] text-2xl font-bold">
+                  {selectedStudent.fullName?.charAt(0)}
+                </div>
+              )}
+
+              <h2 className="text-xl font-bold text-gray-800 mt-3">
+                {selectedStudent.fullName}
+              </h2>
+              <p className="text-sm text-gray-500">{selectedStudent.email}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Student Code</p>
+                <p className="font-semibold font-mono">{selectedStudent.studentCode}</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Username</p>
+                <p className="font-semibold">{selectedStudent.username}</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Mobile Number</p>
+                <p className="font-semibold">{selectedStudent.mobileNumber || "—"}</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Status</p>
+                <p className="font-semibold capitalize">{selectedStudent.isActive ? "Active" : "Inactive"}</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Email Verified</p>
+                <p className="font-semibold">{selectedStudent.emailVerified ? "Verified" : "Unverified"}</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-xs">Auth Provider</p>
+                <p className="font-semibold uppercase">{selectedStudent.authType}</p>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
 
-        <h2 className="text-xl font-bold text-gray-800 mt-3">
-          {selectedStudent.name}
-        </h2>
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4 animate-fadeIn">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg"
+              disabled={updating}
+            >
+              ✕
+            </button>
 
-        <p className="text-sm text-gray-500">{selectedStudent.email}</p>
-      </div>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Edit Student Profile</h2>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Course</p>
-          <p className="font-semibold">{selectedStudent.course}</p>
+            {updateError && (
+              <div className="bg-red-50 text-red-600 text-xs p-3 rounded-lg mb-4">
+                {updateError}
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Student Code</label>
+                <input 
+                  type="text" 
+                  value={editForm.studentCode} 
+                  disabled 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={editForm.fullName} 
+                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                  placeholder="Enter full name"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2BB2A9] outline-none"
+                  required
+                  disabled={updating}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mobile Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    type="text" 
+                    value={editForm.mobileNumber} 
+                    onChange={(e) => setEditForm({ ...editForm, mobileNumber: e.target.value })}
+                    placeholder="Enter mobile number"
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2BB2A9] outline-none"
+                    disabled={updating}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Profile Image URL</label>
+                <div className="relative">
+                  <Image className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                  <input 
+                    type="text" 
+                    value={editForm.profileImage} 
+                    onChange={(e) => setEditForm({ ...editForm, profileImage: e.target.value })}
+                    placeholder="Enter image URL"
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2BB2A9] outline-none"
+                    disabled={updating}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+                  disabled={updating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-gradient-to-r from-[#2BB2A9] to-[#249b93] text-white rounded-lg text-sm font-semibold hover:shadow-lg transition"
+                  disabled={updating}
+                >
+                  {updating ? "Saving Changes..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Status</p>
-          <p className="font-semibold capitalize">{selectedStudent.status}</p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Progress</p>
-          <p className="font-semibold">{selectedStudent.progress}%</p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Average Grade</p>
-          <p className="font-semibold">{selectedStudent.averageGrade}%</p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Completed Courses</p>
-          <p className="font-semibold">
-            {selectedStudent.completedCourses} / {selectedStudent.totalCourses}
-          </p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Country</p>
-          <p className="font-semibold">{selectedStudent.country}</p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Phone</p>
-          <p className="font-semibold">{selectedStudent.phone}</p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <p className="text-gray-500">Last Active</p>
-          <p className="font-semibold">{selectedStudent.lastActive}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };
-
-// Add missing Award icon component
-const Award = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="8" r="6" />
-    <path d="M12 14v7" />
-    <path d="M9 21h6" />
-    <path d="M15 16.5L12 14l-3 2.5" />
-  </svg>
-);
 
 export default AllStudents;

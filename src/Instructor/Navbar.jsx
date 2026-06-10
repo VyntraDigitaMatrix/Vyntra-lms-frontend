@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useInstructorAuth } from "./auth/AuthContext";
 import {
   FaBell,
   FaChevronDown,
@@ -12,6 +13,7 @@ import {
 } from "react-icons/fa";
 
 const Navbar = () => {
+  const { instructor, logout } = useInstructorAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
 
@@ -25,14 +27,16 @@ const Navbar = () => {
     { icon: <FaSignOutAlt />, label: "Logout" },
   ];
 
-  const handleItemClick = (label) => {
+  const handleItemClick = async (label) => {
     if (label === "Settings") navigate("/instructor/settings");
     else if (label === "My Courses") navigate("/instructor/courses");
     else if (label === "Profile") navigate("/instructor/profile");
     else if (label === "My Classes") navigate("/instructor/students");
     else if (label === "Notifications") navigate("/instructor/notifications");
     else if (label === "Help & Support") navigate("/instructor/contact-support");
-    else if (label === "Logout") navigate("/InstructorLogin");
+    else if (label === "Logout") {
+      await logout();
+    }
     setShowProfileMenu(false);
   };
 
@@ -49,10 +53,20 @@ const Navbar = () => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-bold text-[#7c3aed]">
-              I
-            </div>
-            <span className="text-sm font-semibold text-gray-700">Instructor</span>
+            {instructor?.profileImage ? (
+              <img 
+                src={instructor.profileImage} 
+                alt="Instructor Profile" 
+                className="w-8 h-8 rounded-full object-cover border border-[#7c3aed]"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-bold text-[#7c3aed]">
+                {instructor?.fullName?.charAt(0) || "I"}
+              </div>
+            )}
+            <span className="text-sm font-semibold text-gray-700">
+              {instructor?.fullName || "Instructor"}
+            </span>
             <FaChevronDown
               className={`text-xs text-gray-600 transition ${
                 showProfileMenu ? "rotate-180" : ""
