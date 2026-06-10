@@ -25,7 +25,7 @@ const Navbar = () => {
     { icon: <FaQuestionCircle />, label: "Help & Support" },
     { icon: <FaSignOutAlt />, label: "Logout" },
   ];
-const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <nav className="relative w-full h-[70px] bg-white border-b border-gray-200 flex items-center justify-end px-6">
       {/* Right */}
@@ -49,40 +49,39 @@ const navigate = useNavigate();
             </span>
 
             <FaChevronDown
-              className={`text-xs text-gray-600 transition ${
-                showProfileMenu ? "rotate-180" : ""
-              }`}
+              className={`text-xs text-gray-600 transition ${showProfileMenu ? "rotate-180" : ""
+                }`}
             />
           </button>
 
           {showProfileMenu && (
             <div className="absolute right-0 top-12 w-[240px] bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
-        {profileItems.map((item, index) => (
-  <div
-    key={index}
-    onClick={() => {
-      if (item.label === "Settings") {
-        navigate("/student/settings");
-      } else if (item.label === "My Courses") {
-        navigate("/student/courses");
-      } else if (item.label === "Profile") {
-        navigate("/student/profile");
-      } else if (item.label === "Certificates") {
-        navigate("/student/certificates");
-      } else if (item.label === "Notifications") {
-        navigate("/student/notifications");
-      } else if (item.label === "Help & Support") {
-        navigate("/student/contact-support");
-      }
+              {profileItems.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    if (item.label === "Settings") {
+                      navigate("/student/settings");
+                    } else if (item.label === "My Courses") {
+                      navigate("/student/courses");
+                    } else if (item.label === "Profile") {
+                      navigate("/student/profile");
+                    } else if (item.label === "Certificates") {
+                      navigate("/student/certificates");
+                    } else if (item.label === "Notifications") {
+                      navigate("/student/notifications");
+                    } else if (item.label === "Help & Support") {
+                      navigate("/students/contact-support");
+                    }
 
-      setShowProfileMenu(false);
-    }}
-    className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-blue-100 hover:text-blue-600 cursor-pointer transition text-[15px] font-medium"
-  >
-    <span className="text-blue-600">{item.icon}</span>
-    <span>{item.label}</span>
-  </div>
-))}
+                    setShowProfileMenu(false);
+                  }}
+                  className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-blue-100 hover:text-blue-600 cursor-pointer transition text-[15px] font-medium"
+                >
+                  <span className="text-blue-600">{item.icon}</span>
+                  <span>{item.label}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -111,11 +111,11 @@ function Resources() {
 
   const getIcon = (type) => {
     switch(type) {
-      case "PDF": return <FaFilePdf className="text-red-500" />;
-      case "PPT": return <FaFilePowerpoint className="text-orange-500" />;
-      case "DOC": return <FaFileWord className="text-blue-500" />;
-      case "Video": return <FaVideo className="text-purple-500" />;
-      default: return <FaFilePdf className="text-red-500" />;
+      case "PDF": return <FaFilePdf className="text-red-500 text-lg sm:text-xl" />;
+      case "PPT": return <FaFilePowerpoint className="text-orange-500 text-lg sm:text-xl" />;
+      case "DOC": return <FaFileWord className="text-blue-500 text-lg sm:text-xl" />;
+      case "Video": return <FaVideo className="text-purple-500 text-lg sm:text-xl" />;
+      default: return <FaFilePdf className="text-red-500 text-lg sm:text-xl" />;
     }
   };
 
@@ -211,118 +211,115 @@ function Resources() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header Section */}
-      <div className="flex items-center justify-between -mb-5 px-6 pt-6 ">
-                <p className="text-sm text-gray-400">
-                  <Link to="/student/dashboard" className="hover:text-blue-600 transition">
-                    Dashboard
-                  </Link>
-                  <span className="mx-2">&gt;</span>
-                  <span className="text-gray-600 font-medium">Resources</span>
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
-                </div>
-              </div>
-      <div className="max-w-7xl mx-auto px-5 py-4">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      {/* Breadcrumb - Responsive */}
+      <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
+        <div className="flex items-center justify-between">
+          <p className="text-xs sm:text-sm text-gray-400">
+            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
+              Dashboard
+            </Link>
+            <span className="mx-1 sm:mx-2">&gt;</span>
+            <span className="text-gray-600 font-medium">Resources</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Header Section - Responsive */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">Learning Resources</h1>
-                <p className="text-sm text-gray-500">Access study materials, notes, and educational content</p>
-              </div>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Learning Resources</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Access study materials, notes, and educational content</p>
           </div>
 
           <button
             onClick={() => setShowUploadModal(true)}
-            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold flex items-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+            className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold flex items-center gap-1.5 sm:gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-md text-sm sm:text-base"
           >
-            <FaPlus className="text-sm" />
+            <FaPlus className="text-xs sm:text-sm" />
             Upload Resource
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-5 py-6 -mt-5">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-3">
-              <div className="w-[52px] h-[52px] rounded-xl bg-blue-50 flex items-center justify-center">
-                <MdQuiz className="text-blue-600 text-[24px]" />
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 pb-6 sm:pb-8">
+        {/* Stats Cards - Responsive Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-blue-50 flex items-center justify-center">
+                <MdQuiz className="text-blue-600 text-lg sm:text-2xl" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Resources</p>
-                <h2 className="text-2xl font-bold text-gray-800">{stats.totalResources}</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Total Resources</p>
+                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.totalResources}</h2>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-3">
-              <div className="w-[52px] h-[52px] rounded-xl bg-green-50 flex items-center justify-center">
-                <FaArrowDown className="text-green-600 text-[22px]" />
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-green-50 flex items-center justify-center">
+                <FaArrowDown className="text-green-600 text-base sm:text-[22px]" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Downloads</p>
-                <h2 className="text-2xl font-bold text-gray-800">{stats.downloads}</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Total Downloads</p>
+                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.downloads}</h2>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-3">
-              <div className="w-[52px] h-[52px] rounded-xl bg-yellow-50 flex items-center justify-center">
-                <FaBookmark className="text-yellow-600 text-[22px]" />
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-yellow-50 flex items-center justify-center">
+                <FaBookmark className="text-yellow-600 text-base sm:text-[22px]" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Saved Items</p>
-                <h2 className="text-2xl font-bold text-gray-800">{stats.saved}</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Saved Items</p>
+                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.saved}</h2>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-3">
-              <div className="w-[52px] h-[52px] rounded-xl bg-purple-50 flex items-center justify-center">
-                <FaGraduationCap className="text-purple-600 text-[22px]" />
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-purple-50 flex items-center justify-center">
+                <FaGraduationCap className="text-purple-600 text-base sm:text-[22px]" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Courses Covered</p>
-                <h2 className="text-2xl font-bold text-gray-800">{stats.courses}</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Courses Covered</p>
+                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.courses}</h2>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
+        {/* Search and Filter Bar - Responsive */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 mb-5 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm" />
               <input
                 type="text"
-                placeholder="Search resources by title, description, or course..."
+                placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-xs sm:text-sm"
               />
             </div>
             
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className="h-11 px-5 border border-gray-200 rounded-lg flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition"
+                className="w-full sm:w-auto h-9 sm:h-11 px-3 sm:px-5 border border-gray-200 rounded-lg flex items-center justify-center sm:justify-between gap-2 text-gray-700 hover:bg-gray-50 transition text-xs sm:text-sm"
               >
-                <FaFilter className="text-sm" />
+                <FaFilter className="text-xs sm:text-sm" />
                 <span className="font-medium">Filter: {filterType}</span>
-                <FaChevronDown className={`text-xs transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
+                <FaChevronDown className={`text-[10px] sm:text-xs transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute top-12 right-0 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-2 animate-fadeIn">
+                <div className="absolute top-10 sm:top-12 right-0 w-40 sm:w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-2 animate-fadeIn">
                   {filterOptions.map((type) => (
                     <button
                       key={type}
@@ -330,7 +327,7 @@ function Resources() {
                         setFilterType(type);
                         setShowFilterDropdown(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
+                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm transition-all duration-200 ${
                         filterType === type
                           ? "bg-blue-50 text-blue-600 font-medium"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -345,30 +342,30 @@ function Resources() {
           </div>
         </div>
 
-        {/* Upload Area & Categories */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 mb-6">
+        {/* Upload Area & Categories - Responsive */}
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 mb-5 sm:mb-6">
           {/* Upload Area */}
           <div
             onClick={() => setShowUploadModal(true)}
-            className="xl:col-span-3 bg-white rounded-xl border-2 border-dashed border-blue-300 p-8 flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all"
+            className="lg:col-span-3 bg-white rounded-xl border-2 border-dashed border-blue-300 p-6 sm:p-8 flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all"
           >
             <div className="text-center">
-              <FaCloudUploadAlt className="text-blue-500 text-5xl mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-gray-800 mb-1">
-                Drag & Drop Resources Here
+              <FaCloudUploadAlt className="text-blue-500 text-3xl sm:text-5xl mx-auto mb-2 sm:mb-3" />
+              <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-1">
+                Drag & Drop Resources
               </h3>
-              <p className="text-gray-500 text-sm">
-                Support for PDF, PPT, DOC, Video files up to 100MB
+              <p className="text-gray-500 text-xs sm:text-sm">
+                PDF, PPT, DOC, Video up to 100MB
               </p>
-              <button className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm">
+              <button className="mt-3 sm:mt-4 px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition shadow-sm">
                 Browse Files
               </button>
             </div>
           </div>
 
           {/* Categories Card */}
-          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
               <MdFolder className="text-blue-600" />
               Categories
             </h3>
@@ -377,17 +374,17 @@ function Resources() {
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-lg transition-all duration-200 ${
+                className={`w-full flex items-center justify-between py-2 px-2.5 sm:px-3 rounded-lg transition-all duration-200 ${
                   filterType === type
                     ? "bg-blue-50 text-blue-600"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   {getIcon(type)}
-                  <span className="text-sm font-medium">{type}</span>
+                  <span className="text-xs sm:text-sm font-medium">{type}</span>
                 </div>
-                <span className={`text-sm font-semibold ${
+                <span className={`text-xs sm:text-sm font-semibold ${
                   filterType === type ? "text-blue-600" : "text-gray-500"
                 }`}>
                   {resources.filter((item) => item.type === type).length}
@@ -397,9 +394,9 @@ function Resources() {
           </div>
         </div>
 
-        {/* Resources Grid */}
+        {/* Resources Grid - Responsive */}
         {filteredResources.length > 0 ? (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {filteredResources.map((item) => (
               <div
                 key={item.id}
@@ -407,39 +404,27 @@ function Resources() {
               >
                 <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                 
-                <div className="p-4">
-                  <div className="flex items-start gap-4">
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     {/* Icon */}
-                    <div className={`w-[54px] h-[54px] rounded-xl ${getIconBg(item.iconType)} flex items-center justify-center text-2xl shrink-0`}>
+                    <div className={`w-12 h-12 sm:w-[54px] sm:h-[54px] rounded-xl ${getIconBg(item.iconType)} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
                       {getIcon(item.iconType)}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       {/* Header */}
-                      <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-gray-400">
-            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
-              Dashboard
-            </Link>
-            <span className="mx-2">&gt;</span>
-            <span className="text-gray-600 font-medium">Resources</span>
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
-          </div>
-        </div>
-                      <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h2 className="text-lg font-bold text-gray-800 truncate hover:text-blue-600 transition">
+                          <h2 className="text-sm sm:text-lg font-bold text-gray-800 truncate hover:text-blue-600 transition">
                             {item.title}
                           </h2>
-                          <p className="text-gray-500 text-xs mt-1">
+                          <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5">
                             {item.course} • {item.type} • {item.size}
                           </p>
                         </div>
 
                         <span
-                          className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          className={`shrink-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-medium ${
                             item.status === "Public"
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-100 text-gray-600"
@@ -450,52 +435,52 @@ function Resources() {
                       </div>
 
                       {/* Description */}
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      <p className="text-gray-600 text-[11px] sm:text-sm mb-2 line-clamp-2">
                         {item.description}
                       </p>
 
                       {/* Meta Info */}
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-3">
-                        <span className="flex items-center gap-1">
-                          <FaUserGraduate className="text-blue-500" />
-                          {item.uploadedBy}
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
+                        <span className="flex items-center gap-0.5 sm:gap-1">
+                          <FaUserGraduate className="text-blue-500 text-[9px] sm:text-xs" />
+                          <span className="truncate max-w-[80px] sm:max-w-none">{item.uploadedBy.split(' ')[0]}</span>
                         </span>
-                        <span className="flex items-center gap-1">
-                          <FaCalendarAlt className="text-gray-400" />
+                        <span className="flex items-center gap-0.5 sm:gap-1">
+                          <FaCalendarAlt className="text-gray-400 text-[9px] sm:text-xs" />
                           {item.date}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <FaDownload className="text-green-500" />
-                          {item.downloads} downloads
+                        <span className="flex items-center gap-0.5 sm:gap-1">
+                          <FaDownload className="text-green-500 text-[9px] sm:text-xs" />
+                          {item.downloads}
                         </span>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-2">
-                        <button className="h-[34px] px-3 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-blue-100 transition">
-                          <FaEye size={12} />
+                      {/* Action Buttons - Wrap on mobile */}
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 bg-blue-50 text-blue-600 rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-blue-100 transition">
+                          <FaEye size={10} className="sm:text-xs" />
                           Preview
                         </button>
 
                         <button 
                           onClick={() => handleSaveResource(item.id)}
-                          className={`h-[34px] px-3 rounded-lg text-sm font-medium flex items-center gap-1.5 transition ${
+                          className={`h-7 sm:h-[34px] px-2 sm:px-3 rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 transition ${
                             item.saved
                               ? "bg-yellow-50 text-yellow-600 hover:bg-yellow-100"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
-                          <FaStar size={12} />
+                          <FaStar size={10} className="sm:text-xs" />
                           {item.saved ? "Saved" : "Save"}
                         </button>
 
-                        <button className="h-[34px] px-3 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-blue-700 transition shadow-sm">
-                          <FaDownload size={12} />
+                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 bg-blue-600 text-white rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-blue-700 transition shadow-sm">
+                          <FaDownload size={10} className="sm:text-xs" />
                           Download
                         </button>
 
-                        <button className="h-[34px] px-3 text-gray-500 hover:text-blue-600 rounded-lg text-sm flex items-center gap-1.5 transition">
-                          <FaShare size={12} />
+                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 text-gray-500 hover:text-blue-600 rounded-lg text-[10px] sm:text-sm flex items-center gap-1 transition">
+                          <FaShare size={10} className="sm:text-xs" />
                           Share
                         </button>
                       </div>
@@ -506,18 +491,18 @@ function Resources() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-200">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FaFilePdf className="text-4xl text-gray-400" />
+          <div className="bg-white rounded-xl p-8 sm:p-12 text-center shadow-sm border border-gray-200">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <FaFilePdf className="text-2xl sm:text-4xl text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No resources found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+            <h3 className="text-base sm:text-xl font-semibold text-gray-600 mb-1 sm:mb-2">No resources found</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Try adjusting your search or filter criteria</p>
             <button
               onClick={() => {
                 setSearch("");
                 setFilterType("All");
               }}
-              className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-xs sm:text-sm"
             >
               Clear all filters
             </button>
@@ -525,26 +510,26 @@ function Resources() {
         )}
       </div>
 
-      {/* Upload Modal */}
+      {/* Upload Modal - Responsive */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl animate-fadeIn">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">Upload New Resource</h2>
-                <p className="text-sm text-gray-500 mt-1">Share learning materials with the community</p>
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-800">Upload New Resource</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Share learning materials with the community</p>
               </div>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition"
               >
-                <FaTimes className="text-gray-500" />
+                <FaTimes className="text-gray-500 text-sm sm:text-base" />
               </button>
             </div>
 
-            <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleUploadSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                   Resource Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -552,20 +537,20 @@ function Resources() {
                   placeholder="Enter resource title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                   Course <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={formData.course}
                     onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
                     required
                   >
                     <option value="">Select Course</option>
@@ -575,19 +560,19 @@ function Resources() {
                     <option value="Node.js">Node.js</option>
                     <option value="Python">Python</option>
                   </select>
-                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm" />
+                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                   File Type <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
                     required
                   >
                     <option value="">Select File Type</option>
@@ -596,12 +581,12 @@ function Resources() {
                     <option value="DOC">Word Document</option>
                     <option value="Video">Video File</option>
                   </select>
-                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm" />
+                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                   Description
                 </label>
                 <textarea
@@ -609,13 +594,13 @@ function Resources() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows="3"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none text-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                     File Size
                   </label>
                   <input
@@ -623,39 +608,39 @@ function Resources() {
                     placeholder="e.g., 2.5 MB"
                     value={formData.size}
                     onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                     Status
                   </label>
                   <div className="relative">
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
                     >
                       <option value="Public">Public</option>
                       <option value="Private">Private</option>
                     </select>
-                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm" />
+                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition"
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-md"
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-md text-sm"
                 >
                   Upload Resource
                 </button>
@@ -665,12 +650,12 @@ function Resources() {
         </div>
       )}
 
-      {/* Message Modal */}
+      {/* Message Modal - Responsive */}
       {messageModal.show && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-3">
-          <div className="w-96 bg-white rounded-2xl p-6 shadow-xl text-center animate-fadeIn">
+          <div className="w-80 sm:w-96 bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-xl text-center animate-fadeIn">
             <div
-              className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 ${
+              className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-3 sm:mb-4 ${
                 messageModal.type === "success"
                   ? "bg-green-100 text-green-600"
                   : "bg-red-100 text-red-600"
@@ -679,11 +664,11 @@ function Resources() {
               {messageModal.type === "success" ? "✓" : "!"}
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">
               {messageModal.type === "success" ? "Success!" : "Error!"}
             </h2>
 
-            <p className="text-gray-500 mb-6">{messageModal.message}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">{messageModal.message}</p>
 
             <button
               type="button"
@@ -694,7 +679,7 @@ function Resources() {
                   message: "",
                 })
               }
-              className={`w-full py-2.5 rounded-lg text-white font-semibold ${
+              className={`w-full py-2 sm:py-2.5 rounded-lg text-white font-semibold text-sm ${
                 messageModal.type === "success"
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-red-600 hover:bg-red-700"

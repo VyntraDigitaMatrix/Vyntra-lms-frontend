@@ -95,26 +95,17 @@ const ChangePassword = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Replace this with your real backend API
-      // await axios.post("/api/change-password", {
-      //   oldPassword,
-      //   newPassword,
-      // });
-
       setOldStatus("success");
       setNewStatus("success");
       setConfirmStatus("success");
       setSuccessMessage("Password changed successfully!");
       
-      // Clear form
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
       
-      // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage("");
         setOldStatus(null);
@@ -131,59 +122,55 @@ const ChangePassword = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <main className="max-w-7xl mx-auto px-5 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between   mb-5">
-                <p className="text-sm text-gray-400">
-                  <Link to="/student/dashboard" className="hover:text-blue-600 transition">
-                    Dashboard
-                  </Link>
-                  <span className="mx-2">&gt;</span>
-                  <span className="text-gray-600 font-medium">Change Password</span>
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 pl-2 border-l border-gray-200"></div>
-                </div>
-              </div>
-        <div className="mb-8">
-          <div className="flex items-center gap-3 -mb-2 -mt-3">
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">Change Password</h1>
-              <p className="text-gray-500 mt-1">Update your password to keep your account secure</p>
-            </div>
-          </div>
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 py-4 sm:py-6 md:py-8">
+        {/* Breadcrumb */}
+        <div className="mb-4 sm:mb-5">
+          <p className="text-xs sm:text-sm text-gray-400">
+            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
+              Dashboard
+            </Link>
+            <span className="mx-1 sm:mx-2">&gt;</span>
+            <span className="text-gray-600 font-medium">Change Password</span>
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        {/* Header */}
+        <div className="mb-5 sm:mb-6 md:mb-8">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800">Change Password</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Update your password to keep your account secure</p>
+        </div>
+
+        {/* Main Card */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           <div className="flex flex-col lg:flex-row">
             {/* Left Form Section */}
-            <div className="flex-1 p-8 lg:p-10">
+            <div className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10">
               <div className="max-w-md mx-auto lg:mx-0">
                 {/* Success Message */}
                 {successMessage && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-slideDown">
-                    <FaCheckCircle className="text-green-600 text-xl" />
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2 sm:gap-3 animate-slideDown">
+                    <FaCheckCircle className="text-green-600 text-base sm:text-xl shrink-0" />
                     <div>
-                      <p className="text-green-800 font-semibold">Success!</p>
-                      <p className="text-green-600 text-sm">{successMessage}</p>
+                      <p className="text-green-800 font-semibold text-xs sm:text-sm">Success!</p>
+                      <p className="text-green-600 text-[11px] sm:text-sm">{successMessage}</p>
                     </div>
                   </div>
                 )}
 
                 {/* Old Password Field */}
-                <div className="mb-6">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <FaKey className="text-gray-500 text-xs" />
+                <div className="mb-4 sm:mb-6">
+                  <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                    <FaKey className="text-gray-500 text-[10px] sm:text-xs" />
                     Old Password
                     {oldStatus === "success" && (
-                      <FaCheckCircle className="text-green-500 text-sm" />
+                      <FaCheckCircle className="text-green-500 text-[10px] sm:text-sm" />
                     )}
                   </label>
 
                   <div
-                    className={`h-12 border ${getBorderClass(
+                    className={`h-10 sm:h-12 border ${getBorderClass(
                       oldStatus
-                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                    )} rounded-xl flex items-center px-3 sm:px-4 transition-all duration-200 bg-white`}
                   >
                     <input
                       type={showOld ? "text" : "password"}
@@ -195,33 +182,32 @@ const ChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Enter your current password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-xs sm:text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
                     />
-
                     <button
                       type="button"
                       onClick={() => setShowOld(!showOld)}
                       className="text-gray-400 hover:text-gray-600 transition"
                     >
-                      {showOld ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                      {showOld ? <FaRegEye size={14} className="sm:text-lg" /> : <FaRegEyeSlash size={14} className="sm:text-lg" />}
                     </button>
                   </div>
                 </div>
 
                 {/* New Password Field */}
-                <div className="mb-6">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <FaShieldAlt className="text-gray-500 text-xs" />
+                <div className="mb-4 sm:mb-6">
+                  <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                    <FaShieldAlt className="text-gray-500 text-[10px] sm:text-xs" />
                     New Password
                     {newStatus === "success" && (
-                      <FaCheckCircle className="text-green-500 text-sm" />
+                      <FaCheckCircle className="text-green-500 text-[10px] sm:text-sm" />
                     )}
                   </label>
 
                   <div
-                    className={`h-12 border ${getBorderClass(
+                    className={`h-10 sm:h-12 border ${getBorderClass(
                       newStatus
-                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                    )} rounded-xl flex items-center px-3 sm:px-4 transition-all duration-200 bg-white`}
                   >
                     <input
                       type={showNew ? "text" : "password"}
@@ -233,24 +219,23 @@ const ChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Create a strong password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-xs sm:text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
                     />
-
                     <button
                       type="button"
                       onClick={() => setShowNew(!showNew)}
                       className="text-gray-400 hover:text-gray-600 transition"
                     >
-                      {showNew ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                      {showNew ? <FaRegEye size={14} className="sm:text-lg" /> : <FaRegEyeSlash size={14} className="sm:text-lg" />}
                     </button>
                   </div>
 
                   {/* Password Strength Indicator */}
                   {newPassword && (
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-gray-500">Password Strength</span>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    <div className="mt-2 sm:mt-3">
+                      <div className="flex items-center justify-between mb-1 sm:mb-2">
+                        <span className="text-[10px] sm:text-xs text-gray-500">Password Strength</span>
+                        <span className={`text-[9px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full ${
                           passwordStrength <= 2 ? "bg-red-100 text-red-600" :
                           passwordStrength <= 4 ? "bg-yellow-100 text-yellow-600" :
                           "bg-green-100 text-green-600"
@@ -258,7 +243,7 @@ const ChangePassword = () => {
                           {getPasswordStrengthText()}
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1 sm:h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${getPasswordStrengthColor()} rounded-full transition-all duration-300`}
                           style={{ width: `${(passwordStrength / 5) * 100}%` }}
@@ -269,9 +254,9 @@ const ChangePassword = () => {
 
                   {/* Password Rules */}
                   {newPassword && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                      <p className="text-xs font-semibold text-gray-700 mb-3">Password Requirements:</p>
-                      <ul className="space-y-2">
+                    <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <p className="text-[10px] sm:text-xs font-semibold text-gray-700 mb-2 sm:mb-3">Password Requirements:</p>
+                      <ul className="space-y-1.5 sm:space-y-2">
                         {[
                           { key: "minLength", text: "Minimum 12 characters" },
                           { key: "uppercase", text: "At least one uppercase letter" },
@@ -281,12 +266,12 @@ const ChangePassword = () => {
                         ].map((rule) => (
                           <li
                             key={rule.key}
-                            className="flex items-center gap-2 text-xs"
+                            className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs"
                           >
                             {rules[rule.key] ? (
-                              <FaCheck className="text-green-500 text-xs" />
+                              <FaCheck className="text-green-500 text-[8px] sm:text-xs" />
                             ) : (
-                              <FaTimes className="text-gray-300 text-xs" />
+                              <FaTimes className="text-gray-300 text-[8px] sm:text-xs" />
                             )}
                             <span className={rules[rule.key] ? "text-gray-700" : "text-gray-400"}>
                               {rule.text}
@@ -299,19 +284,19 @@ const ChangePassword = () => {
                 </div>
 
                 {/* Confirm Password Field */}
-                <div className="mb-8">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <MdVerified className="text-gray-500 text-sm" />
+                <div className="mb-6 sm:mb-8">
+                  <label className="text-xs sm:text-sm font-semibold text-gray-700 flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                    <MdVerified className="text-gray-500 text-[10px] sm:text-sm" />
                     Confirm New Password
                     {confirmStatus === "success" && (
-                      <FaCheckCircle className="text-green-500 text-sm" />
+                      <FaCheckCircle className="text-green-500 text-[10px] sm:text-sm" />
                     )}
                   </label>
 
                   <div
-                    className={`h-12 border ${getBorderClass(
+                    className={`h-10 sm:h-12 border ${getBorderClass(
                       confirmStatus
-                    )} rounded-xl flex items-center px-4 transition-all duration-200 bg-white`}
+                    )} rounded-xl flex items-center px-3 sm:px-4 transition-all duration-200 bg-white`}
                   >
                     <input
                       type={showConfirm ? "text" : "password"}
@@ -323,45 +308,44 @@ const ChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Confirm your new password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-xs sm:text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
                     />
-
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
                       className="text-gray-400 hover:text-gray-600 transition"
                     >
-                      {showConfirm ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                      {showConfirm ? <FaRegEye size={14} className="sm:text-lg" /> : <FaRegEyeSlash size={14} className="sm:text-lg" />}
                     </button>
                   </div>
                 </div>
 
                 {/* Error Message */}
                 {errorMessage && (
-                  <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl">
-                    <p className="text-red-600 text-sm font-medium flex items-center gap-2">
-                      <FaTimes className="text-red-500" />
+                  <div className="mb-4 sm:mb-6 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-600 text-[11px] sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                      <FaTimes className="text-red-500 text-[10px] sm:text-xs" />
                       {errorMessage}
                     </p>
                   </div>
                 )}
 
                 {/* Action Buttons */}
-                <div className="space-y-3">
+                <div className="space-y-2.5 sm:space-y-3">
                   <button
                     type="button"
                     onClick={handleChangePassword}
                     disabled={isLoading}
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full h-10 sm:h-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
                   >
                     {isLoading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Updating Password...
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Updating...
                       </>
                     ) : (
                       <>
-                        <FaLock size={16} />
+                        <FaLock size={12} className="sm:text-base" />
                         Change Password
                       </>
                     )}
@@ -369,53 +353,71 @@ const ChangePassword = () => {
 
                   <button
                     type="button"
-                    className="w-full text-blue-600 text-sm font-semibold hover:text-blue-700 transition flex items-center justify-center gap-2"
+                    className="w-full text-blue-600 text-[11px] sm:text-sm font-semibold hover:text-blue-700 transition flex items-center justify-center gap-1.5"
                   >
-                    <FaArrowLeft size={12} />
+                    <FaArrowLeft size={10} className="sm:text-xs" />
                     Forgot Password?
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Right Illustration Section */}
-            <div className="lg:w-[45%] bg-gradient-to-br from-blue-50 to-indigo-50 p-8 flex flex-col items-center justify-center">
+            {/* Right Illustration Section - Hidden on mobile, shown on desktop */}
+            <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-blue-50 to-indigo-50 p-6 md:p-8 flex-col items-center justify-center">
               <img
                 src={CP}
                 alt="Change Password Illustration"
-                className="w-64 h-64 object-contain mb-6"
+                className="w-48 md:w-64 h-48 md:h-64 object-contain mb-4 md:mb-6"
               />
               
               <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4">
-                  <MdSecurity className="text-blue-600 text-lg" />
-                  <span className="text-sm font-semibold text-gray-700">Account Security</span>
+                <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white rounded-full shadow-sm mb-3 md:mb-4">
+                  <MdSecurity className="text-blue-600 text-base md:text-lg" />
+                  <span className="text-xs md:text-sm font-semibold text-gray-700">Account Security</span>
                 </div>
                 
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 md:mb-3">
                   Secure Your Account
                 </h3>
                 
-                <p className="text-gray-600 text-sm leading-relaxed max-w-md">
+                <p className="text-gray-600 text-xs md:text-sm leading-relaxed max-w-md">
                   Create a strong, unique password to protect your account from unauthorized access and keep your personal data safe.
                 </p>
                 
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <div className="mt-4 md:mt-6 flex items-center justify-center gap-1.5 md:gap-2 text-[10px] md:text-xs text-gray-500">
+                  <div className="flex items-center gap-0.5 md:gap-1">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full" />
                     <span>Strong</span>
                   </div>
-                  <div className="w-px h-3 bg-gray-300" />
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  <div className="w-px h-2 md:h-3 bg-gray-300" />
+                  <div className="flex items-center gap-0.5 md:gap-1">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-yellow-500 rounded-full" />
                     <span>Medium</span>
                   </div>
-                  <div className="w-px h-3 bg-gray-300" />
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  <div className="w-px h-2 md:h-3 bg-gray-300" />
+                  <div className="flex items-center gap-0.5 md:gap-1">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full" />
                     <span>Weak</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Mobile Illustration - Simple version for mobile */}
+            <div className="lg:hidden bg-gradient-to-br from-blue-50 to-indigo-50 p-4 mt-4 rounded-xl flex items-center justify-center gap-3">
+              <img
+                src={CP}
+                alt="Change Password Illustration"
+                className="w-16 h-16 object-contain"
+              />
+              <div>
+                <div className="flex items-center gap-1 mb-1">
+                  <MdSecurity className="text-blue-600 text-sm" />
+                  <span className="text-xs font-semibold text-gray-700">Account Security</span>
+                </div>
+                <p className="text-[10px] text-gray-600">
+                  Create a strong, unique password
+                </p>
               </div>
             </div>
           </div>

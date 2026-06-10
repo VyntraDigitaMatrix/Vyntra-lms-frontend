@@ -22,7 +22,9 @@ import ContactSupport from "./students/ContactSupport";
 import ViewCourse from "./students/ViewCourse";
 import ModuleView from "./students/ModuleView";
 import ModuleLesson from "./students/ModuleLesson";
-import ContinueLearning from "./students/ContinueLearning"
+import ContinueLearning from "./students/ContinueLearning";
+import NoteEditor from "./students/Notes";
+import Notifications from "./students/Notifications";
 import AllStudents from "./Admin/pages/AllStudents";
 import AllInstructors from "./Admin/pages/AllInstructors";
 import AllCourses from "./Admin/pages/AllCourses";
@@ -120,6 +122,8 @@ function App() {
           <Route path="quiz" element={<Quizzes />} />
           <Route path="job-notifications" element={<JobNotifications />} />
           <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
+          <Route path="/student/notes/new" element={<NoteEditor />} />
+          <Route path="notifications" element={<Notifications />} />
         </Route>
 
         {/* Admin Dashboard */}

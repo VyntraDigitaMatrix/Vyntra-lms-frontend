@@ -49,8 +49,6 @@ import {
 import { AiOutlinePlaySquare } from "react-icons/ai";
 
 /* ── helpers to generate lesson lists per module ── */
-// Durations are derived deterministically from the lesson index — no Math.random()
-// so they never change on re-render.
 const FIXED_DURATIONS = [
     "10:24", "14:37", "18:05", "12:50", "16:42",
     "11:18", "19:33", "13:07", "15:55", "17:21",
@@ -113,12 +111,12 @@ const coursesData = {
             "Land a digital marketing job or freelance client",
         ],
         modules: [
-            { title: "Module 1: Digital Marketing Fundamentals", lessons: 5, color: "#7C3AED", icon: <FaBullhorn className="text-purple-600 text-lg" /> },
-            { title: "Module 2: Audience Research & Personas", lessons: 4, color: "#EA580C", icon: <FaUsers className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Content Strategy & Copywriting", lessons: 5, color: "#059669", icon: <FaPenNib className="text-green-600 text-lg" /> },
-            { title: "Module 4: Paid Advertising (Google & Meta)", lessons: 6, color: "#2563EB", icon: <FaGoogle className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Marketing Funnels & CRO", lessons: 4, color: "#DB2777", icon: <FaFilter className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Analytics & Reporting", lessons: 4, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Digital Marketing Fundamentals", lessons: 5, color: "#7C3AED", icon: <FaBullhorn className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: Audience Research & Personas", lessons: 4, color: "#EA580C", icon: <FaUsers className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Content Strategy & Copywriting", lessons: 5, color: "#059669", icon: <FaPenNib className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Paid Advertising (Google & Meta)", lessons: 6, color: "#2563EB", icon: <FaGoogle className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Marketing Funnels & CRO", lessons: 4, color: "#DB2777", icon: <FaFilter className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Analytics & Reporting", lessons: 4, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Do I need any prior marketing knowledge?", a: "No prior experience needed. This course starts from the very basics and builds up step-by-step." },
@@ -161,12 +159,12 @@ const coursesData = {
             "Rank local businesses with Local SEO tactics",
         ],
         modules: [
-            { title: "Module 1: SEO Fundamentals & How Google Works", lessons: 4, color: "#7C3AED", icon: <FaSearch className="text-purple-600 text-lg" /> },
-            { title: "Module 2: Keyword Research & Search Intent", lessons: 6, color: "#EA580C", icon: <FaKey className="text-orange-600 text-lg" /> },
-            { title: "Module 3: On-Page Optimisation", lessons: 6, color: "#059669", icon: <FaFileAlt className="text-green-600 text-lg" /> },
-            { title: "Module 4: Technical SEO", lessons: 7, color: "#2563EB", icon: <FaCogs className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Link Building & Off-Page SEO", lessons: 5, color: "#DB2777", icon: <FaLink className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Tracking & Reporting with GSC & GA4", lessons: 4, color: "#D97706", icon: <FaChartBar className="text-amber-600 text-lg" /> },
+            { title: "Module 1: SEO Fundamentals & How Google Works", lessons: 4, color: "#7C3AED", icon: <FaSearch className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: Keyword Research & Search Intent", lessons: 6, color: "#EA580C", icon: <FaKey className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: On-Page Optimisation", lessons: 6, color: "#059669", icon: <FaFileAlt className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Technical SEO", lessons: 7, color: "#2563EB", icon: <FaCogs className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Link Building & Off-Page SEO", lessons: 5, color: "#DB2777", icon: <FaLink className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Tracking & Reporting with GSC & GA4", lessons: 4, color: "#D97706", icon: <FaChartBar className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Do I need a website to practice?", a: "It's helpful but not required. We provide sandbox exercises throughout the course." },
@@ -209,12 +207,12 @@ const coursesData = {
             "Read campaign reports and make data-driven decisions",
         ],
         modules: [
-            { title: "Module 1: Google Ads Ecosystem Overview", lessons: 3, color: "#7C3AED", icon: <FaGlobe className="text-purple-600 text-lg" /> },
-            { title: "Module 2: Search Campaigns & Keyword Strategy", lessons: 6, color: "#EA580C", icon: <FaSearch className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Ad Copywriting & Extensions", lessons: 4, color: "#059669", icon: <FaPenFancy className="text-green-600 text-lg" /> },
-            { title: "Module 4: Display & Remarketing Campaigns", lessons: 4, color: "#2563EB", icon: <FaImages className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Shopping & YouTube Ads", lessons: 4, color: "#DB2777", icon: <FaShoppingCart className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Bidding, Budgets & Optimisation", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Google Ads Ecosystem Overview", lessons: 3, color: "#7C3AED", icon: <FaGlobe className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: Search Campaigns & Keyword Strategy", lessons: 6, color: "#EA580C", icon: <FaSearch className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Ad Copywriting & Extensions", lessons: 4, color: "#059669", icon: <FaPenFancy className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Display & Remarketing Campaigns", lessons: 4, color: "#2563EB", icon: <FaImages className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Shopping & YouTube Ads", lessons: 4, color: "#DB2777", icon: <FaShoppingCart className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Bidding, Budgets & Optimisation", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Do I need a Google Ads account to start?", a: "Yes. We walk you through setting up a free account in the very first lesson." },
@@ -257,12 +255,12 @@ const coursesData = {
             "Measure and improve deliverability, open rate, and CTR",
         ],
         modules: [
-            { title: "Module 1: Email Marketing Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaEnvelope className="text-purple-600 text-lg" /> },
-            { title: "Module 2: List Building & Lead Magnets", lessons: 5, color: "#EA580C", icon: <FaMagnet className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Email Design & Copywriting", lessons: 5, color: "#059669", icon: <FaPalette className="text-green-600 text-lg" /> },
-            { title: "Module 4: Automation & Drip Sequences", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Segmentation & Personalisation", lessons: 4, color: "#DB2777", icon: <FaUserCog className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Analytics, A/B Testing & Deliverability", lessons: 2, color: "#D97706", icon: <FaMailBulk className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Email Marketing Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaEnvelope className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: List Building & Lead Magnets", lessons: 5, color: "#EA580C", icon: <FaMagnet className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Email Design & Copywriting", lessons: 5, color: "#059669", icon: <FaPalette className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Automation & Drip Sequences", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Segmentation & Personalisation", lessons: 4, color: "#DB2777", icon: <FaUserCog className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Analytics, A/B Testing & Deliverability", lessons: 2, color: "#D97706", icon: <FaMailBulk className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Which email platforms are covered?", a: "Mailchimp, Klaviyo, and ConvertKit are covered in detail with hands-on walkthroughs." },
@@ -353,12 +351,12 @@ const coursesData = {
             "Integrate GA4 data into Looker Studio dashboards",
         ],
         modules: [
-            { title: "Module 1: Introduction to GA4 & the Data Model", lessons: 4, color: "#7C3AED", icon: <FaChartBar className="text-purple-600 text-lg" /> },
-            { title: "Module 2: GA4 Setup & Configuration", lessons: 4, color: "#EA580C", icon: <FaCog className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Events, Conversions & Goals", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-lg" /> },
-            { title: "Module 4: Reports, Explorations & Funnels", lessons: 4, color: "#2563EB", icon: <FaSearchPlus className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Google Tag Manager Integration", lessons: 3, color: "#DB2777", icon: <FaTags className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Looker Studio Dashboards", lessons: 2, color: "#D97706", icon: <FaClipboardList className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Introduction to GA4 & the Data Model", lessons: 4, color: "#7C3AED", icon: <FaChartBar className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: GA4 Setup & Configuration", lessons: 4, color: "#EA580C", icon: <FaCog className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Events, Conversions & Goals", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Reports, Explorations & Funnels", lessons: 4, color: "#2563EB", icon: <FaSearchPlus className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Google Tag Manager Integration", lessons: 3, color: "#DB2777", icon: <FaTags className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Looker Studio Dashboards", lessons: 2, color: "#D97706", icon: <FaClipboardList className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Is GA4 replacing Universal Analytics?", a: "Yes. Universal Analytics was sunset in July 2023. GA4 is the current standard — this course prepares you fully." },
@@ -401,12 +399,12 @@ const coursesData = {
             "Measure content performance with the right KPIs",
         ],
         modules: [
-            { title: "Module 1: Content Strategy & Audience Mapping", lessons: 4, color: "#7C3AED", icon: <FaMapMarkedAlt className="text-purple-600 text-lg" /> },
-            { title: "Module 2: Blogging & Long-Form Writing", lessons: 5, color: "#EA580C", icon: <FaPenFancy className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Video Scripts & Storytelling", lessons: 5, color: "#059669", icon: <FaVideo className="text-green-600 text-lg" /> },
-            { title: "Module 4: Content Calendar & Workflow", lessons: 4, color: "#2563EB", icon: <FaCalendarAlt className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Content Distribution & Repurposing", lessons: 4, color: "#DB2777", icon: <FaSyncAlt className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Measuring & Scaling Content", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Content Strategy & Audience Mapping", lessons: 4, color: "#7C3AED", icon: <FaMapMarkedAlt className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: Blogging & Long-Form Writing", lessons: 5, color: "#EA580C", icon: <FaPenFancy className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Video Scripts & Storytelling", lessons: 5, color: "#059669", icon: <FaVideo className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Content Calendar & Workflow", lessons: 4, color: "#2563EB", icon: <FaCalendarAlt className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Content Distribution & Repurposing", lessons: 4, color: "#DB2777", icon: <FaSyncAlt className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Measuring & Scaling Content", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Do I need to be a good writer to take this course?", a: "Not at all. We teach writing from scratch with practical frameworks and templates." },
@@ -449,12 +447,12 @@ const coursesData = {
             "Measure automation ROI and optimise workflows over time",
         ],
         modules: [
-            { title: "Module 1: Marketing Automation Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaRobot className="text-purple-600 text-lg" /> },
-            { title: "Module 2: HubSpot CRM Setup & Configuration", lessons: 5, color: "#EA580C", icon: <FaTools className="text-orange-600 text-lg" /> },
-            { title: "Module 3: Lead Scoring & Nurture Workflows", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-lg" /> },
-            { title: "Module 4: Behavioural Triggers & Drip Campaigns", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-lg" /> },
-            { title: "Module 5: Zapier & Tool Integrations", lessons: 5, color: "#DB2777", icon: <FaPlug className="text-pink-600 text-lg" /> },
-            { title: "Module 6: Reporting, Optimisation & Scaling", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-lg" /> },
+            { title: "Module 1: Marketing Automation Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaRobot className="text-purple-600 text-base sm:text-lg" /> },
+            { title: "Module 2: HubSpot CRM Setup & Configuration", lessons: 5, color: "#EA580C", icon: <FaTools className="text-orange-600 text-base sm:text-lg" /> },
+            { title: "Module 3: Lead Scoring & Nurture Workflows", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-base sm:text-lg" /> },
+            { title: "Module 4: Behavioural Triggers & Drip Campaigns", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-base sm:text-lg" /> },
+            { title: "Module 5: Zapier & Tool Integrations", lessons: 5, color: "#DB2777", icon: <FaPlug className="text-pink-600 text-base sm:text-lg" /> },
+            { title: "Module 6: Reporting, Optimisation & Scaling", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
         ],
         faqs: [
             { q: "Which tools are covered?", a: "HubSpot (primary), Zapier, ActiveCampaign, and Mailchimp automation are all covered." },
@@ -468,12 +466,11 @@ const coursesData = {
 /* ══════════════════════════════════════════════
    MODULE ACCORDION ITEM
    ══════════════════════════════════════════════ */
-const FREE_MODULES = 2; // first N modules are free
+const FREE_MODULES = 2;
 
 const ModuleAccordionItem = ({ mod, index, courseId, navigate, activeLesson, setActiveLesson }) => {
     const [open, setOpen] = useState(false);
     const isFree = index < FREE_MODULES;
-    // useMemo keeps lessons (and durations) stable across re-renders
     const lessons = React.useMemo(() => generateLessons(mod.title, mod.lessons), [mod.title, mod.lessons]);
 
     const handleLessonClick = (lessonIndex) => {
@@ -484,113 +481,57 @@ const ModuleAccordionItem = ({ mod, index, courseId, navigate, activeLesson, set
     };
 
     return (
-        <div
-            className={`border rounded-xl overflow-hidden transition-all duration-200 ${
-                open ? "border-blue-200 shadow-sm" : "border-gray-100"
-            } bg-white`}
-        >
-            {/* ── Module Header ── */}
-            <button
-                onClick={() => setOpen(!open)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition text-left"
-            >
-                {/* icon */}
-                <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-                    style={{ backgroundColor: mod.color + "18" }}
-                >
+        <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"} bg-white`}>
+            <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 hover:bg-gray-50 transition text-left">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base sm:text-lg flex-shrink-0" style={{ backgroundColor: mod.color + "18" }}>
                     {mod.icon}
                 </div>
-
-                {/* title + meta */}
                 <div className="flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-gray-800 block truncate">{mod.title}</span>
-                    <span className="text-xs text-gray-400">{mod.lessons} Lessons</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-800 block truncate">{mod.title}</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400">{mod.lessons} Lessons</span>
                 </div>
-
-                {/* free / lock badge */}
                 {isFree ? (
-                    <span className="text-xs font-bold bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full flex-shrink-0">
-                        Free
-                    </span>
+                    <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">Free</span>
                 ) : (
-                    <span className="text-xs font-bold bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
-                        <FaLock className="text-[10px]" /> Premium
+                    <span className="text-[10px] sm:text-xs font-bold bg-gray-100 text-gray-400 px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
+                        <FaLock className="text-[8px] sm:text-[10px]" /> Premium
                     </span>
                 )}
-
-                {/* chevron */}
-                <span className="ml-2 text-gray-400 flex-shrink-0">
-                    {open ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+                <span className="ml-1 sm:ml-2 text-gray-400 flex-shrink-0">
+                    {open ? <FaChevronUp size={10} className="sm:text-xs" /> : <FaChevronDown size={10} className="sm:text-xs" />}
                 </span>
             </button>
-
-            {/* ── Lesson List (dropdown) ── */}
             {open && (
                 <div className="border-t border-gray-100">
                     {lessons.map((lesson, li) => {
                         const lessonKey = `${index + 1}-${li + 1}`;
                         const isActive = activeLesson === lessonKey;
                         return (
-                        <div
-                            key={li}
-                            onClick={() => handleLessonClick(li)}
-                            className={`flex items-center gap-3 px-5 py-2.5 transition-colors ${
-                                isFree ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
-                            } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : isFree ? "hover:bg-blue-50" : ""} ${
-                                li !== lessons.length - 1 ? "border-b border-gray-50" : ""
-                            }`}
-                        >
-                            {/* play / lock icon */}
-                            <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                                {isFree ? (
-                                    <FaPlayCircle
-                                        className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`}
-                                        size={16}
-                                    />
-                                ) : (
-                                    <FaLock className="text-gray-300" size={13} />
-                                )}
-                            </div>
-
-                            {/* lesson title */}
-                            <span
-                                className={`flex-1 text-xs truncate ${
-                                    isActive
-                                        ? "text-blue-700 font-semibold"
-                                        : isFree
-                                        ? "text-gray-700 font-medium group-hover:text-blue-700"
-                                        : "text-gray-400 font-medium"
-                                }`}
-                            >
-                                {`${li + 1}. ${lesson.title}`}
-                            </span>
-
-                            {/* preview badge */}
-                            {lesson.isPreview && isFree && (
-                                <span className="text-[10px] font-semibold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">
-                                    Preview
+                            <div key={li} onClick={() => handleLessonClick(li)} className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 transition-colors ${isFree ? "cursor-pointer group" : "cursor-not-allowed opacity-60"} ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : isFree ? "hover:bg-blue-50" : ""} ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""}`}>
+                                <div className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 flex items-center justify-center">
+                                    {isFree ? (
+                                        <FaPlayCircle className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`} size={12} className="sm:text-base" />
+                                    ) : (
+                                        <FaLock className="text-gray-300" size={11} className="sm:text-sm" />
+                                    )}
+                                </div>
+                                <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-blue-700 font-semibold" : isFree ? "text-gray-700 font-medium group-hover:text-blue-700" : "text-gray-400 font-medium"}`}>
+                                    {`${li + 1}. ${lesson.title}`}
                                 </span>
-                            )}
-
-                            {/* duration */}
-                            <span className={`text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
-                                {lesson.duration}
-                            </span>
-                        </div>
+                                {/* {lesson.isPreview && isFree && (
+                                    <span className="text-[9px] sm:text-[10px] font-semibold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">Preview</span>
+                                )} */}
+                                <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
+                                    {lesson.duration}
+                                </span>
+                            </div>
                         );
                     })}
-
-                    {/* upsell banner for locked modules */}
                     {!isFree && (
-                        <div className="flex items-center gap-2 px-5 py-3 bg-amber-50 border-t border-amber-100">
-                            <FaLock className="text-amber-400 flex-shrink-0" size={13} />
-                            <p className="text-xs text-amber-700 font-medium flex-1">
-                                Enrol in the full course to unlock this module.
-                            </p>
-                            <button className="text-xs bg-amber-400 hover:bg-amber-500 text-white font-bold px-3 py-1 rounded-lg transition-colors flex-shrink-0">
-                                Enrol Now
-                            </button>
+                        <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-amber-50 border-t border-amber-100">
+                            <FaLock className="text-amber-400 flex-shrink-0" size={11} className="sm:text-sm" />
+                            <p className="text-[11px] sm:text-xs text-amber-700 font-medium flex-1">Enrol in the full course to unlock this module.</p>
+                            <button className="text-[10px] sm:text-xs bg-amber-400 hover:bg-amber-500 text-white font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors flex-shrink-0">Enrol Now</button>
                         </div>
                     )}
                 </div>
@@ -600,36 +541,25 @@ const ModuleAccordionItem = ({ mod, index, courseId, navigate, activeLesson, set
 };
 
 /* ══════════════════════════════════════════════
-   CURRICULUM SECTION (shared between tabs)
+   CURRICULUM SECTION
    ══════════════════════════════════════════════ */
 const CurriculumSection = ({ moduleList, courseId, navigate }) => {
     const [activeLesson, setActiveLesson] = useState(null);
-
     return (
-    <div>
-        {/* free-access notice */}
-        <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
-            <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={15} />
-            <p className="text-xs text-blue-700">
-                <span className="font-bold">Free Preview: </span>
-                The first 2 modules are available for free. Enrol to unlock all {moduleList.length} modules.
-            </p>
+        <div>
+            <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 mb-4">
+                <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={13} className="sm:text-sm" />
+                <p className="text-[11px] sm:text-xs text-blue-700">
+                    <span className="font-bold">Free Preview: </span>
+                    The first 2 modules are available for free. Enrol to unlock all {moduleList.length} modules.
+                </p>
+            </div>
+            <div className="space-y-2">
+                {moduleList.map((mod, i) => (
+                    <ModuleAccordionItem key={i} mod={mod} index={i} courseId={courseId} navigate={navigate} activeLesson={activeLesson} setActiveLesson={setActiveLesson} />
+                ))}
+            </div>
         </div>
-
-        <div className="space-y-2">
-            {moduleList.map((mod, i) => (
-                <ModuleAccordionItem
-                    key={i}
-                    mod={mod}
-                    index={i}
-                    courseId={courseId}
-                    navigate={navigate}
-                    activeLesson={activeLesson}
-                    setActiveLesson={setActiveLesson}
-                />
-            ))}
-        </div>
-    </div>
     );
 };
 
@@ -647,22 +577,7 @@ const ContinueLearning = () => {
     const navigate = useNavigate();
     const { courseId } = useParams();
     const course = coursesData[courseId] || coursesData[1];
-
     const [activeTab, setActiveTab] = useState("overview");
-    const [timeLeft, setTimeLeft] = useState({ days: 2, hours: 15, minutes: 48, seconds: 36 });
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-                if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-                if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-                if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-                return prev;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
 
     const handleRatingSubmit = (r) => {
         alert(`Thank you for rating ${r} stars!`);
@@ -694,225 +609,210 @@ const ContinueLearning = () => {
     const moduleList = course.modules || [];
 
     return (
-        <div className="min-h-screen bg-[#f6f7fb] p-5">
+        <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
             <div className="max-w-7xl mx-auto">
+                {/* Breadcrumb */}
+                <div className="mb-4 sm:mb-5">
+                    <p className="text-xs sm:text-sm text-gray-400">
+                        <Link to="/student/courses" className="hover:text-blue-600 transition-colors">My Courses</Link>
+                        <span className="text-gray-300"> &gt; </span>
+                        <span className="text-gray-700 font-medium text-xs sm:text-sm">{course.title}</span>
+                    </p>
+                </div>
 
-                <div className="flex items-start justify-between mb-5">
-                    <div>
-                        <p className="text-sm text-gray-400 mb-1">
-                            <Link to="/student/courses" className="hover:text-blue-600 transition-colors">My Courses</Link>
-                            <span className="text-gray-300"> &gt; </span>
-                            <span className="text-gray-700 font-medium">{course.title}</span>
-                        </p>
+                {/* Hero Section - Responsive */}
+                <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8">
+                    {/* Course Image */}
+                    <div className="relative w-full md:w-64 lg:w-72 h-48 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+                        <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <FaPlay className="text-white w-6 h-6 sm:w-8 sm:h-8" />
+                        </div>
+                    </div>
+
+                    {/* Course Info */}
+                    <div className="flex-1 space-y-3 sm:space-y-4">
+                        <div>
+                            <span className="inline-block text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mb-2">{course.badge}</span>
+                            <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight mb-1 sm:mb-2">{course.title}</h1>
+                            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{course.desc}</p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                                <FaStar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                                <span className="font-bold text-gray-900">{course.rating}</span>
+                                <span className="text-gray-400 text-[10px] sm:text-xs">({course.reviews} ratings)</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-gray-500">
+                                <FaUser className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="text-[11px] sm:text-xs">{course.students} Students</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-gray-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                                <span className="text-[11px] sm:text-xs">{course.level} Level</span>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                            {[
+                                { Icon: FaBook, text: `${course.lessons} Lessons` },
+                                { Icon: AiOutlinePlaySquare, text: `${moduleList.length} Modules` },
+                                { Icon: FaClock, text: `${course.duration}` },
+                                { Icon: FaTrophy, text: "Certificate" },
+                            ].map(({ Icon, text }, i) => (
+                                <div key={i} className="flex items-center gap-1 sm:gap-1.5 border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-white">
+                                    <Icon className="text-gray-400" size={12} className="sm:text-sm" />
+                                    {text}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Tabs - Horizontal scroll on mobile */}
+                <div className="border-b border-gray-200 mb-5 sm:mb-6 overflow-x-auto">
+                    <div className="flex gap-1 sm:gap-2 min-w-max">
+                        {tabs.map(({ key, label }) => (
+                            <button
+                                key={key}
+                                onClick={() => setActiveTab(key)}
+                                className={`relative px-3 sm:px-5 pb-2 sm:pb-3 pt-1 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === key ? "text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                            >
+                                {label}
+                                {activeTab === key && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                    {/* ══ LEFT COLUMN ══ */}
-                    <div className="flex-1 min-w-0 space-y-6">
-
-                        {/* Hero Row */}
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <div className="relative w-full sm:w-72 h-48 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-                                <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                    <FaPlay className="text-white w-8 h-8" />
-                                </div>
-                            </div>
-
-                            <div className="flex-1 space-y-4">
-                                <div>
-                                    <span className="inline-block text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mb-2">{course.badge}</span>
-                                    <h1 className="text-xl font-extrabold text-gray-900 leading-tight mb-2">{course.title}</h1>
-                                    <p className="text-sm text-gray-500">{course.desc}</p>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-5 text-sm text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                        <FaStar className="w-4 h-4 text-yellow-400" />
-                                        <span className="font-bold text-gray-900">{course.rating}</span>
-                                        <span className="text-gray-400">({course.reviews} ratings)</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-gray-500">
-                                        <FaUser className="w-4 h-4" />
-                                        <span>{course.students} Students Enrolled</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-gray-500">
-                                        <span className="w-2 h-2 rounded-full bg-gray-400 inline-block" />
-                                        <span>{course.level} Level</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-wrap gap-1">
-                                    {[
-                                        { Icon: FaBook, text: `${course.lessons} Lessons` },
-                                        { Icon: AiOutlinePlaySquare, text: `${moduleList.length} Modules` },
-                                        { Icon: FaClock, text: `${course.duration}` },
-                                        { Icon: FaTrophy, text: "Certificate" },
-                                    ].map(({ Icon, text }, i) => (
-                                        <div key={i} className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 bg-white">
-                                            <span className="text-gray-400"><Icon /></span>
-                                            {text}
+                {/* Tab Panels */}
+                <div>
+                    {/* OVERVIEW */}
+                    {activeTab === "overview" && (
+                        <div className="space-y-5 sm:space-y-6">
+                            <div>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">About this course</h3>
+                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">{course.desc}</p>
+                                <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">What you'll learn</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 sm:gap-x-6">
+                                    {course.learnings.map((item, i) => (
+                                        <div key={i} className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700">
+                                            <FaCheckCircle size={12} className="sm:text-sm text-blue-600 mt-1 flex-shrink-0" />
+                                            <span className="text-[11px] sm:text-sm">{item}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+                            <div>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
+                                <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
+                            </div>
                         </div>
+                    )}
 
-                        {/* Tabs */}
-                        <div className="border-b border-gray-200">
-                            <div className="flex overflow-x-auto">
-                                {tabs.map(({ key, label }) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setActiveTab(key)}
-                                        className={`relative px-5 pb-3 pt-1 text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === key ? "text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
-                                    >
-                                        {label}
-                                        {activeTab === key && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
-                                    </button>
+                    {/* CURRICULUM */}
+                    {activeTab === "curriculum" && (
+                        <div>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
+                            <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
+                        </div>
+                    )}
+
+                    {/* INSTRUCTOR */}
+                    {activeTab === "instructor" && (
+                        <div>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">About the Instructor</h3>
+                            <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-2xl">
+                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0 mx-auto sm:mx-0">
+                                    {course.instructor.initial}
+                                </div>
+                                <div className="text-center sm:text-left">
+                                    <h4 className="font-bold text-gray-900 text-sm sm:text-base">{course.instructor.name}</h4>
+                                    <p className="text-xs sm:text-sm text-blue-600 mb-2 sm:mb-3">{course.instructor.title}</p>
+                                    <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 mb-2 sm:mb-3">
+                                        <span className="flex items-center gap-1"><FaStar className="w-3 h-3 text-yellow-400" /> {course.instructor.rating} Rating</span>
+                                        <span className="flex items-center gap-1"><FaUser className="w-3 h-3" /> {course.instructor.students} Students</span>
+                                    </div>
+                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{course.instructor.bio}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* REVIEWS */}
+                    {activeTab === "reviews" && (
+                        <div>
+                            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-5 bg-amber-50 border border-amber-100 rounded-xl sm:rounded-2xl mb-5 sm:mb-6">
+                                <div className="text-center">
+                                    <div className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-none">{course.rating}</div>
+                                    <div className="flex justify-center mt-1 sm:mt-2 mb-1">
+                                        {[1, 2, 3, 4, 5].map(s => <FaStar key={s} className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />)}
+                                    </div>
+                                    <div className="text-[10px] sm:text-xs text-gray-400">Course Rating</div>
+                                </div>
+                                <div className="flex-1 space-y-1.5 w-full">
+                                    {[5, 4, 3, 2, 1].map(s => (
+                                        <div key={s} className="flex items-center gap-2">
+                                            <div className="flex-1 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div className="h-full bg-yellow-400 rounded-full" style={{ width: s === 5 ? "70%" : s === 4 ? "20%" : s === 3 ? "6%" : "3%" }} />
+                                            </div>
+                                            <div className="flex gap-0.5 w-12 sm:w-16 justify-end">
+                                                {Array(s).fill(0).map((_, i) => <FaStar key={i} className="w-2 h-2 sm:w-3 sm:h-3 text-yellow-400" />)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-5 sm:mb-6">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">Rate this Course</h3>
+                                <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-5">How would you rate your learning experience?</p>
+                                <div className="flex items-center gap-1 sm:gap-2 mb-4 sm:mb-5">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button key={star} onClick={() => setRating(star)} className="transition-transform hover:scale-110">
+                                            <FaStar size={24} className={`sm:text-3xl ${star <= rating ? "text-yellow-400" : "text-gray-300"}`} />
+                                        </button>
+                                    ))}
+                                </div>
+                                <button onClick={() => handleRatingSubmit(rating)} disabled={!rating} className="bg-blue-600 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-300">
+                                    Submit Rating
+                                </button>
+                            </div>
+                            <div className="divide-y divide-gray-100">
+                                {reviews.map((r, i) => (
+                                    <div key={i} className="py-4 sm:py-5">
+                                        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs sm:text-sm flex-shrink-0">
+                                                {r.initial}
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-xs sm:text-sm text-gray-900">{r.name}</div>
+                                                <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
+                                                    <div className="flex gap-0.5">
+                                                        {Array(5).fill(0).map((_, j) => (
+                                                            <FaStar key={j} className={`w-2 h-2 sm:w-3 sm:h-3 ${j < r.rating ? "text-yellow-400" : "text-gray-200"}`} />
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-[10px] sm:text-xs text-gray-400">{r.time}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-gray-600 pl-10 sm:pl-12">{r.text}</p>
+                                    </div>
                                 ))}
                             </div>
                         </div>
+                    )}
 
-                        {/* Tab Panels */}
-                        <div>
-
-                            {/* OVERVIEW */}
-                            {activeTab === "overview" && (
-                                <div className="space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-3">About this course</h3>
-                                        <p className="text-sm text-gray-600 leading-relaxed mb-5">{course.desc}</p>
-                                        <h4 className="text-sm font-bold text-gray-900 mb-3">What you'll learn</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 gap-x-6">
-                                            {course.learnings.map((item, i) => (
-                                                <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                                                    <FaCheckCircle className="text-blue-600 mt-0.5 flex-shrink-0" />
-                                                    {item}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-4">Course Curriculum</h3>
-                                        <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
-                                    </div>
+                    {/* FAQS */}
+                    {activeTab === "faqs" && (
+                        <div className="space-y-2 sm:space-y-3">
+                            {course.faqs.map((faq, i) => (
+                                <div key={i} className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
+                                    <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-1.5">{faq.q}</div>
+                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{faq.a}</p>
                                 </div>
-                            )}
-
-                            {/* CURRICULUM */}
-                            {activeTab === "curriculum" && (
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Course Curriculum</h3>
-                                    <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
-                                </div>
-                            )}
-
-                            {/* INSTRUCTOR */}
-                            {activeTab === "instructor" && (
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">About the Instructor</h3>
-                                    <div className="flex gap-4 p-5 bg-blue-50 rounded-2xl">
-                                        <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
-                                            {course.instructor.initial}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900 text-base">{course.instructor.name}</h4>
-                                            <p className="text-sm text-blue-600 mb-3">{course.instructor.title}</p>
-                                            <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                                                <span className="flex items-center gap-1"><FaStar className="w-3 h-3 text-yellow-400" /> {course.instructor.rating} Rating</span>
-                                                <span className="flex items-center gap-1"><FaUser className="w-3 h-3" /> {course.instructor.students} Students</span>
-                                            </div>
-                                            <p className="text-sm text-gray-600 leading-relaxed">{course.instructor.bio}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* REVIEWS */}
-                            {activeTab === "reviews" && (
-                                <div>
-                                    <div className="flex items-center gap-8 p-5 bg-amber-50 border border-amber-100 rounded-2xl mb-6">
-                                        <div className="text-center">
-                                            <div className="text-5xl font-extrabold text-gray-900 leading-none">{course.rating}</div>
-                                            <div className="flex justify-center mt-2 mb-1">
-                                                {[1, 2, 3, 4, 5].map(s => <FaStar key={s} className="w-4 h-4 text-yellow-400" />)}
-                                            </div>
-                                            <div className="text-xs text-gray-400">Course Rating</div>
-                                        </div>
-                                        <div className="flex-1 space-y-1.5">
-                                            {[5, 4, 3, 2, 1].map(s => (
-                                                <div key={s} className="flex items-center gap-2">
-                                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: s === 5 ? "70%" : s === 4 ? "20%" : s === 3 ? "6%" : "3%" }} />
-                                                    </div>
-                                                    <div className="flex gap-0.5 w-16 justify-end">
-                                                        {Array(s).fill(0).map((_, i) => <FaStar key={i} className="w-3 h-3 text-yellow-400" />)}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Rate this Course</h3>
-                                        <p className="text-sm text-gray-500 mb-5">How would you rate your learning experience?</p>
-                                        <div className="flex items-center gap-2 mb-5">
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <button key={star} onClick={() => setRating(star)} className="transition-transform hover:scale-110">
-                                                    <FaStar size={32} className={star <= rating ? "text-yellow-400" : "text-gray-300"} />
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <button onClick={() => handleRatingSubmit(rating)} disabled={!rating} className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300">
-                                            Submit Rating
-                                        </button>
-                                    </div>
-
-                                    <div className="divide-y divide-gray-100">
-                                        {reviews.map((r, i) => (
-                                            <div key={i} className="py-5">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm flex-shrink-0">
-                                                        {r.initial}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-sm text-gray-900">{r.name}</div>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <div className="flex gap-0.5">
-                                                                {Array(5).fill(0).map((_, j) => (
-                                                                    <svg key={j} viewBox="0 0 24 24" fill={j < r.rating ? "#FBBF24" : "#E5E7EB"} className="w-3 h-3">
-                                                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                                    </svg>
-                                                                ))}
-                                                            </div>
-                                                            <span className="text-xs text-gray-400">{r.time}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p className="text-sm text-gray-600 pl-12">{r.text}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* FAQs */}
-                            {activeTab === "faqs" && (
-                                <div className="space-y-3">
-                                    {course.faqs.map((faq, i) => (
-                                        <div key={i} className="border border-gray-200 rounded-xl p-4 bg-white">
-                                            <div className="font-semibold text-sm text-gray-900 mb-1.5">{faq.q}</div>
-                                            <p className="text-sm text-gray-600">{faq.a}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
