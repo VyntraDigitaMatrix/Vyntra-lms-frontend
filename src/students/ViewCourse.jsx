@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { studentCourseApi, studentPaymentApi } from "./auth/api";
+import { useAuth } from "./auth/AuthContext";
 import S1 from "../assets/S1.jpg";
 import S2 from "../assets/S2.jpg";
 import S3 from "../assets/S3.jpg";
@@ -73,32 +75,37 @@ const faqsData = [
     { q: "Is there any support?", a: "Yes, you can ask questions in the discussion forum and get instructor support." },
 ];
 
-const FREE_MODULES = 2;
-
-/* ── MODULE ACCORDION ITEM ── */
-const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLesson }) => {
+const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLesson, isEnrolled, courseId }) => {
     const [open, setOpen] = useState(false);
-    const isFree = index < FREE_MODULES;
-    const lessons = useMemo(() => generateLessons(mod.title, mod.lessons), [mod.title, mod.lessons]);
+    const lessons = mod.lessons || [];
 
-    const handleLessonClick = (lessonIndex) => {
-        if (!isFree) return;
-        const lessonKey = `${index + 1}-${lessonIndex + 1}`;
+    const isModuleFree = isEnrolled || lessons.some(l => l.previewAllowed);
+
+    const handleLessonClick = (lesson) => {
+        const canAccess = isEnrolled || lesson.previewAllowed;
+        if (!canAccess) return;
+        
+        const lessonKey = `${mod.id}-${lesson.id}`;
         setActiveLesson(lessonKey);
-        navigate(`/student/module/${index + 1}/lesson/${lessonIndex + 1}`);
+        
+        if (isEnrolled) {
+            navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
+        } else {
+            navigate(`/student/module/${mod.id}/lesson/${lesson.id}`);
+        }
     };
 
     return (
         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"} bg-white`}>
             <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-3 p-3.5 hover:bg-gray-50 transition text-left">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0" style={{ backgroundColor: mod.color + "18" }}>
-                    {mod.icon}
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-blue-50">
+                    📚
                 </div>
                 <div className="flex-1 min-w-0">
                     <span className="text-xs sm:text-sm font-semibold text-gray-800 block truncate">{mod.title}</span>
-                    <span className="text-[10px] sm:text-xs text-gray-400">{mod.lessons} Lessons</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400">{lessons.length} Lessons</span>
                 </div>
-                {isFree ? (
+                {isModuleFree ? (
                     <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full flex-shrink-0">Free</span>
                 ) : (
                     <span className="text-[10px] sm:text-xs font-bold bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
@@ -112,47 +119,48 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
 
             {open && (
                 <div className="border-t border-gray-100">
-                    {lessons.map((lesson, li) => {
-                        const lessonKey = `${index + 1}-${li + 1}`;
-                        const isActive = activeLesson === lessonKey;
-                        return (
-                            <div
-                                key={li}
-                                onClick={() => handleLessonClick(li)}
-                                className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                                    isFree ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
-                                } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : isFree ? "hover:bg-blue-50" : ""} ${
-                                    li !== lessons.length - 1 ? "border-b border-gray-50" : ""
-                                }`}
-                            >
-                                <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
-                                    {isFree ? (
-                                        <FaPlayCircle className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`} size={13} />
-                                    ) : (
-                                        <FaLock className="text-gray-300" size={11} />
+                    {lessons.length === 0 ? (
+                        <p className="text-[11px] text-gray-400 italic p-3 text-center">No lessons in this module.</p>
+                    ) : (
+                        lessons.map((lesson, li) => {
+                            const canAccess = isEnrolled || lesson.previewAllowed;
+                            const lessonKey = `${mod.id}-${lesson.id}`;
+                            const isActive = activeLesson === lessonKey;
+                            return (
+                                <div
+                                    key={lesson.id || li}
+                                    onClick={() => handleLessonClick(lesson)}
+                                    className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                                        canAccess ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
+                                    } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : canAccess ? "hover:bg-blue-50" : ""} ${
+                                        li !== lessons.length - 1 ? "border-b border-gray-50" : ""
+                                    }`}
+                                >
+                                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                                        {canAccess ? (
+                                            <FaPlayCircle className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`} size={13} />
+                                        ) : (
+                                            <FaLock className="text-gray-300" size={11} />
+                                        )}
+                                    </div>
+                                    <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-blue-700 font-semibold" : canAccess ? "text-gray-700 font-medium group-hover:text-blue-700" : "text-gray-400 font-medium"}`}>
+                                        {`${li + 1}. ${lesson.title}`}
+                                    </span>
+                                    {lesson.durationInMinutes && (
+                                        <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
+                                            {lesson.durationInMinutes} mins
+                                        </span>
                                     )}
                                 </div>
-                                <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-blue-700 font-semibold" : isFree ? "text-gray-700 font-medium group-hover:text-blue-700" : "text-gray-400 font-medium"}`}>
-                                    {`${li + 1}. ${lesson.title}`}
-                                </span>
-                                {/* {lesson.isPreview && isFree && (
-                                    <span className="text-[9px] font-semibold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">Preview</span>
-                                )} */}
-                                <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
-                                    {lesson.duration}
-                                </span>
-                            </div>
-                        );
-                    })}
-                    {!isFree && (
+                            );
+                        })
+                    )}
+                    {!isModuleFree && (
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-3 bg-amber-50 border-t border-amber-100">
                             <div className="flex items-center gap-2">
                                 <FaLock className="text-amber-400 flex-shrink-0" size={11} />
                                 <p className="text-[11px] sm:text-xs text-amber-700 font-medium">Enrol in the full course to unlock this module.</p>
                             </div>
-                            <button className="w-full sm:w-auto text-[10px] sm:text-xs bg-amber-400 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg transition-colors ml-auto">
-                                Enrol Now
-                            </button>
                         </div>
                     )}
                 </div>
@@ -162,36 +170,190 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
 };
 
 /* ── CURRICULUM SECTION ── */
-const CurriculumSection = ({ navigate }) => {
+const CurriculumSection = ({ modules, isEnrolled, courseId, navigate }) => {
     const [activeLesson, setActiveLesson] = useState(null);
+    const hasFreeModules = !isEnrolled && modules.some(m => m.lessons && m.lessons.some(l => l.previewAllowed));
+
     return (
         <div>
-            <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
-                <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={13} />
-                <p className="text-[11px] sm:text-xs text-blue-700">
-                    <span className="font-bold">Free Preview: </span>
-                    The first 2 modules are available for free. Enrol to unlock all {modulesData.length} modules.
-                </p>
-            </div>
+            {hasFreeModules && (
+                <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
+                    <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={13} />
+                    <p className="text-[11px] sm:text-xs text-blue-700">
+                        <span className="font-bold">Free Preview: </span>
+                        Some lessons are available as a free preview. Enrol to unlock all modules.
+                    </p>
+                </div>
+            )}
             <div className="space-y-2">
-                {modulesData.map((mod, i) => (
-                    <ModuleAccordionItem key={i} mod={mod} index={i} navigate={navigate} activeLesson={activeLesson} setActiveLesson={setActiveLesson} />
+                {modules.map((mod, i) => (
+                    <ModuleAccordionItem 
+                        key={mod.id || i} 
+                        mod={mod} 
+                        index={i} 
+                        navigate={navigate} 
+                        activeLesson={activeLesson} 
+                        setActiveLesson={setActiveLesson} 
+                        isEnrolled={isEnrolled}
+                        courseId={courseId}
+                    />
                 ))}
             </div>
         </div>
     );
 };
 
-/* ── MAIN COMPONENT ── */
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+        if (window.Razorpay) {
+            resolve(true);
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
+
 const ViewCourse = () => {
+    const { courseId } = useParams();
+    const [courseData, setCourseData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const [reviews, setReviews] = useState(reviewsData);
     const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
     const navigate = useNavigate();
-    const { courseId } = useParams();
-    const course = coursesData[courseId] || coursesData[1];
+
+    const { student, isAuthenticated } = useAuth();
+    const [paymentLoading, setPaymentLoading] = useState(false);
+
+    const handlePayment = async () => {
+        if (!isAuthenticated) {
+            navigate("/UserLogin");
+            return;
+        }
+        if (paymentLoading) return;
+        setPaymentLoading(true);
+
+        try {
+            const scriptLoaded = await loadRazorpayScript();
+            if (!scriptLoaded) {
+                alert("Razorpay SDK failed to load. Please check your internet connection.");
+                setPaymentLoading(false);
+                return;
+            }
+
+            const orderRes = await studentPaymentApi.createOrder(courseId);
+            if (!orderRes.data || !orderRes.data.data) {
+                throw new Error("Failed to create order");
+            }
+
+            const orderData = orderRes.data.data;
+            const options = {
+                key: orderData.keyId,
+                amount: orderData.amount,          // backend already returns paise
+                currency: orderData.currency || "INR",
+                name: "Vyntra LMS",
+                description: orderData.courseTitle || courseData?.title || "Course Enrollment",
+                order_id: orderData.razorpayOrderId,
+                handler: async (response) => {
+                    try {
+                        setPaymentLoading(true);
+                        const verifyRes = await studentPaymentApi.verifyPayment({
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature
+                        });
+                        if (verifyRes.status === 200 || (verifyRes.data && verifyRes.data.success)) {
+                            alert("Payment successful! You are now enrolled.");
+                            fetchCourseStructure();
+                        } else {
+                            alert("Verification failed. Please contact support.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error verifying payment: " + (err.response?.data?.message || err.message));
+                    } finally {
+                        setPaymentLoading(false);
+                    }
+                },
+                prefill: {
+                    name: student?.fullName || student?.name || "",
+                    email: student?.email || "",
+                    contact: student?.phone || student?.phoneNumber || ""
+                },
+                theme: {
+                    color: "#2563EB"
+                },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentLoading(false);
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert("Payment failed: " + response.error.description);
+                setPaymentLoading(false);
+            });
+            rzp.open();
+        } catch (err) {
+            console.error(err);
+            alert("Error placing order: " + (err.response?.data?.message || err.message));
+            setPaymentLoading(false);
+        }
+    };
 
     const [activeTab, setActiveTab] = useState("overview");
     const [timeLeft, setTimeLeft] = useState({ days: 2, hours: 15, minutes: 48, seconds: 36 });
+
+    const fetchCourseStructure = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const res = await studentCourseApi.getCourseStructure(courseId);
+            if (res.data && res.data.data) {
+                setCourseData(res.data.data);
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Failed to fetch course details from server.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (courseId) {
+            fetchCourseStructure();
+        }
+    }, [courseId]);
+
+    const course = courseData ? {
+        ...courseData,
+        image: courseData.thumbnailUrl || S1,
+        rating: "4.7",
+        reviews: "1,250",
+        lessons: `${(courseData.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lessons`,
+        desc: courseData.description || "Learn from industry experts and enhance your skills.",
+        price: courseData.discountPrice ? `₹${courseData.discountPrice}` : (courseData.price ? `₹${courseData.price}` : "₹999"),
+        oldPrice: courseData.price ? `₹${courseData.price}` : "₹2,499",
+        offer: courseData.discountPrice && courseData.price ? `${Math.round(((courseData.price - courseData.discountPrice) / courseData.price) * 100)}% OFF` : "60% OFF"
+    } : {
+        title: "Loading Course...",
+        image: S1,
+        rating: "4.5",
+        reviews: "0",
+        lessons: "0 Lessons",
+        desc: "",
+        price: "₹0",
+        oldPrice: "₹0",
+        offer: "0% OFF"
+    };
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -264,16 +426,40 @@ const ViewCourse = () => {
                 </div>
 
                 <div className="space-y-2">
-                    <button className="w-full h-11 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-4 h-4">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                        Pay Now
-                    </button>
-                    <button className="w-full h-11 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2">
-                        <IoCartOutline className="w-4 h-4" />
-                        Add to Cart
-                    </button>
+                    {courseData?.isEnrolled ? (
+                        <button 
+                            type="button"
+                            onClick={() => navigate(`/student/continue-learning/${courseId}`)}
+                            className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
+                        >
+                            Continue Learning
+                        </button>
+                    ) : (
+                        <>
+                            <button 
+                                type="button"
+                                onClick={handlePayment}
+                                disabled={paymentLoading}
+                                className={`w-full h-11 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition flex items-center justify-center gap-2 border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                            >
+                                {paymentLoading ? (
+                                    <span className="w-4 h-4 border-2 border-t-white border-white/20 rounded-full animate-spin"></span>
+                                ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-4 h-4">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                )}
+                                {paymentLoading ? "Processing..." : "Pay Now"}
+                            </button>
+                            <button 
+                                type="button"
+                                className="w-full h-11 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2 border-none cursor-pointer bg-white"
+                            >
+                                <IoCartOutline className="w-4 h-4" />
+                                Add to Cart
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-center gap-1.5 pt-1">
@@ -332,6 +518,32 @@ const ViewCourse = () => {
             </div>
         </div>
     );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#f6f7fb] flex flex-col items-center justify-center p-5">
+                <div className="w-10 h-10 border-4 border-t-blue-600 border-gray-200 rounded-full animate-spin mb-4"></div>
+                <span className="text-sm text-gray-500 font-semibold font-sans">Loading course details...</span>
+            </div>
+        );
+    }
+
+    if (error || !courseData) {
+        return (
+            <div className="min-h-screen bg-[#f6f7fb] flex flex-col items-center justify-center p-5">
+                <div className="bg-red-50 text-red-700 p-6 rounded-2xl border border-red-100 max-w-md text-center">
+                    <p className="text-sm font-bold mb-2">⚠️ Error Loading Course</p>
+                    <p className="text-xs text-gray-600 mb-4">{error || "Course details not found"}</p>
+                    <Link
+                        to="/student/all-courses"
+                        className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition"
+                    >
+                        Back to All Courses
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-6 pb-24 md:pb-6">
@@ -436,7 +648,12 @@ const ViewCourse = () => {
                                     </div>
                                     <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                                         <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Course Syllabus</h3>
-                                        <CurriculumSection navigate={navigate} />
+                                        <CurriculumSection 
+                                            modules={courseData?.modules || []} 
+                                            isEnrolled={courseData?.isEnrolled || false} 
+                                            courseId={courseId} 
+                                            navigate={navigate} 
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -444,7 +661,12 @@ const ViewCourse = () => {
                             {/* CURRICULUM PANEL */}
                             {activeTab === "curriculum" && (
                                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                                    <CurriculumSection navigate={navigate} />
+                                    <CurriculumSection 
+                                        modules={courseData?.modules || []} 
+                                        isEnrolled={courseData?.isEnrolled || false} 
+                                        courseId={courseId} 
+                                        navigate={navigate} 
+                                    />
                                 </div>
                             )}
 
@@ -566,21 +788,42 @@ const ViewCourse = () => {
 
             {/* ── MOBILE OVERLAY STICKY CONVERSION BAR ── */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] px-4 py-3 flex items-center justify-between z-50 transform-gpu">
-                <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-lg font-black text-gray-900">{course.price}</span>
-                        <span className="text-xs text-gray-400 line-through">{course.oldPrice}</span>
-                    </div>
-                    <span className="inline-block text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.2 rounded mt-0.5">
-                        {course.offer} SAVINGS
-                    </span>
-                </div>
-                <button className="h-11 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-3.5 h-3.5">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    Pay Now
-                </button>
+                {courseData?.isEnrolled ? (
+                    <button 
+                        type="button"
+                        onClick={() => navigate(`/student/continue-learning/${courseId}`)}
+                        className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
+                    >
+                        Continue Learning
+                    </button>
+                ) : (
+                    <>
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-lg font-black text-gray-900">{course.price}</span>
+                                <span className="text-xs text-gray-400 line-through">{course.oldPrice}</span>
+                            </div>
+                            <span className="inline-block text-[9px] font-bold bg-green-100 text-green-700 px-1.5 py-0.2 rounded mt-0.5">
+                                {course.offer} SAVINGS
+                            </span>
+                        </div>
+                        <button 
+                            type="button"
+                            onClick={handlePayment}
+                            disabled={paymentLoading}
+                            className={`h-11 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                        >
+                            {paymentLoading ? (
+                                <span className="w-3.5 h-3.5 border-2 border-t-white border-white/20 rounded-full animate-spin"></span>
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-3.5 h-3.5">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            )}
+                            {paymentLoading ? "Processing..." : "Pay Now"}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );

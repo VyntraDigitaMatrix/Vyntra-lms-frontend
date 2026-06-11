@@ -731,6 +731,19 @@ const InstructorCourses = () => {
     alert("Course deletion is disabled on the frontend. Please contact an administrator to request removal of a course.");
   };
 
+  const handleRequestPublish = async (courseId) => {
+    if (window.confirm("Are you sure you want to request publication for this course? Administrators will review it.")) {
+      try {
+        await instructorCourseApi.requestCoursePublish(courseId);
+        alert("Publish request submitted successfully!");
+        fetchCourses();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Failed to submit publish request.");
+      }
+    }
+  };
+
   const sortedCourses = [...courses].sort((a, b) => {
     if (sortBy === "Popular") return (b.averageRating || 0) - (a.averageRating || 0);
     if (sortBy === "Latest") return b.id - a.id;
@@ -805,8 +818,14 @@ const InstructorCourses = () => {
                 <div key={course.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300">
                   <div className="relative">
                     <img src={course.thumbnailUrl || fallbackImage} alt={course.title} className="w-full h-[180px] object-cover" />
-                    <span className={`absolute top-3 right-3 text-[11px] font-bold px-3 py-1 rounded-full ${course.status === "PUBLISHED" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                      {course.status}
+                    <span className={`absolute top-3 right-3 text-[11px] font-bold px-3 py-1 rounded-full ${
+                      course.status === "PUBLISHED" 
+                        ? "bg-green-100 text-green-700" 
+                        : course.publishRequested 
+                          ? "bg-blue-100 text-blue-700" 
+                          : "bg-yellow-100 text-yellow-700"
+                    }`}>
+                      {course.status === "PUBLISHED" ? "PUBLISHED" : course.publishRequested ? "PUBLISH PENDING" : course.status || "DRAFT"}
                     </span>
                   </div>
                   <div className="p-4">
@@ -855,6 +874,20 @@ const InstructorCourses = () => {
                         <FaTrash className="text-[11px]" />
                       </button>
                     </div>
+                    {course.status !== "PUBLISHED" && (
+                      <button
+                        type="button"
+                        onClick={() => handleRequestPublish(course.id)}
+                        disabled={course.publishRequested}
+                        className={`w-full mt-3 h-9 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                          course.publishRequested
+                            ? "bg-blue-50 border border-blue-100 text-blue-500 cursor-not-allowed"
+                            : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm border-none cursor-pointer"
+                        }`}
+                      >
+                        {course.publishRequested ? "Sent for Approval" : "Request Course Publish"}
+                      </button>
+                    )}
                   </div>
                 </div>
               );

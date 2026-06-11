@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { studentCourseApi } from "./auth/api";
 import S1 from "../assets/S1.jpg";
 import S2 from "../assets/S2.jpg";
 import S3 from "../assets/S3.jpg";
@@ -11,138 +12,59 @@ import S8 from "../assets/S8.jpg";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const AllCourses = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("Popular");
   const [currentPage, setCurrentPage] = useState(1);
-  const coursesPerPage = 4;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const coursesPerPage = 8;
 
-  const courses = [
-    {
-      id: 1,
-      title: "Digital Marketing Fundamentals",
-      badge: "Bestseller",
-      image: S1,
-      rating: "4.7",
-      reviews: "1,250",
-      lessons: "28 Lessons",
-      desc: "Learn the basics of digital marketing and kickstart your career.",
-      price: "₹999",
-      oldPrice: "₹2,499",
-      offer: "60% OFF",
-      priceValue: 999,
-    },
-    {
-      id: 2,
-      title: "Search Engine Optimization (SEO)",
-      badge: "Popular",
-      image: S2,
-      rating: "4.6",
-      reviews: "980",
-      lessons: "26 Lessons",
-      desc: "Master SEO strategies to rank higher on search engines.",
-      price: "₹1,199",
-      oldPrice: "₹2,999",
-      offer: "60% OFF",
-      priceValue: 1199,
-    },
-    {
-      id: 3,
-      title: "Social Media Marketing Mastery",
-      badge: "Trending",
-      image: S3,
-      rating: "4.8",
-      reviews: "1,450",
-      lessons: "30 Lessons",
-      desc: "Build brand awareness using powerful social platforms.",
-      price: "₹1,299",
-      oldPrice: "₹2,999",
-      offer: "57% OFF",
-      priceValue: 1299,
-    },
-    {
-      id: 4,
-      title: "Email Marketing Essentials",
-      badge: "",
-      image: S4,
-      rating: "4.5",
-      reviews: "760",
-      lessons: "18 Lessons",
-      desc: "Learn email marketing strategies that drive results.",
-      price: "₹899",
-      oldPrice: "₹1,999",
-      offer: "55% OFF",
-      priceValue: 899,
-    },
-    {
-      id: 5,
-      title: "YouTube Marketing Success",
-      badge: "",
-      image: S5,
-      rating: "4.7",
-      reviews: "820",
-      lessons: "22 Lessons",
-      desc: "Grow your YouTube channel and brand with proven strategies.",
-      price: "₹1,099",
-      oldPrice: "₹2,699",
-      offer: "50% OFF",
-      priceValue: 1099,
-    },
-    {
-      id: 6,
-      title: "Google Ads Campaigns",
-      badge: "",
-      image: S6,
-      rating: "4.6",
-      reviews: "650",
-      lessons: "20 Lessons",
-      desc: "Run profitable ad campaigns and get high ROI.",
-      price: "₹1,299",
-      oldPrice: "₹2,999",
-      offer: "57% OFF",
-      priceValue: 1299,
-    },
-    {
-      id: 7,
-      title: "Google Analytics Mastery",
-      badge: "",
-      image: S7,
-      rating: "4.6",
-      reviews: "540",
-      lessons: "16 Lessons",
-      desc: "Analyze data and make smart marketing decisions.",
-      price: "₹899",
-      oldPrice: "₹1,999",
-      offer: "55% OFF",
-      priceValue: 899,
-    },
-    {
-      id: 8,
-      title: "E-commerce Marketing Strategies",
-      badge: "",
-      image: S8,
-      rating: "4.7",
-      reviews: "610",
-      lessons: "24 Lessons",
-      desc: "Boost sales and grow your online business.",
-      price: "₹1,199",
-      oldPrice: "₹2,499",
-      offer: "52% OFF",
-      priceValue: 1199,
-    },
-  ];
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      let sortParam = "id,desc";
+      if (sortBy === "Popular") sortParam = "averageRating,desc";
+      else if (sortBy === "Latest") sortParam = "id,desc";
+      else if (sortBy === "Price Low") sortParam = "price,asc";
+      else if (sortBy === "Price High") sortParam = "price,desc";
 
-  const sortedCourses = [...courses].sort((a, b) => {
-    if (sortBy === "Popular") return Number(b.rating) - Number(a.rating);
-    if (sortBy === "Latest") return b.id - a.id;
-    if (sortBy === "Price Low") return a.priceValue - b.priceValue;
-    if (sortBy === "Price High") return b.priceValue - a.priceValue;
-    return 0;
-  });
+      const res = await studentCourseApi.getPublishedCourses(currentPage - 1, coursesPerPage, sortParam);
+      if (res.data && res.data.data) {
+        setCourses(res.data.data.content || []);
+        setTotalPages(res.data.data.totalPages || 1);
+        setTotalElements(res.data.data.totalElements || 0);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch courses catalog from server.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
-  const paginatedCourses = sortedCourses.slice(
-    (currentPage - 1) * coursesPerPage,
-    currentPage * coursesPerPage
-  );
+  useEffect(() => {
+    fetchCourses();
+  }, [currentPage, sortBy]);
+
+  const displayCourses = courses.map(course => ({
+    ...course,
+    id: course.id,
+    title: course.title || "Untitled Course",
+    badge: course.averageRating >= 4.7 ? "Bestseller" : "",
+    image: course.thumbnailUrl || S1,
+    rating: course.averageRating ? course.averageRating.toFixed(1) : "4.5",
+    reviews: course.totalRatings || "0",
+    lessons: `${course.level || "Beginner"} Level`,
+    desc: `Learn ${course.title || "digital marketing"} and boost your career.`,
+    price: course.discountPrice ? `₹${course.discountPrice}` : (course.price ? `₹${course.price}` : "₹999"),
+    oldPrice: course.price ? `₹${course.price}` : "₹2,499",
+    offer: course.discountPrice && course.price ? `${Math.round(((course.price - course.discountPrice) / course.price) * 100)}% OFF` : "60% OFF"
+  }));
+
+  const paginatedCourses = displayCourses;
 
   const changePage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -173,7 +95,7 @@ const AllCourses = () => {
         {/* Sort and Results Row - Responsive */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <p className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1">
-            Showing 1-{sortedCourses.length} of {sortedCourses.length} courses
+            Showing 1-{courses.length} of {totalElements} courses
           </p>
           <select
             value={sortBy}
@@ -191,24 +113,33 @@ const AllCourses = () => {
         </div>
 
         {/* Courses Grid - Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          {paginatedCourses.map((course, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300"
-            >
-              <div className="relative">
-                <img
-                  src={course.image}
-                  alt={course.title}
-                  className="w-full h-[120px] sm:h-[130px] object-cover"
-                />
-                {course.badge && (
-                  <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-blue-600 text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                    {course.badge}
-                  </span>
-                )}
-              </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-t-blue-600 border-gray-200 rounded-full animate-spin"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-xs font-semibold">
+            {error}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            {paginatedCourses.map((course, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300"
+              >
+                <div className="relative">
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-[120px] sm:h-[130px] object-cover"
+                  />
+                  {course.badge && (
+                    <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-blue-600 text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                      {course.badge}
+                    </span>
+                  )}
+                </div>
               <div className="p-3 sm:p-4">
                 <h2 className="font-bold text-gray-900 text-xs sm:text-sm leading-5 min-h-[36px] sm:min-h-[40px] line-clamp-2">
                   {course.title}
@@ -243,6 +174,7 @@ const AllCourses = () => {
             </div>
           ))}
         </div>
+        )}
 
         {/* Pagination - Responsive with horizontal scroll on mobile */}
         <div className="flex justify-center items-center gap-1 sm:gap-2 mt-6 sm:mt-7 overflow-x-auto pb-2">

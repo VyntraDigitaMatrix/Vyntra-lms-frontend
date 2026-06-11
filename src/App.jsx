@@ -66,6 +66,8 @@ import InstructorAssignments from "./Instructor/pages/Assignments";
 import InstructorProfile from "./Instructor/pages/InstructorProfile";
 import StudentAllCourses from "./students/AllCourses";
 import CourseViewDetails from "./Instructor/pages/CourseViewDetails";
+import AdminCourseViewDetails from "./Admin/pages/CourseViewDetails";
+import AdminLessonView from "./Admin/pages/LessonView";
 import LessonView from "./Instructor/pages/LessonView";
 import Resume from "./students/Resume";
 import JobNotifications from "./students/JobNotification";
@@ -171,6 +173,7 @@ function App() {
                   <Route path="all-students" element={<AllStudents />} />
                   <Route path="all-instructors" element={<AllInstructors />} />
                   <Route path="all-courses" element={<AllCourses />} />
+                  <Route path="course-preview/:id" element={<AdminCourseViewDetails />} />
                   <Route path="all-classes" element={<AllClasses />} />
                   <Route path="all-assignments" element={<AllAssignments />} />
                   <Route path="schedule" element={<Schedule1 />} />
@@ -180,6 +183,7 @@ function App() {
                   <Route path="notes" element={<Notes1 />} />
                   <Route path="downloads" element={<Downloads1 />} />
                 </Route>
+                <Route path="/admin/course/:courseId/lesson/:lessonId" element={<AdminLessonView />} />
               </Route>
 
               {/* Protected Instructor Routes */}

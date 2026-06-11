@@ -75,4 +75,40 @@ export const studentAuth = {
   logout: () => api.post("/api/student/auth/logout"),
 };
 
+export const studentCourseApi = {
+  getPublishedCourses: (page = 0, size = 10, sort = "id,desc") => {
+    return api.get(`/api/student/courses?page=${page}&size=${size}&sort=${sort}`);
+  },
+  getCourseStructure: (courseId) => {
+    return api.get(`/api/student/courses/${courseId}`);
+  }
+};
+
+export const studentPaymentApi = {
+  createOrder: (courseId) => {
+    return api.post(`/api/student/payments/orders/courses/${courseId}`);
+  },
+  verifyPayment: (data) => {
+    return api.post("/api/student/payments/verify", data);
+  }
+};
+
+export const studentEnrolledCourseApi = {
+  // GET /api/v1/student/my-courses  (paginated)
+  getMyEnrolledCourses: (page = 0, size = 10) =>
+    api.get(`/api/v1/student/my-courses?page=${page}&size=${size}&sort=createdAt,desc`),
+
+  // GET /api/v1/student/my-courses/{courseId}/modules  (list with nested lessons)
+  getCourseModules: (courseId) =>
+    api.get(`/api/v1/student/my-courses/${courseId}/modules`),
+
+  // GET /api/v1/student/my-courses/{courseId}/modules/{moduleId}/lessons  (paginated)
+  getModuleLessons: (courseId, moduleId, page = 0, size = 50) =>
+    api.get(`/api/v1/student/my-courses/${courseId}/modules/${moduleId}/lessons?page=${page}&size=${size}&sort=sortOrder,asc`),
+
+  // GET /api/v1/student/my-courses/{courseId}/lessons/{lessonId}  (single lesson full content)
+  getLessonById: (courseId, lessonId) =>
+    api.get(`/api/v1/student/my-courses/${courseId}/lessons/${lessonId}`),
+};
+
 export default api;

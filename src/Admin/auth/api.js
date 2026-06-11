@@ -120,4 +120,25 @@ export const adminManagement = {
   createInstructor: (data) => api.post("/api/admin/management/create-instructor", data),
 };
 
+export const adminCourseApi = {
+  createCourse: (formData) => api.post("/api/admin/courses", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  updateCourse: (courseId, formData) => api.put(`/api/admin/courses/${courseId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  publishCourse: (courseId) => api.patch(`/api/admin/courses/${courseId}/publish`),
+  archiveCourse: (courseId) => api.patch(`/api/admin/courses/${courseId}/archive`),
+  getPendingPublishRequests: (page = 0, size = 10) => {
+    return api.get(`/api/admin/courses/pending-publish?page=${page}&size=${size}`);
+  },
+  rejectPublishRequest: (courseId) => api.patch(`/api/admin/courses/${courseId}/reject-publish`),
+  getAllCourses: (page = 0, size = 10) => {
+    return api.get(`/api/admin/courses?page=${page}&size=${size}`);
+  },
+  getCourseById: (courseId) => api.get(`/api/admin/courses/${courseId}`),
+  getCourseModules: (courseId) => api.get(`/api/admin/modules/courses/${courseId}?page=0&size=100`),
+  getModuleLessons: (moduleId) => api.get(`/api/admin/lessons/modules/${moduleId}?page=0&size=100`),
+};
+
 export default api;

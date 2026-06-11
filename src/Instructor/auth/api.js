@@ -86,6 +86,7 @@ export const instructorCourseApi = {
   updateCourseContent: (courseId, formData) => api.put(`/api/instructor/courses/${courseId}/content`, formData, {
     headers: { "Content-Type": "multipart/form-data" }
   }),
+  requestCoursePublish: (courseId) => api.post(`/api/instructor/courses/${courseId}/request-publish`),
 };
 
 export const instructorModuleApi = {

@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { studentEnrolledCourseApi } from "./auth/api";
 import {
     FaPlay, FaCheckCircle, FaChevronLeft, FaChevronRight,
     FaChevronDown, FaChevronUp, FaClock, FaBook, FaTrophy,
@@ -506,6 +507,24 @@ const QuizView = ({ quiz, moduleColor, onComplete, isCompleted }) => {
         setShowExplanation(false); setFinished(false); setScore(0);
     };
 
+    const [requestSent, setRequestSent] = useState(() => {
+        try {
+            return localStorage.getItem(`quiz_req_${quiz.title || quiz.id}`) === "true";
+        } catch {
+            return false;
+        }
+    });
+
+    const triggerSendRequest = () => {
+        try {
+            localStorage.setItem(`quiz_req_${quiz.title || quiz.id}`, "true");
+            setRequestSent(true);
+            alert("Quiz request sent successfully!");
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     if (finished) {
         const pct = Math.round((score / totalQ) * 100);
         const passed = pct >= 60;
@@ -530,8 +549,24 @@ const QuizView = ({ quiz, moduleColor, onComplete, isCompleted }) => {
                     <div className={`w-2 h-2 rounded-full ${passed ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`}></div>
                     {passed ? "Minimum Passing Criteria Met (60%)" : "Requires 60% Passing Grade"}
                 </div>
+                
+                <div className="mb-6 flex flex-col items-center">
+                    {requestSent ? (
+                        <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold shadow-sm">
+                            <FaCheckCircle className="text-blue-400" /> Already quiz request sent
+                        </div>
+                    ) : (
+                        <button
+                            onClick={triggerSendRequest}
+                            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-900 bg-white hover:bg-slate-100 transition shadow-md border-none cursor-pointer"
+                        >
+                            Send Quiz Request
+                        </button>
+                    )}
+                </div>
+
                 {!passed && (
-                    <button onClick={handleRetry} className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.02]" style={{ background: moduleColor }}>
+                    <button onClick={handleRetry} className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.02] border-none cursor-pointer" style={{ background: moduleColor }}>
                         <FaRedo className="w-3 h-3" /> Re-attempt Assessment
                     </button>
                 )}
@@ -781,10 +816,50 @@ const ModuleLesson = () => {
     const allModules = courseModulesData[cId] || courseModulesData[1];
     const currentModule = allModules[mId - 1] || allModules[0];
     const currentLesson = currentModule.lessons[lId - 1] || currentModule.lessons[0];
-    const content = getContent(mId, lId, allModules);
+    const staticContent = getContent(mId, lId, allModules);
 
+    // ── API: fetch real lesson data ──
+    const [lessonData, setLessonData] = useState(null);
+    const [lessonLoading, setLessonLoading] = useState(true);
+    const [lessonError, setLessonError] = useState("");
+
+    const fetchLesson = useCallback(async () => {
+        if (!courseId || !lessonId) return;
+        setLessonLoading(true);
+        setLessonError("");
+        try {
+            const res = await studentEnrolledCourseApi.getLessonById(courseId, lessonId);
+            if (res.data?.data) setLessonData(res.data.data);
+        } catch (err) {
+            console.error("Lesson fetch failed:", err);
+            setLessonError("Could not load lesson content from server.");
+        } finally {
+            setLessonLoading(false);
+        }
+    }, [courseId, lessonId]);
+
+    useEffect(() => { fetchLesson(); }, [fetchLesson]);
+
+    // Merge API data with static fallbacks
+    const liveLessonType = lessonData?.lessonType?.toLowerCase();
     const isQuiz = currentLesson.type === "quiz";
     const isAssignment = currentLesson.type === "assignment";
+    const isVideo = !isQuiz && !isAssignment && (liveLessonType === "video" || !liveLessonType);
+    const isText = !isQuiz && !isAssignment && (liveLessonType === "text" || liveLessonType === "article");
+
+    // Displayed content — prefer API data, fall back to static
+    const content = {
+        title: lessonData?.title || staticContent.title,
+        description: lessonData?.description || staticContent.description,
+        body: lessonData?.content || null,
+        videoUrl: lessonData?.videoUrl || null,
+        resourceUrl: lessonData?.resourceUrl || null,
+        duration: lessonData?.durationInMinutes ? `${lessonData.durationInMinutes} min` : currentLesson.duration,
+        keyPoints: staticContent.keyPoints,
+        resources: lessonData?.resourceUrl
+            ? [{ name: `${lessonData.title || "Lesson"} Resource`, url: lessonData.resourceUrl }]
+            : staticContent.resources,
+    };
 
     const quiz = quizData[cId]?.[mId] || getGenericQuiz(cId, mId, allModules);
     const assignment = assignmentData[cId]?.[mId] || getGenericAssignment(mId, allModules);
@@ -828,7 +903,9 @@ const ModuleLesson = () => {
                         <FaChevronLeft className="w-2.5 h-2.5" /> Course Workspace
                     </Link>
                     <span className="text-slate-200 font-light">|</span>
-                    <span className="text-xs font-bold text-slate-800 truncate max-w-[180px] sm:max-w-xs opacity-80">{currentModule.title}</span>
+                    <span className="text-xs font-bold text-slate-800 truncate max-w-[180px] sm:max-w-xs opacity-80">
+                        {lessonLoading ? "Loading…" : content.title}
+                    </span>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-3 py-1.5 border border-slate-200/60 rounded-xl">
@@ -883,17 +960,40 @@ const ModuleLesson = () => {
                         </div>
 
                         {/* Main Stage */}
+                        {lessonLoading ? (
+                            <div className="rounded-2xl bg-slate-100 aspect-video flex items-center justify-center animate-pulse">
+                                <div className="text-slate-400 text-sm font-semibold">Loading lesson…</div>
+                            </div>
+                        ) : lessonError ? (
+                            <div className="rounded-2xl bg-red-50 border border-red-100 aspect-video flex flex-col items-center justify-center gap-3">
+                                <p className="text-xs text-red-500 font-semibold">{lessonError}</p>
+                                <button onClick={fetchLesson} className="text-xs bg-red-500 text-white font-bold px-4 py-2 rounded-xl hover:bg-red-600 transition">Retry</button>
+                            </div>
+                        ) : (
                         <div className={`rounded-2xl overflow-hidden ${isQuiz || isAssignment ? "bg-transparent" : "bg-black aspect-video shadow-md border border-slate-200"}`}>
                             {isQuiz ? (
                                 <QuizView quiz={quiz} moduleColor={currentModule.color} onComplete={markComplete} isCompleted={isDone} />
                             ) : isAssignment ? (
                                 <AssignmentView assignment={assignment} moduleColor={currentModule.color} onSubmit={markComplete} isSubmitted={isDone} />
-                            ) : (
-                                <video className="w-full h-full object-cover" controls>
-                                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                            ) : content.videoUrl ? (
+                                <video className="w-full h-full object-cover" controls key={content.videoUrl}>
+                                    <source src={content.videoUrl} />
+                                    Your browser does not support the video tag.
                                 </video>
+                            ) : isText && content.body ? (
+                                <div className="w-full h-full bg-white p-6 overflow-y-auto text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                    {content.body}
+                                </div>
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                                    <div className="w-16 h-16 rounded-2xl bg-blue-600/20 flex items-center justify-center">
+                                        <FaPlay className="text-blue-400 text-2xl" />
+                                    </div>
+                                    <p className="text-white/60 text-xs font-semibold">No video available for this lesson</p>
+                                </div>
                             )}
                         </div>
+                        )}
 
                         {/* Lesson Metadata */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 border border-slate-200/80 rounded-2xl shadow-2xs">
@@ -911,7 +1011,7 @@ const ModuleLesson = () => {
                                 <h1 className="text-lg font-black text-black tracking-tight">{content.title}</h1>
                                 <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-medium">
                                     <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 border border-slate-100 rounded-md">
-                                        <FaClock className="w-2.5 h-2.5 text-slate-400" /> {currentLesson.duration}
+                                        <FaClock className="w-2.5 h-2.5 text-slate-400" /> {content.duration || currentLesson.duration}
                                     </span>
                                     <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 border border-slate-100 rounded-md">
                                         {isQuiz ? <MdOutlineQuiz className="w-3 h-3 text-slate-400" /> : isAssignment ? <MdAssignment className="w-3 h-3 text-slate-400" /> : <AiOutlinePlaySquare className="w-3 h-3 text-slate-400" />}
@@ -926,13 +1026,23 @@ const ModuleLesson = () => {
                             )}
                         </div>
 
-                        {/* Video Lesson Extras */}
-                        {!isQuiz && !isAssignment && (
+                        {/* Video / Text Lesson Extras */}
+                        {!isQuiz && !isAssignment && !lessonLoading && (
                             <div className="space-y-4">
+                                {/* Description */}
+                                {content.description && (
                                 <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs">
                                     <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Lesson Scope Context</h3>
                                     <p className="text-xs font-medium text-slate-600 leading-relaxed">{content.description}</p>
                                 </div>
+                                )}
+                                {/* Full text body if lesson type is text */}
+                                {content.body && isText && (
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs">
+                                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3">Lesson Content</h3>
+                                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{content.body}</div>
+                                </div>
+                                )}
                                 <div className="bg-indigo-500/5 rounded-2xl p-5 border border-indigo-500/10 space-y-3">
                                     <h3 className="text-xs font-extrabold uppercase tracking-widest text-indigo-500">Key Execution Vectors</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

@@ -170,7 +170,7 @@ const colorMap = {
 /* ═══════════════════════════════════════════════
    QUIZ PLAYER — FULLSCREEN
 ═══════════════════════════════════════════════ */
-const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
+const QuizPlayer = ({ quiz, mode, onClose, onComplete, isRequestSent, onSendRequest }) => {
     const detail = quizDetails[quiz.id];
     const questions = detail.questions || [];
     const startIdx = mode === "resume" ? (detail.resumeFrom || 0) : 0;
@@ -298,9 +298,20 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
 
                 {/* Footer */}
                 <div className="flex-shrink-0 px-6 py-4 border-t border-gray-100 bg-white">
-                    <div className="max-w-xl mx-auto">
+                    <div className="max-w-xl mx-auto space-y-3">
+                        {isRequestSent ? (
+                            <div className="w-full p-2.5 bg-blue-50 border border-blue-100 rounded-xl text-center text-xs text-blue-700 font-semibold flex items-center justify-center gap-1.5">
+                                <FaCheckCircle className="text-blue-500" /> Already quiz request sent
+                            </div>
+                        ) : (
+                            <button onClick={() => onSendRequest(quiz.id)}
+                                className="w-full h-11 rounded-xl text-white text-sm font-bold hover:opacity-90 transition flex items-center justify-center gap-2 border-none cursor-pointer"
+                                style={{ background: "#2563eb" }}>
+                                Send Quiz Request
+                            </button>
+                        )}
                         <button onClick={onClose}
-                            className="w-full h-12 rounded-2xl text-white font-bold text-sm transition hover:opacity-90"
+                            className="w-full h-12 rounded-2xl text-white font-bold text-sm transition hover:opacity-90 border-none cursor-pointer"
                             style={{ background: c.accent }}>
                             Done
                         </button>
@@ -702,7 +713,7 @@ const AnalyticsModal = ({ quiz, onClose }) => {
 /* ═══════════════════════════════════════════════
    DRAWER
 ═══════════════════════════════════════════════ */
-const QuizDetailDrawer = ({ quiz, onClose, onStartQuiz, onResumeQuiz, onRetakeQuiz, onViewAnalytics }) => {
+const QuizDetailDrawer = ({ quiz, onClose, onStartQuiz, onResumeQuiz, onRetakeQuiz, onViewAnalytics, isRequestSent, onSendRequest }) => {
     if (!quiz) return null;
     const detail = quizDetails[quiz.id];
     const c = colorMap[quiz.color] || colorMap.gray;
@@ -776,6 +787,24 @@ const QuizDetailDrawer = ({ quiz, onClose, onStartQuiz, onResumeQuiz, onRetakeQu
                                     {detail.certificate && <p className="text-xs text-amber-600 font-semibold mt-1 flex items-center gap-1"><FaAward /> Certificate Earned</p>}
                                 </div>
                             </div>
+
+                            {/* Quiz Request status inline card */}
+                            <div className="pt-2">
+                                {isRequestSent ? (
+                                    <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-center text-xs text-blue-700 font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+                                        <FaCheckCircle className="text-blue-500" />
+                                        Already quiz request sent
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => onSendRequest(quiz.id)}
+                                        className="w-full h-10 rounded-xl border border-dashed border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                    >
+                                        Send Quiz Request
+                                    </button>
+                                )}
+                            </div>
+
                             {detail.breakdown.length > 0 && (
                                 <div>
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Section Breakdown</p>
@@ -839,17 +868,30 @@ const QuizDetailDrawer = ({ quiz, onClose, onStartQuiz, onResumeQuiz, onRetakeQu
                 {/* Footer CTAs */}
                 <div className="px-5 py-4 border-t border-gray-100">
                     {quiz.status === "Completed" && (
-                        <div className="flex gap-3">
-                            <button onClick={() => { onClose(); onViewAnalytics(quiz); }}
-                                className="flex-1 h-11 rounded-xl border-2 text-sm font-bold transition flex items-center justify-center gap-2 hover:opacity-80"
-                                style={{ borderColor: c.accent, color: c.accent, background: c.light }}>
-                                <FaChartBar /> Analytics
-                            </button>
-                            <button onClick={() => { onClose(); onRetakeQuiz(quiz); }}
-                                className="flex-1 h-11 rounded-xl text-white text-sm font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
-                                style={{ background: c.accent }}>
-                                <FaRedo /> Retake
-                            </button>
+                        <div className="space-y-3">
+                            {isRequestSent ? (
+                                <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-xl text-center text-xs text-blue-700 font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+                                    <FaCheckCircle className="text-blue-500" /> Already quiz request sent
+                                </div>
+                            ) : (
+                                <button onClick={() => onSendRequest(quiz.id)}
+                                    className="w-full h-11 rounded-xl text-white text-sm font-bold hover:opacity-90 transition flex items-center justify-center gap-2 border-none cursor-pointer"
+                                    style={{ background: "#2563eb" }}>
+                                    Send Quiz Request
+                                </button>
+                            )}
+                            <div className="flex gap-3">
+                                <button onClick={() => { onClose(); onViewAnalytics(quiz); }}
+                                    className="flex-1 h-11 rounded-xl border-2 text-sm font-bold transition flex items-center justify-center gap-2 hover:opacity-80 cursor-pointer"
+                                    style={{ borderColor: c.accent, color: c.accent, background: c.light }}>
+                                    <FaChartBar /> Analytics
+                                </button>
+                                <button onClick={() => { onClose(); onRetakeQuiz(quiz); }}
+                                    className="flex-1 h-11 rounded-xl text-white text-sm font-bold hover:opacity-90 transition flex items-center justify-center gap-2 border-none cursor-pointer"
+                                    style={{ background: c.accent }}>
+                                    <FaRedo /> Retake
+                                </button>
+                            </div>
                         </div>
                     )}
                     {quiz.status === "In Progress" && (
@@ -924,6 +966,21 @@ const Quizzes = () => {
     const [selectedQuiz, setSelectedQuiz] = useState(null);
     const [quizPlayerState, setQuizPlayerState] = useState(null); // { quiz, mode }
     const [analyticsQuiz, setAnalyticsQuiz] = useState(null);
+
+    const [sentRequests, setSentRequests] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem("quiz_sent_requests") || "{}");
+        } catch {
+            return {};
+        }
+    });
+
+    const handleSendRequest = (quizId) => {
+        const updated = { ...sentRequests, [quizId]: true };
+        setSentRequests(updated);
+        localStorage.setItem("quiz_sent_requests", JSON.stringify(updated));
+        alert("Quiz request sent successfully!");
+    };
 
     const quizzes = [
         { id: 1, title: "Digital Marketing Basics Quiz", module: "Module 1", questions: "15 Questions", date: "20 May 2024", duration: "20 mins", status: "Completed",     score: "90%",  color: "purple", course: "Marketing" },
@@ -1016,12 +1073,26 @@ const Quizzes = () => {
                                 </div>
 
                                 <div className="flex items-center justify-between lg:justify-end gap-6">
-                                    <div className="text-right">
-                                        {quiz.status === "Completed" && <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#eafaf0] text-[#16a34a] text-sm font-semibold"><FaCheck className="text-[11px]" />Completed</span>}
+                                    <div className="text-right flex flex-col items-end gap-2">
+                                        {quiz.status === "Completed" && (
+                                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                                {sentRequests[quiz.id] ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-bold text-blue-600">
+                                                        <FaCheckCircle className="text-blue-500 text-[10px]" /> Request Sent
+                                                    </span>
+                                                ) : (
+                                                    <button onClick={(e) => { e.stopPropagation(); handleSendRequest(quiz.id); }}
+                                                        className="px-3 py-1.5 rounded-full border border-dashed border-teal-300 text-teal-600 bg-teal-50 hover:bg-teal-100 text-xs font-bold transition cursor-pointer">
+                                                        Send Request
+                                                    </button>
+                                                )}
+                                                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#eafaf0] text-[#16a34a] text-sm font-semibold"><FaCheck className="text-[11px]" />Completed</span>
+                                            </div>
+                                        )}
                                         {quiz.status === "In Progress" && <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#fff7e8] text-[#f59e0b] text-sm font-semibold"><FaTrophy className="text-[11px]" />In Progress</span>}
                                         {quiz.status === "Upcoming" && <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#edf4ff] text-[#2563eb] text-sm font-semibold"><FaHourglassHalf className="text-[11px]" />Upcoming</span>}
                                         {quiz.status === "Not Attempted" && <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-gray-600 text-sm font-semibold">Not Attempted</span>}
-                                        <div className="mt-3">
+                                        <div className="mt-1">
                                             {quiz.status === "Completed" && (
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center"><FaTrophy className="text-green-600 text-lg" /></div>
@@ -1066,6 +1137,8 @@ const Quizzes = () => {
                     onResumeQuiz={q => setQuizPlayerState({ quiz: q, mode: "resume" })}
                     onRetakeQuiz={q => setQuizPlayerState({ quiz: q, mode: "retake" })}
                     onViewAnalytics={q => setAnalyticsQuiz(q)}
+                    isRequestSent={sentRequests[selectedQuiz.id]}
+                    onSendRequest={handleSendRequest}
                 />
             )}
 
@@ -1076,6 +1149,8 @@ const Quizzes = () => {
                     mode={quizPlayerState.mode}
                     onClose={() => setQuizPlayerState(null)}
                     onComplete={(id, pct) => console.log(`Quiz ${id} completed: ${pct}%`)}
+                    isRequestSent={sentRequests[quizPlayerState.quiz.id]}
+                    onSendRequest={handleSendRequest}
                 />
             )}
 

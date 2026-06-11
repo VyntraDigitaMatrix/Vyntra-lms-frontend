@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { studentEnrolledCourseApi } from "./auth/api";
 import S6 from "../assets/s6.jpg";
 import S7 from "../assets/s7.jpg";
 import S8 from "../assets/s8.jpg";
@@ -48,31 +49,15 @@ import {
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 
-/* ── helpers to generate lesson lists per module ── */
-const FIXED_DURATIONS = [
-    "10:24", "14:37", "18:05", "12:50", "16:42",
-    "11:18", "19:33", "13:07", "15:55", "17:21",
-    "10:48", "14:02", "12:36", "16:14", "18:59",
-    "11:43", "13:28", "15:06", "17:39", "19:12",
-];
-
-const generateLessons = (moduleTitle, count) => {
-    const prefixes = [
-        "Introduction to",
-        "Understanding",
-        "Deep Dive into",
-        "Practical Guide to",
-        "Advanced",
-        "Hands-on",
-        "Mastering",
-    ];
-    const topics = moduleTitle.replace(/Module \d+:\s*/i, "").split(" & ");
-    return Array.from({ length: count }, (_, i) => ({
-        id: i + 1,
-        title: `${prefixes[i % prefixes.length]} ${topics[i % topics.length]}`,
-        duration: FIXED_DURATIONS[i % FIXED_DURATIONS.length],
-        isPreview: i === 0,
-    }));
+/* ── helpers ── */
+const getLessonTypeIcon = (type) => {
+    if (!type) return "▶";
+    const t = type.toLowerCase();
+    if (t === "video") return "▶";
+    if (t === "text" || t === "article") return "📄";
+    if (t === "quiz") return "❓";
+    if (t === "assignment") return "📝";
+    return "▶";
 };
 
 /* ── Course-Specific Data ── */
@@ -466,74 +451,72 @@ const coursesData = {
 /* ══════════════════════════════════════════════
    MODULE ACCORDION ITEM
    ══════════════════════════════════════════════ */
-const FREE_MODULES = 2;
-
-const ModuleAccordionItem = ({ mod, index, courseId, navigate, activeLesson, setActiveLesson }) => {
+/* ─── Enrolled Module Accordion (all modules unlocked) ─── */
+const ModuleAccordionItem = ({ mod, courseId, navigate, activeLesson, setActiveLesson }) => {
     const [open, setOpen] = useState(false);
-    const isFree = index < FREE_MODULES;
-    const lessons = React.useMemo(() => generateLessons(mod.title, mod.lessons), [mod.title, mod.lessons]);
+    const lessons = mod.lessons || [];
 
-    const handleLessonClick = (lessonIndex) => {
-        if (!isFree) return;
-        const lessonKey = `${index + 1}-${lessonIndex + 1}`;
+    const handleLessonClick = (lesson) => {
+        const lessonKey = `${mod.id}-${lesson.id}`;
         setActiveLesson(lessonKey);
-        navigate(`/student/course/${courseId}/module/${index + 1}/lesson/${lessonIndex + 1}`);
+        navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
     };
+
+    const moduleColor = "#2563EB";
 
     return (
         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"} bg-white`}>
             <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 hover:bg-gray-50 transition text-left">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base sm:text-lg flex-shrink-0" style={{ backgroundColor: mod.color + "18" }}>
-                    {mod.icon}
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-blue-50">
+                    <FaPlayCircle className="text-blue-500" />
                 </div>
                 <div className="flex-1 min-w-0">
                     <span className="text-xs sm:text-sm font-semibold text-gray-800 block truncate">{mod.title}</span>
-                    <span className="text-[10px] sm:text-xs text-gray-400">{mod.lessons} Lessons</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400">{lessons.length} Lessons</span>
                 </div>
-                {isFree ? (
-                    <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">Free</span>
-                ) : (
-                    <span className="text-[10px] sm:text-xs font-bold bg-gray-100 text-gray-400 px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
-                        <FaLock className="text-[8px] sm:text-[10px]" /> Premium
-                    </span>
-                )}
+                <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">Enrolled</span>
                 <span className="ml-1 sm:ml-2 text-gray-400 flex-shrink-0">
-                    {open ? <FaChevronUp size={10} className="sm:text-xs" /> : <FaChevronDown size={10} className="sm:text-xs" />}
+                    {open ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
                 </span>
             </button>
             {open && (
                 <div className="border-t border-gray-100">
+                    {lessons.length === 0 && (
+                        <div className="px-5 py-3 text-xs text-gray-400">No lessons in this module.</div>
+                    )}
                     {lessons.map((lesson, li) => {
-                        const lessonKey = `${index + 1}-${li + 1}`;
+                        const lessonKey = `${mod.id}-${lesson.id}`;
                         const isActive = activeLesson === lessonKey;
+                        const duration = lesson.durationInMinutes
+                            ? `${lesson.durationInMinutes} min`
+                            : "";
                         return (
-                            <div key={li} onClick={() => handleLessonClick(li)} className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 transition-colors ${isFree ? "cursor-pointer group" : "cursor-not-allowed opacity-60"} ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : isFree ? "hover:bg-blue-50" : ""} ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""}`}>
-                                <div className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 flex items-center justify-center">
-                                    {isFree ? (
-                                        <FaPlayCircle className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`} size={12} className="sm:text-base" />
-                                    ) : (
-                                        <FaLock className="text-gray-300" size={11} className="sm:text-sm" />
-                                    )}
+                            <div
+                                key={lesson.id}
+                                onClick={() => handleLessonClick(lesson)}
+                                className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 cursor-pointer transition-colors group ${
+                                    isActive ? "bg-blue-50 border-l-2 border-blue-500" : "hover:bg-blue-50"
+                                } ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""}`}
+                            >
+                                <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-xs">
+                                    {getLessonTypeIcon(lesson.lessonType)}
                                 </div>
-                                <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-blue-700 font-semibold" : isFree ? "text-gray-700 font-medium group-hover:text-blue-700" : "text-gray-400 font-medium"}`}>
-                                    {`${li + 1}. ${lesson.title}`}
+                                <span className={`flex-1 text-[11px] sm:text-xs truncate font-medium ${
+                                    isActive ? "text-blue-700 font-semibold" : "text-gray-700 group-hover:text-blue-700"
+                                }`}>
+                                    {li + 1}. {lesson.title}
                                 </span>
-                                {/* {lesson.isPreview && isFree && (
-                                    <span className="text-[9px] sm:text-[10px] font-semibold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">Preview</span>
-                                )} */}
-                                <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
-                                    {lesson.duration}
-                                </span>
+                                {lesson.previewAllowed && (
+                                    <span className="text-[9px] font-bold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">Preview</span>
+                                )}
+                                {duration && (
+                                    <span className={`text-[10px] flex-shrink-0 ml-1 ${
+                                        isActive ? "text-blue-500" : "text-gray-400"
+                                    }`}>{duration}</span>
+                                )}
                             </div>
                         );
                     })}
-                    {!isFree && (
-                        <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-amber-50 border-t border-amber-100">
-                            <FaLock className="text-amber-400 flex-shrink-0" size={11} className="sm:text-sm" />
-                            <p className="text-[11px] sm:text-xs text-amber-700 font-medium flex-1">Enrol in the full course to unlock this module.</p>
-                            <button className="text-[10px] sm:text-xs bg-amber-400 hover:bg-amber-500 text-white font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors flex-shrink-0">Enrol Now</button>
-                        </div>
-                    )}
                 </div>
             )}
         </div>
@@ -541,22 +524,30 @@ const ModuleAccordionItem = ({ mod, index, courseId, navigate, activeLesson, set
 };
 
 /* ══════════════════════════════════════════════
-   CURRICULUM SECTION
+   CURRICULUM SECTION — enrolled, all unlocked
    ══════════════════════════════════════════════ */
 const CurriculumSection = ({ moduleList, courseId, navigate }) => {
     const [activeLesson, setActiveLesson] = useState(null);
+    const totalLessons = moduleList.reduce((s, m) => s + (m.lessons || []).length, 0);
     return (
         <div>
-            <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 mb-4">
-                <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={13} className="sm:text-sm" />
-                <p className="text-[11px] sm:text-xs text-blue-700">
-                    <span className="font-bold">Free Preview: </span>
-                    The first 2 modules are available for free. Enrol to unlock all {moduleList.length} modules.
+            <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 mb-4">
+                <FaPlayCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={13} />
+                <p className="text-[11px] sm:text-xs text-emerald-700">
+                    <span className="font-bold">Enrolled: </span>
+                    You have full access to all {moduleList.length} modules and {totalLessons} lessons.
                 </p>
             </div>
             <div className="space-y-2">
-                {moduleList.map((mod, i) => (
-                    <ModuleAccordionItem key={i} mod={mod} index={i} courseId={courseId} navigate={navigate} activeLesson={activeLesson} setActiveLesson={setActiveLesson} />
+                {moduleList.map((mod) => (
+                    <ModuleAccordionItem
+                        key={mod.id}
+                        mod={mod}
+                        courseId={courseId}
+                        navigate={navigate}
+                        activeLesson={activeLesson}
+                        setActiveLesson={setActiveLesson}
+                    />
                 ))}
             </div>
         </div>
@@ -576,8 +567,41 @@ const ContinueLearning = () => {
     const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
     const navigate = useNavigate();
     const { courseId } = useParams();
-    const course = coursesData[courseId] || coursesData[1];
     const [activeTab, setActiveTab] = useState("overview");
+
+    /* ── API state ── */
+    const [courseModules, setCourseModules] = useState([]);
+    const [modulesLoading, setModulesLoading] = useState(true);
+    const [modulesError, setModulesError] = useState("");
+
+    const fetchModules = useCallback(async () => {
+        if (!courseId) return;
+        setModulesLoading(true);
+        setModulesError("");
+        try {
+            const res = await studentEnrolledCourseApi.getCourseModules(courseId);
+            if (res.data?.data) {
+                setCourseModules(res.data.data);
+            }
+        } catch (err) {
+            console.error(err);
+            setModulesError("Failed to load course content.");
+        } finally {
+            setModulesLoading(false);
+        }
+    }, [courseId]);
+
+    useEffect(() => { fetchModules(); }, [fetchModules]);
+
+    /* ── Derive course-level display data from first module's courseId field ── */
+    const totalLessons = courseModules.reduce((s, m) => s + (m.lessons || []).length, 0);
+
+    /* ── Fallback to static data for fields not in enrolled modules API ── */
+    const staticCourse = coursesData[courseId] || coursesData[1];
+    const course = {
+        ...staticCourse,
+        modules: courseModules,
+    };
 
     const handleRatingSubmit = (r) => {
         alert(`Thank you for rating ${r} stars!`);
@@ -600,13 +624,13 @@ const ContinueLearning = () => {
 
     const tabs = [
         { key: "overview", label: "Overview" },
-        { key: "curriculum", label: "Curriculum" },
+        { key: "curriculum", label: `Curriculum (${courseModules.length})` },
         { key: "instructor", label: "Instructor" },
         { key: "reviews", label: `Reviews (${course.reviews})` },
         { key: "faqs", label: "FAQs" },
     ];
 
-    const moduleList = course.modules || [];
+    const moduleList = courseModules;
 
     return (
         <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
@@ -628,6 +652,10 @@ const ContinueLearning = () => {
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                             <FaPlay className="text-white w-6 h-6 sm:w-8 sm:h-8" />
                         </div>
+                        {/* Enrolled badge */}
+                        <span className="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                            ✓ Enrolled
+                        </span>
                     </div>
 
                     {/* Course Info */}
@@ -654,13 +682,13 @@ const ContinueLearning = () => {
                         </div>
                         <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {[
-                                { Icon: FaBook, text: `${course.lessons} Lessons` },
+                                { Icon: FaBook, text: `${totalLessons} Lessons` },
                                 { Icon: AiOutlinePlaySquare, text: `${moduleList.length} Modules` },
-                                { Icon: FaClock, text: `${course.duration}` },
+                                { Icon: FaClock, text: course.duration || "—" },
                                 { Icon: FaTrophy, text: "Certificate" },
                             ].map(({ Icon, text }, i) => (
                                 <div key={i} className="flex items-center gap-1 sm:gap-1.5 border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-white">
-                                    <Icon className="text-gray-400" size={12} className="sm:text-sm" />
+                                    <Icon className="text-gray-400" size={12} />
                                     {text}
                                 </div>
                             ))}
@@ -694,9 +722,9 @@ const ContinueLearning = () => {
                                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">{course.desc}</p>
                                 <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">What you'll learn</h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 sm:gap-x-6">
-                                    {course.learnings.map((item, i) => (
+                                    {(course.learnings || []).map((item, i) => (
                                         <div key={i} className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700">
-                                            <FaCheckCircle size={12} className="sm:text-sm text-blue-600 mt-1 flex-shrink-0" />
+                                            <FaCheckCircle size={12} className="text-blue-600 mt-1 flex-shrink-0" />
                                             <span className="text-[11px] sm:text-sm">{item}</span>
                                         </div>
                                     ))}
@@ -704,7 +732,15 @@ const ContinueLearning = () => {
                             </div>
                             <div>
                                 <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
-                                <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
+                                {modulesLoading ? (
+                                    <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={i} className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse" />
+                                    ))}</div>
+                                ) : modulesError ? (
+                                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">{modulesError}</div>
+                                ) : (
+                                    <CurriculumSection moduleList={moduleList} courseId={courseId} navigate={navigate} />
+                                )}
                             </div>
                         </div>
                     )}
@@ -713,7 +749,18 @@ const ContinueLearning = () => {
                     {activeTab === "curriculum" && (
                         <div>
                             <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
-                            <CurriculumSection moduleList={moduleList} courseId={course.id} navigate={navigate} />
+                            {modulesLoading ? (
+                                <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => (
+                                    <div key={i} className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse" />
+                                ))}</div>
+                            ) : modulesError ? (
+                                <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 flex items-center justify-between">
+                                    <span>{modulesError}</span>
+                                    <button onClick={fetchModules} className="text-red-600 font-bold underline">Retry</button>
+                                </div>
+                            ) : (
+                                <CurriculumSection moduleList={moduleList} courseId={courseId} navigate={navigate} />
+                            )}
                         </div>
                     )}
 

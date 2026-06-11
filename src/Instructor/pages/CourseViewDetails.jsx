@@ -195,6 +195,7 @@ const CourseViewDetails = () => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [publishing, setPublishing] = useState(false);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedModules, setExpandedModules] = useState({});
@@ -204,7 +205,7 @@ const CourseViewDetails = () => {
   const [showModuleModal, setShowModuleModal] = useState(false);
   const [moduleModalMode, setModuleModalMode] = useState("add"); // "add" or "edit"
   const [selectedModule, setSelectedModule] = useState(null);
-  const [moduleForm, setModuleForm] = useState({ title: "", description: "", sortOrder: "" });
+  const [moduleForm, setModuleForm] = useState({ title: "", description: "", sortOrder: "", previewAllowed: false });
   const [moduleSubmitting, setModuleSubmitting] = useState(false);
   const [moduleError, setModuleError] = useState("");
 
@@ -330,7 +331,7 @@ const CourseViewDetails = () => {
   // Module action handlers
   const handleOpenAddModal = () => {
     const nextSortOrder = modules.length > 0 ? Math.max(...modules.map(m => m.sortOrder || 0)) + 1 : 1;
-    setModuleForm({ title: "", description: "", sortOrder: nextSortOrder });
+    setModuleForm({ title: "", description: "", sortOrder: nextSortOrder, previewAllowed: false });
     setModuleModalMode("add");
     setModuleError("");
     setShowModuleModal(true);
@@ -342,6 +343,7 @@ const CourseViewDetails = () => {
       title: mod.title || "",
       description: mod.description || "",
       sortOrder: mod.sortOrder || "",
+      previewAllowed: mod.previewAllowed ?? false,
     });
     setModuleModalMode("edit");
     setModuleError("");
@@ -366,6 +368,7 @@ const CourseViewDetails = () => {
         title: moduleForm.title.trim(),
         description: moduleForm.description.trim(),
         sortOrder: parseInt(moduleForm.sortOrder, 10),
+        previewAllowed: moduleForm.previewAllowed ?? false,
       };
 
       if (moduleModalMode === "add") {
@@ -393,6 +396,22 @@ const CourseViewDetails = () => {
       } catch (err) {
         console.error(err);
         alert(err.response?.data?.message || "Failed to delete the module.");
+      }
+    }
+  };
+
+  const handleRequestPublish = async () => {
+    if (window.confirm("Are you sure you want to request publication for this course? Administrators will review it.")) {
+      setPublishing(true);
+      try {
+        await instructorCourseApi.requestCoursePublish(id);
+        alert("Publish request submitted successfully!");
+        fetchData();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Failed to submit publish request.");
+      } finally {
+        setPublishing(false);
       }
     }
   };
@@ -1044,8 +1063,14 @@ const CourseViewDetails = () => {
                 <div className="border-t border-gray-100 pt-4 space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-gray-400 font-medium">Status</span>
-                    <span className={`font-bold px-2 py-0.5 rounded-full ${courseData?.status === "PUBLISHED" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                      {courseData?.status || "DRAFT"}
+                    <span className={`font-bold px-2 py-0.5 rounded-full ${
+                      courseData?.status === "PUBLISHED" 
+                        ? "bg-green-100 text-green-700" 
+                        : courseData?.publishRequested 
+                          ? "bg-blue-100 text-blue-700" 
+                          : "bg-yellow-100 text-yellow-700"
+                    }`}>
+                      {courseData?.status === "PUBLISHED" ? "PUBLISHED" : courseData?.publishRequested ? "PUBLISH PENDING" : courseData?.status || "DRAFT"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
@@ -1057,6 +1082,23 @@ const CourseViewDetails = () => {
                     <span className="font-bold text-gray-800">{course.language}</span>
                   </div>
                 </div>
+
+                {courseData?.status !== "PUBLISHED" && (
+                  <div className="border-t border-gray-100 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleRequestPublish}
+                      disabled={courseData?.publishRequested || publishing}
+                      className={`w-full h-11 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                        courseData?.publishRequested
+                          ? "bg-blue-50 border border-blue-100 text-blue-500 cursor-not-allowed animate-none"
+                          : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm border-none cursor-pointer"
+                      }`}
+                    >
+                      {publishing ? "Submitting..." : courseData?.publishRequested ? "Sent for Approval" : "Request Course Publish"}
+                    </button>
+                  </div>
+                )}
 
                 <div className="border-t border-gray-100 pt-4">
                   <Link
@@ -1146,6 +1188,22 @@ const CourseViewDetails = () => {
                   disabled={moduleSubmitting}
                 />
                 <p className="text-[11px] text-gray-400 mt-1">Determines the display order of the module (must be unique for this course).</p>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={moduleForm.previewAllowed}
+                    onChange={(e) => setModuleForm({ ...moduleForm, previewAllowed: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                    disabled={moduleSubmitting}
+                  />
+                  <div>
+                    <span className="block text-xs font-bold text-gray-800">Allow Preview</span>
+                    <span className="block text-[10px] text-gray-400">Allow previewing module content before enrollment</span>
+                  </div>
+                </label>
               </div>
 
               {/* Modal Footer */}

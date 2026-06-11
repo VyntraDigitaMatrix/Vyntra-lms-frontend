@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { adminCourseApi, adminManagement } from "../auth/api";
 import {
   BookOpen,
   PlayCircle,
@@ -138,137 +139,11 @@ const AdminCourses = () => {
   const videoInputRef = useRef(null);
   const imageInputRef = useRef(null);
   
-  // ---------- Mock Data with Thumbnails and Videos ----------
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      title: "Web Development Bootcamp",
-      description: "Complete web development course with projects",
-      instructor: "John Smith",
-      category: "Development",
-      students: 342,
-      status: "Published",
-      createdDate: "May 15, 2024",
-      lastUpdated: "Jun 10, 2024",
-      icon: "code",
-      trend: "+12%",
-      thumbnailUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=100&h=100&fit=crop",
-      mediaType: "image",
-      promoVideoUrl: "",
-    },
-    {
-      id: 2,
-      title: "Data Science Fundamentals",
-      description: "Learn data science from scratch with Python",
-      instructor: "Sarah Johnson",
-      category: "Data Science",
-      students: 287,
-      status: "Published",
-      createdDate: "May 10, 2024",
-      lastUpdated: "Jun 5, 2024",
-      icon: "chart",
-      trend: "+8%",
-      thumbnailUrl: "",
-      mediaType: "video",
-      promoVideoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    },
-    {
-      id: 3,
-      title: "UI/UX Design Principles",
-      description: "Design beautiful user experiences with Figma",
-      instructor: "Mike Wilson",
-      category: "Design",
-      students: 156,
-      status: "Published",
-      createdDate: "May 5, 2024",
-      lastUpdated: "May 28, 2024",
-      icon: "design",
-      trend: "+5%",
-      thumbnailUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=100&h=100&fit=crop",
-      mediaType: "image",
-      promoVideoUrl: "",
-    },
-    {
-      id: 4,
-      title: "Python Programming",
-      description: "Python for beginners to advanced concepts",
-      instructor: "Emily Davis",
-      category: "Programming",
-      students: 423,
-      status: "Published",
-      createdDate: "Apr 28, 2024",
-      lastUpdated: "Jun 12, 2024",
-      icon: "code",
-      trend: "+18%",
-      thumbnailUrl: "",
-      mediaType: "video",
-      promoVideoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-    },
-    {
-      id: 5,
-      title: "Machine Learning Basics",
-      description: "Introduction to machine learning algorithms",
-      instructor: "David Brown",
-      category: "Data Science",
-      students: 198,
-      status: "Draft",
-      createdDate: "Apr 25, 2024",
-      lastUpdated: "May 20, 2024",
-      icon: "brain",
-      trend: "-2%",
-      thumbnailUrl: "https://images.unsplash.com/photo-1591453089816-0fbb971b454c?w=100&h=100&fit=crop",
-      mediaType: "image",
-      promoVideoUrl: "",
-    },
-    {
-      id: 6,
-      title: "Digital Marketing Strategy",
-      description: "Complete digital marketing guide for 2024",
-      instructor: "Lisa Anderson",
-      category: "Marketing",
-      students: 234,
-      status: "Draft",
-      createdDate: "Apr 20, 2024",
-      lastUpdated: "May 15, 2024",
-      icon: "marketing",
-      trend: "+3%",
-      thumbnailUrl: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=100&h=100&fit=crop",
-      mediaType: "image",
-      promoVideoUrl: "",
-    },
-    {
-      id: 7,
-      title: "React Advanced Patterns",
-      description: "Master React with advanced patterns and hooks",
-      instructor: "James Wilson",
-      category: "Development",
-      students: 189,
-      status: "Published",
-      createdDate: "Jun 1, 2024",
-      lastUpdated: "Jun 14, 2024",
-      icon: "code",
-      trend: "+25%",
-      thumbnailUrl: "",
-      mediaType: "video",
-      promoVideoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    },
-    {
-      id: 8,
-      title: "Cloud Computing AWS",
-      description: "Complete AWS certification preparation",
-      instructor: "Maria Garcia",
-      category: "Development",
-      students: 267,
-      status: "Draft",
-      createdDate: "May 25, 2024",
-      lastUpdated: "Jun 8, 2024",
-      icon: "code",
-      trend: "+10%",
-      thumbnailUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=100&h=100&fit=crop",
-      mediaType: "image",
-      promoVideoUrl: "",
-    },
-  ]);
+  // ---------- API State ----------
+  const [courses, setCourses] = useState([]);
+  const [instructorsList, setInstructorsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // ---------- UI State ----------
   const [searchTerm, setSearchTerm] = useState("");
@@ -280,17 +155,17 @@ const AdminCourses = () => {
   const [showModal, setShowModal] = useState(false);
   const [editCourse, setEditCourse] = useState(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [viewCourse, setViewCourse] = useState(null);
   const [actionMenu, setActionMenu] = useState(null);
   const [editorContent, setEditorContent] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
+  const [thumbnailFile, setThumbnailFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState("");
+  const [videoFile, setVideoFile] = useState(null);
   const [mediaType, setMediaType] = useState("image");
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
-    id: "",
     title: "",
     slug: "",
     description: "",
@@ -299,17 +174,52 @@ const AdminCourses = () => {
     price: "",
     discountPrice: "",
     language: "",
-    level: "Beginner",
-    status: "Draft",
+    level: "BEGINNER",
+    status: "DRAFT",
     instructorId: "",
-    mediaType: "image",
+    lifetimeAccess: true,
+    validityInDays: ""
   });
 
   // ---------- Data Lists ----------
   const categories = ["Development", "Data Science", "Design", "Programming", "Marketing"];
 
-  // Helper functions
-  const parseDate = (dateStr) => new Date(dateStr);
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      let res;
+      if (statusFilter === "Pending Publish") {
+        res = await adminCourseApi.getPendingPublishRequests(0, 500);
+      } else {
+        res = await adminCourseApi.getAllCourses(0, 500);
+      }
+      if (res.data && res.data.data) {
+        setCourses(res.data.data.content || []);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch courses catalog from server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchInstructors = async () => {
+    try {
+      const res = await adminManagement.getAllInstructors(null, 0, 500);
+      if (res.data && res.data.data) {
+        setInstructorsList(res.data.data.content || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch instructors list for dropdown", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+    fetchInstructors();
+  }, [statusFilter]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -321,7 +231,6 @@ const AdminCourses = () => {
   const openAddModal = () => {
     setEditCourse(null);
     setFormData({
-      id: "",
       title: "",
       slug: "",
       description: "",
@@ -329,123 +238,163 @@ const AdminCourses = () => {
       promoVideoUrl: "",
       price: "",
       discountPrice: "",
-      language: "",
-      level: "Beginner",
-      status: "Draft",
+      language: "English",
+      level: "BEGINNER",
+      status: "DRAFT",
       instructorId: "",
-      mediaType: "image",
+      lifetimeAccess: true,
+      validityInDays: ""
     });
     setEditorContent("");
     setThumbnailPreview("");
+    setThumbnailFile(null);
     setVideoPreview("");
+    setVideoFile(null);
     setMediaType("image");
     setShowModal(true);
   };
 
   const openEditModal = (course) => {
+    const matchedInst = instructorsList.find(i => i.instructorCode === course.instructorCode);
+    const instId = matchedInst ? matchedInst.id : (course.instructorId || "");
+
     setEditCourse(course);
     setFormData({
-      id: course.id,
-      title: course.title,
-      slug: course.title?.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-") || "",
-      description: course.description,
+      title: course.title || "",
+      slug: course.slug || "",
+      description: course.description || "",
       thumbnailUrl: course.thumbnailUrl || "",
       promoVideoUrl: course.promoVideoUrl || "",
       price: course.price || "",
       discountPrice: course.discountPrice || "",
-      language: course.language || "",
-      level: course.level || "Beginner",
-      status: course.status,
-      instructorId: course.instructorId || "",
-      mediaType: course.mediaType || "image",
+      language: course.language || "English",
+      level: course.level || "BEGINNER",
+      status: course.status || "DRAFT",
+      instructorId: instId || "",
+      lifetimeAccess: course.lifetimeAccess ?? true,
+      validityInDays: course.validityInDays || ""
     });
     setEditorContent(course.description || "");
     setThumbnailPreview(course.thumbnailUrl || "");
+    setThumbnailFile(null);
     setVideoPreview(course.promoVideoUrl || "");
-    setMediaType(course.mediaType || "image");
+    setVideoFile(null);
+    setMediaType(course.promoVideoUrl ? "video" : "image");
     setShowModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     
-    const updatedData = {
-      ...formData,
-      mediaType: mediaType,
-      description: editorContent,
-      thumbnailUrl: mediaType === "image" ? formData.thumbnailUrl : "",
-      promoVideoUrl: mediaType === "video" ? formData.promoVideoUrl : "",
-    };
-
-    if (editCourse) {
-      setCourses(
-        courses.map((course) =>
-          course.id === editCourse.id
-            ? { 
-                ...course, 
-                ...updatedData,
-                lastUpdated: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-              }
-            : course
-        )
-      );
-    } else {
-      const newCourse = {
-        id: Date.now(),
-        title: formData.title,
-        description: editorContent,
-        instructor: "New Instructor",
-        category: "Development",
-        students: 0,
-        status: formData.status,
-        createdDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        lastUpdated: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        icon: "code",
-        trend: "0%",
-        ...updatedData,
-      };
-      setCourses([newCourse, ...courses]);
+    if (!formData.instructorId) {
+      alert("Instructor ID is required.");
+      return;
     }
-    setShowModal(false);
-    setEditorContent("");
-    setThumbnailPreview("");
-    setVideoPreview("");
-  };
 
-  const handleDeleteClick = (id) => {
-    setDeleteConfirm({ type: "single", id });
-  };
+    try {
+      const payload = new FormData();
+      payload.append("title", formData.title.trim());
+      payload.append("description", editorContent.trim());
+      payload.append("price", formData.price);
+      if (formData.discountPrice) {
+        payload.append("discountPrice", formData.discountPrice);
+      }
+      payload.append("language", formData.language || "English");
+      payload.append("level", formData.level);
+      payload.append("instructorId", parseInt(formData.instructorId, 10));
+      payload.append("lifetimeAccess", formData.lifetimeAccess ? "true" : "false");
+      
+      if (!formData.lifetimeAccess && formData.validityInDays) {
+        payload.append("validityInDays", parseInt(formData.validityInDays, 10));
+      }
 
-  const confirmDelete = () => {
-    if (!deleteConfirm) return;
-    if (deleteConfirm.type === "single") {
-      setCourses(courses.filter((c) => c.id !== deleteConfirm.id));
-      setSelectedCourses(selectedCourses.filter((id) => id !== deleteConfirm.id));
-    } else if (deleteConfirm.type === "bulk") {
-      setCourses(courses.filter((c) => !deleteConfirm.ids.includes(c.id)));
-      setSelectedCourses([]);
+      // Thumbnail
+      if (thumbnailFile) {
+        payload.append("thumbnailInputType", "FILE_UPLOAD");
+        payload.append("thumbnailFile", thumbnailFile);
+      } else if (formData.thumbnailUrl) {
+        payload.append("thumbnailInputType", "URL");
+        payload.append("thumbnailUrl", formData.thumbnailUrl);
+      } else {
+        payload.append("thumbnailInputType", "URL");
+        payload.append("thumbnailUrl", "");
+      }
+
+      // Video
+      if (videoFile) {
+        payload.append("promoVideoInputType", "FILE_UPLOAD");
+        payload.append("promoVideoFile", videoFile);
+      } else if (formData.promoVideoUrl) {
+        payload.append("promoVideoInputType", "URL");
+        payload.append("promoVideoUrl", formData.promoVideoUrl);
+      } else {
+        payload.append("promoVideoInputType", "URL");
+        payload.append("promoVideoUrl", "");
+      }
+
+      if (editCourse) {
+        await adminCourseApi.updateCourse(editCourse.id, payload);
+        alert("Course updated successfully!");
+      } else {
+        await adminCourseApi.createCourse(payload);
+        alert("Course created successfully!");
+      }
+
+      setShowModal(false);
+      fetchCourses();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to save course. Ensure Validity is specified if Lifetime Access is disabled.");
     }
-    setDeleteConfirm(null);
   };
 
-  const duplicateCourse = (course) => {
-    const newCourse = {
-      ...course,
-      id: Date.now(),
-      title: `${course.title} (Copy)`,
-      students: 0,
-      status: "Draft",
-      createdDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      lastUpdated: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      trend: "0%",
-    };
-    setCourses([newCourse, ...courses]);
-    setActionMenu(null);
+  const handlePublishCourse = async (courseId) => {
+    if (window.confirm("Are you sure you want to PUBLISH this course? Students will be able to enroll immediately.")) {
+      setActionLoading(true);
+      try {
+        await adminCourseApi.publishCourse(courseId);
+        alert("Course published successfully!");
+        fetchCourses();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Failed to publish course. Make sure the course contains modules & lessons.");
+      } finally {
+        setActionLoading(false);
+      }
+    }
   };
 
-  const archiveCourse = (id) => {
-    setCourses(courses.map(c => c.id === id ? { ...c, status: "Archived" } : c));
-    setActionMenu(null);
+  const handleRejectPublish = async (courseId) => {
+    if (window.confirm("Are you sure you want to REJECT the publish request for this course?")) {
+      setActionLoading(true);
+      try {
+        await adminCourseApi.rejectPublishRequest(courseId);
+        alert("Publish request rejected successfully.");
+        fetchCourses();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Failed to reject publish request.");
+      } finally {
+        setActionLoading(false);
+      }
+    }
+  };
+
+  const handleArchiveCourse = async (courseId) => {
+    if (window.confirm("Are you sure you want to ARCHIVE this course?")) {
+      setActionLoading(true);
+      try {
+        await adminCourseApi.archiveCourse(courseId);
+        alert("Course archived successfully!");
+        fetchCourses();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Failed to archive course.");
+      } finally {
+        setActionLoading(false);
+      }
+    }
   };
 
   const toggleSelectCourse = (id) => {
@@ -462,29 +411,35 @@ const AdminCourses = () => {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkArchive = async () => {
     if (selectedCourses.length === 0) return;
-    setDeleteConfirm({ type: "bulk", ids: [...selectedCourses] });
-  };
-
-  const handleBulkArchive = () => {
-    if (selectedCourses.length === 0) return;
-    setCourses(courses.map(c => selectedCourses.includes(c.id) ? { ...c, status: "Archived" } : c));
-    setSelectedCourses([]);
+    if (window.confirm(`Are you sure you want to archive ${selectedCourses.length} course(s)?`)) {
+      setActionLoading(true);
+      try {
+        await Promise.all(selectedCourses.map(id => adminCourseApi.archiveCourse(id)));
+        alert("Selected courses archived successfully!");
+        fetchCourses();
+        setSelectedCourses([]);
+      } catch (err) {
+        console.error(err);
+        alert("An error occurred during bulk archiving.");
+      } finally {
+        setActionLoading(false);
+      }
+    }
   };
 
   const exportToCSV = () => {
-    const headers = ["ID", "Title", "Instructor", "Category", "Students", "Status", "Created Date", "Last Updated", "Media Type"];
+    const headers = ["ID", "Title", "Instructor", "Category", "Price", "Discount Price", "Status", "Publish Requested"];
     const rows = filteredCourses.map((c) => [
       c.id,
       c.title,
-      c.instructor,
-      c.category,
-      c.students,
+      c.instructorName,
+      c.category || "Development",
+      c.price,
+      c.discountPrice || "",
       c.status,
-      c.createdDate,
-      c.lastUpdated,
-      c.mediaType || "image",
+      c.publishRequested ? "YES" : "NO",
     ]);
     const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -498,24 +453,30 @@ const AdminCourses = () => {
 
   // Filtering & Sorting
   const filteredCourses = useMemo(() => {
-    let result = [...courses.filter(c => c.status !== "Archived")];
+    let result = [...courses];
 
     result = result.filter((course) => {
       const matchesSearch =
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.category.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === "All Categories" || course.category === categoryFilter;
-      const matchesStatus = statusFilter === "All Status" || course.status === statusFilter;
+        (course.instructorName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (course.category || "Development").toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === "All Categories" || (course.category || "Development") === categoryFilter;
+      
+      let matchesStatus = true;
+      if (statusFilter === "Pending Publish") {
+        matchesStatus = course.publishRequested && course.status !== "PUBLISHED";
+      } else if (statusFilter !== "All Status") {
+        matchesStatus = course.status === statusFilter.toUpperCase();
+      }
       return matchesSearch && matchesCategory && matchesStatus;
     });
 
     if (sortBy === "Students") {
-      result.sort((a, b) => b.students - a.students);
+      result.sort((a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0));
     } else if (sortBy === "Course Name") {
       result.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === "Newest") {
-      result.sort((a, b) => parseDate(b.createdDate) - parseDate(a.createdDate));
+      result.sort((a, b) => b.id - a.id);
     }
     return result;
   }, [courses, searchTerm, categoryFilter, statusFilter, sortBy]);
@@ -528,28 +489,17 @@ const AdminCourses = () => {
 
   useEffect(() => setCurrentPage(1), [searchTerm, categoryFilter, statusFilter, sortBy, itemsPerPage]);
 
-  // Stats
-  const totalCourses = courses.filter(c => c.status !== "Archived").length;
-  const publishedCourses = courses.filter(c => c.status === "Published").length;
-  const draftCourses = courses.filter(c => c.status === "Draft").length;
-  const totalEnrollments = courses.reduce((sum, c) => sum + c.students, 0);
+  // Stats calculation
+  const totalCourses = courses.length;
+  const publishedCourses = courses.filter(c => c.status === "PUBLISHED").length;
+  const draftCourses = courses.filter(c => c.status === "DRAFT").length;
+  const totalRequests = courses.filter(c => c.publishRequested && c.status !== "PUBLISHED").length;
 
-  // Icon renderer for fallback
-  const getIcon = (icon) => {
-    const base = "w-12 h-12 rounded-lg flex items-center justify-center text-white";
-    switch (icon) {
-      case "chart":
-        return <div className={`${base} bg-purple-500`}><BarChart3 size={20} /></div>;
-      case "design":
-        return <div className={`${base} bg-amber-500`}><Palette size={20} /></div>;
-      case "marketing":
-        return <div className={`${base} bg-blue-500`}><Megaphone size={20} /></div>;
-      case "brain":
-        return <div className={`${base} bg-orange-500`}><Brain size={20} /></div>;
-      default:
-        return <div className={`${base} bg-teal-600`}><Code2 size={20} /></div>;
-    }
-  };
+  const getIcon = () => (
+    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white bg-teal-600 flex-shrink-0">
+      <BookOpen size={18} />
+    </div>
+  );
 
   const getCategoryColor = (category) => {
     const map = {
@@ -559,14 +509,7 @@ const AdminCourses = () => {
       Programming: "bg-blue-50 text-blue-700",
       Marketing: "bg-pink-50 text-pink-700",
     };
-    return map[category] || "bg-gray-50 text-gray-700";
-  };
-
-  const getTrendIcon = (trend) => {
-    const val = parseFloat(trend);
-    if (val > 0) return <TrendingUp size={12} className="text-green-600" />;
-    if (val < 0) return <TrendingDown size={12} className="text-red-600" />;
-    return null;
+    return map[category || "Development"] || "bg-gray-50 text-gray-700";
   };
 
   const handleEditorChange = (content) => {
@@ -574,32 +517,18 @@ const AdminCourses = () => {
   };
 
   const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
+    setThumbnailPreview(URL.createObjectURL(file));
+    setThumbnailFile(file);
+  };
 
-  const imageUrl = URL.createObjectURL(file);
-
-  setThumbnailPreview(imageUrl);
-
-  setFormData({
-    ...formData,
-    thumbnailUrl: imageUrl,
-  });
-};
-
- const handleVideoUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const videoUrl = URL.createObjectURL(file);
-
-  setVideoPreview(videoUrl);
-
-  setFormData({
-    ...formData,
-    promoVideoUrl: videoUrl,
-  });
-};
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setVideoPreview(URL.createObjectURL(file));
+    setVideoFile(file);
+  };
 
   const handleVideoUrlChange = (e) => {
     const url = e.target.value;
@@ -610,20 +539,14 @@ const AdminCourses = () => {
     }
   };
 
-  // Function to extract YouTube video ID
-  const getYouTubeThumbnail = (url) => {
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-    return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-sans">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-5 py-6">
         {/* Breadcrumb */}
         <div className="mb-4">
           <p className="text-sm text-gray-500 flex items-center">
-            <Link to="/admin/dashboard" className="hover:text-teal-600 transition">
+            <Link to="/admin/dashboard" className="hover:text-teal-600 transition no-underline">
               Dashboard
             </Link>
             <span className="mx-2">/</span>
@@ -638,11 +561,11 @@ const AdminCourses = () => {
             <p className="text-gray-500 text-sm mt-0.5">Manage your course catalog, track performance, and organize content</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={exportToCSV} className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-gray-700 bg-white hover:bg-gray-50 text-sm transition">
+            <button onClick={exportToCSV} className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-gray-700 bg-white hover:bg-gray-50 text-sm transition font-semibold cursor-pointer">
               <Download size={16} />
-              Export
+              Export CSV
             </button>
-            <button onClick={openAddModal} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 text-sm transition shadow-sm">
+            <button onClick={openAddModal} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 text-sm transition shadow-sm font-semibold border-none cursor-pointer">
               <Plus size={16} />
               New Course
             </button>
@@ -651,10 +574,10 @@ const AdminCourses = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={<BookOpen size={18} />} title="Total Courses" value={totalCourses} trend="+2" color="teal" />
-          <StatCard icon={<PlayCircle size={18} />} title="Published" value={publishedCourses} trend="+1" color="green" />
-          <StatCard icon={<Clock size={18} />} title="Drafts" value={draftCourses} trend="-1" color="amber" />
-          <StatCard icon={<Users size={18} />} title="Enrollments" value={totalEnrollments} trend="+15%" color="blue" />
+          <StatCard icon={<BookOpen size={18} />} title="Total Courses" value={totalCourses} trend="0%" color="teal" />
+          <StatCard icon={<PlayCircle size={18} />} title="Published" value={publishedCourses} trend="0%" color="green" />
+          <StatCard icon={<Clock size={18} />} title="Drafts" value={draftCourses} trend="0%" color="amber" />
+          <StatCard icon={<Users size={18} />} title="Pending Publish" value={totalRequests} trend="0%" color="blue" />
         </div>
 
         {/* Filter Bar & Table */}
@@ -662,7 +585,7 @@ const AdminCourses = () => {
           {/* Filters */}
           <div className="p-4 flex flex-wrap items-center gap-3 border-b border-gray-100">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
               <input
                 type="text"
                 placeholder="Search courses by title, instructor or category..."
@@ -677,15 +600,16 @@ const AdminCourses = () => {
             </SelectBox>
             <SelectBox value={statusFilter} onChange={setStatusFilter}>
               <option>All Status</option>
-              <option>Published</option>
-              <option>Draft</option>
+              <option value="Draft">Draft</option>
+              <option value="Published">Published</option>
+              <option value="Pending Publish">Pending Publish</option>
             </SelectBox>
             <SelectBox value={sortBy} onChange={setSortBy}>
               <option>Newest</option>
               <option>Students</option>
               <option>Course Name</option>
             </SelectBox>
-            <button onClick={resetFilters} className="flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm text-gray-600 transition">
+            <button onClick={resetFilters} className="flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm text-gray-600 transition cursor-pointer">
               <X size={14} />
               Clear
             </button>
@@ -699,13 +623,9 @@ const AdminCourses = () => {
                 <span className="text-xs font-medium text-teal-800">{selectedCourses.length} course(s) selected</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={handleBulkArchive} className="flex items-center gap-1 text-xs bg-white border border-amber-200 text-amber-600 px-2 py-1 rounded hover:bg-amber-50 transition">
+                <button onClick={handleBulkArchive} className="flex items-center gap-1 text-xs bg-white border border-amber-200 text-amber-600 px-2 py-1 rounded hover:bg-amber-50 transition cursor-pointer">
                   <Archive size={12} />
                   Archive
-                </button>
-                <button onClick={handleBulkDelete} className="flex items-center gap-1 text-xs bg-white border border-red-200 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition">
-                  <Trash2 size={12} />
-                  Delete
                 </button>
               </div>
             </div>
@@ -719,132 +639,108 @@ const AdminCourses = () => {
                   <th className="px-4 py-3 w-10">
                     <button 
                       onClick={toggleSelectAll} 
-                      className="text-gray-400 hover:text-teal-600 transition"
+                      className="text-gray-400 hover:text-teal-600 transition border-none bg-transparent cursor-pointer"
                       disabled={paginatedCourses.length === 0}
                     >
                       {selectedCourses.length === paginatedCourses.length && paginatedCourses.length > 0 ? 
-                        <CheckSquare size={14} /> : <Square size={14} />
-                      }
+                        <CheckSquare size={14} /> : <Square size={14} />}
                     </button>
                   </th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Course</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Instructor</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Students</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Updated</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {paginatedCourses.map((course) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12 text-gray-500">
+                      <div className="w-8 h-8 border-4 border-t-teal-600 border-gray-200 rounded-full animate-spin mx-auto mb-2"></div>
+                      <span>Loading courses catalog...</span>
+                    </td>
+                  </tr>
+                ) : paginatedCourses.map((course, idx) => (
                   <tr key={course.id} className="hover:bg-gray-50 transition group">
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleSelectCourse(course.id)} className="text-gray-400 hover:text-teal-600 transition">
+                      <button onClick={() => toggleSelectCourse(course.id)} className="text-gray-400 hover:text-teal-600 transition border-none bg-transparent cursor-pointer">
                         {selectedCourses.includes(course.id) ? <CheckSquare size={14} /> : <Square size={14} />}
                       </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                      {/* Single Course Icon */}
-                       {getIcon(course.icon)}
-                        {/* Fallback Icon */}                        
+                        {course.thumbnailUrl ? (
+                          <img src={course.thumbnailUrl} alt="Thumbnail" className="w-10 h-10 object-cover rounded-lg border border-gray-200" />
+                        ) : getIcon()}
                         <div>
-                          <h3 className="font-medium text-gray-900 text-sm">{course.title}</h3>
-                          <p className="text-xs text-gray-500 line-clamp-1 max-w-xs">{course.description}</p>
-                          <span className="text-xs text-gray-400 mt-1 inline-flex items-center gap-1">
-                            {course.mediaType === "video" ? (
-                              <><Video size={10} /> Video Course</>
-                            ) : (
-                              <><ImageIcon size={10} /> Image Course</>
-                            )}
-                          </span>
+                          <h3 className="font-semibold text-gray-900 text-sm">{course.title}</h3>
+                          <p className="text-xs text-gray-400 line-clamp-1 max-w-xs">{course.description}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 text-sm">{course.instructor}</td>
+                    <td className="px-4 py-3 text-gray-700 text-sm font-medium">{course.instructorName || "Unassigned"}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(course.category)}`}>
-                        {course.category}
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${getCategoryColor(course.category)}`}>
+                        {course.category || "Development"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 text-sm font-semibold">
+                      {course.discountPrice ? `₹${course.discountPrice}` : `₹${course.price}`}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        course.status === "PUBLISHED" 
+                          ? "bg-green-100 text-green-700" 
+                          : course.publishRequested 
+                            ? "bg-blue-100 text-blue-700" 
+                            : "bg-yellow-100 text-yellow-700"
+                      }`}>
+                        {course.status === "PUBLISHED" ? "PUBLISHED" : course.publishRequested ? "PENDING PUBLISH" : course.status || "DRAFT"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-gray-700 text-sm">{course.students.toLocaleString()}</span>
-                        {course.trend && (
-                          <div className="flex items-center gap-0.5">
-                            {getTrendIcon(course.trend)}
-                            <span className={`text-xs ${parseFloat(course.trend) > 0 ? 'text-green-600' : parseFloat(course.trend) < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                              {course.trend}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        course.status === "Published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {course.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{course.lastUpdated}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <button 
-                          onClick={() => setViewCourse(course)} 
-                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition" 
-                          title="View details"
+                        <Link 
+                          to={`/admin/course-preview/${course.id}`} 
+                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-teal-50 hover:text-teal-600 transition flex items-center justify-center" 
+                          title="View course details"
                         >
                           <Eye size={14} />
-                        </button>
+                        </Link>
                         <button 
                           onClick={() => openEditModal(course)} 
-                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition" 
+                          className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-teal-50 hover:text-teal-600 transition cursor-pointer bg-transparent" 
                           title="Edit course"
                         >
                           <Edit size={14} />
                         </button>
-                        {/* Image Preview */}
-{/* Image Preview */}
-{course.thumbnailUrl && (
-  <img
-    src={course.thumbnailUrl}
-    alt="course"
-    className="w-[30px] h-[30px] rounded border border-gray-200 object-cover"
-  />
-)}
-
-{/* Video Preview */}
-{course.promoVideoUrl && (
-  <div className="w-[30px] h-[30px] rounded border border-gray-200 overflow-hidden relative bg-black">
-    <video
-      src={course.promoVideoUrl}
-      className="w-full h-full object-cover"
-      muted
-    />
-    <PlayCircle
-      size={10}
-      className="absolute inset-0 m-auto text-white"
-    />
-  </div>
-)}
                         <div className="relative">
                           <button 
                             onClick={() => setActionMenu(actionMenu === course.id ? null : course.id)} 
-                            className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 transition"
+                            className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-100 transition cursor-pointer bg-transparent"
                           >
                             <MoreVertical size={14} />
                           </button>
                           {actionMenu === course.id && (
-                            <div className="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-100 z-20 py-1">
-                              <button onClick={() => { duplicateCourse(course); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                <Copy size={12} /> Duplicate
-                              </button>
-                              <button onClick={() => { archiveCourse(course.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                <Archive size={12} /> Archive
-                              </button>
-                              <button onClick={() => { handleDeleteClick(course.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-100 z-20 py-1 font-semibold text-xs">
+                              {course.publishRequested && course.status !== "PUBLISHED" && (
+                                <>
+                                  <button onClick={() => { handlePublishCourse(course.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-teal-600 hover:bg-teal-50 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                                    <CheckSquare size={12} /> Publish
+                                  </button>
+                                  <button onClick={() => { handleRejectPublish(course.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                                    <X size={12} /> Reject Request
+                                  </button>
+                                </>
+                              )}
+                              {course.status === "PUBLISHED" && (
+                                <button onClick={() => { handleArchiveCourse(course.id); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-amber-600 hover:bg-amber-50 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                                  <Archive size={12} /> Archive
+                                </button>
+                              )}
+                              <button onClick={() => { alert("Deletion is disabled on the frontend. Re-assign or archive the course instead."); setActionMenu(null); }} className="w-full text-left px-3 py-1.5 text-gray-400 hover:bg-gray-50 flex items-center gap-2 border-none bg-transparent cursor-pointer">
                                 <Trash2 size={12} /> Delete
                               </button>
                             </div>
@@ -854,13 +750,13 @@ const AdminCourses = () => {
                     </td>
                   </tr>
                 ))}
-                {paginatedCourses.length === 0 && (
+                {!loading && paginatedCourses.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="text-center py-16 text-gray-400">
+                    <td colSpan="7" className="text-center py-16 text-gray-400">
                       <div className="flex flex-col items-center gap-3">
                         <BookOpen size={48} strokeWidth={1} />
-                        <p className="text-sm">No courses found. Try adjusting your filters or create a new course.</p>
-                        <button onClick={resetFilters} className="text-teal-600 text-sm hover:text-teal-700 font-medium">Clear all filters</button>
+                        <p className="text-sm font-medium">No courses found matching this catalog filter.</p>
+                        <button onClick={resetFilters} className="text-teal-600 text-sm hover:text-teal-700 font-semibold border-none bg-transparent cursor-pointer">Clear all filters</button>
                       </div>
                     </td>
                   </tr>
@@ -876,7 +772,7 @@ const AdminCourses = () => {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500">Rows per page:</span>
+                <span className="text-xs text-gray-500 font-medium">Rows per page:</span>
                 <select 
                   value={itemsPerPage} 
                   onChange={(e) => setItemsPerPage(Number(e.target.value))} 
@@ -889,15 +785,15 @@ const AdminCourses = () => {
                 <button 
                   onClick={() => setCurrentPage(p => Math.max(p-1, 1))} 
                   disabled={currentPage === 1} 
-                  className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition"
+                  className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer bg-white"
                 >
                   <ChevronLeft size={14} />
                 </button>
-                <span className="px-3 py-1 bg-teal-600 text-white rounded text-xs font-medium">{currentPage}</span>
+                <span className="px-3 py-1 bg-teal-600 text-white rounded text-xs font-semibold">{currentPage}</span>
                 <button 
                   onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} 
                   disabled={currentPage === totalPages || totalPages === 0} 
-                  className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition"
+                  className="p-1.5 rounded border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer bg-white"
                 >
                   <ChevronRight size={14} />
                 </button>
@@ -909,39 +805,30 @@ const AdminCourses = () => {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl" style={{ maxHeight: "90vh", overflowY: "auto" }}>
-            <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
-              <h2 className="text-lg font-semibold text-gray-800">{editCourse ? "Edit Course" : "Create New Course"}</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 transition">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" style={{ maxHeight: "90vh" }}>
+            <div className="flex justify-between items-center px-6 py-4 border-b sticky top-0 bg-white z-10">
+              <h2 className="text-base font-bold text-gray-800">{editCourse ? "Edit Course Content" : "Create New Course"}</h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 transition border-none bg-transparent cursor-pointer">
                 <X size={18} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Course ID */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Course ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  required
-                  type="number"
-                  placeholder="Enter course ID"
-                  value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
-                />
-              </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(90vh - 70px)" }}>
+              {error && (
+                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-semibold">
+                  ⚠️ {error}
+                </div>
+              )}
 
               {/* Course Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                   Course Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   required
-                  placeholder="Enter course title"
+                  placeholder="e.g., Search Engine Optimization (SEO)"
                   value={formData.title}
                   onChange={(e) => {
                     const title = e.target.value;
@@ -955,26 +842,25 @@ const AdminCourses = () => {
                         .replace(/\s+/g, "-"),
                     });
                   }}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-gray-50/50"
                 />
               </div>
 
               {/* Slug */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Slug (URL)</label>
                 <input
                   type="text"
                   placeholder="auto-generated from title"
                   value={formData.slug}
                   readOnly
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
                 />
-                <p className="text-xs text-gray-500 mt-1">Auto-generated from course title</p>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <RichTextEditor value={editorContent} onChange={handleEditorChange} editorRef={editorRef} />
@@ -982,31 +868,31 @@ const AdminCourses = () => {
 
               {/* Media Type Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Media Type</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Media Type</label>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setMediaType("image")}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2 border-none cursor-pointer ${
                       mediaType === "image"
                         ? "bg-teal-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
-                    <ImageIcon size={16} />
-                    Image
+                    <ImageIcon size={14} />
+                    Image File
                   </button>
                   <button
                     type="button"
                     onClick={() => setMediaType("video")}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2 border-none cursor-pointer ${
                       mediaType === "video"
                         ? "bg-teal-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
-                    <Video size={16} />
-                    Video
+                    <Video size={14} />
+                    Video Promo
                   </button>
                 </div>
               </div>
@@ -1014,19 +900,27 @@ const AdminCourses = () => {
               {/* Image Upload */}
               {mediaType === "image" && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Course Thumbnail</label>
-                  <label className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 transition bg-gray-50">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Course Thumbnail</label>
+                  <label className="border-2 border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 transition bg-gray-50/50">
                     {thumbnailPreview ? (
-                      <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-48 object-cover rounded-lg" />
+                      <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-40 object-cover rounded-lg" />
                     ) : (
                       <>
-                        <Upload className="text-gray-400 mb-2" size={28} />
-                        <p className="text-sm text-gray-600 font-medium">Click to upload image</p>
-                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG supported</p>
+                        <Upload className="text-gray-400 mb-2" size={24} />
+                        <p className="text-xs text-gray-600 font-semibold">Click to upload thumbnail image</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, JPEG supported</p>
                       </>
                     )}
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" ref={imageInputRef} />
                   </label>
+                  <div className="mt-2">
+                    <span className="text-xs text-gray-500 font-medium">Or enter image URL:</span>
+                    <input type="text" value={formData.thumbnailUrl} onChange={(e) => {
+                      setFormData({ ...formData, thumbnailUrl: e.target.value });
+                      setThumbnailPreview(e.target.value || "");
+                      setThumbnailFile(null);
+                    }} placeholder="https://domain.com/photo.jpg" className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-teal-500 mt-1" />
+                  </div>
                 </div>
               )}
 
@@ -1034,21 +928,17 @@ const AdminCourses = () => {
               {mediaType === "video" && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Video File</label>
-                    <label className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 transition bg-gray-50">
-                      {videoPreview && !videoPreview.includes('blob:') ? (
-                        <video controls className="w-full h-48 object-cover rounded-lg">
-                          <source src={videoPreview} type="video/mp4" />
-                        </video>
-                      ) : videoPreview && videoPreview.includes('blob:') ? (
-                        <video controls className="w-full h-48 object-cover rounded-lg">
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Upload Video File</label>
+                    <label className="border-2 border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 transition bg-gray-50/50">
+                      {videoPreview ? (
+                        <video controls className="w-full h-40 object-cover rounded-lg">
                           <source src={videoPreview} type="video/mp4" />
                         </video>
                       ) : (
                         <>
-                          <FileVideo className="text-gray-400 mb-2" size={28} />
-                          <p className="text-sm text-gray-600 font-medium">Click to upload video</p>
-                          <p className="text-xs text-gray-400 mt-1">MP4, WebM, OGG supported</p>
+                          <FileVideo className="text-gray-400 mb-2" size={24} />
+                          <p className="text-xs text-gray-600 font-semibold">Click to upload video file</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">MP4, WebM formats up to 2GB</p>
                         </>
                       )}
                       <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" ref={videoInputRef} />
@@ -1056,15 +946,14 @@ const AdminCourses = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Or Enter Video URL</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Or Enter Video URL</label>
                     <input
                       type="text"
                       placeholder="https://example.com/video.mp4"
                       value={formData.promoVideoUrl}
                       onChange={handleVideoUrlChange}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-gray-50/50"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Supports MP4, WebM formats</p>
                   </div>
                 </>
               )}
@@ -1072,129 +961,92 @@ const AdminCourses = () => {
               {/* Price and Discount Price */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($) <span className="text-red-500">*</span></label>
-                  <input required type="number" step="0.01" placeholder="0.00" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Price (₹) <span className="text-red-500">*</span></label>
+                  <input required type="number" placeholder="0.00" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-gray-50/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount Price ($)</label>
-                  <input type="number" step="0.01" placeholder="0.00" value={formData.discountPrice} onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Discount Price (₹)</label>
+                  <input type="number" placeholder="0.00" value={formData.discountPrice} onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-gray-50/50" />
                 </div>
               </div>
 
               {/* Language and Level */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Language <span className="text-red-500">*</span></label>
-                  <input required placeholder="e.g., English" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none" />
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Language <span className="text-red-500">*</span></label>
+                  <input required placeholder="e.g., English" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-gray-50/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Level <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Level <span className="text-red-500">*</span></label>
                   <select required value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-1 focus:ring-teal-500 outline-none">
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                    <option value="BEGINNER">Beginner</option>
+                    <option value="INTERMEDIATE">Intermediate</option>
+                    <option value="ADVANCED">Advanced</option>
                   </select>
                 </div>
               </div>
 
-              {/* Status and Instructor ID */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-1 focus:ring-teal-500 outline-none">
-                    <option value="Draft">Draft</option>
-                    <option value="Published">Published</option>
-                    <option value="Archived">Archived</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Instructor ID <span className="text-red-500">*</span></label>
-                  <input required type="number" placeholder="Enter instructor ID" value={formData.instructorId} onChange={(e) => setFormData({ ...formData, instructorId: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none" />
-                </div>
+              {/* Validity access toggles */}
+              <div className="bg-gray-50 border border-gray-200/60 rounded-xl p-4 space-y-3">
+                <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.lifetimeAccess}
+                    onChange={(e) => setFormData(p => ({
+                      ...p,
+                      lifetimeAccess: e.target.checked,
+                      validityInDays: e.target.checked ? "" : p.validityInDays
+                    }))}
+                    className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                  />
+                  Lifetime Course Access
+                </label>
+
+                {!formData.lifetimeAccess && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Validity in Days <span className="text-red-400">*</span></label>
+                    <input
+                      type="number"
+                      value={formData.validityInDays}
+                      onChange={(e) => setFormData({ ...formData, validityInDays: e.target.value })}
+                      placeholder="e.g. 365"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none bg-white"
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Instructor Selection */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Assign Instructor <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.instructorId}
+                  onChange={(e) => setFormData({ ...formData, instructorId: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-1 focus:ring-teal-500 outline-none"
+                >
+                  <option value="">Select Instructor</option>
+                  {instructorsList.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.fullName} ({inst.instructorCode})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button type="submit" className="flex-1 bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
-                  {editCourse ? "Update Course" : "Create Course"}
+              <div className="flex gap-3 pt-4 border-t border-gray-100">
+                <button type="submit" className="flex-1 bg-teal-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-teal-700 transition border-none cursor-pointer">
+                  {editCourse ? "Save Changes" : "Create Course"}
                 </button>
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition bg-transparent cursor-pointer">
                   Cancel
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* View Details Modal */}
-      {viewCourse && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-4 border-b bg-gray-50 sticky top-0">
-              <h2 className="text-lg font-semibold text-gray-800">Course Details</h2>
-              <button onClick={() => setViewCourse(null)} className="text-gray-400 hover:text-gray-600 transition"><X size={18} /></button>
-            </div>
-            <div className="p-4 space-y-4">
-              {/* Media Preview */}
-              <div className="flex items-start gap-4 pb-3 border-b">
-                {viewCourse.mediaType === "video" && viewCourse.promoVideoUrl ? (
-                  <div className="w-full">
-                    <video controls className="w-full rounded-lg max-h-64">
-                      <source src={viewCourse.promoVideoUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Video size={14} className="text-red-500" />
-                      <span className="text-xs text-gray-500">Promotional Video</span>
-                    </div>
-                  </div>
-                ) : viewCourse.thumbnailUrl ? (
-                  <div>
-                    <img src={viewCourse.thumbnailUrl} alt={viewCourse.title} className="w-32 h-32 rounded-lg object-cover border border-gray-200" />
-                    <div className="flex items-center gap-2 mt-2">
-                      <ImageIcon size={14} className="text-blue-500" />
-                      <span className="text-xs text-gray-500">Course Thumbnail</span>
-                    </div>
-                  </div>
-                ) : (
-                  getIcon(viewCourse.icon)
-                )}
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{viewCourse.title}</h3>
-                  <div className="text-xs text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: viewCourse.description }} />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2"><User size={14} className="text-gray-400" /><span><span className="font-medium">Instructor:</span> {viewCourse.instructor}</span></div>
-                <div className="flex items-center gap-2"><Tag size={14} className="text-gray-400" /><span><span className="font-medium">Category:</span> {viewCourse.category}</span></div>
-                <div className="flex items-center gap-2"><Users size={14} className="text-gray-400" /><span><span className="font-medium">Students:</span> {viewCourse.students}</span></div>
-                <div className="flex items-center gap-2"><PlayCircle size={14} className="text-gray-400" /><span><span className="font-medium">Status:</span> {viewCourse.status}</span></div>
-                <div className="flex items-center gap-2"><Calendar size={14} className="text-gray-400" /><span><span className="font-medium">Created:</span> {viewCourse.createdDate}</span></div>
-                <div className="flex items-center gap-2"><Clock size={14} className="text-gray-400" /><span><span className="font-medium">Updated:</span> {viewCourse.lastUpdated}</span></div>
-                <div className="flex items-center gap-2"><Video size={14} className="text-gray-400" /><span><span className="font-medium">Media Type:</span> {viewCourse.mediaType === "video" ? "Video Course" : "Image Course"}</span></div>
-              </div>
-            </div>
-            <div className="p-4 bg-gray-50 flex justify-end gap-2 rounded-b-lg sticky bottom-0">
-              <button onClick={() => { setViewCourse(null); openEditModal(viewCourse); }} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 transition">Edit Course</button>
-              <button onClick={() => setViewCourse(null)} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-sm w-full p-5 text-center shadow-xl">
-            <div className="mx-auto w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mb-3"><Trash2 className="text-red-600" size={20} /></div>
-            <h3 className="text-md font-semibold text-gray-800">Confirm Deletion</h3>
-            <p className="text-gray-500 mt-1 text-sm">{deleteConfirm.type === "bulk" ? `Are you sure you want to delete ${deleteConfirm.ids.length} course(s)?` : "Are you sure you want to delete this course?"}</p>
-            <div className="flex gap-2 mt-5">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm hover:bg-red-700 transition">Delete</button>
-            </div>
           </div>
         </div>
       )}
