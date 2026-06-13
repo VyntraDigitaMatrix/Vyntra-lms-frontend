@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { studentQuizApi } from "./auth/api";
 import { Link } from "react-router-dom";
 import {
     FaClipboardCheck, FaCheckCircle, FaTrophy, FaChevronRight,
@@ -161,10 +163,10 @@ const quizDetails = {
 
 const colorMap = {
     purple: { bg: "bg-[#f3ebff]", text: "text-[#7c3aed]", accent: "#7c3aed", light: "#f3ebff" },
-    blue:   { bg: "bg-[#eaf2ff]", text: "text-[#2563eb]", accent: "#2563eb", light: "#eaf2ff" },
+    blue: { bg: "bg-[#eaf2ff]", text: "text-[#2563eb]", accent: "#2563eb", light: "#eaf2ff" },
     orange: { bg: "bg-[#fff5e7]", text: "text-[#f59e0b]", accent: "#f59e0b", light: "#fff5e7" },
-    sky:    { bg: "bg-[#edf6ff]", text: "text-[#3b82f6]", accent: "#3b82f6", light: "#edf6ff" },
-    gray:   { bg: "bg-[#f3f4f6]", text: "text-gray-500",  accent: "#6b7280", light: "#f3f4f6" },
+    sky: { bg: "bg-[#edf6ff]", text: "text-[#3b82f6]", accent: "#3b82f6", light: "#edf6ff" },
+    gray: { bg: "bg-[#f3f4f6]", text: "text-gray-500", accent: "#6b7280", light: "#f3f4f6" },
 };
 
 /* ═══════════════════════════════════════════════
@@ -610,9 +612,9 @@ const AnalyticsModal = ({ quiz, onClose }) => {
                             <div className="grid grid-cols-2 gap-3">
                                 {[
                                     { label: "Correct", val: detail.attempt.correct, icon: "✅", color: "#16a34a", bg: "#eafaf0" },
-                                    { label: "Wrong",   val: detail.attempt.wrong,   icon: "❌", color: "#dc2626", bg: "#fff1f1" },
+                                    { label: "Wrong", val: detail.attempt.wrong, icon: "❌", color: "#dc2626", bg: "#fff1f1" },
                                     { label: "Skipped", val: detail.attempt.skipped, icon: "⏭️", color: "#6b7280", bg: "#f3f4f6" },
-                                    { label: "Time",    val: detail.attempt.timeTaken, icon: "⏱️", color: "#2563eb", bg: "#eaf2ff" },
+                                    { label: "Time", val: detail.attempt.timeTaken, icon: "⏱️", color: "#2563eb", bg: "#eaf2ff" },
                                 ].map(s => (
                                     <div key={s.label} className="rounded-2xl p-4 flex items-center gap-3" style={{ background: s.bg }}>
                                         <span className="text-xl">{s.icon}</span>
@@ -925,10 +927,10 @@ const QuizDetailDrawer = ({ quiz, onClose, onStartQuiz, onResumeQuiz, onRetakeQu
 ═══════════════════════════════════════════════ */
 const StatusBadge = ({ status }) => {
     const map = {
-        Completed:       { bg: "bg-[#eafaf0]", text: "text-[#16a34a]", icon: <FaCheck className="text-[10px]" /> },
-        "In Progress":   { bg: "bg-[#fff7e8]", text: "text-[#f59e0b]", icon: <FaTrophy className="text-[10px]" /> },
-        Upcoming:        { bg: "bg-[#edf4ff]", text: "text-[#2563eb]", icon: <FaHourglassHalf className="text-[10px]" /> },
-        "Not Attempted": { bg: "bg-gray-100",  text: "text-gray-500",  icon: null },
+        Completed: { bg: "bg-[#eafaf0]", text: "text-[#16a34a]", icon: <FaCheck className="text-[10px]" /> },
+        "In Progress": { bg: "bg-[#fff7e8]", text: "text-[#f59e0b]", icon: <FaTrophy className="text-[10px]" /> },
+        Upcoming: { bg: "bg-[#edf4ff]", text: "text-[#2563eb]", icon: <FaHourglassHalf className="text-[10px]" /> },
+        "Not Attempted": { bg: "bg-gray-100", text: "text-gray-500", icon: null },
     };
     const s = map[status] || map["Not Attempted"];
     return (
@@ -961,6 +963,7 @@ const ScoreRing = ({ score, color }) => {
    MAIN
 ═══════════════════════════════════════════════ */
 const Quizzes = () => {
+    const { courseId, moduleId, lessonId } = useParams();
     const [activeTab, setActiveTab] = useState("All Quizzes");
     const [selectedCourse, setSelectedCourse] = useState("All Courses");
     const [selectedQuiz, setSelectedQuiz] = useState(null);
@@ -982,22 +985,74 @@ const Quizzes = () => {
         alert("Quiz request sent successfully!");
     };
 
-    const quizzes = [
-        { id: 1, title: "Digital Marketing Basics Quiz", module: "Module 1", questions: "15 Questions", date: "20 May 2024", duration: "20 mins", status: "Completed",     score: "90%",  color: "purple", course: "Marketing" },
-        { id: 2, title: "SEO Fundamentals Quiz",          module: "Module 2", questions: "20 Questions", date: "22 May 2024", duration: "25 mins", status: "Completed",     score: "85%",  color: "blue",   course: "SEO" },
-        { id: 3, title: "Social Media Marketing Quiz",    module: "Module 3", questions: "15 Questions", date: "25 May 2024", duration: "20 mins", status: "In Progress",   score: "7/15", color: "orange", course: "Marketing" },
-        { id: 4, title: "Google Ads Quiz",                module: "Module 4", questions: "20 Questions", date: "28 May 2024", duration: "25 mins", status: "Upcoming",      score: "1 Day",color: "sky",    course: "Google Ads" },
-        { id: 5, title: "Email Marketing Quiz",           module: "Module 5", questions: "15 Questions", date: "30 May 2024", duration: "20 mins", status: "Not Attempted", score: "",     color: "gray",   course: "Email Marketing" },
-    ];
+    const [quizzes, setQuizzes] = useState([]);
 
-    const tabFiltered = activeTab === "All Quizzes" ? quizzes
-        : activeTab === "Upcoming"     ? quizzes.filter(i => i.status === "Upcoming")
-        : activeTab === "Attempted"    ? quizzes.filter(i => i.status === "Completed" || i.status === "In Progress")
-        : activeTab === "Quiz Results" ? quizzes.filter(i => i.status === "Completed")
-        : quizzes;
+    const fetchQuizzes = async () => {
+        try {
+            const response = await studentQuizApi.getAllQuizzes();
+
+            console.log("API Response:", response.data);
+            console.log("Data:", response.data?.data);
+            console.log("Is Array:", Array.isArray(response.data?.data));
+
+            setQuizzes(response.data?.data?.content || []);
+        } catch (error) {
+            console.error("Error fetching quizzes:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchQuizzes();
+    }, []);
+
+    useEffect(() => {
+        if (courseId || moduleId || lessonId) {
+            fetchQuizzes();
+        }
+    }, [courseId, moduleId, lessonId]);
+
+    const quizArray = Array.isArray(quizzes) ? quizzes : [];
+
+    const tabFiltered = activeTab === "All Quizzes" ? quizArray
+        : activeTab === "Upcoming" ? quizArray.filter(i => i.status === "Upcoming")
+            : activeTab === "Attempted" ? quizArray.filter(i => i.status === "Completed" || i.status === "In Progress")
+                : activeTab === "Quiz Results" ? quizArray.filter(i => i.status === "Completed")
+                    : quizzes;
 
     const filteredQuizzes = selectedCourse === "All Courses"
         ? tabFiltered : tabFiltered.filter(i => i.course === selectedCourse);
+
+    
+
+    const totalQuizzes = quizArray.length;
+
+    const attemptedQuizzes = quizArray.filter(
+        q => q.status === "Completed" || q.status === "In Progress"
+    ).length;
+
+    const completedQuizzes = quizArray.filter(
+        q => q.status === "Completed"
+    );
+
+    const avgScore =
+        completedQuizzes.length > 0
+            ? Math.round(
+                completedQuizzes.reduce(
+                    (sum, q) => sum + Number(q.score || 0),
+                    0
+                ) / completedQuizzes.length
+            )
+            : 0;
+
+    const correctAnswers =
+        completedQuizzes.length > 0
+            ? Math.round(
+                completedQuizzes.reduce(
+                    (sum, q) => sum + Number(q.score || 0),
+                    0
+                ) / completedQuizzes.length
+            )
+            : 0;
 
     return (
         <div className="p-3 sm:p-5 md:p-6 min-h-screen bg-[#f7f8fc]">
@@ -1024,10 +1079,30 @@ const Quizzes = () => {
                 {/* STATS */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {[
-                        { label: "Total Quizzes", val: "24", icon: <MdQuiz className="text-[#7c3aed] text-[24px]" />, bg: "bg-[#f3ebff]" },
-                        { label: "Attempted",     val: "18", icon: <FaClipboardCheck className="text-[#2563eb] text-[22px]" />, bg: "bg-[#e9f2ff]" },
-                        { label: "Correct Answers",val: "76%",icon: <FaCheckCircle className="text-[#16a34a] text-[22px]" />, bg: "bg-[#eafaf0]" },
-                        { label: "Avg. Score",    val: "82%", icon: <FaTrophy className="text-[#f59e0b] text-[22px]" />, bg: "bg-[#fff5e7]" },
+                        {
+                            label: "Total Quizzes",
+                            val: totalQuizzes,
+                            icon: <MdQuiz className="text-[#7c3aed] text-[24px]" />,
+                            bg: "bg-[#f3ebff]"
+                        },
+                        {
+                            label: "Attempted",
+                            val: attemptedQuizzes,
+                            icon: <FaClipboardCheck className="text-[#2563eb] text-[22px]" />,
+                            bg: "bg-[#e9f2ff]"
+                        },
+                        {
+                            label: "Correct Answers",
+                            val: `${correctAnswers}%`,
+                            icon: <FaCheckCircle className="text-[#16a34a] text-[22px]" />,
+                            bg: "bg-[#eafaf0]"
+                        },
+                        {
+                            label: "Avg. Score",
+                            val: `${avgScore}%`,
+                            icon: <FaTrophy className="text-[#f59e0b] text-[22px]" />,
+                            bg: "bg-[#fff5e7]"
+                        }
                     ].map(s => (
                         <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3 shadow-sm">
                             <div className={`w-[52px] h-[52px] rounded-xl ${s.bg} flex items-center justify-center`}>{s.icon}</div>
@@ -1115,6 +1190,12 @@ const Quizzes = () => {
                         );
                     })}
                 </div>
+
+                {quizArray.length === 0 && (
+                <div className="text-center py-10 bg-gray-100 rounded-xl">
+                    No quizzes available
+                </div>
+            )}
 
                 {/* BOTTOM CTA */}
                 <div className="mt-8 bg-[#f6f0ff] border border-[#ede2ff] rounded-xl p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Me from "../assets/Me.jpg";
+import { useAuth } from "./auth/AuthContext";
 import {
   FaUser,
   FaEdit,
@@ -14,12 +15,25 @@ import {
 } from "react-icons/fa";
 
 const AdminProfile = () => {
+  const { student, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+
+  const [profileImage, setProfileImage] = useState(null);
+  const userName = "Harika";
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfileImage(imageUrl);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
       <div className="max-w-6xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-md overflow-hidden">
-        
+
         {/* Header Banner */}
         <div className="h-32 sm:h-40 bg-gradient-to-r from-blue-600 to-blue-700 relative">
           <button
@@ -36,21 +50,43 @@ const AdminProfile = () => {
           {/* Profile Header */}
           <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16">
             <div className="relative mx-auto sm:mx-0">
-              <img
-                src={Me}
-                alt="Admin"
-                className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg object-cover"
-              />
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                />
+              ) : (
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg bg-blue-500 flex items-center justify-center">
+                  <span className="text-white text-3xl sm:text-4xl font-bold">
+                    {userName?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+
               {isEditing && (
-                <button className="absolute bottom-1 right-1 bg-blue-500 text-white p-2 sm:p-2.5 rounded-full hover:bg-blue-600 transition shadow-md">
-                  <FaCamera size={12} className="sm:text-sm" />
-                </button>
+                <>
+                  <label
+                    htmlFor="profile-upload"
+                    className="absolute bottom-1 right-1 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer shadow-md"
+                  >
+                    <FaCamera size={12} />
+                  </label>
+
+                  <input
+                    id="profile-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </>
               )}
             </div>
 
             <div className="text-center sm:text-left flex-1">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 sm:mt-20">
-                Shankar Admin
+                {student && student.fullName ? student.fullName : "Student"}
               </h2>
               <p className="text-xs sm:text-sm text-gray-500 mt-0.5">LMS Administrator</p>
               <span className="inline-block mt-2 bg-blue-500 text-white px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">

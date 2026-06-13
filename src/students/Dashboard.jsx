@@ -10,8 +10,10 @@ import {
   FaEllipsisV, FaMedal, FaChevronDown, FaTv, FaCheckCircle,
   FaClipboardCheck, FaFileUpload,
 } from "react-icons/fa";
+import { useAuth } from "./auth/AuthContext";
 
 const Dashboard = () => {
+  const { student, logout } = useAuth();
   const navigate = useNavigate();
   const [selectedDays, setSelectedDays] = React.useState("This Week");
   const [showDays, setShowDays] = React.useState(false);
@@ -40,7 +42,7 @@ const Dashboard = () => {
 
       {/* Header */}
       <div className="mb-4 sm:mb-5">
-        <h1 className="text-lg sm:text-xl font-bold text-[#111827]">Welcome back, Shankar!</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-[#111827]">Welcome back, {student && student.fullName ? student.fullName : "Student"}!</h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
           Let's continue your learning journey.
         </p>

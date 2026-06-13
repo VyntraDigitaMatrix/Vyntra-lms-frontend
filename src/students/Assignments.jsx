@@ -508,7 +508,7 @@ function SubmittedDetail({ assignment, onBack }) {
             )}
             {tab === "Submission History" && (
               <div className="space-y-0">
-                {assignment.history.map((item, i) => (
+                {assignment.history?.map((item, i) => (
                   <div key={i} className="flex items-center justify-between py-3 sm:py-4 border-b border-gray-100 last:border-0">
                     <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-sm text-gray-700">
                       {historyIconMap[item.type]}
@@ -620,7 +620,7 @@ function GradedDetail({ assignment, onBack }) {
                 <div>
                   <SectionLabel>Your Submission</SectionLabel>
                   <div className="space-y-2">
-                    {assignment.resources.map((f, i) => (
+                    {assignment.resources?.map((f, i) => (
                       <FileRow key={i} name={f.name} size={f.size} type={f.type} />
                     ))}
                   </div>
@@ -725,6 +725,17 @@ const Assignments = () => {
     return "View Details";
   }
 
+  const dueDateMap = useMemo(() => {
+    const map = {};
+    assignments.forEach((a) => {
+      const d = parseDueDate(a.dueDate);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(a);
+    });
+    return map;
+  }, []);
+
   if (selected) {
     const a = selected;
     const onBack = () => setSelected(null);
@@ -733,16 +744,6 @@ const Assignments = () => {
     if (a.status === "Graded") return <GradedDetail assignment={a} onBack={onBack} />;
   }
 
-  const dueDateMap = useMemo(() => {
-  const map = {};
-  assignments.forEach((a) => {
-    const d = parseDueDate(a.dueDate);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    if (!map[key]) map[key] = [];
-    map[key].push(a);
-  });
-  return map;
-}, []);
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
@@ -836,96 +837,96 @@ const Assignments = () => {
           </div>
 
           <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-  {/* Header */}
-  <div className="flex items-center justify-between mb-3 sm:mb-5">
-    <button
-      onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
-      className="text-gray-400 text-base sm:text-xl hover:text-blue-600"
-    >‹</button>
-    <h2 className="font-bold text-gray-900 text-sm sm:text-base">
-      {monthNames[month]} {year}
-    </h2>
-    <button
-      onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
-      className="text-gray-400 text-base sm:text-xl hover:text-blue-600"
-    >›</button>
-  </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3 sm:mb-5">
+              <button
+                onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+                className="text-gray-400 text-base sm:text-xl hover:text-blue-600"
+              >‹</button>
+              <h2 className="font-bold text-gray-900 text-sm sm:text-base">
+                {monthNames[month]} {year}
+              </h2>
+              <button
+                onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+                className="text-gray-400 text-base sm:text-xl hover:text-blue-600"
+              >›</button>
+            </div>
 
-  {/* Day name headers */}
-  <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-[9px] sm:text-xs text-gray-400 mb-2 sm:mb-3">
-    {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => <span key={d}>{d}</span>)}
-  </div>
+            {/* Day name headers */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-[9px] sm:text-xs text-gray-400 mb-2 sm:mb-3">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => <span key={d}>{d}</span>)}
+            </div>
 
-  {/* Day cells */}
-  <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-xs sm:text-sm">
-    {calendarDays.map((date, i) => {
-      if (!date) return <span key={i} />;
-      const key = `${year}-${month}-${date}`;
-      const items = dueDateMap[key];
-      const statusColor = items
-        ? items.some((a) => a.status === "Pending")
-          ? "bg-orange-100 text-orange-600"
-          : items.some((a) => a.status === "Submitted")
-          ? "bg-green-100 text-green-600"
-          : "bg-blue-100 text-blue-600"
-        : "";
-      const isSelected = selectedCalDate === key;
-      return (
-        <span
-          key={i}
-          onClick={() => items && setSelectedCalDate(isSelected ? null : key)}
-          className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full mx-auto text-[11px] sm:text-sm relative
+            {/* Day cells */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-xs sm:text-sm">
+              {calendarDays.map((date, i) => {
+                if (!date) return <span key={i} />;
+                const key = `${year}-${month}-${date}`;
+                const items = dueDateMap[key];
+                const statusColor = items
+                  ? items.some((a) => a.status === "Pending")
+                    ? "bg-orange-100 text-orange-600"
+                    : items.some((a) => a.status === "Submitted")
+                      ? "bg-green-100 text-green-600"
+                      : "bg-blue-100 text-blue-600"
+                  : "";
+                const isSelected = selectedCalDate === key;
+                return (
+                  <span
+                    key={i}
+                    onClick={() => items && setSelectedCalDate(isSelected ? null : key)}
+                    className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full mx-auto text-[11px] sm:text-sm relative
             ${items ? `cursor-pointer font-semibold ${statusColor}` : "text-gray-600"}
             ${isSelected ? "ring-2 ring-blue-500 ring-offset-1" : ""}
           `}
-          title={items ? items.map((a) => a.title).join(", ") : ""}
-        >
-          {date}
-          {items && (
-            <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full
+                    title={items ? items.map((a) => a.title).join(", ") : ""}
+                  >
+                    {date}
+                    {items && (
+                      <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full
               ${items.some((a) => a.status === "Pending") ? "bg-orange-500"
-                : items.some((a) => a.status === "Submitted") ? "bg-green-500"
-                : "bg-blue-500"}`}
-            />
-          )}
-        </span>
-      );
-    })}
-  </div>
+                          : items.some((a) => a.status === "Submitted") ? "bg-green-500"
+                            : "bg-blue-500"}`}
+                      />
+                    )}
+                  </span>
+                );
+              })}
+            </div>
 
-  {/* Legend */}
-  <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-100">
-    {[["bg-orange-500","Pending"],["bg-green-500","Submitted"],["bg-blue-500","Graded"]].map(([color, label]) => (
-      <div key={label} className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
-        <span className={`w-2 h-2 rounded-full ${color}`} />
-        {label}
-      </div>
-    ))}
-  </div>
+            {/* Legend */}
+            <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-100">
+              {[["bg-orange-500", "Pending"], ["bg-green-500", "Submitted"], ["bg-blue-500", "Graded"]].map(([color, label]) => (
+                <div key={label} className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
+                  <span className={`w-2 h-2 rounded-full ${color}`} />
+                  {label}
+                </div>
+              ))}
+            </div>
 
-  {/* Selected day panel */}
-  {selectedCalDate && dueDateMap[selectedCalDate] ? (
-    <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
-      {dueDateMap[selectedCalDate].map((a, i) => (
-        <div
-          key={i}
-          onClick={() => setSelected(a)}
-          className="flex items-center justify-between bg-gray-50 rounded-xl p-2 sm:p-3 border border-gray-100 cursor-pointer hover:border-blue-200 hover:bg-blue-50 transition"
-        >
-          <div>
-            <p className="text-[11px] sm:text-xs font-semibold text-gray-800 leading-tight">{a.title}</p>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">Due {a.dueDate.split(",")[1]?.trim()}</p>
+            {/* Selected day panel */}
+            {selectedCalDate && dueDateMap[selectedCalDate] ? (
+              <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                {dueDateMap[selectedCalDate].map((a, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setSelected(a)}
+                    className="flex items-center justify-between bg-gray-50 rounded-xl p-2 sm:p-3 border border-gray-100 cursor-pointer hover:border-blue-200 hover:bg-blue-50 transition"
+                  >
+                    <div>
+                      <p className="text-[11px] sm:text-xs font-semibold text-gray-800 leading-tight">{a.title}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">Due {a.dueDate.split(",")[1]?.trim()}</p>
+                    </div>
+                    <Badge status={a.status} />
+                  </div>
+                ))}
+              </div>
+            ) : selectedCalDate ? null : (
+              <p className="text-[10px] sm:text-xs text-gray-400 text-center mt-3 pt-3 border-t border-gray-100">
+                Tap a highlighted date to see due assignments
+              </p>
+            )}
           </div>
-          <Badge status={a.status} />
-        </div>
-      ))}
-    </div>
-  ) : selectedCalDate ? null : (
-    <p className="text-[10px] sm:text-xs text-gray-400 text-center mt-3 pt-3 border-t border-gray-100">
-      Tap a highlighted date to see due assignments
-    </p>
-  )}
-</div>
         </div>
       </div>
     </div>

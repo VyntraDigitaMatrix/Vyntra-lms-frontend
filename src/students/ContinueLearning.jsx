@@ -1,48 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { studentEnrolledCourseApi } from "./auth/api";
-import S6 from "../assets/s6.jpg";
-import S7 from "../assets/s7.jpg";
-import S8 from "../assets/s8.jpg";
-import S9 from "../assets/s9.jpg";
-import S10 from "../assets/s10.jpg";
-import S11 from "../assets/s11.jpg";
-import S12 from "../assets/s12.jpg";
-import S13 from "../assets/s13.jpg";
 
 import {
     FaStar, FaUser, FaBook, FaClock, FaTrophy,
-    FaCheckCircle, FaPlay, FaLinkedin, FaBullhorn,
-    FaUsers, FaPenNib, FaGoogle, FaFilter, FaChartLine,
-    FaSearch,
-    FaKey,
-    FaFileAlt,
-    FaCogs,
-    FaLink,
-    FaChartBar,
-    FaGlobe,
-    FaPenFancy,
-    FaImages,
-    FaShoppingCart,
-    FaEnvelope,
-    FaMagnet,
-    FaPalette,
-    FaBolt,
-    FaUserCog,
-    FaMailBulk,
-    FaCog,
-    FaBullseye,
-    FaSearchPlus,
-    FaTags,
-    FaClipboardList,
-    FaMapMarkedAlt,
-    FaVideo,
-    FaCalendarAlt,
-    FaSyncAlt,
-    FaRobot,
-    FaTools,
-    FaPlug,
-    FaLock,
+    FaCheckCircle, FaPlay,
     FaChevronDown,
     FaChevronUp,
     FaPlayCircle,
@@ -60,401 +22,42 @@ const getLessonTypeIcon = (type) => {
     return "▶";
 };
 
-/* ── Course-Specific Data ── */
-const coursesData = {
-    1: {
-        id: 1,
-        title: "Digital Marketing",
-        badge: "Bestseller",
-        image: S6,
-        rating: "4.7",
-        reviews: "1,250",
-        lessons: "28",
-        duration: "18h 30m",
-        students: "14,200",
-        level: "Beginner",
-        desc: "Master the complete digital marketing landscape — from brand building to paid ads — and launch your career in the fastest-growing industry.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Continue Learning",
-        instructor: {
-            name: "Sarah Johnson",
-            initial: "S",
-            title: "Digital Marketing Strategist",
-            rating: "4.8",
-            students: "14,200",
-            bio: "15+ years in digital marketing. Ex-Google & HubSpot consultant. Built marketing strategies for 200+ brands across FMCG, EdTech, and SaaS verticals. Passionate about making digital skills accessible to everyone.",
-        },
-        learnings: [
-            "Build a complete digital marketing strategy from scratch",
-            "Run and optimise paid campaigns across Google & Meta",
-            "Understand the customer journey and funnel marketing",
-            "Create a personal brand online",
-            "Analyse campaign data and improve ROI",
-            "Land a digital marketing job or freelance client",
-        ],
-        modules: [
-            { title: "Module 1: Digital Marketing Fundamentals", lessons: 5, color: "#7C3AED", icon: <FaBullhorn className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: Audience Research & Personas", lessons: 4, color: "#EA580C", icon: <FaUsers className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Content Strategy & Copywriting", lessons: 5, color: "#059669", icon: <FaPenNib className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Paid Advertising (Google & Meta)", lessons: 6, color: "#2563EB", icon: <FaGoogle className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Marketing Funnels & CRO", lessons: 4, color: "#DB2777", icon: <FaFilter className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Analytics & Reporting", lessons: 4, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Do I need any prior marketing knowledge?", a: "No prior experience needed. This course starts from the very basics and builds up step-by-step." },
-            { q: "Will I get a certificate?", a: "Yes, a verified certificate of completion is awarded at the end of the course." },
-            { q: "Is the content updated regularly?", a: "Yes, course content is updated quarterly to reflect the latest platform changes and industry trends." },
-            { q: "Can I get freelance projects after this course?", a: "Absolutely. Module 6 includes a dedicated section on landing your first freelance client." },
-        ],
-    },
-    2: {
-        id: 2,
-        title: "SEO Mastery Course",
-        badge: "Bestseller",
-        image: S8,
-        rating: "4.8",
-        reviews: "980",
-        lessons: "32",
-        duration: "22h 10m",
-        students: "9,800",
-        level: "Intermediate",
-        desc: "Go from zero to SEO pro. Learn technical SEO, on-page optimisation, link building, and rank any website on page 1 of Google.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Continue Learning",
-        instructor: {
-            name: "Alex Thompson",
-            initial: "A",
-            title: "SEO Consultant & Growth Marketer",
-            rating: "4.9",
-            students: "9,800",
-            bio: "10 years of hands-on SEO experience. Has ranked websites in competitive niches including finance, health, and e-commerce. Ex-Moz contributor and speaker at BrightonSEO. Clients include Fortune 500 companies.",
-        },
-        learnings: [
-            "Conduct in-depth keyword research using Ahrefs & SEMrush",
-            "Perform a full technical SEO audit",
-            "Optimise on-page elements for maximum rankings",
-            "Build high-quality backlinks with white-hat strategies",
-            "Understand Google's core algorithm updates",
-            "Rank local businesses with Local SEO tactics",
-        ],
-        modules: [
-            { title: "Module 1: SEO Fundamentals & How Google Works", lessons: 4, color: "#7C3AED", icon: <FaSearch className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: Keyword Research & Search Intent", lessons: 6, color: "#EA580C", icon: <FaKey className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: On-Page Optimisation", lessons: 6, color: "#059669", icon: <FaFileAlt className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Technical SEO", lessons: 7, color: "#2563EB", icon: <FaCogs className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Link Building & Off-Page SEO", lessons: 5, color: "#DB2777", icon: <FaLink className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Tracking & Reporting with GSC & GA4", lessons: 4, color: "#D97706", icon: <FaChartBar className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Do I need a website to practice?", a: "It's helpful but not required. We provide sandbox exercises throughout the course." },
-            { q: "Which tools are covered?", a: "Ahrefs, SEMrush, Google Search Console, Screaming Frog, and GA4 are all covered in depth." },
-            { q: "Is this course updated for the latest Google algorithm?", a: "Yes — the course covers all major updates including Helpful Content, Core Web Vitals, and E-E-A-T." },
-            { q: "How long until I see results on my website?", a: "SEO takes time. Most students see measurable improvements within 3–6 months of applying the techniques." },
-        ],
-    },
-    3: {
-        id: 3,
-        title: "Google Ads for Beginners",
-        badge: "New",
-        image: S9,
-        rating: "4.6",
-        reviews: "720",
-        lessons: "24",
-        duration: "15h 45m",
-        students: "6,500",
-        level: "Beginner",
-        desc: "Launch profitable Google Ads campaigns from day one. Learn Search, Display, Shopping, and YouTube ads with real campaign walkthroughs.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Continue Learning",
-        instructor: {
-            name: "Michael Smith",
-            initial: "M",
-            title: "Certified Google Ads Specialist",
-            rating: "4.7",
-            students: "6,500",
-            bio: "Google Certified Partner with $2M+ in ad spend managed. Specialises in helping small businesses compete with big budgets. Trainer at Google's Garage India programme. Known for making PPC simple and results-driven.",
-        },
-        learnings: [
-            "Set up and navigate Google Ads Manager confidently",
-            "Create Search, Display, Shopping & YouTube campaigns",
-            "Write high-converting ad copy that gets clicks",
-            "Use keyword match types and negative keywords strategically",
-            "Optimise Quality Score and reduce Cost Per Click",
-            "Read campaign reports and make data-driven decisions",
-        ],
-        modules: [
-            { title: "Module 1: Google Ads Ecosystem Overview", lessons: 3, color: "#7C3AED", icon: <FaGlobe className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: Search Campaigns & Keyword Strategy", lessons: 6, color: "#EA580C", icon: <FaSearch className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Ad Copywriting & Extensions", lessons: 4, color: "#059669", icon: <FaPenFancy className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Display & Remarketing Campaigns", lessons: 4, color: "#2563EB", icon: <FaImages className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Shopping & YouTube Ads", lessons: 4, color: "#DB2777", icon: <FaShoppingCart className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Bidding, Budgets & Optimisation", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Do I need a Google Ads account to start?", a: "Yes. We walk you through setting up a free account in the very first lesson." },
-            { q: "How much ad budget do I need to practice?", a: "You can start with as little as ₹500/day. We teach you to maximise every rupee." },
-            { q: "Will this help me pass the Google Ads certification?", a: "Yes — the course content closely aligns with the official Google Ads certification exam." },
-            { q: "Can I use this for my business or only for clients?", a: "Both! Whether you're a business owner or an aspiring PPC manager, this course applies." },
-        ],
-    },
-    4: {
-        id: 4,
-        title: "Email Marketing Strategy",
-        badge: "Bestseller",
-        image: S10,
-        rating: "4.9",
-        reviews: "1,540",
-        lessons: "26",
-        duration: "16h 20m",
-        students: "11,300",
-        level: "Beginner",
-        desc: "Build, grow, and monetise an email list. Master automation, segmentation, and copywriting to achieve open rates that beat industry averages.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Review Course",
-        instructor: {
-            name: "Priya Sharma",
-            initial: "P",
-            title: "Email Marketing & Automation Expert",
-            rating: "4.9",
-            students: "11,300",
-            bio: "Former CRM head at a leading D2C brand. Managed email lists of 500,000+ subscribers. Specialises in lifecycle email marketing, drip sequences, and re-engagement campaigns. Keynote speaker at Email Evolution Conference 2023.",
-        },
-        learnings: [
-            "Build a high-quality email list from scratch using lead magnets",
-            "Design beautiful emails that render across all devices",
-            "Write subject lines that achieve 40%+ open rates",
-            "Set up automated welcome sequences and drip campaigns",
-            "Segment your audience for hyper-targeted messaging",
-            "Measure and improve deliverability, open rate, and CTR",
-        ],
-        modules: [
-            { title: "Module 1: Email Marketing Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaEnvelope className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: List Building & Lead Magnets", lessons: 5, color: "#EA580C", icon: <FaMagnet className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Email Design & Copywriting", lessons: 5, color: "#059669", icon: <FaPalette className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Automation & Drip Sequences", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Segmentation & Personalisation", lessons: 4, color: "#DB2777", icon: <FaUserCog className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Analytics, A/B Testing & Deliverability", lessons: 2, color: "#D97706", icon: <FaMailBulk className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Which email platforms are covered?", a: "Mailchimp, Klaviyo, and ConvertKit are covered in detail with hands-on walkthroughs." },
-            { q: "Is email marketing still relevant?", a: "Absolutely. Email has the highest ROI of any marketing channel — $42 for every $1 spent on average." },
-            { q: "Can I use this for an e-commerce store?", a: "Yes! Module 5 has a dedicated section on e-commerce email flows including abandoned cart and post-purchase sequences." },
-            { q: "Will I learn how to avoid the spam folder?", a: "Yes — Module 6 covers deliverability best practices in depth." },
-        ],
-    },
-    5: {
-        id: 5,
-        title: "Social Media Marketing",
-        badge: "Trending",
-        image: S7,
-        rating: "4.7",
-        reviews: "1,100",
-        lessons: "30",
-        duration: "20h 00m",
-        students: "13,000",
-        level: "Beginner",
-        desc: "Grow brands on Instagram, LinkedIn, YouTube, and X. Learn content creation, community management, and organic growth strategies that actually work.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Continue Learning",
-        instructor: {
-            name: "Neha Patel",
-            initial: "N",
-            title: "Social Media Strategist & Content Creator",
-            rating: "4.8",
-            students: "13,000",
-            bio: "Built multiple brand accounts from 0 to 100K followers. Social media consultant for startups and public figures. Her Instagram growth framework has been featured in YourStory and Inc42. 7 years of hands-on experience.",
-        },
-        learnings: [
-            "Develop a platform-specific social media strategy",
-            "Create scroll-stopping content for Reels, Shorts, and Carousels",
-            "Grow an organic following using hashtags and trends",
-            "Manage brand communities and handle crises professionally",
-            "Collaborate with influencers and run UGC campaigns",
-            "Measure social performance with native analytics tools",
-        ],
-        modules: [
-            { title: "Module 1: Social Media Strategy Foundations", lessons: 4, color: "#7C3AED", icon: "📱" },
-            { title: "Module 2: Instagram & Reels Mastery", lessons: 6, color: "#EA580C", icon: "📸" },
-            { title: "Module 3: LinkedIn for B2B Growth", lessons: 5, color: "#059669", icon: "💼" },
-            { title: "Module 4: YouTube & Short-Form Video", lessons: 6, color: "#2563EB", icon: "▶️" },
-            { title: "Module 5: Community Management & Influencers", lessons: 5, color: "#DB2777", icon: "🤝" },
-            { title: "Module 6: Analytics & Growth Hacking", lessons: 4, color: "#D97706", icon: "🚀" },
-        ],
-        faqs: [
-            { q: "Do I need expensive equipment for content creation?", a: "No. We teach you how to create professional content with just a smartphone." },
-            { q: "Is this course focused on organic growth only?", a: "Primarily yes, but we also cover paid social fundamentals in Module 6." },
-            { q: "Which platforms are covered?", a: "Instagram, LinkedIn, YouTube, X (Twitter), and a brief overview of Pinterest and Threads." },
-            { q: "How quickly can I grow my account?", a: "With consistent application, most students see meaningful growth within 60–90 days." },
-        ],
-    },
-    6: {
-        id: 6,
-        title: "Web Analytics with GA4",
-        badge: "New",
-        image: S11,
-        rating: "4.6",
-        reviews: "430",
-        lessons: "22",
-        duration: "14h 30m",
-        students: "4,200",
-        level: "Intermediate",
-        desc: "Unlock the full power of Google Analytics 4. Track user behaviour, set up conversions, build custom reports, and make decisions backed by real data.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Start Learning",
-        instructor: {
-            name: "David Wilson",
-            initial: "D",
-            title: "Data Analytics & GA4 Specialist",
-            rating: "4.7",
-            students: "4,200",
-            bio: "Analytics consultant for e-commerce and SaaS companies. Migrated 80+ clients from Universal Analytics to GA4. Certified in Google Analytics, Tag Manager, and Looker Studio. Contributor to Analytics Mania blog.",
-        },
-        learnings: [
-            "Set up GA4 from scratch and configure data streams",
-            "Understand sessions, users, events, and the GA4 data model",
-            "Create custom events and conversions",
-            "Build insightful reports and explorations",
-            "Connect GA4 with Google Tag Manager",
-            "Integrate GA4 data into Looker Studio dashboards",
-        ],
-        modules: [
-            { title: "Module 1: Introduction to GA4 & the Data Model", lessons: 4, color: "#7C3AED", icon: <FaChartBar className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: GA4 Setup & Configuration", lessons: 4, color: "#EA580C", icon: <FaCog className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Events, Conversions & Goals", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Reports, Explorations & Funnels", lessons: 4, color: "#2563EB", icon: <FaSearchPlus className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Google Tag Manager Integration", lessons: 3, color: "#DB2777", icon: <FaTags className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Looker Studio Dashboards", lessons: 2, color: "#D97706", icon: <FaClipboardList className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Is GA4 replacing Universal Analytics?", a: "Yes. Universal Analytics was sunset in July 2023. GA4 is the current standard — this course prepares you fully." },
-            { q: "Do I need Google Tag Manager knowledge?", a: "No. Module 5 teaches GTM from scratch specifically for GA4 integration." },
-            { q: "Will I learn how to set up e-commerce tracking?", a: "Yes — enhanced e-commerce tracking is covered in Module 3." },
-            { q: "Is coding knowledge required?", a: "Basic HTML familiarity helps but is not required. All technical steps are explained clearly." },
-        ],
-    },
-    7: {
-        id: 7,
-        title: "Content Marketing Basics",
-        badge: "Bestseller",
-        image: S12,
-        rating: "4.8",
-        reviews: "890",
-        lessons: "25",
-        duration: "17h 00m",
-        students: "8,700",
-        level: "Beginner",
-        desc: "Create content that ranks, resonates, and converts. Learn blogging, video scripts, social content, and how to build a content engine for any brand.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Review Course",
-        instructor: {
-            name: "Anjali Mehta",
-            initial: "A",
-            title: "Content Strategist & Brand Storyteller",
-            rating: "4.8",
-            students: "8,700",
-            bio: "10 years creating content for startups and Fortune 500 brands. Former Content Head at a leading EdTech unicorn. Her content frameworks have generated 5M+ organic visits. Mentor at Google's Women Techmakers programme.",
-        },
-        learnings: [
-            "Build a content marketing strategy aligned to business goals",
-            "Write long-form blog posts that rank on Google",
-            "Script and storyboard YouTube and social videos",
-            "Create content calendars and editorial workflows",
-            "Repurpose content across multiple channels efficiently",
-            "Measure content performance with the right KPIs",
-        ],
-        modules: [
-            { title: "Module 1: Content Strategy & Audience Mapping", lessons: 4, color: "#7C3AED", icon: <FaMapMarkedAlt className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: Blogging & Long-Form Writing", lessons: 5, color: "#EA580C", icon: <FaPenFancy className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Video Scripts & Storytelling", lessons: 5, color: "#059669", icon: <FaVideo className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Content Calendar & Workflow", lessons: 4, color: "#2563EB", icon: <FaCalendarAlt className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Content Distribution & Repurposing", lessons: 4, color: "#DB2777", icon: <FaSyncAlt className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Measuring & Scaling Content", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Do I need to be a good writer to take this course?", a: "Not at all. We teach writing from scratch with practical frameworks and templates." },
-            { q: "Is this course for individuals or marketing teams?", a: "Both. The content calendar and workflow modules are especially useful for teams." },
-            { q: "Will I learn SEO writing?", a: "Yes — Module 2 covers keyword-optimised writing and on-page SEO specifically for blog content." },
-            { q: "Do I get content templates?", a: "Yes, you get 15+ ready-to-use templates including blog outlines, video scripts, and content calendars." },
-        ],
-    },
-    8: {
-        id: 8,
-        title: "Marketing Automation",
-        badge: "Advanced",
-        image: S13,
-        rating: "4.7",
-        reviews: "560",
-        lessons: "28",
-        duration: "19h 45m",
-        students: "5,100",
-        level: "Advanced",
-        desc: "Automate your marketing at scale. Master HubSpot, Zapier, and CRM workflows to nurture leads, retain customers, and grow revenue on autopilot.",
-        price: "₹999",
-        oldPrice: "₹2,499",
-        offer: "60% OFF",
-        priceValue: 999,
-        button: "Start Learning",
-        instructor: {
-            name: "Kiran Rao",
-            initial: "K",
-            title: "Marketing Automation & CRM Expert",
-            rating: "4.8",
-            students: "5,100",
-            bio: "HubSpot Platinum Partner and certified CRM consultant. Has implemented automation systems for 100+ B2B and B2C companies. Previously VP of Marketing at a Series B SaaS startup. Speaks at MarTech conferences across Asia.",
-        },
-        learnings: [
-            "Design end-to-end marketing automation workflows",
-            "Set up HubSpot CRM and marketing hub from scratch",
-            "Build lead scoring models to prioritise sales outreach",
-            "Create multi-step drip campaigns triggered by user behaviour",
-            "Connect tools using Zapier and API integrations",
-            "Measure automation ROI and optimise workflows over time",
-        ],
-        modules: [
-            { title: "Module 1: Marketing Automation Fundamentals", lessons: 4, color: "#7C3AED", icon: <FaRobot className="text-purple-600 text-base sm:text-lg" /> },
-            { title: "Module 2: HubSpot CRM Setup & Configuration", lessons: 5, color: "#EA580C", icon: <FaTools className="text-orange-600 text-base sm:text-lg" /> },
-            { title: "Module 3: Lead Scoring & Nurture Workflows", lessons: 5, color: "#059669", icon: <FaBullseye className="text-green-600 text-base sm:text-lg" /> },
-            { title: "Module 4: Behavioural Triggers & Drip Campaigns", lessons: 6, color: "#2563EB", icon: <FaBolt className="text-blue-600 text-base sm:text-lg" /> },
-            { title: "Module 5: Zapier & Tool Integrations", lessons: 5, color: "#DB2777", icon: <FaPlug className="text-pink-600 text-base sm:text-lg" /> },
-            { title: "Module 6: Reporting, Optimisation & Scaling", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base sm:text-lg" /> },
-        ],
-        faqs: [
-            { q: "Which tools are covered?", a: "HubSpot (primary), Zapier, ActiveCampaign, and Mailchimp automation are all covered." },
-            { q: "Do I need prior CRM experience?", a: "Basic familiarity with email marketing is helpful, but the course starts with CRM fundamentals." },
-            { q: "Is HubSpot free or paid?", a: "HubSpot has a free tier which is sufficient for all exercises in this course. No paid subscription needed." },
-            { q: "Will this help me get a marketing operations job?", a: "Yes — marketing automation is one of the highest-paying digital marketing specialisations, and this course prepares you for MOps roles." },
-        ],
-    },
-};
-
 /* ══════════════════════════════════════════════
    MODULE ACCORDION ITEM
    ══════════════════════════════════════════════ */
-/* ─── Enrolled Module Accordion (all modules unlocked) ─── */
-const ModuleAccordionItem = ({ mod, courseId, navigate, activeLesson, setActiveLesson }) => {
+const ModuleAccordionItem = ({
+    mod,
+    courseId,
+    navigate,
+    activeLesson,
+    setActiveLesson,
+    onFetchLessons,
+}) => {
     const [open, setOpen] = useState(false);
-    const lessons = mod.lessons || [];
+    const [lessons, setLessons] = useState(mod.lessons || []);
+    const [lessonsLoading, setLessonsLoading] = useState(false);
+    const [lessonsLoaded, setLessonsLoaded] = useState(
+        (mod.lessons || []).length > 0
+    );
+
+    const handleToggle = async () => {
+        const next = !open;
+        setOpen(next);
+
+        // Lazy-load lessons only on first expand if not already loaded
+        if (next && !lessonsLoaded) {
+            setLessonsLoading(true);
+            try {
+                const fetched = await onFetchLessons(mod.id);
+                setLessons(fetched);
+                setLessonsLoaded(true);
+            } catch (_) {
+                // keep empty
+            } finally {
+                setLessonsLoading(false);
+            }
+        }
+    };
 
     const handleLessonClick = (lesson) => {
         const lessonKey = `${mod.id}-${lesson.id}`;
@@ -462,61 +65,95 @@ const ModuleAccordionItem = ({ mod, courseId, navigate, activeLesson, setActiveL
         navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
     };
 
-    const moduleColor = "#2563EB";
-
     return (
-        <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"} bg-white`}>
-            <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 hover:bg-gray-50 transition text-left">
+        <div
+            className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"
+                } bg-white`}
+        >
+            <button
+                onClick={handleToggle}
+                className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 hover:bg-gray-50 transition text-left"
+            >
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-blue-50">
                     <FaPlayCircle className="text-blue-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-800 block truncate">{mod.title}</span>
-                    <span className="text-[10px] sm:text-xs text-gray-400">{lessons.length} Lessons</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-800 block truncate">
+                        {mod.title}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-gray-400">
+                        {lessons.length} Lessons
+                    </span>
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">Enrolled</span>
+                <span className="text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
+                    Enrolled
+                </span>
                 <span className="ml-1 sm:ml-2 text-gray-400 flex-shrink-0">
                     {open ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
                 </span>
             </button>
+
             {open && (
                 <div className="border-t border-gray-100">
-                    {lessons.length === 0 && (
-                        <div className="px-5 py-3 text-xs text-gray-400">No lessons in this module.</div>
-                    )}
-                    {lessons.map((lesson, li) => {
-                        const lessonKey = `${mod.id}-${lesson.id}`;
-                        const isActive = activeLesson === lessonKey;
-                        const duration = lesson.durationInMinutes
-                            ? `${lesson.durationInMinutes} min`
-                            : "";
-                        return (
-                            <div
-                                key={lesson.id}
-                                onClick={() => handleLessonClick(lesson)}
-                                className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 cursor-pointer transition-colors group ${
-                                    isActive ? "bg-blue-50 border-l-2 border-blue-500" : "hover:bg-blue-50"
-                                } ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""}`}
-                            >
-                                <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-xs">
-                                    {getLessonTypeIcon(lesson.lessonType)}
+                    {lessonsLoading ? (
+                        <div className="px-5 py-4 space-y-2">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="h-7 bg-gray-100 rounded-lg animate-pulse"
+                                />
+                            ))}
+                        </div>
+                    ) : lessons.length === 0 ? (
+                        <div className="px-5 py-3 text-xs text-gray-400">
+                            No lessons in this module.
+                        </div>
+                    ) : (
+                        lessons.map((lesson, li) => {
+                            const lessonKey = `${mod.id}-${lesson.id}`;
+                            const isActive = activeLesson === lessonKey;
+                            const duration = lesson.durationInMinutes
+                                ? `${lesson.durationInMinutes} min`
+                                : "";
+                            return (
+                                <div
+                                    key={lesson.id}
+                                    onClick={() => handleLessonClick(lesson)}
+                                    className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 cursor-pointer transition-colors group
+                    ${isActive
+                                            ? "bg-blue-50 border-l-2 border-blue-500"
+                                            : "hover:bg-blue-50"
+                                        }
+                    ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""}`}
+                                >
+                                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-xs">
+                                        {getLessonTypeIcon(lesson.lessonType)}
+                                    </div>
+                                    <span
+                                        className={`flex-1 text-[11px] sm:text-xs truncate font-medium ${isActive
+                                            ? "text-blue-700 font-semibold"
+                                            : "text-gray-700 group-hover:text-blue-700"
+                                            }`}
+                                    >
+                                        {li + 1}. {lesson.title}
+                                    </span>
+                                    {lesson.previewAllowed && (
+                                        <span className="text-[9px] font-bold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">
+                                            Preview
+                                        </span>
+                                    )}
+                                    {duration && (
+                                        <span
+                                            className={`text-[10px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"
+                                                }`}
+                                        >
+                                            {duration}
+                                        </span>
+                                    )}
                                 </div>
-                                <span className={`flex-1 text-[11px] sm:text-xs truncate font-medium ${
-                                    isActive ? "text-blue-700 font-semibold" : "text-gray-700 group-hover:text-blue-700"
-                                }`}>
-                                    {li + 1}. {lesson.title}
-                                </span>
-                                {lesson.previewAllowed && (
-                                    <span className="text-[9px] font-bold bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded flex-shrink-0">Preview</span>
-                                )}
-                                {duration && (
-                                    <span className={`text-[10px] flex-shrink-0 ml-1 ${
-                                        isActive ? "text-blue-500" : "text-gray-400"
-                                    }`}>{duration}</span>
-                                )}
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             )}
         </div>
@@ -524,18 +161,27 @@ const ModuleAccordionItem = ({ mod, courseId, navigate, activeLesson, setActiveL
 };
 
 /* ══════════════════════════════════════════════
-   CURRICULUM SECTION — enrolled, all unlocked
+   CURRICULUM SECTION
    ══════════════════════════════════════════════ */
-const CurriculumSection = ({ moduleList, courseId, navigate }) => {
+const CurriculumSection = ({ moduleList, courseId, navigate, onFetchLessons }) => {
     const [activeLesson, setActiveLesson] = useState(null);
-    const totalLessons = moduleList.reduce((s, m) => s + (m.lessons || []).length, 0);
+
+    const totalLessons = moduleList.reduce(
+        (s, m) => s + (m.lessons || []).length,
+        0
+    );
+
     return (
         <div>
             <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 mb-4">
-                <FaPlayCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={13} />
+                <FaPlayCircle
+                    className="text-emerald-500 mt-0.5 flex-shrink-0"
+                    size={13}
+                />
                 <p className="text-[11px] sm:text-xs text-emerald-700">
                     <span className="font-bold">Enrolled: </span>
-                    You have full access to all {moduleList.length} modules and {totalLessons} lessons.
+                    You have full access to all {moduleList.length} modules
+                    {totalLessons > 0 && ` and ${totalLessons} lessons`}.
                 </p>
             </div>
             <div className="space-y-2">
@@ -547,6 +193,7 @@ const CurriculumSection = ({ moduleList, courseId, navigate }) => {
                         navigate={navigate}
                         activeLesson={activeLesson}
                         setActiveLesson={setActiveLesson}
+                        onFetchLessons={onFetchLessons}
                     />
                 ))}
             </div>
@@ -558,50 +205,137 @@ const CurriculumSection = ({ moduleList, courseId, navigate }) => {
    MAIN COMPONENT
    ══════════════════════════════════════════════ */
 const ContinueLearning = () => {
-    const [rating, setRating] = useState(0);
-    const [reviews, setReviews] = useState([
-        { name: "Rajesh Kumar", initial: "R", rating: 5, time: "2 weeks ago", text: "Excellent course! Very detailed and practical examples." },
-        { name: "Priya Sharma", initial: "P", rating: 4, time: "1 month ago", text: "Great content, very helpful for my career." },
-        { name: "Amit Patel", initial: "A", rating: 5, time: "2 months ago", text: "Best course I've taken! Highly recommend." },
-    ]);
-    const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
     const navigate = useNavigate();
     const { courseId } = useParams();
-    const [activeTab, setActiveTab] = useState("overview");
 
-    /* ── API state ── */
+    /* ── Course detail ── */
+    const [courseDetails, setCourseDetails] = useState(null);
+    const [courseLoading, setCourseLoading] = useState(true);
+
+    /* ── Modules ── */
     const [courseModules, setCourseModules] = useState([]);
     const [modulesLoading, setModulesLoading] = useState(true);
     const [modulesError, setModulesError] = useState("");
 
+    /* ── UI ── */
+    const [activeTab, setActiveTab] = useState("overview");
+    const [rating, setRating] = useState(0);
+    const [reviews, setReviews] = useState([
+        {
+            name: "Rajesh Kumar",
+            initial: "R",
+            rating: 5,
+            time: "2 weeks ago",
+            text: "Excellent course! Very detailed and practical examples.",
+        },
+        {
+            name: "Priya Sharma",
+            initial: "P",
+            rating: 4,
+            time: "1 month ago",
+            text: "Great content, very helpful for my career.",
+        },
+        {
+            name: "Amit Patel",
+            initial: "A",
+            rating: 5,
+            time: "2 months ago",
+            text: "Best course I've taken! Highly recommend.",
+        },
+    ]);
+    const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
+
+    /* ══════════════════════════════════════════
+       FETCH COURSE DETAIL
+       Uses getMyCourseById — falls back to list search
+    ══════════════════════════════════════════ */
+    const fetchCourseDetails = useCallback(async () => {
+        if (!courseId) return;
+        setCourseLoading(true);
+        try {
+            // Primary: dedicated endpoint
+            const res = await studentEnrolledCourseApi.getMyCourseById(courseId);
+            const data = res.data?.data || res.data || null;
+            setCourseDetails(data);
+        } catch (err) {
+            // Fallback: search inside paginated list
+            try {
+                const listRes = await studentEnrolledCourseApi.getMyEnrolledCourses(0, 100);
+                const content =
+                    listRes.data?.data?.content ||
+                    listRes.data?.content ||
+                    [];
+                const found = content.find(
+                    (c) =>
+                        String(c.courseId) === String(courseId) ||
+                        String(c.id) === String(courseId)
+                );
+                setCourseDetails(found || null);
+            } catch (fallbackErr) {
+                console.error("fetchCourseDetails fallback error:", fallbackErr);
+            }
+        } finally {
+            setCourseLoading(false);
+        }
+    }, [courseId]);
+
+    /* ══════════════════════════════════════════
+       FETCH MODULES  (with nested lessons)
+       GET /api/v1/student/my-courses/{courseId}/modules
+    ══════════════════════════════════════════ */
     const fetchModules = useCallback(async () => {
         if (!courseId) return;
         setModulesLoading(true);
         setModulesError("");
         try {
             const res = await studentEnrolledCourseApi.getCourseModules(courseId);
-            if (res.data?.data) {
-                setCourseModules(res.data.data);
-            }
+            // API returns { data: { data: [...] } }  OR  { data: [...] }
+            const modules =
+                res.data?.data ||
+                res.data ||
+                [];
+            setCourseModules(Array.isArray(modules) ? modules : []);
         } catch (err) {
-            console.error(err);
+            console.error("fetchModules error:", err);
             setModulesError("Failed to load course content.");
         } finally {
             setModulesLoading(false);
         }
     }, [courseId]);
 
-    useEffect(() => { fetchModules(); }, [fetchModules]);
+    /* ══════════════════════════════════════════
+       FETCH LESSONS for a module (lazy, on expand)
+       GET /api/v1/student/my-courses/{courseId}/modules/{moduleId}/lessons
+    ══════════════════════════════════════════ */
+    const fetchLessonsForModule = useCallback(
+        async (moduleId) => {
+            const res = await studentEnrolledCourseApi.getModuleLessons(
+                courseId,
+                moduleId,
+                0,
+                100
+            );
+            return (
+                res.data?.data?.content ||
+                res.data?.content ||
+                res.data?.data ||
+                res.data ||
+                []
+            );
+        },
+        [courseId]
+    );
 
-    /* ── Derive course-level display data from first module's courseId field ── */
-    const totalLessons = courseModules.reduce((s, m) => s + (m.lessons || []).length, 0);
+    useEffect(() => {
+        fetchCourseDetails();
+        fetchModules();
+    }, [fetchCourseDetails, fetchModules]);
 
-    /* ── Fallback to static data for fields not in enrolled modules API ── */
-    const staticCourse = coursesData[courseId] || coursesData[1];
-    const course = {
-        ...staticCourse,
-        modules: courseModules,
-    };
+    /* ── Derived ── */
+    const totalLessons = courseModules.reduce(
+        (s, m) => s + (m.lessons || []).length,
+        0
+    );
 
     const handleRatingSubmit = (r) => {
         alert(`Thank you for rating ${r} stars!`);
@@ -626,87 +360,141 @@ const ContinueLearning = () => {
         { key: "overview", label: "Overview" },
         { key: "curriculum", label: `Curriculum (${courseModules.length})` },
         { key: "instructor", label: "Instructor" },
-        { key: "reviews", label: `Reviews (${course.reviews})` },
+        { key: "reviews", label: `Reviews (${courseDetails?.reviews || 0})` },
         { key: "faqs", label: "FAQs" },
     ];
 
-    const moduleList = courseModules;
+    const totalDuration = courseModules.reduce((total, module) => {
+  const moduleDuration = (module.lessons || []).reduce(
+    (sum, lesson) => sum + (lesson.durationInMinutes || 0),
+    0
+  );
+  return total + moduleDuration;
+}, 0);
 
+    /* ══════════════════════════════════════════
+       RENDER
+    ══════════════════════════════════════════ */
     return (
         <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
             <div className="max-w-7xl mx-auto">
+
                 {/* Breadcrumb */}
                 <div className="mb-4 sm:mb-5">
                     <p className="text-xs sm:text-sm text-gray-400">
-                        <Link to="/student/courses" className="hover:text-blue-600 transition-colors">My Courses</Link>
+                        <Link
+                            to="/student/courses"
+                            className="hover:text-blue-600 transition-colors"
+                        >
+                            My Courses
+                        </Link>
                         <span className="text-gray-300"> &gt; </span>
-                        <span className="text-gray-700 font-medium text-xs sm:text-sm">{course.title}</span>
+                        <span className="text-gray-700 font-medium text-xs sm:text-sm">
+                            {courseDetails?.courseTitle || courseDetails?.title || "Loading…"}
+                        </span>
                     </p>
                 </div>
 
-                {/* Hero Section - Responsive */}
+                {/* Hero Section */}
                 <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    {/* Course Image */}
+                    {/* Thumbnail */}
                     <div className="relative w-full md:w-64 lg:w-72 h-48 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-                        <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                        {courseDetails?.thumbnailUrl && (
+                            <img
+                                src={courseDetails.thumbnailUrl}
+                                alt={courseDetails?.courseTitle || courseDetails?.title}
+                                className="w-full h-full object-cover"
+                            />
+                        )}
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                             <FaPlay className="text-white w-6 h-6 sm:w-8 sm:h-8" />
                         </div>
-                        {/* Enrolled badge */}
                         <span className="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
                             ✓ Enrolled
                         </span>
                     </div>
 
-                    {/* Course Info */}
+                    {/* Info */}
                     <div className="flex-1 space-y-3 sm:space-y-4">
-                        <div>
-                            <span className="inline-block text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mb-2">{course.badge}</span>
-                            <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight mb-1 sm:mb-2">{course.title}</h1>
-                            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{course.desc}</p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
-                                <FaStar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
-                                <span className="font-bold text-gray-900">{course.rating}</span>
-                                <span className="text-gray-400 text-[10px] sm:text-xs">({course.reviews} ratings)</span>
+                        {courseLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-6 bg-gray-200 rounded-lg animate-pulse w-2/3" />
+                                <div className="h-4 bg-gray-100 rounded-lg animate-pulse w-full" />
+                                <div className="h-4 bg-gray-100 rounded-lg animate-pulse w-3/4" />
                             </div>
-                            <div className="flex items-center gap-1.5 text-gray-500">
-                                <FaUser className="w-3 h-3 sm:w-4 sm:h-4" />
-                                <span className="text-[11px] sm:text-xs">{course.students} Students</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-gray-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                                <span className="text-[11px] sm:text-xs">{course.level} Level</span>
-                            </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                            {[
-                                { Icon: FaBook, text: `${totalLessons} Lessons` },
-                                { Icon: AiOutlinePlaySquare, text: `${moduleList.length} Modules` },
-                                { Icon: FaClock, text: course.duration || "—" },
-                                { Icon: FaTrophy, text: "Certificate" },
-                            ].map(({ Icon, text }, i) => (
-                                <div key={i} className="flex items-center gap-1 sm:gap-1.5 border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-white">
-                                    <Icon className="text-gray-400" size={12} />
-                                    {text}
+                        ) : (
+                            <>
+                                <div>
+                                    <span className="inline-block text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full mb-2">
+                                        {courseDetails?.badge || "Enrolled"}
+                                    </span>
+                                    <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight mb-1 sm:mb-2">
+                                        {courseDetails?.courseTitle || courseDetails?.title}
+                                    </h1>
+                                    <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                                        {courseDetails?.courseDescription || courseDetails?.description}
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
+                                <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                        <FaStar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                                        <span className="font-bold text-gray-900">
+                                            {courseDetails?.rating || 0}
+                                        </span>
+                                        <span className="text-gray-400 text-[10px] sm:text-xs">
+                                            ({courseDetails?.reviews || courseDetails?.reviewCount || 0} ratings)
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-gray-500">
+                                        <FaUser className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        <span className="text-[11px] sm:text-xs">
+                                            {courseDetails?.students || courseDetails?.studentCount || 0} Students
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-gray-500">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                                        <span className="text-[11px] sm:text-xs">
+                                            {courseDetails?.level || "Beginner"} Level
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                    {[
+                                        { Icon: FaBook, text: `${totalLessons} Lessons` },
+                                        { Icon: AiOutlinePlaySquare, text: `${courseModules.length} Modules` },
+                                        { Icon: FaClock, text: totalDuration > 0 ? `${totalDuration} min` : "N/A" },
+                                        { Icon: FaTrophy, text: "Certificate" },
+                                    ].map(({ Icon, text }, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex items-center gap-1 sm:gap-1.5 border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-white"
+                                        >
+                                            <Icon className="text-gray-400" size={12} />
+                                            {text}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* Tabs - Horizontal scroll on mobile */}
+                {/* Tabs */}
                 <div className="border-b border-gray-200 mb-5 sm:mb-6 overflow-x-auto">
                     <div className="flex gap-1 sm:gap-2 min-w-max">
                         {tabs.map(({ key, label }) => (
                             <button
                                 key={key}
                                 onClick={() => setActiveTab(key)}
-                                className={`relative px-3 sm:px-5 pb-2 sm:pb-3 pt-1 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === key ? "text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                                className={`relative px-3 sm:px-5 pb-2 sm:pb-3 pt-1 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === key
+                                    ? "text-blue-600"
+                                    : "text-gray-500 hover:text-gray-700"
+                                    }`}
                             >
                                 {label}
-                                {activeTab === key && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
+                                {activeTab === key && (
+                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+                                )}
                             </button>
                         ))}
                     </div>
@@ -714,115 +502,223 @@ const ContinueLearning = () => {
 
                 {/* Tab Panels */}
                 <div>
-                    {/* OVERVIEW */}
+                    {/* ── OVERVIEW ── */}
                     {activeTab === "overview" && (
                         <div className="space-y-5 sm:space-y-6">
                             <div>
-                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">About this course</h3>
-                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">{course.desc}</p>
-                                <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">What you'll learn</h4>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">
+                                    About this course
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">
+                                    {courseDetails?.desc || courseDetails?.courseDescription || courseDetails?.description}
+                                </p>
+                                <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">
+                                    What you'll learn
+                                </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 sm:gap-x-6">
-                                    {(course.learnings || []).map((item, i) => (
-                                        <div key={i} className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700">
-                                            <FaCheckCircle size={12} className="text-blue-600 mt-1 flex-shrink-0" />
-                                            <span className="text-[11px] sm:text-sm">{item}</span>
-                                        </div>
-                                    ))}
+                                    {(courseDetails?.learnings || courseDetails?.whatYouWillLearn || []).map(
+                                        (item, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700"
+                                            >
+                                                <FaCheckCircle
+                                                    size={12}
+                                                    className="text-blue-600 mt-1 flex-shrink-0"
+                                                />
+                                                <span className="text-[11px] sm:text-sm">{item}</span>
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             </div>
+
                             <div>
-                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
+                                    Course Curriculum
+                                </h3>
                                 {modulesLoading ? (
-                                    <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => (
-                                        <div key={i} className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse" />
-                                    ))}</div>
+                                    <div className="space-y-2">
+                                        {Array.from({ length: 4 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse"
+                                            />
+                                        ))}
+                                    </div>
                                 ) : modulesError ? (
-                                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">{modulesError}</div>
+                                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">
+                                        {modulesError}
+                                    </div>
                                 ) : (
-                                    <CurriculumSection moduleList={moduleList} courseId={courseId} navigate={navigate} />
+                                    <CurriculumSection
+                                        moduleList={courseModules}
+                                        courseId={courseId}
+                                        navigate={navigate}
+                                        onFetchLessons={fetchLessonsForModule}
+                                    />
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* CURRICULUM */}
+                    {/* ── CURRICULUM ── */}
                     {activeTab === "curriculum" && (
                         <div>
-                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Curriculum</h3>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
+                                Course Curriculum
+                            </h3>
                             {modulesLoading ? (
-                                <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => (
-                                    <div key={i} className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse" />
-                                ))}</div>
+                                <div className="space-y-2">
+                                    {Array.from({ length: 6 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="h-14 bg-white rounded-xl border border-gray-100 animate-pulse"
+                                        />
+                                    ))}
+                                </div>
                             ) : modulesError ? (
                                 <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 flex items-center justify-between">
                                     <span>{modulesError}</span>
-                                    <button onClick={fetchModules} className="text-red-600 font-bold underline">Retry</button>
+                                    <button
+                                        onClick={fetchModules}
+                                        className="text-red-600 font-bold underline"
+                                    >
+                                        Retry
+                                    </button>
                                 </div>
                             ) : (
-                                <CurriculumSection moduleList={moduleList} courseId={courseId} navigate={navigate} />
+                                <CurriculumSection
+                                    moduleList={courseModules}
+                                    courseId={courseId}
+                                    navigate={navigate}
+                                    onFetchLessons={fetchLessonsForModule}
+                                />
                             )}
                         </div>
                     )}
 
-                    {/* INSTRUCTOR */}
+                    {/* ── INSTRUCTOR ── */}
                     {activeTab === "instructor" && (
                         <div>
-                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">About the Instructor</h3>
-                            <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-2xl">
-                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0 mx-auto sm:mx-0">
-                                    {course.instructor.initial}
-                                </div>
-                                <div className="text-center sm:text-left">
-                                    <h4 className="font-bold text-gray-900 text-sm sm:text-base">{course.instructor.name}</h4>
-                                    <p className="text-xs sm:text-sm text-blue-600 mb-2 sm:mb-3">{course.instructor.title}</p>
-                                    <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 mb-2 sm:mb-3">
-                                        <span className="flex items-center gap-1"><FaStar className="w-3 h-3 text-yellow-400" /> {course.instructor.rating} Rating</span>
-                                        <span className="flex items-center gap-1"><FaUser className="w-3 h-3" /> {course.instructor.students} Students</span>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
+                                About the Instructor
+                            </h3>
+                            {courseDetails?.instructor ? (
+                                <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-2xl">
+                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0 mx-auto sm:mx-0">
+                                        {courseDetails.instructor.initial ||
+                                            courseDetails.instructor.name?.charAt(0)}
                                     </div>
-                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{course.instructor.bio}</p>
+                                    <div className="text-center sm:text-left">
+                                        <h4 className="font-bold text-gray-900 text-sm sm:text-base">
+                                            {courseDetails.instructor.name}
+                                        </h4>
+                                        <p className="text-xs sm:text-sm text-blue-600 mb-2 sm:mb-3">
+                                            {courseDetails.instructor.title}
+                                        </p>
+                                        <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 mb-2 sm:mb-3">
+                                            <span className="flex items-center gap-1">
+                                                <FaStar className="w-3 h-3 text-yellow-400" />
+                                                {courseDetails.instructor.rating} Rating
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <FaUser className="w-3 h-3" />
+                                                {courseDetails.instructor.students} Students
+                                            </span>
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                            {courseDetails.instructor.bio}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <p className="text-xs text-gray-400">No instructor info available.</p>
+                            )}
                         </div>
                     )}
 
-                    {/* REVIEWS */}
+                    {/* ── REVIEWS ── */}
                     {activeTab === "reviews" && (
                         <div>
                             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-5 bg-amber-50 border border-amber-100 rounded-xl sm:rounded-2xl mb-5 sm:mb-6">
                                 <div className="text-center">
-                                    <div className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-none">{course.rating}</div>
+                                    <div className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-none">
+                                        {courseDetails?.rating || 0}
+                                    </div>
                                     <div className="flex justify-center mt-1 sm:mt-2 mb-1">
-                                        {[1, 2, 3, 4, 5].map(s => <FaStar key={s} className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />)}
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                            <FaStar key={s} className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                                        ))}
                                     </div>
                                     <div className="text-[10px] sm:text-xs text-gray-400">Course Rating</div>
                                 </div>
                                 <div className="flex-1 space-y-1.5 w-full">
-                                    {[5, 4, 3, 2, 1].map(s => (
+                                    {[5, 4, 3, 2, 1].map((s) => (
                                         <div key={s} className="flex items-center gap-2">
                                             <div className="flex-1 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-yellow-400 rounded-full" style={{ width: s === 5 ? "70%" : s === 4 ? "20%" : s === 3 ? "6%" : "3%" }} />
+                                                <div
+                                                    className="h-full bg-yellow-400 rounded-full"
+                                                    style={{
+                                                        width:
+                                                            s === 5
+                                                                ? "70%"
+                                                                : s === 4
+                                                                    ? "20%"
+                                                                    : s === 3
+                                                                        ? "6%"
+                                                                        : "3%",
+                                                    }}
+                                                />
                                             </div>
                                             <div className="flex gap-0.5 w-12 sm:w-16 justify-end">
-                                                {Array(s).fill(0).map((_, i) => <FaStar key={i} className="w-2 h-2 sm:w-3 sm:h-3 text-yellow-400" />)}
+                                                {Array(s)
+                                                    .fill(0)
+                                                    .map((_, i) => (
+                                                        <FaStar
+                                                            key={i}
+                                                            className="w-2 h-2 sm:w-3 sm:h-3 text-yellow-400"
+                                                        />
+                                                    ))}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Rate this course */}
                             <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-5 sm:mb-6">
-                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">Rate this Course</h3>
-                                <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-5">How would you rate your learning experience?</p>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
+                                    Rate this Course
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-5">
+                                    How would you rate your learning experience?
+                                </p>
                                 <div className="flex items-center gap-1 sm:gap-2 mb-4 sm:mb-5">
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                        <button key={star} onClick={() => setRating(star)} className="transition-transform hover:scale-110">
-                                            <FaStar size={24} className={`sm:text-3xl ${star <= rating ? "text-yellow-400" : "text-gray-300"}`} />
+                                        <button
+                                            key={star}
+                                            onClick={() => setRating(star)}
+                                            className="transition-transform hover:scale-110"
+                                        >
+                                            <FaStar
+                                                size={24}
+                                                className={`sm:text-3xl ${star <= rating ? "text-yellow-400" : "text-gray-300"
+                                                    }`}
+                                            />
                                         </button>
                                     ))}
                                 </div>
-                                <button onClick={() => handleRatingSubmit(rating)} disabled={!rating} className="bg-blue-600 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-300">
+                                <button
+                                    onClick={() => handleRatingSubmit(rating)}
+                                    disabled={!rating}
+                                    className="bg-blue-600 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-300"
+                                >
                                     Submit Rating
                                 </button>
                             </div>
+
+                            {/* Review list */}
                             <div className="divide-y divide-gray-100">
                                 {reviews.map((r, i) => (
                                     <div key={i} className="py-4 sm:py-5">
@@ -831,33 +727,56 @@ const ContinueLearning = () => {
                                                 {r.initial}
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-xs sm:text-sm text-gray-900">{r.name}</div>
+                                                <div className="font-semibold text-xs sm:text-sm text-gray-900">
+                                                    {r.name}
+                                                </div>
                                                 <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
                                                     <div className="flex gap-0.5">
-                                                        {Array(5).fill(0).map((_, j) => (
-                                                            <FaStar key={j} className={`w-2 h-2 sm:w-3 sm:h-3 ${j < r.rating ? "text-yellow-400" : "text-gray-200"}`} />
-                                                        ))}
+                                                        {Array(5)
+                                                            .fill(0)
+                                                            .map((_, j) => (
+                                                                <FaStar
+                                                                    key={j}
+                                                                    className={`w-2 h-2 sm:w-3 sm:h-3 ${j < r.rating ? "text-yellow-400" : "text-gray-200"
+                                                                        }`}
+                                                                />
+                                                            ))}
                                                     </div>
-                                                    <span className="text-[10px] sm:text-xs text-gray-400">{r.time}</span>
+                                                    <span className="text-[10px] sm:text-xs text-gray-400">
+                                                        {r.time}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <p className="text-xs sm:text-sm text-gray-600 pl-10 sm:pl-12">{r.text}</p>
+                                        <p className="text-xs sm:text-sm text-gray-600 pl-10 sm:pl-12">
+                                            {r.text}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* FAQS */}
+                    {/* ── FAQs ── */}
                     {activeTab === "faqs" && (
                         <div className="space-y-2 sm:space-y-3">
-                            {course.faqs.map((faq, i) => (
-                                <div key={i} className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
-                                    <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-1.5">{faq.q}</div>
-                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{faq.a}</p>
-                                </div>
-                            ))}
+                            {(courseDetails?.faqs || []).length === 0 ? (
+                                <p className="text-xs text-gray-400">No FAQs available.</p>
+                            ) : (
+                                (courseDetails?.faqs || []).map((faq, i) => (
+                                    <div
+                                        key={i}
+                                        className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white"
+                                    >
+                                        <div className="font-semibold text-xs sm:text-sm text-gray-900 mb-1.5">
+                                            {faq.q || faq.question}
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                            {faq.a || faq.answer}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     )}
                 </div>

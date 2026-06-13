@@ -157,6 +157,7 @@ function App() {
                   <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
+                  <Route path="continue-learning" element={<ContinueLearning />} />
                 </Route>
 
                 <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />

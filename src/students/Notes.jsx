@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { studentNotesApi } from "./auth/api";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
@@ -477,7 +478,12 @@ const INITIAL_NOTES = [
 ];
 
 function Notes() {
-  const [notes, setNotes] = useState(INITIAL_NOTES);
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const courseId = 1; // get from params or selected course
   const [sortType, setSortType] = useState("Latest");
   const [filter, setFilter] = useState("All");
   const [showEditor, setShowEditor] = useState(false);
@@ -505,7 +511,7 @@ function Notes() {
 
   const filteredNotes = useMemo(() => {
     let data = [...notes];
-    if (searchTerm) data = data.filter(i => i.title.toLowerCase().includes(searchTerm.toLowerCase()) || i.description.toLowerCase().includes(searchTerm.toLowerCase()) || i.author.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (searchTerm) data = data.filter(i => i.title.toLowerCase().includes(searchTerm.toLowerCase()) || i.description.toLowerCase().includes(searchTerm.toLowerCase()) || (i.userName || "").toLowerCase().includes(searchTerm.toLowerCase()));
     if (filter !== "All") data = data.filter(i => i.type === filter);
     if (sortType === "Latest") data.sort((a, b) => new Date(b.date) - new Date(a.date));
     else if (sortType === "Oldest") data.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -526,13 +532,13 @@ function Notes() {
   const handleAddComment = (noteId, text) => {
     setNotes(prev => prev.map(n => n.id === noteId
       ? {
-          ...n,
-          comments: n.comments + 1,
-          commentsList: [
-            ...(n.commentsList || []),
-            { author: "You", avatar: "https://randomuser.me/api/portraits/men/32.jpg", text, time: "Just now" },
-          ],
-        }
+        ...n,
+        comments: n.comments + 1,
+        commentsList: [
+          ...(n.commentsList || []),
+          { author: "You", avatar: "https://randomuser.me/api/portraits/men/32.jpg", text, time: "Just now" },
+        ],
+      }
       : n
     ));
     // keep modal open with updated note
@@ -545,26 +551,117 @@ function Notes() {
     if (n) setCommentNote(n);
   };
 
-  const handleSaveNote = ({ title, type, category, description, points }) => {
-    const newNote = {
-      id: Date.now(), type, category, title, description,
-      points: points.length ? points : [],
-      author: "Current User", date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      likes: 0, liked: false, comments: 0, commentsList: [],
-    };
-    setNotes(prev => [newNote, ...prev]);
-    setShowEditor(false);
-    setTimeout(() => setMessageModal({ show: true, type: "success", message: "Note saved successfully!" }), 200);
-  };
+  const handleSaveNote = async ({
+    title,
+    type,
+    category,
+    description,
+    points,
+    content,
+  }) => {
+    try {
+      const payload = {
+        title,
+        description,
+        courseId: 1,
+      };
 
-  const handleDeleteNote = (id) => {
-    if (window.confirm("Delete this note?")) {
-      setNotes(notes.filter(n => n.id !== id));
-      setActiveMenuNote(null);
-      setMessageModal({ show: true, type: "success", message: "Note Deleted Successfully!" });
+      await studentNotesApi.createNote(payload);
+
+      setShowEditor(false);
+
+      setMessageModal({
+        show: true,
+        type: "success",
+        message: "Note Created Successfully!",
+      });
+
+      fetchNotes(currentPage);
+    } catch (error) {
+      console.error("Create Note Error:", error);
+
+      setMessageModal({
+        show: true,
+        type: "error",
+        message: "Failed to create note",
+      });
     }
   };
+
+  const handleDeleteNote = async (id) => {
+    const confirmed = window.confirm("Delete this note?");
+
+    if (!confirmed) return;
+
+    try {
+      await studentNotesApi.deleteNote(id);
+
+      setNotes((prev) => prev.filter((note) => note.id !== id));
+
+      setActiveMenuNote(null);
+
+      setMessageModal({
+        show: true,
+        type: "success",
+        message: "Note Deleted Successfully!",
+      });
+
+      // Refresh current page
+      fetchNotes(currentPage);
+
+    } catch (error) {
+      console.error("Delete Note Error:", error);
+
+      setMessageModal({
+        show: true,
+        type: "error",
+        message: "Failed to delete note",
+      });
+    }
+  };
+
+  const fetchNotes = async (page = 0) => {
+    try {
+      setLoading(true);
+
+      const response = await studentNotesApi.getNotes(
+        courseId,
+        page,
+        10
+      );
+
+      const data = response.data;
+      console.log("API DATA:", data.content);
+
+      const formattedNotes = (data.content || []).map((note) => ({
+        ...note,
+
+        likes: 0,
+        comments: 0,
+        liked: false,
+        commentsList: [],
+
+        type: "Personal",
+        category: "Product",
+
+        date: new Date(note.createdAt).toLocaleDateString(),
+
+        points: [],
+      }));
+
+      setNotes(formattedNotes);
+      setCurrentPage(data.number);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, [courseId]);
 
   const stats = {
     total: notes.length,
@@ -673,13 +770,13 @@ function Notes() {
         {/* Notes Grid */}
         {filteredNotes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {filteredNotes.map(note => (
+            {notes.map(note => (
               <div key={note.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
                 <div className="p-3 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3 sm:mb-4">
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                      <span className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium ${tagColors[note.type]}`}>{note.type}</span>
+                      <span className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium ${tagColors[note.type]}`}>{note.noteType || "Note"}</span>
                       {note.category !== "Image" && (
                         <span className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium ${tagColors[note.category]}`}>{note.category}</span>
                       )}
@@ -712,7 +809,7 @@ function Notes() {
                   <h2 className="text-sm sm:text-lg font-bold text-gray-800 mb-1.5 sm:mb-2 line-clamp-2 hover:text-blue-600 transition-colors">{note.title}</h2>
                   <p className="text-gray-600 text-[11px] sm:text-sm mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-3">{note.description}</p>
 
-                  {note.points.length > 0 && (
+                  {note.points?.length > 0 && (
                     <ul className="space-y-0.5 sm:space-y-1 mb-2 sm:mb-3">
                       {note.points.slice(0, 2).map((point, i) => (
                         <li key={i} className="text-gray-500 text-[10px] sm:text-xs flex items-start gap-1.5">
@@ -722,42 +819,17 @@ function Notes() {
                       ))}
                     </ul>
                   )}
-
-                  {/* ── Action bar ── */}
-                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 pt-2 sm:pt-3 border-t border-gray-100">
-                    {/* Like */}
-                    <button
-                      onClick={() => handleLike(note.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all ${note.liked ? "bg-blue-50 text-blue-600 border border-blue-200" : "text-gray-500 hover:bg-gray-50 hover:text-blue-600 border border-transparent"}`}>
-                      <FaThumbsUp className={`text-[10px] sm:text-xs transition-transform ${note.liked ? "scale-110" : ""}`} />
-                      <span>{note.likes}</span>
-                    </button>
-
-                    {/* Comment */}
-                    <button
-                      onClick={() => openComments(note.id)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition border border-transparent">
-                      <FaComment className="text-[10px] sm:text-xs" />
-                      <span>{note.comments}</span>
-                    </button>
-
-                    {/* Share */}
-                    <button
-                      onClick={() => setShareNote(note)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-green-600 transition border border-transparent">
-                      <FaShare className="text-[10px] sm:text-xs" />
-                      <span className="hidden sm:inline">Share</span>
-                    </button>
-                  </div>
                 </div>
 
                 <div className="bg-gray-50 px-3 sm:px-5 py-2 sm:py-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 sm:gap-2">
-                    <img src={note.avatar} alt={note.author} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-2 ring-white" />
-                    <span className="text-[10px] sm:text-sm font-medium text-gray-700 truncate max-w-[100px] sm:max-w-none">{note.author.split(" ")[0]}</span>
+                    <img
+                      src="https://ui-avatars.com/api/?name=User"
+                      alt="User" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-2 ring-white" />
+                    <span className="text-[10px] sm:text-sm font-medium text-gray-700 truncate max-w-[100px] sm:max-w-none">{note.userName || "Unknown User"}</span>
                   </div>
                   <div className="flex items-center gap-1 text-[9px] sm:text-xs text-gray-500">
-                    <FaClock className="text-[8px] sm:text-xs" /><span>{note.date}</span>
+                    <FaClock className="text-[8px] sm:text-xs" /><span>{new Date(note.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -776,6 +848,43 @@ function Notes() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-8 mb-4 flex-wrap">
+        <button
+          disabled={currentPage === 0}
+          onClick={() => fetchNotes(currentPage - 1)}
+          className={`px-4 py-2 rounded-lg border transition ${currentPage === 0
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-blue-50 hover:border-blue-500"
+            }`}
+        >
+          ← Previous
+        </button>
+
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index}
+            onClick={() => fetchNotes(index)}
+            className={`w-10 h-10 rounded-lg font-medium transition ${currentPage === index
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-white border hover:bg-blue-50"
+              }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          disabled={currentPage === totalPages - 1}
+          onClick={() => fetchNotes(currentPage + 1)}
+          className={`px-4 py-2 rounded-lg border transition ${currentPage === totalPages - 1
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-blue-50 hover:border-blue-500"
+            }`}
+        >
+          Next →
+        </button>
       </div>
 
       {/* Success / Error modal */}
