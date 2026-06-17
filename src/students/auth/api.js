@@ -132,35 +132,72 @@ export const studentNotesApi = {
 };
 
 export const studentQuizApi = {
-  getAllQuizzes: () =>
-    api.get("/api/student/quizzes"),
+  getQuizzes: () => api.get('/api/student/quizzes'),
+  getQuizById: (quizId) => api.get(`/api/student/quizzes/${quizId}`),
+  startQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/start`),
+  retryQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/retry`),
+  resumeQuiz: (quizId) => api.get(`/api/student/quizzes/${quizId}/resume`),
+  getLeaderboard: (quizId) => api.get(`/api/student/quizzes/${quizId}/leaderboard`),
+  getAttempts: () => api.get('/api/student/quizzes/attempts'),
+  getAttemptResult: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/result`),
+  getAttemptQuestions: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/questions`),
+  saveAnswer: (attemptId, data) => api.post(`/api/student/quizzes/attempts/${attemptId}/save-answer`, data),
+  submitAttempt: (attemptId, data) => {
+    // Ensure data has an answers array (even if empty) to prevent backend null error
+    const payload = {
+      answers: data?.answers || []
+    };
+    return api.post(`/api/student/quizzes/attempts/${attemptId}/submit`, payload);
+  },
+};
 
-  getQuizById: (quizId) =>
-    api.get(`/api/student/quizzes/${quizId}`),
+export const studentJobApi = {
+  // Get all jobs with pagination
+  getJobs: (page = 0, size = 10) =>
+    api.get(`/api/student/jobs?page=${page}&size=${size}`),
 
-  startQuiz: (quizId) =>
-    api.post(`/api/student/quizzes/${quizId}/start`),
+  // Get job details by ID
+  getJobById: (jobId) =>
+    api.get(`/api/student/jobs/${jobId}`),
+};
 
-  retryQuiz: (quizId) =>
-    api.post(`/api/student/quizzes/${quizId}/retry`),
+export const studentAssignmentApi = {
 
-  resumeQuiz: (quizId) =>
-    api.get(`/api/student/quizzes/${quizId}/resume`),
+  getAssignmentsByModule: (moduleId) =>
+    api.get(`/api/student/assignments/module/${moduleId}`),
 
-  saveAnswer: (attemptId, data) =>
-    api.post(`/api/student/quizzes/attempts/${attemptId}/save-answer`, data),
+  getAssignmentById: (assignmentId) =>
+    api.get(`/api/student/assignments/${assignmentId}`),
 
-  submitQuiz: (attemptId) =>
-    api.post(`/api/student/quizzes/attempts/${attemptId}/submit`),
+  submitAssignment: (assignmentId, submissionText, file) => {
+  const formData = new FormData();
 
-  getQuestions: (attemptId) =>
-    api.get(`/api/student/quizzes/attempts/${attemptId}/questions`),
+  if (file) {
+    formData.append("file", file);
+  }
 
-  getResult: (attemptId) =>
-    api.get(`/api/student/quizzes/attempts/${attemptId}/result`),
+  return api.post(
+    `/api/student/assignments/${assignmentId}/submit`,
+    formData,
+    {
+      params: {
+        submissionText,
+      },
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+},
 
-  getLeaderboard: (quizId) =>
-    api.get(`/api/student/quizzes/${quizId}/leaderboard`),
+  updateSubmission: (assignmentId, data) =>
+    api.put(`/api/student/assignments/${assignmentId}/submission`, data),
+
+  getSubmissions: () =>
+    api.get(`/api/student/assignments/submissions`),
+
+  getSubmissionById: (submissionId) =>
+    api.get(`/api/student/assignments/submissions/${submissionId}`),
 };
 
 export default api;

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { studentEnrolledCourseApi } from "./auth/api";
+import { studentEnrolledCourseApi, studentAssignmentApi } from "./auth/api";
 import {
     FaPlay, FaCheckCircle, FaChevronLeft, FaChevronRight,
     FaChevronDown, FaChevronUp, FaClock, FaBook, FaTrophy,
@@ -13,9 +13,7 @@ import {
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { MdOutlineQuiz, MdAssignment, MdInfoOutline, MdCloudUpload } from "react-icons/md";
 
-/* ══════════════════════════════════════════════════════════════
-   NOTE COLORS CONFIG
-══════════════════════════════════════════════════════════════ */
+/* NOTE COLORS CONFIG */
 const NOTE_COLORS = [
     { bg: "bg-yellow-50", border: "border-yellow-200", dot: "bg-yellow-400", label: "Yellow" },
     { bg: "bg-blue-50", border: "border-blue-200", dot: "bg-blue-400", label: "Blue" },
@@ -24,9 +22,7 @@ const NOTE_COLORS = [
     { bg: "bg-purple-50", border: "border-purple-200", dot: "bg-purple-400", label: "Purple" },
 ];
 
-/* ══════════════════════════════════════════════════════════════
-   TAKE NOTES PANEL COMPONENT
-══════════════════════════════════════════════════════════════ */
+/* TAKE NOTES PANEL COMPONENT */
 const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
     const [notes, setNotes] = useState(() => {
         try { return JSON.parse(localStorage.getItem(`notes_${lessonId}`) || "[]"); } catch { return []; }
@@ -560,12 +556,14 @@ const ModuleLesson = () => {
 
     // Lessons per module (lazy cache: moduleId → lessons[])
     const [moduleLessonsCache, setModuleLessonsCache] = useState({});
+    const [moduleAssignmentsCache, setModuleAssignmentsCache] = useState({});
     const [loadingModuleLessons, setLoadingModuleLessons] = useState({});
 
     // UI
     const [completedLessons, setCompletedLessons] = useState(new Set());
     const [expandedModules, setExpandedModules] = useState(new Set([moduleId]));
     const [sidebarOpen, setSidebarOpen] = useState(true);
+
 
     /* ══════════════════════════════════════════
        FETCH MODULES (sidebar)
@@ -601,19 +599,51 @@ const ModuleLesson = () => {
     ══════════════════════════════════════════ */
     const fetchModuleLessons = useCallback(async (mId) => {
         const key = String(mId);
-        if (moduleLessonsCache[key] || loadingModuleLessons[key]) return;
-        setLoadingModuleLessons(prev => ({ ...prev, [key]: true }));
+
+        if (loadingModuleLessons[key]) return;
+
+        setLoadingModuleLessons(prev => ({
+            ...prev,
+            [key]: true,
+        }));
+
         try {
-            const res = await studentEnrolledCourseApi.getModuleLessons(courseId, mId, 0, 100);
-            const lessons = res.data?.data?.content || res.data?.content || res.data?.data || res.data || [];
-            setModuleLessonsCache(prev => ({ ...prev, [key]: Array.isArray(lessons) ? lessons : [] }));
+            const [lessonRes, assignmentRes] = await Promise.all([
+                studentEnrolledCourseApi.getModuleLessons(courseId, mId, 0, 100),
+                studentAssignmentApi.getAssignmentsByModule(mId),
+            ]);
+
+            const lessons =
+                lessonRes.data?.data?.content ||
+                lessonRes.data?.content ||
+                lessonRes.data?.data ||
+                [];
+
+            const assignments =
+                assignmentRes.data?.data?.content ||
+                assignmentRes.data?.content ||
+                assignmentRes.data?.data ||
+                [];
+
+            setModuleLessonsCache(prev => ({
+                ...prev,
+                [key]: lessons,
+            }));
+
+            setModuleAssignmentsCache(prev => ({
+                ...prev,
+                [key]: assignments,
+            }));
+
         } catch (err) {
-            console.error(`fetchModuleLessons(${mId}) error:`, err);
-            setModuleLessonsCache(prev => ({ ...prev, [key]: [] }));
+            console.error(err);
         } finally {
-            setLoadingModuleLessons(prev => ({ ...prev, [key]: false }));
+            setLoadingModuleLessons(prev => ({
+                ...prev,
+                [key]: false,
+            }));
         }
-    }, [courseId, moduleLessonsCache, loadingModuleLessons]);
+    }, [courseId]);
 
     /* ══════════════════════════════════════════
        FETCH CURRENT LESSON
@@ -871,16 +901,16 @@ const ModuleLesson = () => {
                         {!isQuiz && !isAssignment && !lessonLoading && !lessonError && (
                             <div className="space-y-4">
                                 {content.description && (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs">
-        <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">
-            About this Lesson
-        </h3>
+                                    <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs">
+                                        <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">
+                                            About this Lesson
+                                        </h3>
 
-        <p className="text-sm text-slate-700 leading-relaxed">
-            {stripHtml(content.description)}
-        </p>
-    </div>
-)}
+                                        <p className="text-sm text-slate-700 leading-relaxed">
+                                            {stripHtml(content.description)}
+                                        </p>
+                                    </div>
+                                )}
                                 {content.body && isText && (
                                     <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs">
                                         <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3">Lesson Content</h3>
@@ -951,6 +981,8 @@ const ModuleLesson = () => {
                                     const isExpandedMod = expandedModules.has(key);
                                     const isActiveMod = String(mod.id) === String(moduleId);
                                     const lessons = moduleLessonsCache[key] || mod.lessons || [];
+                                    const assignments =
+                                        moduleAssignmentsCache[key] || [];
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.id}-${l.id}`)).length;
 
                                     return (
@@ -977,49 +1009,148 @@ const ModuleLesson = () => {
                                                             ))}
                                                         </div>
                                                     ) : lessons.length === 0 ? (
-                                                        <div className="px-5 py-3 text-[10px] text-slate-400">No lessons found.</div>
+                                                        <div className="px-5 py-3 text-[10px] text-slate-400">
+                                                            No lessons found.
+                                                        </div>
                                                     ) : (
-                                                        lessons.map(lesson => {
-                                                            const isActive = String(mod.id) === String(moduleId) && String(lesson.id) === String(lessonId);
-                                                            const isDoneLesson = completedLessons.has(`${mod.id}-${lesson.id}`);
-                                                            const lType = getLessonIcon(lesson.lessonType || lesson.type);
-                                                            const isAssignLesson = lType === "assignment";
-                                                            const isQuizLesson = lType === "quiz";
+                                                        <>
+                                                            {lessons.map((lesson) => {
+                                                                const isActive =
+                                                                    String(mod.id) === String(moduleId) &&
+                                                                    String(lesson.id) === String(lessonId);
 
-                                                            let itemClass = "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
-                                                            if (isActive) itemClass += "bg-blue-600 text-white font-semibold border-l-blue-600";
-                                                            else if (isAssignLesson) itemClass += "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
-                                                            else itemClass += "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
+                                                                const isDoneLesson = completedLessons.has(
+                                                                    `${mod.id}-${lesson.id}`
+                                                                );
 
-                                                            return (
-                                                                <button key={lesson.id} onClick={() => goTo(mod.id, lesson.id)} className={itemClass}>
-                                                                    <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
-                                                                        {isDoneLesson ? (
-                                                                            <FaCheckCircle className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"}`} />
-                                                                        ) : isAssignLesson ? (
-                                                                            <MdAssignment className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-amber-500"}`} />
-                                                                        ) : isQuizLesson ? (
-                                                                            <MdOutlineQuiz className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-indigo-400"}`} />
-                                                                        ) : (
-                                                                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isActive ? "border-white/40" : "border-slate-300 bg-white"}`}>
-                                                                                <FaPlay className={`w-1.5 h-1.5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                                                                const lType = getLessonIcon(
+                                                                    lesson.lessonType || lesson.type
+                                                                );
+
+                                                                const isAssignLesson = lType === "assignment";
+                                                                const isQuizLesson = lType === "quiz";
+
+                                                                let itemClass =
+                                                                    "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
+
+                                                                if (isActive)
+                                                                    itemClass +=
+                                                                        "bg-blue-600 text-white font-semibold border-l-blue-600";
+                                                                else if (isAssignLesson)
+                                                                    itemClass +=
+                                                                        "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
+                                                                else
+                                                                    itemClass +=
+                                                                        "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
+
+                                                                return (
+                                                                    <button
+                                                                        key={lesson.id}
+                                                                        onClick={() => goTo(mod.id, lesson.id)}
+                                                                        className={itemClass}
+                                                                    >
+                                                                        <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                                                            {isDoneLesson ? (
+                                                                                <FaCheckCircle
+                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"
+                                                                                        }`}
+                                                                                />
+                                                                            ) : isAssignLesson ? (
+                                                                                <MdAssignment
+                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-amber-500"
+                                                                                        }`}
+                                                                                />
+                                                                            ) : isQuizLesson ? (
+                                                                                <MdOutlineQuiz
+                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-indigo-400"
+                                                                                        }`}
+                                                                                />
+                                                                            ) : (
+                                                                                <div
+                                                                                    className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isActive
+                                                                                        ? "border-white/40"
+                                                                                        : "border-slate-300 bg-white"
+                                                                                        }`}
+                                                                                >
+                                                                                    <FaPlay
+                                                                                        className={`w-1.5 h-1.5 ${isActive ? "text-white" : "text-slate-400"
+                                                                                            }`}
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p
+                                                                                className={`text-xs truncate leading-tight ${isActive
+                                                                                    ? "text-white"
+                                                                                    : isAssignLesson
+                                                                                        ? "text-amber-800 font-semibold"
+                                                                                        : "text-slate-700 font-medium"
+                                                                                    }`}
+                                                                            >
+                                                                                {lesson.title}
+                                                                            </p>
+
+                                                                            <p
+                                                                                className={`text-[10px] mt-0.5 ${isActive
+                                                                                    ? "text-blue-100"
+                                                                                    : isAssignLesson
+                                                                                        ? "text-amber-500"
+                                                                                        : "text-slate-400"
+                                                                                    }`}
+                                                                            >
+                                                                                {isAssignLesson
+                                                                                    ? "Assignment"
+                                                                                    : isQuizLesson
+                                                                                        ? "Quiz"
+                                                                                        : lesson.durationInMinutes
+                                                                                            ? `${lesson.durationInMinutes} min`
+                                                                                            : lesson.duration || ""}
+                                                                            </p>
+                                                                        </div>
+                                                                    </button>
+                                                                );
+                                                            })}
+
+                                                            {assignments?.length > 0 && (
+                                                                <>
+                                                                    <div className="px-4 py-2 bg-amber-100 border-t border-amber-200">
+                                                                        <p className="text-[10px] font-bold uppercase text-amber-700">
+                                                                            Module Assignments
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {assignments.map((assignment) => (
+                                                                        <button
+                                                                            key={assignment.assignmentId}
+                                                                            onClick={() =>
+                                                                                navigate(`/student/course/${courseId}/module/${mod.id}/assignment/${assignment.assignmentId}`)
+                                                                            }
+                                                                            className="w-full flex items-center gap-3 px-4 py-3 bg-amber-50 border-b border-amber-100 hover:bg-amber-100/70 transition-colors text-left"
+                                                                        >
+                                                                            <MdAssignment className="text-amber-500 text-lg flex-shrink-0" />
+
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <p className="text-xs font-semibold text-slate-800 truncate">
+                                                                                    {assignment.title}
+                                                                                </p>
+                                                                                <p className="text-[10px] text-slate-500">
+                                                                                    Due: {assignment.dueDate?.split("T")[0]}
+                                                                                </p>
                                                                             </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <p className={`text-xs truncate leading-tight ${isActive ? "text-white" : isAssignLesson ? "text-amber-800 font-semibold" : "text-slate-700 font-medium"}`}>
-                                                                            {lesson.title}
-                                                                        </p>
-                                                                        <p className={`text-[10px] mt-0.5 ${isActive ? "text-blue-100" : isAssignLesson ? "text-amber-500" : "text-slate-400"}`}>
-                                                                            {isAssignLesson ? "Assignment" : isQuizLesson ? "Quiz"
-                                                                                : lesson.durationInMinutes ? `${lesson.durationInMinutes} min` : lesson.duration || ""}
-                                                                        </p>
-                                                                    </div>
-                                                                </button>
-                                                            );
-                                                        })
-                                                    )}
+
+                                                                            <FaChevronRight className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />
+                                                                        </button>
+                                                                    ))}
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    )
+                                                    }
+
                                                 </div>
+
                                             )}
                                         </div>
                                     );

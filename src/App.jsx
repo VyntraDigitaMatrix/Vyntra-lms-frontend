@@ -71,6 +71,7 @@ import AdminLessonView from "./Admin/pages/LessonView";
 import LessonView from "./Instructor/pages/LessonView";
 import Resume from "./students/Resume";
 import JobNotifications from "./students/JobNotification";
+import AssignmentDetail from "./students/AssignmentDetail";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -158,7 +159,12 @@ function App() {
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
                   <Route path="continue-learning" element={<ContinueLearning />} />
+                  <Route
+                    path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
+                    element={<AssignmentDetail />}
+                  />
                 </Route>
+
 
                 <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
                 <Route

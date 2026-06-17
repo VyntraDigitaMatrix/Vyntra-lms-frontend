@@ -87,7 +87,223 @@ const UserLogin = () => {
 
   return (
     <div className="min-h-screen bg-[#f6f5f7] flex items-center justify-center px-4 py-8">
-      <div className="relative w-[820px] max-w-full min-h-[580px] bg-white rounded-lg overflow-hidden shadow-xl transition-all duration-200 hover:shadow-2xl flex flex-col justify-center">
+      {/* Mobile View - Card Layout */}
+      <div className="w-full max-w-md bg-white rounded-lg overflow-hidden shadow-xl transition-all duration-200 hover:shadow-2xl md:hidden">
+        {/* Mobile Toggle Buttons */}
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => {
+              setError("");
+              setIsSignUp(false);
+            }}
+            className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
+              !isSignUp
+                ? "text-[#ff3b30] border-b-2 border-[#ff3b30] bg-white"
+                : "text-gray-500 bg-gray-50"
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => {
+              setError("");
+              setIsSignUp(true);
+            }}
+            className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
+              isSignUp
+                ? "text-[#ff3b30] border-b-2 border-[#ff3b30] bg-white"
+                : "text-gray-500 bg-gray-50"
+            }`}
+          >
+            Sign Up
+          </button>
+        </div>
+
+        <div className="p-6">
+          {/* Sign In Form - Mobile */}
+          {!isSignUp && (
+            <div className="animate-fadeIn">
+              <h1 className="text-2xl font-bold text-center mb-6">Welcome Back</h1>
+              
+              <div className="mb-4">
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full px-6 py-3 border border-gray-300 rounded-full flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-red-500 transition duration-300 cursor-pointer"
+                >
+                  <img
+                    src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Continue with Google
+                  </span>
+                </button>
+              </div>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-gray-500">or use your account</span>
+                </div>
+              </div>
+              
+              {error && (
+                <div className="text-red-500 text-xs mb-3 text-center w-full bg-red-50 p-2 rounded">
+                  {error}
+                </div>
+              )}
+
+              <input
+                type="email"
+                placeholder="Email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="w-full bg-gray-100 px-4 py-3 mb-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition"
+                required
+              />
+
+              <div className="relative w-full mb-3">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                >
+                  {showLoginPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+
+              <div className="text-right mb-4">
+                <Link to="/ForgotPassword" className="text-xs text-gray-600 hover:text-blue-600 transition">
+                  Forgot your password?
+                </Link>
+              </div>
+
+              <button
+                onClick={handleSignIn}
+                disabled={loading}
+                className={`w-full py-3 bg-[#ff3b30] text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-[#e03126] cursor-pointer ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? "Signing In..." : "Sign In"}
+              </button>
+            </div>
+          )}
+
+          {/* Sign Up Form - Mobile */}
+          {isSignUp && (
+            <div className="animate-fadeIn">
+              <h1 className="text-2xl font-bold text-center mb-6">Create Account</h1>
+              
+              <div className="mb-4">
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full px-6 py-3 border border-gray-300 rounded-full flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-red-500 transition duration-300 cursor-pointer"
+                >
+                  <img
+                    src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Continue with Google
+                  </span>
+                </button>
+              </div>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-gray-500">or use your email for registration</span>
+                </div>
+              </div>
+
+              {error && (
+                <div className="text-red-500 text-xs mb-3 text-center w-full bg-red-50 p-2 rounded">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-3 mb-4">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition"
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Mobile Number"
+                  value={registerMobile}
+                  onChange={(e) => setRegisterMobile(e.target.value)}
+                  className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition"
+                  required
+                />
+                <div className="relative w-full">
+                  <input
+                    type={showRegisterPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                  >
+                    {showRegisterPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Referral Code (Optional)"
+                  value={registerReferralCode}
+                  onChange={(e) => setRegisterReferralCode(e.target.value)}
+                  className="w-full bg-gray-100 px-4 py-3 outline-none text-sm rounded border border-transparent focus:border-blue-500 transition"
+                />
+              </div>
+
+              <button
+                onClick={handleSignUp}
+                disabled={loading}
+                className={`w-full py-3 bg-[#ff3b30] text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-[#e03126] cursor-pointer ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? "Creating..." : "Sign Up"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop View - Original Layout */}
+      <div className="relative w-[820px] max-w-full min-h-[580px] bg-white rounded-lg overflow-hidden shadow-xl transition-all duration-200 hover:shadow-2xl hidden md:block">
         
         {/* Sign In */}
         <div

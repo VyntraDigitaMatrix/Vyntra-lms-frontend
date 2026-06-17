@@ -8,135 +8,7 @@ import {
     FaWhatsapp, FaLinkedin, FaEnvelope as FaEnvelopeSolid, FaLink, FaCopy,
     FaSlidersH, FaSortAmountDown, FaSortAmountUp
 } from 'react-icons/fa';
-
-const JOBS = [
-    {
-        id: 1, title: 'Senior Digital Marketing Manager', company: 'GrowthHive Agency',
-        location: 'Remote (India)', type: 'Full-time', salary: '₹18L – ₹28L', posted: '2 hours ago',
-        logo: 'GH', logoColor: 'bg-blue-600', skills: ['SEO', 'Google Ads', 'Meta Ads'],
-        category: 'paid-media', badge: 'Hot', matchScore: 94, applicants: 45, deadline: '2025-07-15',
-        description: 'Lead end-to-end digital marketing campaigns for Fortune 500 clients. Drive ROI through data-driven paid media, SEO strategy, and funnel optimisation.',
-        about: 'GrowthHive Agency is a performance-first digital marketing agency working with Fortune 500 clients across India and Southeast Asia. We are a team of 120+ marketers obsessed with data, creativity, and results. Our remote-first culture has been recognised as one of India\'s best workplaces for marketers.',
-        responsibilities: [
-            'Own the performance marketing roadmap across Google, Meta, and programmatic channels',
-            'Collaborate with cross-functional teams to align campaign goals with business outcomes',
-            'Lead a team of 4 digital marketers and drive their growth',
-            'Present monthly ROI reports and insights to C-suite stakeholders',
-            'Own budget planning and forecasting for a ₹5Cr+ annual ad spend',
-        ],
-        requirements: [
-            '5+ years in digital marketing with 2+ years in a leadership role',
-            'Expert-level knowledge of Google Ads, Meta Business Manager',
-            'Strong analytical skills and experience with GA4, Looker Studio',
-            'Excellent communication and stakeholder management skills',
-        ],
-        perks: ['Remote-first culture with flexible hours', '₹5L annual L&D budget', 'ESOP for senior roles', 'Health insurance for family', 'Annual team off-site', '₹1L home-office setup stipend'],
-    },
-    {
-        id: 2, title: 'Content Marketing Strategist', company: 'BrandNarrative Co.',
-        location: 'Bangalore, India', type: 'Full-time', salary: '₹12L – ₹20L', posted: '1 day ago',
-        logo: 'BN', logoColor: 'bg-blue-800', skills: ['Content Strategy', 'SEO Writing', 'HubSpot'],
-        category: 'content', badge: 'Featured', matchScore: 88, applicants: 78, deadline: '2025-07-20',
-        description: 'Craft compelling content ecosystems — from editorial calendars to long-form thought leadership — that drive organic growth and brand authority.',
-        about: 'BrandNarrative Co. is a content-first B2B marketing studio helping SaaS and fintech brands build organic authority. We partner with marketing and growth teams to develop content that ranks, converts, and retains.',
-        responsibilities: [
-            'Develop and own the content strategy across blog, social, and email',
-            'Produce long-form SEO articles and manage a network of freelance writers',
-            'Track content performance and iterate based on data',
-            'Partner with SEO, design, and product teams to execute content campaigns',
-        ],
-        requirements: [
-            '3+ years in content marketing or editorial',
-            'Strong SEO writing skills and familiarity with HubSpot CMS',
-            'Portfolio of published long-form content required',
-            'Experience with keyword research tools like Ahrefs or Semrush',
-        ],
-        perks: ['Hybrid model (3 days office)', 'Creative freedom and ownership', 'Generous leave policy', 'Quarterly off-sites', 'Book & course reimbursement'],
-    },
-    {
-        id: 3, title: 'Performance Marketing Lead', company: 'ScaleUp Digital',
-        location: 'Hyderabad, India', type: 'Full-time', salary: '₹22L – ₹35L', posted: '3 days ago',
-        logo: 'SD', logoColor: 'bg-blue-900', skills: ['Google Ads', 'Meta Ads', 'Analytics'],
-        category: 'paid-media', badge: 'Urgent', matchScore: 91, applicants: 32, deadline: '2025-07-10',
-        description: 'Own paid acquisition across Google, Meta, and programmatic channels. Build attribution models and optimise toward aggressive growth targets.',
-        about: 'ScaleUp Digital is a fast-growing performance marketing agency based in Hyderabad, working with 40+ D2C and ecommerce brands. We move fast, iterate constantly, and reward impact.',
-        responsibilities: [
-            'Manage ₹2Cr+ monthly ad budget across all paid channels',
-            'Build multi-touch attribution models to measure real campaign impact',
-            'Partner with the product team to improve landing page conversion',
-            'Hire and mentor a team of 3 performance marketers',
-        ],
-        requirements: [
-            '4+ years in performance marketing',
-            'Experience managing large budgets (₹1Cr+ monthly)',
-            'Proficiency in GA4, Mixpanel, or Amplitude',
-            'Deep understanding of funnel economics and unit economics',
-        ],
-        perks: ['Stock options', '₹50K annual wellness allowance', 'Work with top D2C brands', 'High-growth startup environment', 'Flexible WFH policy'],
-    },
-    {
-        id: 4, title: 'Social Media Marketing Intern', company: 'PixelBuzz Studio',
-        location: 'Remote', type: 'Internship', salary: '₹15k – ₹25k/mo', posted: '5 days ago',
-        logo: 'PB', logoColor: 'bg-blue-400', skills: ['Instagram', 'Canva', 'Copywriting'],
-        category: 'internship', badge: null, matchScore: 76, applicants: 156, deadline: '2025-07-25',
-        description: 'Hands-on role creating viral content, managing communities, and running A/B creative tests for fast-growing D2C brands.',
-        about: 'PixelBuzz Studio is a social-first creative studio helping D2C brands build communities and drive engagement. We run social for 20+ brands and are known for our high-energy, experimental approach to content.',
-        responsibilities: [
-            'Create and schedule content for Instagram, LinkedIn, and Twitter',
-            'Assist in community management and respond to DMs',
-            'Run A/B tests on creative formats',
-            'Track engagement metrics and compile weekly reports',
-        ],
-        requirements: [
-            'Pursuing or recently completed a degree in marketing or communications',
-            'Strong eye for visual design (Canva proficiency required)',
-            'Active presence on social media platforms',
-        ],
-        perks: ['Full-time offer for top performers', 'Mentorship from senior marketers', 'Flexible remote work', 'Certificate of completion'],
-    },
-    {
-        id: 5, title: 'Marketing Analytics Specialist', company: 'DataPulse Inc.',
-        location: 'Pune, India', type: 'Full-time', salary: '₹16L – ₹26L', posted: '1 week ago',
-        logo: 'DP', logoColor: 'bg-blue-700', skills: ['GA4', 'Looker Studio', 'SQL'],
-        category: 'analytics', badge: null, matchScore: 85, applicants: 67, deadline: '2025-07-18',
-        description: 'Transform raw marketing data into actionable insights. Build dashboards, attribution models, and forecasting reports that inform growth strategy.',
-        about: 'DataPulse Inc. is a marketing intelligence company helping growth teams make faster, smarter decisions. Our platform connects ad data, CRM data, and web analytics to give a single source of truth for marketing performance.',
-        responsibilities: [
-            'Build and maintain marketing dashboards in Looker Studio and Tableau',
-            'Write SQL queries to extract insights from BigQuery data warehouse',
-            'Present findings to growth and leadership teams bi-weekly',
-            'Build attribution models and revenue forecasting reports',
-        ],
-        requirements: [
-            '2+ years in a marketing analytics or data analyst role',
-            'Proficiency in SQL, GA4, and at least one BI tool',
-            'Knowledge of marketing attribution models (MTA, MMM) preferred',
-            'Comfortable working with large datasets and cleaning messy data',
-        ],
-        perks: ['Fully remote with home-office stipend', 'Annual data conference budget', 'Collaborative culture', 'Quarterly bonuses', 'Top-of-market salary'],
-    },
-    {
-        id: 6, title: 'Email Marketing Manager', company: 'InboxFirst',
-        location: 'Mumbai, India', type: 'Contract', salary: '₹10L – ₹16L', posted: '2 days ago',
-        logo: 'IF', logoColor: 'bg-blue-600', skills: ['Klaviyo', 'Mailchimp', 'Automation'],
-        category: 'email', badge: 'New', matchScore: 82, applicants: 41, deadline: '2025-07-22',
-        description: 'Design lifecycle email programs that convert, retain, and re-engage. Own open rates, click-throughs, and revenue-per-email for a portfolio of ecom brands.',
-        about: 'InboxFirst is a boutique email marketing consultancy that manages retention programs for 15+ ecommerce brands. We are obsessed with deliverability, personalisation, and revenue-per-email.',
-        responsibilities: [
-            'Build and manage automated email flows (welcome, abandoned cart, win-back)',
-            'A/B test subject lines, content, and send times',
-            'Own email KPIs including open rate, CTR, and revenue per email',
-            'Audit and improve list hygiene and deliverability health',
-        ],
-        requirements: [
-            '3+ years in email marketing for ecommerce',
-            'Expert in Klaviyo and/or Mailchimp',
-            'Strong understanding of segmentation and list hygiene',
-            'Experience with HTML email templates is a bonus',
-        ],
-        perks: ['Contract to full-time opportunity', 'Remote work', 'Direct impact on revenue', 'Flexible hours'],
-    },
-];
+import { studentJobApi } from "./auth/api";
 
 const badgeConfig = {
     Hot: 'bg-red-50 text-red-600',
@@ -197,9 +69,9 @@ const ShareModal = ({ job, onClose }) => {
     };
 
     const shareLinks = [
-        { name: 'WhatsApp', icon: FaWhatsapp, color: 'bg-green-500', url: `https://wa.me/?text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.company} - ${shareUrl}`)}` },
+        { name: 'WhatsApp', icon: FaWhatsapp, color: 'bg-green-500', url: `https://wa.me/?text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.companyName} - ${shareUrl}`)}` },
         { name: 'LinkedIn', icon: FaLinkedin, color: 'bg-blue-700', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
-        { name: 'Email', icon: FaEnvelopeSolid, color: 'bg-gray-600', url: `mailto:?subject=${encodeURIComponent(`Job Opportunity: ${job.title} at ${job.company}`)}&body=${encodeURIComponent(`Hi,\n\nCheck out this amazing opportunity:\n\n${job.title} at ${job.company}\n${shareUrl}\n\n${job.description}\n\nBest regards!`)}` },
+        { name: 'Email', icon: FaEnvelopeSolid, color: 'bg-gray-600', url: `mailto:?subject=${encodeURIComponent(`Job Opportunity: ${job.title} at ${job.companyName}`)}&body=${encodeURIComponent(`Hi,\n\nCheck out this amazing opportunity:\n\n${job.title} at ${job.companyName}\n${shareUrl}\n\n${job.description}\n\nBest regards!`)}` },
     ];
 
     return (
@@ -211,10 +83,10 @@ const ShareModal = ({ job, onClose }) => {
                 </div>
                 <div className="p-5">
                     <div className="flex items-center gap-3 mb-5 p-3 bg-slate-50 rounded-xl">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xs ${job.logoColor}`}>{job.logo}</div>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xs ${job.logoColor || 'bg-blue-600'}`}>{job.logo || job.companyName?.charAt(0) || 'J'}</div>
                         <div className="flex-1 min-w-0">
                             <p className="font-semibold text-slate-800 text-sm truncate">{job.title}</p>
-                            <p className="text-xs text-slate-500 truncate">{job.company}</p>
+                            <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
                         </div>
                     </div>
                     <div className="flex gap-3 mb-5 justify-center">
@@ -379,10 +251,10 @@ const ApplyPage = ({ job, onBack }) => {
         return (
             <div className="min-h-screen bg-[#f7f8fc] flex flex-col">
                 <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white flex-shrink-0 ${job.logoColor}`}>{job.logo}</div>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white flex-shrink-0 ${job.logoColor || 'bg-blue-600'}`}>{job.logo || job.companyName?.charAt(0) || 'J'}</div>
                     <div>
                         <p className="text-[13px] font-semibold text-slate-900 leading-tight">{job.title}</p>
-                        <p className="text-[11.5px] text-slate-500">{job.company}</p>
+                        <p className="text-[11.5px] text-slate-500">{job.companyName}</p>
                     </div>
                 </div>
                 <div className="flex-1 flex items-center justify-center p-6">
@@ -392,7 +264,7 @@ const ApplyPage = ({ job, onBack }) => {
                         </div>
                         <h2 className="text-xl font-bold text-slate-900 mb-2">Application submitted!</h2>
                         <p className="text-[13.5px] text-slate-500 leading-relaxed mb-6">
-                            Your application for <strong className="text-slate-700">{job.title}</strong> at {job.company} has been sent. You'll hear back within 5–7 business days.
+                            Your application for <strong className="text-slate-700">{job.title}</strong> at {job.companyName} has been sent. You'll hear back within 5–7 business days.
                         </p>
                         <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 text-left">
                             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">What's next</p>
@@ -419,10 +291,10 @@ const ApplyPage = ({ job, onBack }) => {
                     <FaArrowLeft className="text-xs" /> Back to jobs
                 </button>
                 <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[11px] text-white flex-shrink-0 ${job.logoColor}`}>{job.logo}</div>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[11px] text-white flex-shrink-0 ${job.logoColor || 'bg-blue-600'}`}>{job.logo || job.companyName?.charAt(0) || 'J'}</div>
                     <div className="hidden sm:block">
                         <p className="text-[12.5px] font-semibold text-slate-900 leading-tight">{job.title}</p>
-                        <p className="text-[11px] text-slate-500">{job.company}</p>
+                        <p className="text-[11px] text-slate-500">{job.companyName}</p>
                     </div>
                 </div>
                 <div className="text-[12px] text-slate-400">Step {step + 1}/{STEPS.length}</div>
@@ -447,11 +319,11 @@ const ApplyPage = ({ job, onBack }) => {
                 </div>
 
                 <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm text-white flex-shrink-0 ${job.logoColor}`}>{job.logo}</div>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm text-white flex-shrink-0 ${job.logoColor || 'bg-blue-600'}`}>{job.logo || job.companyName?.charAt(0) || 'J'}</div>
                     <div className="flex-1 min-w-0">
                         <p className="text-[13.5px] font-semibold text-slate-900 truncate">{job.title}</p>
                         <div className="flex flex-wrap gap-2 mt-0.5">
-                            <span className="text-[12px] text-slate-500">{job.company}</span>
+                            <span className="text-[12px] text-slate-500">{job.companyName}</span>
                             <span className="text-slate-300">·</span>
                             <span className="text-[12px] text-slate-500">{job.salary}</span>
                             <span className="text-slate-300">·</span>
@@ -548,7 +420,7 @@ const ApplyPage = ({ job, onBack }) => {
                                 </div>
                             )}
                             <p className="text-[12px] text-slate-400 leading-relaxed pt-1">
-                                By submitting, you confirm all information is accurate and consent to sharing your details with {job.company}.
+                                By submitting, you confirm all information is accurate and consent to sharing your details with {job.companyName}.
                             </p>
                         </div>
                     )}
@@ -612,8 +484,8 @@ const DetailPage = ({ job, onBack, onApply }) => {
             <div className="mx-auto px-4 sm:px-6 py-6 sm:py-8">
                 <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mb-4">
                     <div className="flex gap-4 items-start mb-4">
-                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-bold text-base sm:text-lg text-white flex-shrink-0 ${job.logoColor}`}>
-                            {job.logo}
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-bold text-base sm:text-lg text-white flex-shrink-0 ${job.logoColor || 'bg-blue-600'}`}>
+                            {job.logo || job.companyName?.charAt(0) || 'J'}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -624,7 +496,7 @@ const DetailPage = ({ job, onBack, onApply }) => {
                                     </span>
                                 )}
                             </div>
-                            <p className="text-slate-600 text-[14px] font-medium">{job.company}</p>
+                            <p className="text-slate-600 text-[14px] font-medium">{job.companyName}</p>
                         </div>
                     </div>
 
@@ -632,8 +504,8 @@ const DetailPage = ({ job, onBack, onApply }) => {
                         {[
                             { icon: FaMapMarkerAlt, label: 'Location', value: job.location },
                             { icon: FaDollarSign, label: 'Salary', value: job.salary },
-                            { icon: FaBriefcase, label: 'Type', value: job.type },
-                            { icon: FaCalendarAlt, label: 'Deadline', value: new Date(job.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) },
+                            { icon: FaBriefcase, label: 'Type', value: job.type || job.experienceLevel },
+                            { icon: FaCalendarAlt, label: 'Deadline', value: job.applicationDeadline ? new Date(job.applicationDeadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Not specified' },
                         ].map(({ icon: Icon, label, value }) => (
                             <div key={label} className="bg-slate-50 rounded-xl p-3">
                                 <div className="flex items-center gap-1.5 mb-1">
@@ -646,24 +518,8 @@ const DetailPage = ({ job, onBack, onApply }) => {
                     </div>
 
                     <div className="flex flex-wrap gap-3 items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <p className="text-[11px] text-slate-400 mb-1">Profile match</p>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                        <div className={`h-full rounded-full ${job.matchScore > 89 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${job.matchScore}%` }} />
-                                    </div>
-                                    <span className={`text-[13px] font-bold ${job.matchScore > 89 ? 'text-green-600' : 'text-blue-600'}`}>{job.matchScore}%</span>
-                                </div>
-                            </div>
-                            <div className="w-px h-8 bg-slate-200" />
-                            <div>
-                                <p className="text-[11px] text-slate-400 mb-1">Applicants</p>
-                                <p className="text-[13px] font-semibold text-slate-700">{job.applicants} applied</p>
-                            </div>
-                        </div>
                         <div className="flex flex-wrap gap-1.5">
-                            {job.skills.map(s => (
+                            {job.skills?.map(s => (
                                 <span key={s} className="bg-blue-50 text-blue-700 rounded-lg px-2.5 py-1 text-xs font-medium">{s}</span>
                             ))}
                         </div>
@@ -672,31 +528,35 @@ const DetailPage = ({ job, onBack, onApply }) => {
 
                 <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mb-4">
                     <Section title="About the company">
-                        <p className="text-slate-500 text-[13.5px] leading-relaxed">{job.about}</p>
+                        <p className="text-slate-500 text-[13.5px] leading-relaxed">{job.about || job.companyName || 'Leading company in the industry'}</p>
                     </Section>
                     <Section title="About the role">
                         <p className="text-slate-500 text-[13.5px] leading-relaxed">{job.description}</p>
                     </Section>
-                    <Section title="Key responsibilities">
-                        <ul className="space-y-2.5">
-                            {job.responsibilities.map((r, i) => (
-                                <li key={i} className="flex items-start gap-2.5">
-                                    <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-px">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                    </div>
-                                    <span className="text-slate-500 text-[13.5px] leading-relaxed">{r}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </Section>
                     <Section title="Requirements">
                         <ul className="space-y-2.5">
-                            {job.requirements.map((r, i) => (
-                                <li key={i} className="flex items-start gap-2.5">
+                            {job.requirements ? (
+                                typeof job.requirements === 'string' ? (
+                                    job.requirements.split('\n').map((r, i) => (
+                                        <li key={i} className="flex items-start gap-2.5">
+                                            <FaCheckCircle className="text-green-500 text-xs flex-shrink-0 mt-1" />
+                                            <span className="text-slate-500 text-[13.5px] leading-relaxed">{r}</span>
+                                        </li>
+                                    ))
+                                ) : (
+                                    job.requirements.map((r, i) => (
+                                        <li key={i} className="flex items-start gap-2.5">
+                                            <FaCheckCircle className="text-green-500 text-xs flex-shrink-0 mt-1" />
+                                            <span className="text-slate-500 text-[13.5px] leading-relaxed">{r}</span>
+                                        </li>
+                                    ))
+                                )
+                            ) : (
+                                <li className="flex items-start gap-2.5">
                                     <FaCheckCircle className="text-green-500 text-xs flex-shrink-0 mt-1" />
-                                    <span className="text-slate-500 text-[13.5px] leading-relaxed">{r}</span>
+                                    <span className="text-slate-500 text-[13.5px] leading-relaxed">{job.requirements || 'No specific requirements listed'}</span>
                                 </li>
-                            ))}
+                            )}
                         </ul>
                     </Section>
                 </div>
@@ -704,7 +564,7 @@ const DetailPage = ({ job, onBack, onApply }) => {
                 <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mb-6">
                     <Section title="Perks & benefits">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            {job.perks.map((p, i) => (
+                            {job.perks?.map((p, i) => (
                                 <div key={i} className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
                                     <FaCheckCircle className="text-green-500 text-xs flex-shrink-0" />
                                     <span className="text-[13px] text-slate-600">{p}</span>
@@ -723,7 +583,7 @@ const DetailPage = ({ job, onBack, onApply }) => {
                 <div className="hidden sm:flex items-center justify-between bg-white rounded-2xl border border-slate-200 p-5 sm:p-6">
                     <div>
                         <p className="text-[13.5px] font-semibold text-slate-900">{job.title}</p>
-                        <p className="text-[12.5px] text-slate-500">{job.company} · {job.salary}</p>
+                        <p className="text-[12.5px] text-slate-500">{job.companyName} · {job.salary}</p>
                     </div>
                     <button onClick={() => onApply(job)}
                         className="flex items-center gap-2 bg-blue-600 text-white rounded-xl px-6 py-3 text-[14px] font-semibold hover:bg-blue-700 transition-colors">
@@ -743,6 +603,64 @@ const JobNotification = () => {
     const [bookmarkedJobs, setBookmarkedJobs] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    const fetchJobs = async () => {
+        try {
+            setLoading(true);
+            const response = await studentJobApi.getJobs(0, 10);
+            console.log("Jobs API Response:", response.data);
+            
+            let jobsData = response.data?.data?.content || response.data?.content || response.data?.data || [];
+            
+            // Transform API data to match UI expectations
+            const transformedJobs = jobsData.map(job => ({
+                id: job.id,
+                title: job.title,
+                companyName: job.companyName,
+                company: job.companyName,
+                description: job.description,
+                requirements: job.requirements,
+                location: job.location,
+                salary: job.salary,
+                experienceLevel: job.experienceLevel,
+                type: job.experienceLevel || 'Full-time',
+                applicationDeadline: job.applicationDeadline,
+                active: job.active,
+                // UI-specific fields with defaults
+                logoColor: 'bg-blue-600',
+                logo: job.companyName?.charAt(0) || 'J',
+                badge: job.experienceLevel === 'Internship' ? 'New' : 
+                       job.experienceLevel === 'Senior' ? 'Hot' : 
+                       job.experienceLevel === 'Mid Level' ? 'Featured' : null,
+                matchScore: Math.floor(Math.random() * 30) + 65,
+                posted: '2 days ago',
+                skills: ['React', 'JavaScript', 'CSS'],
+                perks: ['Flexible hours', 'Health insurance', 'Learning stipend'],
+                about: `${job.companyName} is a leading technology company focused on delivering innovative solutions.`,
+                responsibilities: [
+                    'Develop and maintain web applications',
+                    'Collaborate with cross-functional teams',
+                    'Write clean and scalable code',
+                    'Participate in code reviews'
+                ],
+                category: job.experienceLevel === 'Internship' ? 'internship' : 'paid-media'
+            }));
+            
+            setJobs(transformedJobs);
+        } catch (err) {
+            console.error("Jobs fetch error:", err);
+            setError(err?.response?.data?.message || "Failed to load jobs");
+        } finally {
+            setLoading(false);
+        }
+    };
     
     const [showNotifications, setShowNotifications] = useState(false);
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -755,7 +673,33 @@ const JobNotification = () => {
         { id: 3, message: 'Interview scheduled with BrandNarrative Co.', time: '1 day ago', read: true },
     ]);
 
-    const openDetail = (job) => { setSelectedJob(job); setView('detail'); };
+    const openDetail = async (job) => {
+        try {
+            const response = await studentJobApi.getJobById(job.id);
+            const jobData = response.data?.data || response.data;
+            
+            // Transform detail data
+            const transformedJob = {
+                ...job,
+                ...jobData,
+                companyName: jobData.companyName || job.companyName,
+                description: jobData.description || job.description,
+                requirements: jobData.requirements || job.requirements,
+                location: jobData.location || job.location,
+                salary: jobData.salary || job.salary,
+                experienceLevel: jobData.experienceLevel || job.experienceLevel,
+                applicationDeadline: jobData.applicationDeadline || job.applicationDeadline
+            };
+            
+            setSelectedJob(transformedJob);
+            setView("detail");
+        } catch (error) {
+            console.error("Job detail error:", error);
+            setSelectedJob(job);
+            setView("detail");
+        }
+    };
+    
     const openApply = (job) => { setSelectedJob(job); setView('apply'); };
     const goBack = () => { setView('list'); };
 
@@ -787,11 +731,11 @@ const JobNotification = () => {
     };
 
     const getFilteredJobs = () => {
-        let filtered = JOBS.filter(job => {
+        let filtered = jobs.filter(job => {
             const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
             const matchesSearch = searchTerm === '' ||
                 job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 job.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
             
             let matchesJobType = true;
@@ -838,16 +782,16 @@ const JobNotification = () => {
     const filteredJobs = getFilteredJobs();
 
     const categories = [
-        { id: 'all', name: 'All Roles', icon: FaBriefcase, count: JOBS.length },
-        { id: 'paid-media', name: 'Paid Media', icon: FaChartLine, count: JOBS.filter(j => j.category === 'paid-media').length },
-        { id: 'content', name: 'Content', icon: FaPenFancy, count: JOBS.filter(j => j.category === 'content').length },
-        { id: 'analytics', name: 'Analytics', icon: FaRocket, count: JOBS.filter(j => j.category === 'analytics').length },
-        { id: 'email', name: 'Email', icon: FaEnvelope, count: JOBS.filter(j => j.category === 'email').length },
-        { id: 'internship', name: 'Internships', icon: FaStar, count: JOBS.filter(j => j.category === 'internship').length },
+        { id: 'all', name: 'All Roles', icon: FaBriefcase, count: jobs.length },
+        { id: 'paid-media', name: 'Paid Media', icon: FaChartLine, count: jobs.filter(j => j.category === 'paid-media').length },
+        { id: 'content', name: 'Content', icon: FaPenFancy, count: jobs.filter(j => j.category === 'content').length },
+        { id: 'analytics', name: 'Analytics', icon: FaRocket, count: jobs.filter(j => j.category === 'analytics').length },
+        { id: 'email', name: 'Email', icon: FaEnvelope, count: jobs.filter(j => j.category === 'email').length },
+        { id: 'internship', name: 'Internships', icon: FaStar, count: jobs.filter(j => j.category === 'internship').length },
     ];
 
     const stats = [
-        { label: 'Total Jobs', value: JOBS.length, icon: FaBriefcase, iconColor: 'text-blue-600', iconBg: 'bg-blue-50' },
+        { label: 'Total Jobs', value: jobs.length, icon: FaBriefcase, iconColor: 'text-blue-600', iconBg: 'bg-blue-50' },
         { label: 'Applications Sent', value: 12, icon: FaCheckCircle, iconColor: 'text-green-600', iconBg: 'bg-green-50' },
         { label: 'Interviews', value: 3, icon: FaUsers, iconColor: 'text-amber-600', iconBg: 'bg-amber-50' },
         { label: 'Saved Jobs', value: bookmarkedJobs.length, icon: FaBookmark, iconColor: 'text-violet-600', iconBg: 'bg-violet-50' },
@@ -857,6 +801,22 @@ const JobNotification = () => {
     if (view === 'apply' && selectedJob) return <ApplyPage job={selectedJob} onBack={goBack} />;
 
     const activeFilterCount = (activeFilters.jobType?.length || 0) + (activeFilters.salaryRange?.length || 0);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen text-red-500">
+                {error}
+            </div>
+        );
+    }
 
     return (
         <div className="p-3 sm:p-5 md:p-6 min-h-screen bg-[#f7f8fc]">
@@ -906,7 +866,7 @@ const JobNotification = () => {
                             <p className="text-blue-300 text-xs mt-1 max-w-sm">Roles in SEO, paid media, content & analytics — updated daily.</p>
                         </div>
                         <div className="flex gap-3">
-                            {[{ val: JOBS.length, label: 'Live Roles' }, { val: '94%', label: 'Top Match' }].map((s, i) => (
+                            {[{ val: jobs.length, label: 'Live Roles' }, { val: '94%', label: 'Top Match' }].map((s, i) => (
                                 <div key={i} className="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center">
                                     <p className="text-white text-xl font-bold m-0">{s.val}</p>
                                     <p className="text-blue-300 text-[11px] mt-0.5 font-medium uppercase tracking-wider">{s.label}</p>
@@ -1044,7 +1004,7 @@ const JobNotification = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-slate-500 text-[12.5px] sm:text-[13px] mt-0.5">{job.company}</p>
+                                                    <p className="text-slate-500 text-[12.5px] sm:text-[13px] mt-0.5">{job.companyName}</p>
                                                 </div>
                                                 <div className="flex gap-1.5 flex-shrink-0">
                                                     <button
@@ -1088,29 +1048,10 @@ const JobNotification = () => {
 
                                             <div className="flex items-center justify-between flex-wrap gap-2">
                                                 <div className="hidden sm:flex items-center gap-4">
-                                                    <span className="flex items-center gap-1 text-[12px] text-slate-500">
-                                                        <FaUsers className="text-[10px]" />{job.applicants} applicants
-                                                    </span>
                                                     <span className="flex items-center gap-1 text-[12px] text-blue-600 font-medium">
                                                         <FaCalendarAlt className="text-[10px]" />
-                                                        Apply by {new Date(job.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                                        Apply by {job.applicationDeadline ? new Date(job.applicationDeadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Not specified'}
                                                     </span>
-                                                    <div>
-                                                        <p className="text-[10px] text-slate-400">Match</p>
-                                                        <div className="flex items-center gap-1.5 mt-0.5">
-                                                            <div className="h-[3px] bg-slate-200 rounded-full overflow-hidden" style={{ width: 52 }}>
-                                                                <div className={`h-full rounded-full ${job.matchScore > 89 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${job.matchScore}%` }} />
-                                                            </div>
-                                                            <span className={`text-xs font-semibold ${job.matchScore > 89 ? 'text-green-600' : 'text-blue-600'}`}>{job.matchScore}%</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex sm:hidden items-center gap-1.5">
-                                                    <div className="h-[3px] bg-slate-200 rounded-full overflow-hidden" style={{ width: 40 }}>
-                                                        <div className={`h-full rounded-full ${job.matchScore > 89 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${job.matchScore}%` }} />
-                                                    </div>
-                                                    <span className={`text-[11.5px] font-semibold ${job.matchScore > 89 ? 'text-green-600' : 'text-blue-600'}`}>{job.matchScore}%</span>
                                                 </div>
 
                                                 <div className="flex gap-2 ml-auto sm:ml-0">
