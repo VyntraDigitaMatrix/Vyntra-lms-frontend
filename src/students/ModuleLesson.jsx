@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { studentEnrolledCourseApi, studentAssignmentApi } from "./auth/api";
+import { studentEnrolledCourseApi, studentAssignmentApi, studentQuizApi } from "./auth/api";
 import {
     FaPlay, FaCheckCircle, FaChevronLeft, FaChevronRight,
     FaChevronDown, FaChevronUp, FaClock, FaBook, FaTrophy,
@@ -241,14 +241,22 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
 /* ══════════════════════════════════════════════════════════════
    QUIZ COMPONENT
 ══════════════════════════════════════════════════════════════ */
-const QuizView = ({ moduleColor, onComplete, isCompleted }) => {
-    // Placeholder quiz when no real quiz data is available from API
-    const quiz = {
-        title: "Module Quiz",
-        questions: [
-            { id: 1, question: "Quiz questions will be loaded from the server.", options: ["Option A", "Option B", "Option C", "Option D"], correct: 0, explanation: "This is a placeholder. Real questions come from your course content." },
-        ],
-    };
+const QuizView = ({ quizData, moduleColor, onComplete, isCompleted }) => {
+    // Use real quiz data from API if available, otherwise show placeholder
+    const quiz = quizData && quizData.questions && quizData.questions.length > 0
+        ? quizData
+        : {
+            title: quizData?.title || "Module Quiz",
+            questions: [
+                {
+                    id: 1,
+                    question: "Quiz questions will be loaded from the server.",
+                    options: ["Option A", "Option B", "Option C", "Option D"],
+                    correct: 0,
+                    explanation: "This is a placeholder. Real questions come from your course content.",
+                },
+            ],
+        };
 
     const [current, setCurrent] = useState(0);
     const [selected, setSelected] = useState(null);
@@ -257,6 +265,7 @@ const QuizView = ({ moduleColor, onComplete, isCompleted }) => {
     const [finished, setFinished] = useState(isCompleted);
     const [score, setScore] = useState(0);
     const [requestSent, setRequestSent] = useState(false);
+    const [quizLoading, setQuizLoading] = useState(false);
 
     const q = quiz.questions[current];
     const totalQ = quiz.questions.length;
@@ -545,29 +554,29 @@ const ModuleLesson = () => {
     /* ══════════════════════════════════════════
        STATE
     ══════════════════════════════════════════ */
-    // Modules + lessons (sidebar)
     const [allModules, setAllModules] = useState([]);
     const [modulesLoading, setModulesLoading] = useState(true);
 
-    // Current lesson content
     const [lessonData, setLessonData] = useState(null);
     const [lessonLoading, setLessonLoading] = useState(true);
     const [lessonError, setLessonError] = useState("");
 
-    // Lessons per module (lazy cache: moduleId → lessons[])
+    // ── NEW: quiz data for current lesson (if type === quiz) ──
+    const [quizData, setQuizData] = useState(null);
+    const [quizLoading, setQuizLoading] = useState(false);
+
+    // Lessons / assignments / quizzes per module (lazy cache)
     const [moduleLessonsCache, setModuleLessonsCache] = useState({});
     const [moduleAssignmentsCache, setModuleAssignmentsCache] = useState({});
+    const [moduleQuizzesCache, setModuleQuizzesCache] = useState({}); // ← NEW
     const [loadingModuleLessons, setLoadingModuleLessons] = useState({});
 
-    // UI
     const [completedLessons, setCompletedLessons] = useState(new Set());
     const [expandedModules, setExpandedModules] = useState(new Set([moduleId]));
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-
     /* ══════════════════════════════════════════
        FETCH MODULES (sidebar)
-       GET /api/v1/student/my-courses/{courseId}/modules
     ══════════════════════════════════════════ */
     const fetchModules = useCallback(async () => {
         if (!courseId) return;
@@ -576,7 +585,6 @@ const ModuleLesson = () => {
             const res = await studentEnrolledCourseApi.getCourseModules(courseId);
             const mods = res.data?.data || res.data || [];
             setAllModules(Array.isArray(mods) ? mods : []);
-            // Pre-seed cache with any lessons nested inside module response
             const cache = {};
             mods.forEach(m => {
                 if (Array.isArray(m.lessons) && m.lessons.length > 0) {
@@ -594,68 +602,76 @@ const ModuleLesson = () => {
     }, [courseId]);
 
     /* ══════════════════════════════════════════
-       FETCH LESSONS FOR A MODULE (lazy, on accordion expand)
-       GET /api/v1/student/my-courses/{courseId}/modules/{moduleId}/lessons
+       FETCH LESSONS + ASSIGNMENTS + QUIZZES FOR A MODULE
+       Called lazily on accordion expand
     ══════════════════════════════════════════ */
     const fetchModuleLessons = useCallback(async (mId) => {
         const key = String(mId);
-
         if (loadingModuleLessons[key]) return;
 
-        setLoadingModuleLessons(prev => ({
-            ...prev,
-            [key]: true,
-        }));
+        setLoadingModuleLessons(prev => ({ ...prev, [key]: true }));
 
         try {
-            const [lessonRes, assignmentRes] = await Promise.all([
+            const [lessonRes, assignmentRes, quizRes] = await Promise.all([
                 studentEnrolledCourseApi.getModuleLessons(courseId, mId, 0, 100),
                 studentAssignmentApi.getAssignmentsByModule(mId),
+                studentQuizApi.getQuizzes(),   // ← fetch all quizzes then filter by moduleId
             ]);
 
             const lessons =
                 lessonRes.data?.data?.content ||
                 lessonRes.data?.content ||
-                lessonRes.data?.data ||
-                [];
+                lessonRes.data?.data || [];
 
             const assignments =
                 assignmentRes.data?.data?.content ||
                 assignmentRes.data?.content ||
-                assignmentRes.data?.data ||
-                [];
+                assignmentRes.data?.data || [];
 
-            setModuleLessonsCache(prev => ({
-                ...prev,
-                [key]: lessons,
-            }));
+            // Support both paginated and plain-array quiz responses
+            const allQuizzes =
+                quizRes.data?.data?.content ||
+                quizRes.data?.content ||
+                quizRes.data?.data ||
+                quizRes.data || [];
 
-            setModuleAssignmentsCache(prev => ({
-                ...prev,
-                [key]: assignments,
-            }));
+            // Filter quizzes that belong to this module.
+            // Adjust the field name (moduleId / module_id) to match your API response shape.
+            const moduleQuizzes = Array.isArray(allQuizzes)
+                ? allQuizzes.filter(q =>
+                    String(q.moduleId) === String(mId) ||
+                    String(q.module_id) === String(mId)
+                )
+                : [];
 
+            setModuleLessonsCache(prev => ({ ...prev, [key]: lessons }));
+            setModuleAssignmentsCache(prev => ({ ...prev, [key]: assignments }));
+            setModuleQuizzesCache(prev => ({ ...prev, [key]: moduleQuizzes })); // ← store
         } catch (err) {
-            console.error(err);
+            console.error("fetchModuleLessons error:", err);
         } finally {
-            setLoadingModuleLessons(prev => ({
-                ...prev,
-                [key]: false,
-            }));
+            setLoadingModuleLessons(prev => ({ ...prev, [key]: false }));
         }
     }, [courseId]);
 
     /* ══════════════════════════════════════════
        FETCH CURRENT LESSON
-       GET /api/v1/student/my-courses/{courseId}/lessons/{lessonId}
     ══════════════════════════════════════════ */
     const fetchLesson = useCallback(async () => {
         if (!courseId || !lessonId) return;
         setLessonLoading(true);
         setLessonError("");
+        setQuizData(null);
         try {
             const res = await studentEnrolledCourseApi.getLessonById(courseId, lessonId);
-            setLessonData(res.data?.data || res.data || null);
+            const data = res.data?.data || res.data || null;
+            setLessonData(data);
+
+            // ── If this lesson is a quiz, fetch its questions ──
+            const lType = getLessonIcon(data?.lessonType || data?.type);
+            if (lType === "quiz") {
+                await fetchQuizForLesson(data);
+            }
         } catch (err) {
             console.error("fetchLesson error:", err);
             setLessonError("Could not load lesson content. Please try again.");
@@ -665,12 +681,79 @@ const ModuleLesson = () => {
     }, [courseId, lessonId]);
 
     /* ══════════════════════════════════════════
+       FETCH QUIZ DATA FOR A LESSON
+       Uses lessonData.quizId (or lessonId itself as quiz id depending on your API)
+    ══════════════════════════════════════════ */
+    const fetchQuizForLesson = useCallback(async (data) => {
+        // Try quizId from lesson data first, then fall back to lessonId
+        const qId = data?.quizId || data?.quiz_id || data?.id;
+        if (!qId) return;
+
+        setQuizLoading(true);
+        try {
+            // Attempt to start/resume the quiz to get full question data
+            let quizRes;
+            try {
+                // Try resuming first (idempotent if already started)
+                quizRes = await studentQuizApi.resumeQuiz(qId);
+            } catch {
+                // If resume fails (quiz not started), start it
+                quizRes = await studentQuizApi.startQuiz(qId);
+            }
+
+            const attemptId =
+                quizRes.data?.data?.attemptId ||
+                quizRes.data?.attemptId ||
+                quizRes.data?.data?.id ||
+                quizRes.data?.id;
+
+            if (attemptId) {
+                // Fetch the actual questions for this attempt
+                const questionsRes = await studentQuizApi.getAttemptQuestions(attemptId);
+                const rawQuestions =
+                    questionsRes.data?.data?.content ||
+                    questionsRes.data?.content ||
+                    questionsRes.data?.data ||
+                    questionsRes.data || [];
+
+                // Normalize questions to the shape QuizView expects
+                const questions = rawQuestions.map((q) => ({
+                    id: q.id || q.questionId,
+                    question: q.question || q.questionText || q.text,
+                    options: q.options || q.choices || [],
+                    // correct index — adjust field name to match your API
+                    correct: typeof q.correctIndex === "number"
+                        ? q.correctIndex
+                        : (q.options || q.choices || []).findIndex(
+                            o => o === q.correctAnswer || o?.id === q.correctOptionId
+                        ),
+                    explanation: q.explanation || q.hint || "",
+                }));
+
+                setQuizData({
+                    title: data?.title || "Module Quiz",
+                    attemptId,
+                    questions,
+                });
+            } else {
+                // If no attemptId, just show the quiz title with placeholder questions
+                setQuizData({ title: data?.title || "Module Quiz", questions: [] });
+            }
+        } catch (err) {
+            console.error("fetchQuizForLesson error:", err);
+            // Gracefully degrade — QuizView has its own placeholder
+            setQuizData({ title: data?.title || "Module Quiz", questions: [] });
+        } finally {
+            setQuizLoading(false);
+        }
+    }, []);
+
+    /* ══════════════════════════════════════════
        EFFECTS
     ══════════════════════════════════════════ */
     useEffect(() => { fetchModules(); }, [fetchModules]);
     useEffect(() => { fetchLesson(); }, [fetchLesson]);
 
-    // Auto-expand current module + fetch its lessons
     useEffect(() => {
         if (moduleId) {
             setExpandedModules(prev => new Set([...prev, moduleId]));
@@ -678,7 +761,6 @@ const ModuleLesson = () => {
         }
     }, [moduleId]);
 
-    // When a module is expanded, fetch its lessons
     const handleToggleModule = (mId) => {
         const key = String(mId);
         setExpandedModules(prev => {
@@ -696,7 +778,6 @@ const ModuleLesson = () => {
     /* ══════════════════════════════════════════
        DERIVED DATA
     ══════════════════════════════════════════ */
-    // Lesson type detection — prefer API data, fall back to URL param context
     const lessonType = getLessonIcon(lessonData?.lessonType || lessonData?.type);
     const isQuiz = lessonType === "quiz";
     const isAssignment = lessonType === "assignment";
@@ -712,8 +793,6 @@ const ModuleLesson = () => {
         duration: lessonData?.durationInMinutes ? `${lessonData.durationInMinutes} min` : (lessonData?.duration || ""),
     };
 
-    // Build flat lesson list for prev/next navigation
-    // Uses cache; falls back to module-level lessons array
     const flatLessons = allModules.flatMap(m => {
         const key = String(m.id);
         const lessons = moduleLessonsCache[key] || m.lessons || [];
@@ -728,7 +807,6 @@ const ModuleLesson = () => {
 
     const goTo = (mId, lId) => navigate(`/student/course/${courseId}/module/${mId}/lesson/${lId}`);
 
-    // Progress
     const totalLessons = flatLessons.length;
     const completedCount = completedLessons.size;
     const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
@@ -737,12 +815,10 @@ const ModuleLesson = () => {
     const isDone = completedLessons.has(lessonKey);
     const markComplete = () => setCompletedLessons(prev => new Set(prev).add(lessonKey));
 
-    // Find current module color for theming
     const currentModuleData = allModules.find(m => String(m.id) === String(moduleId));
     const moduleColor = currentModuleData?.color || "#2563EB";
     const moduleName = currentModuleData?.title || `Module ${moduleId}`;
 
-    // Note count badge
     const noteCount = (() => {
         try { return JSON.parse(localStorage.getItem(`notes_${courseId}-${moduleId}-${lessonId}`) || "[]").length; } catch { return 0; }
     })();
@@ -822,7 +898,7 @@ const ModuleLesson = () => {
                             </button>
                         </div>
 
-                        {/* Main Content Stage */}
+                        {/* ── Main Content Stage ── */}
                         {lessonLoading ? (
                             <div className="rounded-2xl bg-slate-100 aspect-video flex items-center justify-center animate-pulse">
                                 <p className="text-slate-400 text-sm font-semibold">Loading lesson…</p>
@@ -835,7 +911,22 @@ const ModuleLesson = () => {
                         ) : (
                             <div className={`rounded-2xl overflow-hidden ${isQuiz || isAssignment ? "bg-transparent" : "bg-black aspect-video shadow-md border border-slate-200"}`}>
                                 {isQuiz ? (
-                                    <QuizView moduleColor={moduleColor} onComplete={markComplete} isCompleted={isDone} />
+                                    // ── Quiz loading state ──
+                                    quizLoading ? (
+                                        <div className="w-full min-h-[460px] flex flex-col items-center justify-center bg-slate-900 rounded-2xl gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center animate-pulse">
+                                                <MdOutlineQuiz className="text-indigo-400 text-2xl" />
+                                            </div>
+                                            <p className="text-slate-400 text-sm font-semibold">Loading quiz questions…</p>
+                                        </div>
+                                    ) : (
+                                        <QuizView
+                                            quizData={quizData}
+                                            moduleColor={moduleColor}
+                                            onComplete={markComplete}
+                                            isCompleted={isDone}
+                                        />
+                                    )
                                 ) : isAssignment ? (
                                     <AssignmentView lessonData={lessonData} moduleColor={moduleColor} onSubmit={markComplete} isSubmitted={isDone} />
                                 ) : content.videoUrl ? (
@@ -886,6 +977,12 @@ const ModuleLesson = () => {
                                                     : <AiOutlinePlaySquare className="w-3 h-3 text-slate-400" />}
                                             {isQuiz ? "Quiz" : isAssignment ? "Assignment" : isText ? "Article" : "Video"}
                                         </span>
+                                        {/* Quiz question count badge */}
+                                        {isQuiz && quizData?.questions?.length > 0 && (
+                                            <span className="flex items-center gap-1 bg-indigo-50 px-2 py-0.5 border border-indigo-100 rounded-md text-indigo-600">
+                                                {quizData.questions.length} questions
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 {!isDone && !isQuiz && !isAssignment && (
@@ -905,7 +1002,6 @@ const ModuleLesson = () => {
                                         <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">
                                             About this Lesson
                                         </h3>
-
                                         <p className="text-sm text-slate-700 leading-relaxed">
                                             {stripHtml(content.description)}
                                         </p>
@@ -981,12 +1077,13 @@ const ModuleLesson = () => {
                                     const isExpandedMod = expandedModules.has(key);
                                     const isActiveMod = String(mod.id) === String(moduleId);
                                     const lessons = moduleLessonsCache[key] || mod.lessons || [];
-                                    const assignments =
-                                        moduleAssignmentsCache[key] || [];
+                                    const assignments = moduleAssignmentsCache[key] || [];
+                                    const quizzes = moduleQuizzesCache[key] || []; // ← NEW
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.id}-${l.id}`)).length;
 
                                     return (
                                         <div key={mod.id} className="border-b border-slate-50">
+                                            {/* Module Header */}
                                             <button onClick={() => handleToggleModule(mod.id)}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all ${isActiveMod ? "bg-slate-50/80" : "hover:bg-slate-50/40"}`}>
                                                 <div className="flex-1 min-w-0">
@@ -1008,112 +1105,119 @@ const ModuleLesson = () => {
                                                                 <div key={i} className="h-6 bg-slate-100 rounded animate-pulse" />
                                                             ))}
                                                         </div>
-                                                    ) : lessons.length === 0 ? (
+                                                    ) : lessons.length === 0 && quizzes.length === 0 && assignments.length === 0 ? (
                                                         <div className="px-5 py-3 text-[10px] text-slate-400">
-                                                            No lessons found.
+                                                            No content found.
                                                         </div>
                                                     ) : (
                                                         <>
+                                                            {/* ── Lessons List ── */}
                                                             {lessons.map((lesson) => {
                                                                 const isActive =
                                                                     String(mod.id) === String(moduleId) &&
                                                                     String(lesson.id) === String(lessonId);
-
-                                                                const isDoneLesson = completedLessons.has(
-                                                                    `${mod.id}-${lesson.id}`
-                                                                );
-
-                                                                const lType = getLessonIcon(
-                                                                    lesson.lessonType || lesson.type
-                                                                );
-
+                                                                const isDoneLesson = completedLessons.has(`${mod.id}-${lesson.id}`);
+                                                                const lType = getLessonIcon(lesson.lessonType || lesson.type);
                                                                 const isAssignLesson = lType === "assignment";
                                                                 const isQuizLesson = lType === "quiz";
 
-                                                                let itemClass =
-                                                                    "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
-
+                                                                let itemClass = "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
                                                                 if (isActive)
-                                                                    itemClass +=
-                                                                        "bg-blue-600 text-white font-semibold border-l-blue-600";
+                                                                    itemClass += "bg-blue-600 text-white font-semibold border-l-blue-600";
                                                                 else if (isAssignLesson)
-                                                                    itemClass +=
-                                                                        "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
+                                                                    itemClass += "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
+                                                                else if (isQuizLesson)
+                                                                    itemClass += "hover:bg-indigo-50/50 text-slate-700 hover:border-l-indigo-300";
                                                                 else
-                                                                    itemClass +=
-                                                                        "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
+                                                                    itemClass += "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
 
                                                                 return (
-                                                                    <button
-                                                                        key={lesson.id}
-                                                                        onClick={() => goTo(mod.id, lesson.id)}
-                                                                        className={itemClass}
-                                                                    >
+                                                                    <button key={lesson.id} onClick={() => goTo(mod.id, lesson.id)} className={itemClass}>
                                                                         <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                                                                             {isDoneLesson ? (
-                                                                                <FaCheckCircle
-                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"
-                                                                                        }`}
-                                                                                />
+                                                                                <FaCheckCircle className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"}`} />
                                                                             ) : isAssignLesson ? (
-                                                                                <MdAssignment
-                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-amber-500"
-                                                                                        }`}
-                                                                                />
+                                                                                <MdAssignment className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-amber-500"}`} />
                                                                             ) : isQuizLesson ? (
-                                                                                <MdOutlineQuiz
-                                                                                    className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-indigo-400"
-                                                                                        }`}
-                                                                                />
+                                                                                <MdOutlineQuiz className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-indigo-400"}`} />
                                                                             ) : (
-                                                                                <div
-                                                                                    className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isActive
-                                                                                        ? "border-white/40"
-                                                                                        : "border-slate-300 bg-white"
-                                                                                        }`}
-                                                                                >
-                                                                                    <FaPlay
-                                                                                        className={`w-1.5 h-1.5 ${isActive ? "text-white" : "text-slate-400"
-                                                                                            }`}
-                                                                                    />
+                                                                                <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isActive ? "border-white/40" : "border-slate-300 bg-white"}`}>
+                                                                                    <FaPlay className={`w-1.5 h-1.5 ${isActive ? "text-white" : "text-slate-400"}`} />
                                                                                 </div>
                                                                             )}
                                                                         </div>
-
                                                                         <div className="flex-1 min-w-0">
-                                                                            <p
-                                                                                className={`text-xs truncate leading-tight ${isActive
-                                                                                    ? "text-white"
-                                                                                    : isAssignLesson
-                                                                                        ? "text-amber-800 font-semibold"
-                                                                                        : "text-slate-700 font-medium"
-                                                                                    }`}
-                                                                            >
+                                                                            <p className={`text-xs truncate leading-tight ${isActive ? "text-white" : isAssignLesson ? "text-amber-800 font-semibold" : isQuizLesson ? "text-indigo-800 font-semibold" : "text-slate-700 font-medium"}`}>
                                                                                 {lesson.title}
                                                                             </p>
-
-                                                                            <p
-                                                                                className={`text-[10px] mt-0.5 ${isActive
-                                                                                    ? "text-blue-100"
-                                                                                    : isAssignLesson
-                                                                                        ? "text-amber-500"
-                                                                                        : "text-slate-400"
-                                                                                    }`}
-                                                                            >
-                                                                                {isAssignLesson
-                                                                                    ? "Assignment"
-                                                                                    : isQuizLesson
-                                                                                        ? "Quiz"
-                                                                                        : lesson.durationInMinutes
-                                                                                            ? `${lesson.durationInMinutes} min`
-                                                                                            : lesson.duration || ""}
+                                                                            <p className={`text-[10px] mt-0.5 ${isActive ? "text-blue-100" : isAssignLesson ? "text-amber-500" : isQuizLesson ? "text-indigo-400" : "text-slate-400"}`}>
+                                                                                {isAssignLesson ? "Assignment" : isQuizLesson ? "Quiz" : lesson.durationInMinutes ? `${lesson.durationInMinutes} min` : lesson.duration || ""}
                                                                             </p>
                                                                         </div>
                                                                     </button>
                                                                 );
                                                             })}
 
-                                                            {assignments?.length > 0 && (
+                                                            {/* ══════════════════════════════════════
+                                                                ── Standalone Quizzes Section (NEW) ──
+                                                                Quizzes fetched from studentQuizApi
+                                                                that are not embedded as lessons
+                                                            ══════════════════════════════════════ */}
+                                                            {quizzes.length > 0 && (
+                                                                <>
+                                                                    <div className="px-4 py-2 bg-indigo-50 border-t border-indigo-100">
+                                                                        <p className="text-[10px] font-bold uppercase text-indigo-600 tracking-wide">
+                                                                            Module Quizzes
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {quizzes.map((quiz) => {
+                                                                        // Navigate to the lesson that corresponds to this quiz.
+                                                                        // Use quiz.lessonId if quizzes are linked to lessons,
+                                                                        // or quiz.id if they are standalone quiz entities.
+                                                                        const quizLessonId = quiz.lessonId || quiz.lesson_id || quiz.id;
+                                                                        const isActiveQuiz =
+                                                                            String(mod.id) === String(moduleId) &&
+                                                                            String(quizLessonId) === String(lessonId);
+
+                                                                        return (
+                                                                            <button
+                                                                                key={quiz.id || quiz.quizId}
+                                                                                onClick={() => goTo(mod.id, quizLessonId)}
+                                                                                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 transition-all
+                                                                                    ${isActiveQuiz
+                                                                                        ? "bg-indigo-600 text-white border-l-indigo-600"
+                                                                                        : "hover:bg-indigo-50/50 text-slate-600 border-transparent hover:border-l-indigo-300"
+                                                                                    }`}
+                                                                            >
+                                                                                <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                                                                    <MdOutlineQuiz
+                                                                                        className={`w-3.5 h-3.5 ${isActiveQuiz ? "text-white" : "text-indigo-400"}`}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <p className={`text-xs truncate leading-tight font-medium
+                                                                                        ${isActiveQuiz ? "text-white" : "text-indigo-800"}`}>
+                                                                                        {quiz.title || quiz.name || "Quiz"}
+                                                                                    </p>
+                                                                                    <p className={`text-[10px] mt-0.5
+                                                                                        ${isActiveQuiz ? "text-indigo-100" : "text-indigo-400"}`}>
+                                                                                        Quiz
+                                                                                        {quiz.questionCount ? ` · ${quiz.questionCount} questions` : ""}
+                                                                                        {quiz.durationInMinutes ? ` · ${quiz.durationInMinutes} min` : ""}
+                                                                                    </p>
+                                                                                </div>
+                                                                                <FaChevronRight
+                                                                                    className={`w-2.5 h-2.5 flex-shrink-0 ${isActiveQuiz ? "text-white" : "text-indigo-300"}`}
+                                                                                />
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </>
+                                                            )}
+
+                                                            {/* ── Assignments Section ── */}
+                                                            {assignments.length > 0 && (
                                                                 <>
                                                                     <div className="px-4 py-2 bg-amber-100 border-t border-amber-200">
                                                                         <p className="text-[10px] font-bold uppercase text-amber-700">
@@ -1130,7 +1234,6 @@ const ModuleLesson = () => {
                                                                             className="w-full flex items-center gap-3 px-4 py-3 bg-amber-50 border-b border-amber-100 hover:bg-amber-100/70 transition-colors text-left"
                                                                         >
                                                                             <MdAssignment className="text-amber-500 text-lg flex-shrink-0" />
-
                                                                             <div className="flex-1 min-w-0">
                                                                                 <p className="text-xs font-semibold text-slate-800 truncate">
                                                                                     {assignment.title}
@@ -1139,18 +1242,14 @@ const ModuleLesson = () => {
                                                                                     Due: {assignment.dueDate?.split("T")[0]}
                                                                                 </p>
                                                                             </div>
-
                                                                             <FaChevronRight className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />
                                                                         </button>
                                                                     ))}
                                                                 </>
                                                             )}
                                                         </>
-                                                    )
-                                                    }
-
+                                                    )}
                                                 </div>
-
                                             )}
                                         </div>
                                     );

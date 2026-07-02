@@ -1,60 +1,41 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://107.20.36.39:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-// Request interceptor to add authorization header
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("instructor_accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh / invalid sessions
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // If the error is 401 Unauthorized and we haven't retried yet
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem("instructor_refreshToken");
         if (refreshToken) {
-          // Attempt to fetch new access token using refresh token
-          const response = await axios.post(`${API_BASE_URL}/api/instructor/auth/refresh`, {
-            refreshToken: refreshToken,
-          });
-          
-          if (response.data && response.data.data) {
+          const response = await axios.post(`${API_BASE_URL}/api/instructor/auth/refresh`, { refreshToken });
+          if (response.data?.data) {
             const { accessToken, refreshToken: newRefreshToken } = response.data.data;
             localStorage.setItem("instructor_accessToken", accessToken);
-            if (newRefreshToken) {
-              localStorage.setItem("instructor_refreshToken", newRefreshToken);
-            }
-            
-            // Retry original request with new access token
+            if (newRefreshToken) localStorage.setItem("instructor_refreshToken", newRefreshToken);
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return api(originalRequest);
           }
         }
       } catch (refreshError) {
         console.error("Instructor token refresh failed:", refreshError);
-        // Clear tokens and redirect
         localStorage.removeItem("instructor_accessToken");
         localStorage.removeItem("instructor_refreshToken");
         window.location.href = "/InstructorLogin";
@@ -76,39 +57,213 @@ export const instructorAuth = {
 };
 
 export const instructorCourseApi = {
-  createCourse: (formData) => api.post("/api/instructor/courses", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
-  getInstructorCourses: (page = 0, size = 10) => {
-    return api.get(`/api/instructor/courses?page=${page}&size=${size}`);
-  },
-  getInstructorCourseById: (courseId) => api.get(`/api/instructor/courses/${courseId}`),
-  updateCourseContent: (courseId, formData) => api.put(`/api/instructor/courses/${courseId}/content`, formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
-  requestCoursePublish: (courseId) => api.post(`/api/instructor/courses/${courseId}/request-publish`),
+  createCourse: (data) =>
+    api.post("/api/instructor/courses", data),
+
+  getInstructorCourses: (page = 0, size = 10) =>
+    api.get(`/api/instructor/courses?page=${page}&size=${size}`),
+
+  getInstructorCourseBySlug: (slug) =>
+    api.get(`/api/instructor/courses/${slug}`),
+
+  // Basic Information
+  updateBasicInfo: (slug, data) =>
+    api.put(`/api/instructor/courses/${slug}/basic-info`, data),
+
+  updateInstructors: (slug, data) =>
+  api.put(`/api/instructor/courses/${slug}/instructors`, data),
+
+  // Pricing
+  updatePricing: (slug, data) =>
+    api.put(`/api/instructor/courses/${slug}/pricing`, data),
+
+  // Tags
+  updateTags: (slug, data) =>
+    api.put(`/api/instructor/courses/${slug}/tags`, data),
+
+  // Features
+  updateFeatures: (slug, data) =>
+    api.put(`/api/instructor/courses/${slug}/features`, data),
+
+  // FAQs
+  updateFaqs: (slug, data) =>
+    api.put(`/api/instructor/courses/${slug}/faqs`, data),
+
+  // Course Content
+  updateCourseContent: (slug, formData) =>
+  api.put(
+    `/api/instructor/courses/${slug}/content`,
+    formData
+  ),
+
+  updateBasicInfoMultipart: (slug, formData) =>
+  api.put(
+    `/api/instructor/courses/${slug}/basic-info`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  ),
+
+  getAvailableInstructors: (page = 0, size = 100) =>
+  api.get(`/api/instructor/instructors?page=${page}&size=${size}`),
+ 
+// PUT instructors on a course (already in your api.js — keep this)
+updateCourseInstructors: (courseSlug, data) =>
+  api.put(`/api/instructor/courses/${courseSlug}/instructors`, data),
+
+  publishCourse: (slug) =>
+    api.post(`/api/instructor/courses/${slug}/publish`),
+
+  archiveCourse: (slug) =>
+    api.post(`/api/instructor/courses/${slug}/archive`),
+
+  requestCoursePublish: (slug) =>
+    api.post(`/api/instructor/courses/${slug}/request-publish`),
 };
 
 export const instructorModuleApi = {
-  createModule: (courseId, data) => api.post(`/api/instructor/modules/courses/${courseId}`, data),
-  updateModule: (moduleId, data) => api.put(`/api/instructor/modules/${moduleId}`, data),
-  deleteModule: (moduleId) => api.delete(`/api/instructor/modules/${moduleId}`),
-  getCourseModules: (courseId, page = 0, size = 10) => {
-    return api.get(`/api/instructor/modules/courses/${courseId}?page=${page}&size=${size}`);
-  }
+  createModule: (courseSlug, data) =>
+    api.post(`/api/instructor/modules/courses/${courseSlug}`, data),
+  updateModule: (moduleSlug, data) =>
+    api.put(`/api/instructor/modules/${moduleSlug}`, data),
+  deleteModule: (moduleSlug) =>
+    api.delete(`/api/instructor/modules/${moduleSlug}`),
+  getCourseModules: (courseslug, page = 0, size = 10) =>
+    api.get(`/api/instructor/modules/courses/${courseslug}?page=${page}&size=${size}`),
 };
 
 export const instructorLessonApi = {
-  createLesson: (moduleId, formData) => api.post(`/api/instructor/lessons/modules/${moduleId}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
-  updateLesson: (lessonId, formData) => api.put(`/api/instructor/lessons/${lessonId}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
-  deleteLesson: (lessonId) => api.delete(`/api/instructor/lessons/${lessonId}`),
-  getModuleLessons: (moduleId, page = 0, size = 100) => {
-    return api.get(`/api/instructor/lessons/modules/${moduleId}?page=${page}&size=${size}`);
-  }
+  createLesson: (moduleSlug, formData) =>
+    api.post(`/api/instructor/lessons/modules/${moduleSlug}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  getModuleLessons: (moduleSlug, page = 0, size = 100) =>
+    api.get(`/api/instructor/lessons/modules/${moduleSlug}?page=${page}&size=${size}`),
+
+  updateLesson: (lessonSlug, formData) =>
+    api.put(`/api/instructor/lessons/${lessonSlug}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  deleteLesson: (lessonSlug) =>
+    api.delete(`/api/instructor/lessons/${lessonSlug}`),
 };
+
+export const instructorQuizApi = {
+  createQuiz: (data) =>
+    api.post("/api/instructor/quizzes", data),
+
+  getQuiz: (quizSlug) =>
+    api.get(`/api/instructor/quizzes/${quizSlug}`),
+
+  getQuizById: (quizSlug) =>
+    api.get(`/api/instructor/quizzes/${quizSlug}`),
+
+  // PUT /api/instructor/quizzes/{quizSlug}
+  updateQuiz: (quizSlug, data) =>
+    api.put(`/api/instructor/quizzes/${quizSlug}`, data),
+
+  // DELETE /api/instructor/quizzes/{quizSlug}
+  deleteQuiz: (quizSlug) =>
+    api.delete(`/api/instructor/quizzes/${quizSlug}`),
+
+  // PATCH /api/instructor/quizzes/{quizSlug}/publish
+  publishQuiz: (quizSlug) =>
+    api.patch(`/api/instructor/quizzes/${quizSlug}/publish`),
+
+  // PATCH /api/instructor/quizzes/{quizSlug}/archive
+  archiveQuiz: (quizSlug) =>
+    api.patch(`/api/instructor/quizzes/${quizSlug}/archive`),
+
+  // GET /api/instructor/quizzes/modules/{moduleSlug}  ← uses SLUG not ID
+  getQuizzesByModule: (moduleSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/quizzes/modules/${moduleSlug}?page=${page}&size=${size}`),
+
+  // GET /api/instructor/quizzes/lessons/{lessonSlug}  ← uses SLUG not ID
+  getQuizzesByLesson: (lessonSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/quizzes/lessons/${lessonSlug}?page=${page}&size=${size}`),
+
+  // GET /api/instructor/quizzes/courses/{courseSlug}
+  getQuizzesByCourse: (courseSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/quizzes/courses/${courseSlug}?page=${page}&size=${size}`),
+};
+
+/* ── Quiz Questions ── */
+export const instructorQuizQuestionApi = {
+  getQuizQuestions: (quizSlug) =>
+    api.get(`/api/instructor/quiz-questions/quizzes/${quizSlug}`),
+  createQuestion: (quizSlug, data) =>
+    api.post(`/api/instructor/quiz-questions/quizzes/${quizSlug}`, data),
+  bulkCreateQuestions: (quizSlug, questions) =>
+    api.post(`/api/instructor/quiz-questions/${quizSlug}/bulk`, questions),
+  updateQuestion: (questionId, data) =>
+    api.put(`/api/instructor/quiz-questions/${questionId}`, data),
+  deleteQuestion: (questionId) =>
+    api.delete(`/api/instructor/quiz-questions/${questionId}`),
+};
+
+/* ── Quiz Options ── */
+export const instructorQuizOptionApi = {
+  getQuestionOptions: (questionId) =>
+    api.get(`/api/instructor/quiz-options/questions/${questionId}`),
+  createOption: (questionId, data) =>
+    api.post(`/api/instructor/quiz-options/questions/${questionId}`, data),
+  bulkCreateOptions: (questionId, options) =>
+    api.post(`/api/instructor/quiz-options/${questionId}/bulk`, options),
+  updateOptions: (questionId, data) =>
+    api.put(`/api/instructor/quiz-options/questions/${questionId}/options`, data),
+  // Single option update — used when editing existing questions
+  updateOption: (optionId, data) =>
+    api.put(`/api/instructor/quiz-options/${optionId}`, data),
+  deleteOption: (optionId) =>
+    api.delete(`/api/instructor/quiz-options/${optionId}`),
+};
+
+/* ── Quiz Analytics ── */
+export const instructorQuizAnalyticsApi = {
+  getQuizStudents: (quizId, page = 0, size = 50) =>
+    api.get(`/api/instructor/quizzes/${quizId}/students?page=${page}&size=${size}`),
+  getQuestionAnalytics: (quizId) =>
+    api.get(`/api/instructor/quizzes/${quizId}/question-analytics`),
+  getQuizAnalytics: (quizslug) =>
+    api.get(`/api/instructor/quizzes/${quizslug}/analytics`),
+  getAttemptDetail: (attemptId) =>
+    api.get(`/api/instructor/quizzes/attempts/${attemptId}`),
+};
+
+export const instructorAssignmentApi = {
+  getByModule: (moduleId, page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments/modules/${moduleId}?page=${page}&size=${size}`),
+  createByModule: (moduleId, data) =>
+    api.post(`/api/instructor/assignments/modules/${moduleId}`, data),
+  update: (id, data) =>
+    api.put(`/api/instructor/assignments/${id}`, data),
+  delete: (id) =>
+    api.delete(`/api/instructor/assignments/${id}`),
+  getSubmissions: (id, page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments/${id}/submissions?page=${page}&size=${size}`),
+  getSubmission: (submissionId) =>
+    api.get(`/api/instructor/assignments/submissions/${submissionId}`),
+  grade: (submissionId, data) =>
+    api.post(`/api/instructor/assignments/submissions/${submissionId}/grade`, data),
+};
+
+export const instructorPricingApi = {
+  getPricingPlans: () => api.get("/api/instructor/pricing-plans"),
+};
+
+export const instructorApi = {
+  getAllInstructors: () =>
+    api.get("/api/instructor/instructors"), // Replace with your actual API
+};
+
 
 export default api;

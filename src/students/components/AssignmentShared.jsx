@@ -157,12 +157,6 @@ function parseSubmittedDate(sub) {
     return null;
 }
 
-/* ─────────────────────────────────────────────
-   Transform helper
-   FIX: submission map lookup tries item.id, item.assignmentId, item._id
-        submittedFiles now uses normalizeFiles() to handle any API shape
-        submittedDate now uses parseSubmittedDate() to handle any format
-───────────────────────────────────────────── */
 export function transformAssignment(item, submissionMap = {}) {
     const itemId = item.id ?? item.assignmentId ?? item._id ?? null;
 
@@ -188,9 +182,15 @@ export function transformAssignment(item, submissionMap = {}) {
     }
 
     let status = "Pending";
-    if (sub) {
-        status = sub.score !== null && sub.score !== undefined ? "Graded" : "Submitted";
-    }
+
+if (sub) {
+    status =
+        sub.graded === true ||
+        sub.obtainedMarks !== null &&
+        sub.obtainedMarks !== undefined
+            ? "Graded"
+            : "Submitted";
+}
 
     return {
         id: itemId,
@@ -205,10 +205,10 @@ export function transformAssignment(item, submissionMap = {}) {
         moduleId: item.moduleId,
         status,
         submittedDate: parseSubmittedDate(sub),
-        scoredMarks: sub?.score ?? null,
-        feedback: sub?.feedback || sub?.instructorFeedback || null,
+        scoredMarks: sub?.obtainedMarks ?? sub?.score ?? null,
+        feedback: sub?.feedback ?? sub?.instructorFeedback ?? null,
         gradedBy: sub?.gradedBy || sub?.instructor || null,
-        gradedOn: sub?.gradedOn || sub?.gradedAt || null,
+        gradedOn: sub?.gradedAt ?? sub?.gradedOn ?? null,
         submittedFiles: normalizeFiles(sub),   // ← robust normalizer replaces the old one-liner
         submissionNote: sub?.notes || sub?.submissionNote || sub?.comment || null,
         rubric: sub?.rubric || item.rubric || null,

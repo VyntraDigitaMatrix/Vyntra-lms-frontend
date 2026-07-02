@@ -80,7 +80,7 @@ const LessonView = () => {
                 const curriculumWithLessons = await Promise.all(
                     fetchedModules.map(async (mod) => {
                         try {
-                            const lessonsRes = await instructorLessonApi.getModuleLessons(mod.id, 0, 100);
+                            const lessonsRes = await instructorLessonApi.getModuleLessons(mod.slug, 0, 100);
                             const lessons = lessonsRes.data?.data?.content || [];
                             lessons.sort((a, b) => a.sortOrder - b.sortOrder);
                             return { ...mod, lessons };

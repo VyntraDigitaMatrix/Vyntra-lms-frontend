@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import S1 from "../../assets/S1.jpg";
 import S2 from "../../assets/S2.jpg";
 import S3 from "../../assets/S3.jpg";
@@ -10,706 +10,192 @@ import S7 from "../../assets/S7.jpg";
 import S8 from "../../assets/S8.jpg";
 import {
   FaChevronLeft, FaChevronRight, FaEdit, FaTrash,
-  FaEye, FaPlus, FaTimes, FaUpload, FaVideo, FaLink,
-  FaCheckCircle,
+  FaEye, FaPlus, FaArchive, FaTimes, FaExclamationTriangle,
 } from "react-icons/fa";
+import {
+  MdCheckCircle, MdWarning, MdArchive, MdPublish,
+} from "react-icons/md";
 import { instructorCourseApi } from "../auth/api";
 
 const defaultImages = [S1, S2, S3, S4, S5, S6, S7, S8];
 
-/* ─────────────────────────────────────────
-   SHARED VIDEO UPLOAD SECTION
-   ───────────────────────────────────────── */
-const VideoUploadSection = ({
-  videoTab, setVideoTab,
-  videoFile, videoProgress, videoPreviewUrl,
-  videoDragging, setVideoDragging, videoUploading,
-  videoInputRef, startVideoUpload, resetVideo,
-  promoVideoUrl, onPromoChange,
-  inputClass, labelClass, formatFileSize,
-}) => (
-  <div>
-    <label className={labelClass}>
-      Course Promo Video
-    </label>
-    <div className="flex gap-2 mb-3">
-      {[["upload", FaUpload, "Upload File"], ["url", FaLink, "Video URL"]].map(([tab, Icon, label]) => (
-        <button
-          key={tab} type="button"
-          onClick={() => setVideoTab(tab)}
-          className={`flex-1 h-9 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition ${videoTab === tab
-              ? "bg-violet-600 border-violet-600 text-white"
-              : "border-gray-200 text-gray-500 hover:border-violet-300"
-            }`}
-        >
-          <Icon className="text-[10px]" /> {label}
-        </button>
-      ))}
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+function Toast({ msg, type = "success", onClose }) {
+  if (!msg) return null;
+  return (
+    <div className="fixed top-5 right-5 z-[9999] bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl min-w-[280px] animate-fade-in">
+      {type === "success"
+        ? <MdCheckCircle className="text-emerald-500 text-xl flex-shrink-0" />
+        : <MdWarning className="text-amber-500 text-xl flex-shrink-0" />}
+      <span className="text-sm font-medium text-gray-800 flex-1">{msg}</span>
+      <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
     </div>
+  );
+}
 
-    {videoTab === "upload" && (
-      <div className="space-y-3">
-        {!videoFile ? (
-          <div
-            onDragOver={(e) => { e.preventDefault(); setVideoDragging(true); }}
-            onDragLeave={() => setVideoDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault(); setVideoDragging(false);
-              const file = e.dataTransfer.files[0];
-              if (file?.type.startsWith("video/")) startVideoUpload(file);
-            }}
-            onClick={() => videoInputRef.current?.click()}
-            className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition ${videoDragging ? "border-violet-400 bg-violet-50" : "border-gray-200 hover:border-violet-400 hover:bg-violet-50"
-              }`}
-          >
-            <FaVideo className="text-2xl text-gray-400 mb-2" />
-            <span className="text-xs font-medium text-gray-500">Click or drag & drop to upload video</span>
-            <span className="text-[11px] text-gray-400 mt-1">MP4, MOV, AVI, MKV · Max 2GB</span>
-            <input
-              ref={videoInputRef} type="file" accept="video/*" className="hidden"
-              onChange={(e) => { if (e.target.files[0]) startVideoUpload(e.target.files[0]); }}
-            />
-          </div>
-        ) : (
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5 space-y-2.5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
-                  <FaVideo className="text-violet-600 text-sm" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-gray-800 truncate">{videoFile.name}</p>
-                  <p className="text-[11px] text-gray-400">{formatFileSize(videoFile.size)}</p>
-                </div>
-              </div>
-              <button
-                type="button" onClick={resetVideo}
-                className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition"
-              >
-                <FaTimes className="text-[10px]" />
-              </button>
+/* ══════════════════════════════════════════════════════════
+   ARCHIVE CONFIRM MODAL
+══════════════════════════════════════════════════════════ */
+function ArchiveModal({ course, onClose, onConfirm, loading }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}>
+      <div
+        onClick={e => e.stopPropagation()}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-amber-200 border-t-4 border-t-amber-500"
+      >
+        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <FaArchive className="text-amber-600 text-base" />
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] text-gray-500">{videoUploading ? "Uploading..." : "Upload complete"}</span>
-                <span className="text-[11px] font-semibold text-violet-600">{videoProgress}%</span>
-              </div>
-              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-200"
-                  style={{ width: `${videoProgress}%`, background: videoProgress === 100 ? "#16a34a" : "#7c3aed" }}
-                />
-              </div>
+              <h2 className="text-base font-bold text-gray-900">Archive Course</h2>
+              <p className="text-xs text-gray-500 mt-0.5">This will hide the course from learners</p>
             </div>
-            {videoProgress === 100 && (
-              <div className="flex items-center gap-1.5">
-                <FaCheckCircle className="text-green-500 text-xs" />
-                <span className="text-[11px] text-green-600 font-semibold">Video uploaded successfully</span>
-              </div>
-            )}
           </div>
-        )}
-        {videoPreviewUrl && videoProgress === 100 && (
-          <div>
-            <label className={labelClass}>Video Preview</label>
-            <video src={videoPreviewUrl} controls className="w-full rounded-xl border border-gray-200 bg-black max-h-48 mt-1" />
-          </div>
-        )}
-      </div>
-    )}
-
-    {videoTab === "url" && (
-      <div className="space-y-2">
-        <input
-          value={promoVideoUrl} onChange={onPromoChange}
-          placeholder="https://youtube.com/watch?v=... or Vimeo URL"
-          className={inputClass}
-        />
-        <p className="text-[11px] text-gray-400">Supports YouTube, Vimeo, or direct MP4 links</p>
-        {promoVideoUrl?.startsWith("http") && (
-          <div className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2">
-            <FaLink className="text-violet-400 text-xs flex-shrink-0" />
-            <span className="text-xs text-violet-700 font-medium truncate flex-1">{promoVideoUrl}</span>
-            <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">✓ Linked</span>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-);
-
-/* ─────────────────────────────────────────
-   STEP INDICATOR (shared)
-   ───────────────────────────────────────── */
-const StepIndicator = ({ step, setStep }) => (
-  <div className="flex items-center px-6 pt-4 pb-2">
-    {["Basic Info", "Pricing & Details", "Media"].map((label, i) => (
-      <React.Fragment key={i}>
-        <button
-          type="button"
-          onClick={() => setStep(i + 1)}
-          className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full transition ${step === i + 1 ? "bg-violet-600 text-white" : step > i + 1 ? "bg-violet-100 text-violet-600" : "text-gray-400"
-            }`}
-        >
-          <span className={`w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold ${step === i + 1 ? "bg-white text-violet-600" : step > i + 1 ? "bg-violet-500 text-white" : "bg-gray-200 text-gray-500"
-            }`}>
-            {step > i + 1 ? "✓" : i + 1}
-          </span>
-          {label}
-        </button>
-        {i < 2 && <div className={`flex-1 h-px mx-1 ${step > i + 1 ? "bg-violet-400" : "bg-gray-200"}`} />}
-      </React.Fragment>
-    ))}
-  </div>
-);
-
-/* ─────────────────────────────────────────
-   CREATE COURSE MODAL
-   ───────────────────────────────────────── */
-const emptyForm = {
-  title: "", slug: "", description: "",
-  thumbnailUrl: "", promoVideoUrl: "",
-  price: "", discountPrice: "",
-  language: "", level: "", status: "Draft",
-  lifetimeAccess: true, validityInDays: ""
-};
-
-const CreateCourseModal = ({ onClose, onCreate }) => {
-  const [form, setForm] = useState(emptyForm);
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [step, setStep] = useState(1);
-  const [videoTab, setVideoTab] = useState("upload");
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
-  const [videoDragging, setVideoDragging] = useState(false);
-  const [videoUploading, setVideoUploading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  const videoInputRef = useRef(null);
-  const uploadIntervalRef = useRef(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => {
-      const updated = { ...prev, [name]: value };
-      if (name === "title") {
-        updated.slug = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      }
-      return updated;
-    });
-  };
-
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setThumbnailPreview(URL.createObjectURL(file));
-      setThumbnailFile(file);
-      setForm((prev) => ({ ...prev, thumbnailUrl: "" }));
-    }
-  };
-
-  const startVideoUpload = (file) => {
-    if (!file.type.startsWith("video/")) return;
-    setVideoFile(file); setVideoProgress(0); setVideoUploading(true);
-    setVideoPreviewUrl(URL.createObjectURL(file));
-    let progress = 0;
-    clearInterval(uploadIntervalRef.current);
-    uploadIntervalRef.current = setInterval(() => {
-      progress += Math.random() * 10 + 4;
-      if (progress >= 100) { progress = 100; clearInterval(uploadIntervalRef.current); setVideoUploading(false); }
-      setVideoProgress(Math.round(progress));
-    }, 200);
-  };
-
-  const resetVideo = () => {
-    clearInterval(uploadIntervalRef.current);
-    setVideoFile(null); setVideoProgress(0); setVideoPreviewUrl(null); setVideoUploading(false);
-    if (videoInputRef.current) videoInputRef.current.value = "";
-  };
-
-  const handleNext = () => setStep((s) => s + 1);
-  const handleBack = () => step > 1 ? setStep((s) => s - 1) : onClose();
-
-  const handleCreate = async () => {
-    setSubmitting(true);
-    setError("");
-    try {
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("language", form.language || "English");
-      formData.append("level", form.level || "BEGINNER");
-      formData.append("price", form.price);
-      if (form.discountPrice) {
-        formData.append("discountPrice", form.discountPrice);
-      }
-      formData.append("lifetimeAccess", form.lifetimeAccess ? "true" : "false");
-      if (!form.lifetimeAccess && form.validityInDays) {
-        formData.append("validityInDays", form.validityInDays);
-      }
-
-      // Thumbnail
-      if (thumbnailFile) {
-        formData.append("thumbnailInputType", "FILE_UPLOAD");
-        formData.append("thumbnailFile", thumbnailFile);
-      } else if (form.thumbnailUrl) {
-        formData.append("thumbnailInputType", "URL");
-        formData.append("thumbnailUrl", form.thumbnailUrl);
-      } else {
-        formData.append("thumbnailInputType", "URL");
-        formData.append("thumbnailUrl", "");
-      }
-
-      // Video
-      if (videoTab === "upload" && videoFile) {
-        formData.append("promoVideoInputType", "FILE_UPLOAD");
-        formData.append("promoVideoFile", videoFile);
-      } else if (videoTab === "url" && form.promoVideoUrl) {
-        formData.append("promoVideoInputType", "URL");
-        formData.append("promoVideoUrl", form.promoVideoUrl);
-      } else {
-        formData.append("promoVideoInputType", "URL");
-        formData.append("promoVideoUrl", "");
-      }
-
-      const res = await instructorCourseApi.createCourse(formData);
-      if (res.data) {
-        onCreate();
-        onClose();
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Failed to create course. Ensure Validity is specified if Lifetime Access is disabled.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const inputClass = "w-full h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800 outline-none focus:border-violet-400 focus:bg-white transition placeholder:text-gray-400";
-  const labelClass = "block text-xs font-semibold text-gray-600 mb-1";
-  const formatFileSize = (bytes) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-2xl">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">Create New Course</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Fill in the details to publish your course</p>
-          </div>
-          <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-gray-500 transition" disabled={submitting}>
-            <FaTimes className="text-xs" />
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition text-lg leading-none mt-0.5">
+            <FaTimes />
           </button>
         </div>
 
-        <StepIndicator step={step} setStep={setStep} />
-
-        {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-xs font-semibold">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <div className="px-6 py-4 space-y-4">
-          {step === 1 && (
-            <>
-              <div>
-                <label className={labelClass}>Course Title <span className="text-red-400">*</span></label>
-                <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. Digital Marketing Fundamentals" className={inputClass} required disabled={submitting} />
-              </div>
-              <div>
-                <label className={labelClass}>Slug</label>
-                <div className="relative">
-                  <input name="slug" value={form.slug} onChange={handleChange} placeholder="auto-generated from title" className={`${inputClass} pr-16 text-violet-600`} readOnly />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded">auto</span>
-                </div>
-              </div>
-              <div>
-                <label className={labelClass}>Description <span className="text-red-400">*</span></label>
-                <textarea name="description" value={form.description} onChange={handleChange} placeholder="Describe what students will learn in this course..." rows={4} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800 outline-none focus:border-violet-400 focus:bg-white transition placeholder:text-gray-400 resize-none" required disabled={submitting} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelClass}>Language <span className="text-red-400">*</span></label>
-                  <select name="language" value={form.language} onChange={handleChange} className={inputClass} required disabled={submitting}>
-                    <option value="">Select language</option>
-                    <option>English</option><option>Hindi</option><option>Telugu</option><option>Tamil</option><option>Kannada</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>Level <span className="text-red-400">*</span></label>
-                  <select name="level" value={form.level} onChange={handleChange} className={inputClass} required disabled={submitting}>
-                    <option value="">Select level</option>
-                    <option value="BEGINNER">Beginner</option>
-                    <option value="INTERMEDIATE">Intermediate</option>
-                    <option value="ADVANCED">Advanced</option>
-                  </select>
-                </div>
-              </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelClass}>Price (₹) <span className="text-red-400">*</span></label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                    <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="0.00" className={`${inputClass} pl-7`} required disabled={submitting} />
-                  </div>
-                </div>
-                <div>
-                  <label className={labelClass}>Discount Price (₹)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                    <input name="discountPrice" type="number" value={form.discountPrice} onChange={handleChange} placeholder="0.00" className={`${inputClass} pl-7`} disabled={submitting} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
-                <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.lifetimeAccess}
-                    onChange={(e) => setForm(p => ({
-                      ...p,
-                      lifetimeAccess: e.target.checked,
-                      validityInDays: e.target.checked ? "" : p.validityInDays
-                    }))}
-                    className="w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
-                    disabled={submitting}
-                  />
-                  Lifetime Course Access
-                </label>
-
-                {!form.lifetimeAccess && (
-                  <div>
-                    <label className={labelClass}>Validity in Days <span className="text-red-400">*</span></label>
-                    <input
-                      name="validityInDays"
-                      type="number"
-                      value={form.validityInDays}
-                      onChange={handleChange}
-                      placeholder="e.g. 365"
-                      className={inputClass}
-                      required
-                      disabled={submitting}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {form.price && form.discountPrice && Number(form.discountPrice) < Number(form.price) && (
-                <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 flex items-center justify-between">
-                  <span className="text-xs text-green-700 font-medium">Discount applied</span>
-                  <span className="text-sm font-bold text-green-700">{Math.round(((form.price - form.discountPrice) / form.price) * 100)}% OFF</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <div>
-                <label className={labelClass}>Course Thumbnail</label>
-                <div className="flex gap-3 mb-3">
-                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition overflow-hidden relative">
-                    {thumbnailPreview ? (
-                      <>
-                        <img src={thumbnailPreview} alt="preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition flex flex-col items-center justify-center gap-1">
-                          <FaUpload className="text-white text-lg" />
-                          <span className="text-white text-xs font-semibold">Click to replace</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2 text-gray-400">
-                        <FaUpload className="text-2xl" />
-                        <span className="text-xs font-medium">Click to upload thumbnail</span>
-                        <span className="text-[11px]">PNG, JPG up to 5MB</span>
-                      </div>
-                    )}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} disabled={submitting} />
-                  </label>
-                </div>
-                <div className="mt-2 text-xs text-gray-500">
-                  <span>Or Thumbnail Url:</span>
-                  <input name="thumbnailUrl" value={form.thumbnailUrl} onChange={(e) => {
-                    setForm(p => ({ ...p, thumbnailUrl: e.target.value }));
-                    setThumbnailPreview(e.target.value || null);
-                    setThumbnailFile(null);
-                  }} placeholder="Enter image URL instead of file upload" className={`${inputClass} mt-1`} disabled={submitting} />
-                </div>
-              </div>
-
-              <VideoUploadSection
-                videoTab={videoTab} setVideoTab={setVideoTab}
-                videoFile={videoFile} videoProgress={videoProgress} videoPreviewUrl={videoPreviewUrl}
-                videoDragging={videoDragging} setVideoDragging={setVideoDragging} videoUploading={videoUploading}
-                videoInputRef={videoInputRef} startVideoUpload={startVideoUpload} resetVideo={resetVideo}
-                promoVideoUrl={form.promoVideoUrl}
-                onPromoChange={(e) => setForm(p => ({ ...p, promoVideoUrl: e.target.value }))}
-                inputClass={inputClass} labelClass={labelClass} formatFileSize={formatFileSize}
-              />
-            </>
-          )}
-
-          <div className="flex items-center justify-between pt-2 pb-1">
-            <button type="button" onClick={handleBack}
-              className="h-10 px-5 rounded-xl border border-gray-200 text-sm text-gray-600 font-semibold hover:bg-gray-50 transition" disabled={submitting}>
-              {step === 1 ? "Cancel" : "← Back"}
-            </button>
-            {step < 3 ? (
-              <button type="button" onClick={handleNext}
-                className="h-10 px-6 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition">
-                Next →
-              </button>
-            ) : (
-              <button type="button" onClick={handleCreate} disabled={submitting}
-                className="h-10 px-6 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition flex items-center gap-2">
-                {submitting ? "Creating..." : <><FaPlus className="text-xs" /> Create Course</>}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────
-   EDIT COURSE MODAL
-   ───────────────────────────────────────── */
-const EditCourseModal = ({ course, onClose, onUpdate }) => {
-  const [form, setForm] = useState({
-    description: course.description ?? "",
-    thumbnailUrl: course.thumbnailUrl ?? "",
-    promoVideoUrl: course.promoVideoUrl ?? ""
-  });
-
-  const [thumbnailPreview, setThumbnailPreview] = useState(course.thumbnailUrl || null);
-  const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [videoTab, setVideoTab] = useState(course.promoVideoUrl ? "url" : "upload");
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
-  const [videoDragging, setVideoDragging] = useState(false);
-  const [videoUploading, setVideoUploading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  const videoInputRef = useRef(null);
-  const uploadIntervalRef = useRef(null);
-
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setThumbnailPreview(URL.createObjectURL(file));
-      setThumbnailFile(file);
-      setForm((prev) => ({ ...prev, thumbnailUrl: "" }));
-    }
-  };
-
-  const startVideoUpload = (file) => {
-    if (!file.type.startsWith("video/")) return;
-    setVideoFile(file); setVideoProgress(0); setVideoUploading(true);
-    setVideoPreviewUrl(URL.createObjectURL(file));
-    let progress = 0;
-    clearInterval(uploadIntervalRef.current);
-    uploadIntervalRef.current = setInterval(() => {
-      progress += Math.random() * 10 + 4;
-      if (progress >= 100) { progress = 100; clearInterval(uploadIntervalRef.current); setVideoUploading(false); }
-      setVideoProgress(Math.round(progress));
-    }, 200);
-  };
-
-  const resetVideo = () => {
-    clearInterval(uploadIntervalRef.current);
-    setVideoFile(null); setVideoProgress(0); setVideoPreviewUrl(null); setVideoUploading(false);
-    if (videoInputRef.current) videoInputRef.current.value = "";
-  };
-
-  const handleSave = async () => {
-    setSubmitting(true);
-    setError("");
-    try {
-      const formData = new FormData();
-      formData.append("description", form.description);
-
-      // Thumbnail
-      if (thumbnailFile) {
-        formData.append("thumbnailInputType", "FILE_UPLOAD");
-        formData.append("thumbnailFile", thumbnailFile);
-      } else if (form.thumbnailUrl) {
-        formData.append("thumbnailInputType", "URL");
-        formData.append("thumbnailUrl", form.thumbnailUrl);
-      } else {
-        formData.append("thumbnailInputType", "URL");
-        formData.append("thumbnailUrl", course.thumbnailUrl || "");
-      }
-
-      // Video
-      if (videoTab === "upload" && videoFile) {
-        formData.append("promoVideoInputType", "FILE_UPLOAD");
-        formData.append("promoVideoFile", videoFile);
-      } else if (videoTab === "url" && form.promoVideoUrl) {
-        formData.append("promoVideoInputType", "URL");
-        formData.append("promoVideoUrl", form.promoVideoUrl);
-      } else {
-        formData.append("promoVideoInputType", "URL");
-        formData.append("promoVideoUrl", course.promoVideoUrl || "");
-      }
-
-      const res = await instructorCourseApi.updateCourseContent(course.id, formData);
-      if (res.data) {
-        onUpdate();
-        onClose();
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Failed to update course content.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const inputClass = "w-full h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800 outline-none focus:border-violet-400 focus:bg-white transition placeholder:text-gray-400";
-  const labelClass = "block text-xs font-semibold text-gray-600 mb-1";
-  const formatFileSize = (bytes) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-2xl">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-gray-900">Edit Course Content</h2>
-              <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-semibold">ID: {course.id}</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-0.5">Modify description and media content</p>
-          </div>
-          <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-gray-500 transition" disabled={submitting}>
-            <FaTimes className="text-xs" />
-          </button>
-        </div>
-
-        {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-xs font-semibold">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <div className="px-6 py-4 space-y-4">
-          <div>
-            <label className={labelClass}>Course Title (Read-Only)</label>
-            <input value={course.title} readOnly className={`${inputClass} bg-gray-100 text-gray-400 cursor-not-allowed`} />
-          </div>
-
-          <div>
-            <label className={labelClass}>Description <span className="text-red-400">*</span></label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Describe what students will learn..."
-              rows={4}
-              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-800 outline-none focus:border-violet-400 focus:bg-white transition placeholder:text-gray-400 resize-none"
-              required
-              disabled={submitting}
+        <div className="px-6 py-4">
+          <div className="flex items-center gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-4">
+            <img
+              src={course.thumbnailUrl || defaultImages[0]}
+              alt={course.title}
+              className="w-12 h-9 object-cover rounded-lg flex-shrink-0"
             />
-          </div>
-
-          <div>
-            <label className={labelClass}>Course Thumbnail</label>
-            <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition overflow-hidden relative">
-              {thumbnailPreview ? (
-                <>
-                  <img src={thumbnailPreview} alt="preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition flex flex-col items-center justify-center gap-1">
-                    <FaUpload className="text-white text-lg" />
-                    <span className="text-white text-xs font-semibold">Click to replace</span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-gray-400">
-                  <FaUpload className="text-2xl" />
-                  <span className="text-xs font-medium">Click to upload thumbnail</span>
-                  <span className="text-[11px]">PNG, JPG up to 5MB</span>
-                </div>
-              )}
-              <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} disabled={submitting} />
-            </label>
-            <div className="mt-2 text-xs text-gray-500">
-              <span>Or Thumbnail URL:</span>
-              <input value={form.thumbnailUrl} onChange={(e) => {
-                setForm(p => ({ ...p, thumbnailUrl: e.target.value }));
-                setThumbnailPreview(e.target.value || null);
-                setThumbnailFile(null);
-              }} placeholder="Enter URL" className={`${inputClass} mt-1`} disabled={submitting} />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">{course.title}</p>
+              <p className="text-xs text-gray-500 mt-0.5">Status: <span className="font-semibold text-amber-600">{course.status}</span></p>
             </div>
           </div>
 
-          <VideoUploadSection
-            videoTab={videoTab} setVideoTab={setVideoTab}
-            videoFile={videoFile} videoProgress={videoProgress} videoPreviewUrl={videoPreviewUrl}
-            videoDragging={videoDragging} setVideoDragging={setVideoDragging} videoUploading={videoUploading}
-            videoInputRef={videoInputRef} startVideoUpload={startVideoUpload} resetVideo={resetVideo}
-            promoVideoUrl={form.promoVideoUrl}
-            onPromoChange={(e) => setForm(p => ({ ...p, promoVideoUrl: e.target.value }))}
-            inputClass={inputClass} labelClass={labelClass} formatFileSize={formatFileSize}
-          />
-
-          <div className="flex items-center justify-between pt-2 pb-1">
-            <button type="button" onClick={onClose}
-              className="h-10 px-5 rounded-xl border border-gray-200 text-sm text-gray-600 font-semibold hover:bg-gray-50 transition" disabled={submitting}>
-              Cancel
-            </button>
-            <button type="button" onClick={handleSave} disabled={submitting}
-              className="h-10 px-6 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition flex items-center gap-2">
-              {submitting ? "Saving..." : <><FaEdit className="text-xs" /> Save Changes</>}
-            </button>
+          <div className="space-y-2 mb-5">
+            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">What happens when archived:</p>
+            {[
+              { icon: "🙈", text: "Course is hidden from all learners and search" },
+              { icon: "✅", text: "Existing enrollments and data are preserved" },
+              { icon: "🔓", text: "You can restore or delete it later from settings" },
+              { icon: "🚫", text: "No new enrollments will be accepted" },
+            ].map(({ icon, text }) => (
+              <div key={text} className="flex items-center gap-2.5 text-xs text-gray-600">
+                <span className="text-sm">{icon}</span>
+                <span>{text}</span>
+              </div>
+            ))}
           </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-2.5">
+          <button onClick={onClose}
+            className="flex-1 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-[2] py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition flex items-center justify-center gap-2"
+          >
+            {loading
+              ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Archiving…</>
+              : <><FaArchive className="text-xs" /> Archive Course</>
+            }
+          </button>
         </div>
       </div>
     </div>
   );
-};
+}
 
-/* ─────────────────────────────────────────
-   INSTRUCTOR COURSES PAGE
-   ───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   STATUS BADGE
+══════════════════════════════════════════════════════════ */
+function StatusBadge({ course }) {
+  if (course.status === "PUBLISHED")
+    return <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full">● PUBLISHED</span>;
+  if (course.status === "ARCHIVED")
+    return <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1 rounded-full">🗄 ARCHIVED</span>;
+  if (course.publishRequested)
+    return <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-full">⏳ PENDING</span>;
+  return <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2.5 py-1 rounded-full">✎ {course.status || "DRAFT"}</span>;
+}
+
+/* ══════════════════════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════════════════════ */
+function StatCards({ courses }) {
+  const total    = courses.length;
+  const published= courses.filter(c => c.status === "PUBLISHED").length;
+  const draft    = courses.filter(c => c.status === "DRAFT" || (!c.status)).length;
+  const archived = courses.filter(c => c.status === "ARCHIVED").length;
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      {[
+        { label: "Total Courses",   value: total,     color: "text-violet-600", border: "border-t-violet-500", bg: "bg-violet-50", icon: "📚" },
+        { label: "Published",       value: published, color: "text-emerald-600",border: "border-t-emerald-500",bg: "bg-emerald-50",icon: "✅" },
+        { label: "Draft",           value: draft,     color: "text-amber-600",  border: "border-t-amber-500",  bg: "bg-amber-50",  icon: "✎" },
+        { label: "Archived",        value: archived,  color: "text-orange-600", border: "border-t-orange-500", bg: "bg-orange-50", icon: "🗄" },
+      ].map(({ label, value, color, border, bg, icon }) => (
+        <div key={label} className={`bg-white rounded-xl border border-gray-200 ${border} border-t-2 p-4 shadow-sm flex items-center gap-3`}>
+          <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>{icon}</div>
+          <div>
+            <div className={`text-2xl font-black ${color} leading-none`}>{value}</div>
+            <div className="text-xs text-gray-500 mt-0.5 font-medium">{label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN COMPONENT
+══════════════════════════════════════════════════════════ */
 const InstructorCourses = () => {
-  const [courses, setCourses] = useState([]);
-  const [totalPages, setTotalPages] = useState(0);
+  const navigate = useNavigate();
+
+  const [allCourses,    setAllCourses]    = useState([]);
+  const [courses,       setCourses]       = useState([]);
+  const [totalPages,    setTotalPages]    = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading,       setLoading]       = useState(false);
+  const [error,         setError]         = useState("");
+  const [sortBy,        setSortBy]        = useState("Popular");
+  const [currentPage,   setCurrentPage]   = useState(0);
+  const [statusFilter,  setStatusFilter]  = useState("ALL");
+  const [coursesPerPage] = useState(6);
 
-  const [sortBy, setSortBy] = useState("Popular");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editCourse, setEditCourse] = useState(null);
-  
-  const coursesPerPage = 6;
+  // Archive state
+  const [archiveTarget,  setArchiveTarget]  = useState(null);
+  const [archiving,      setArchiving]      = useState(false);
 
+  // Toast
+  const [toast, setToast] = useState(null);
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  /* ── Fetch ── */
   const fetchCourses = async () => {
     setLoading(true);
     setError("");
     try {
-      const springPage = currentPage - 1;
-      const res = await instructorCourseApi.getInstructorCourses(springPage, coursesPerPage);
-      if (res.data && res.data.data) {
-        setCourses(res.data.data.content || []);
-        setTotalPages(res.data.data.totalPages || 0);
-        setTotalElements(res.data.data.totalElements || 0);
+      const res = await instructorCourseApi.getInstructorCourses(0, 100);
+      if (res.data?.data) {
+        const fetchedCourses = res.data.data.content || [];
+        setAllCourses(fetchedCourses);
+        setTotalElements(fetchedCourses.length);
+        setTotalPages(Math.ceil(fetchedCourses.length / coursesPerPage));
+        applyFiltersAndSort(fetchedCourses, statusFilter, sortBy, currentPage);
       }
     } catch (err) {
-      console.error(err);
-      setError("Failed to fetch courses list from server.");
+      setError(err.response?.data?.message || "Failed to fetch courses.");
     } finally {
       setLoading(false);
     }
@@ -717,175 +203,330 @@ const InstructorCourses = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, [currentPage]);
+  }, []);
 
-  const handleUpdateCourse = () => {
-    fetchCourses();
+  useEffect(() => {
+    applyFiltersAndSort(allCourses, statusFilter, sortBy, currentPage);
+  }, [statusFilter, sortBy, currentPage, allCourses]);
+
+  const applyFiltersAndSort = (coursesData, filter, sort, page) => {
+    // Filter
+    let filtered = coursesData.filter(c => {
+      if (filter === "ALL") return true;
+      if (filter === "ARCHIVED") return c.status === "ARCHIVED";
+      if (filter === "PUBLISHED") return c.status === "PUBLISHED";
+      if (filter === "DRAFT") return c.status === "DRAFT" || !c.status;
+      return true;
+    });
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      if (sort === "Popular") return (b.averageRating || 0) - (a.averageRating || 0);
+      if (sort === "Latest") return b.id - a.id;
+      if (sort === "Price Low") return (a.price || 0) - (b.price || 0);
+      if (sort === "Price High") return (b.price || 0) - (a.price || 0);
+      return 0;
+    });
+
+    // Paginate
+    const start = page * coursesPerPage;
+    const end = start + coursesPerPage;
+    const paginated = sorted.slice(start, end);
+
+    setCourses(paginated);
+    setTotalPages(Math.ceil(sorted.length / coursesPerPage));
+    setTotalElements(sorted.length);
   };
 
-  const handleCreateCourse = () => {
-    fetchCourses();
-  };
-
-  const handleDeleteCourse = (courseId) => {
-    alert("Course deletion is disabled on the frontend. Please contact an administrator to request removal of a course.");
-  };
-
-  const handleRequestPublish = async (courseId) => {
-    if (window.confirm("Are you sure you want to request publication for this course? Administrators will review it.")) {
-      try {
-        await instructorCourseApi.requestCoursePublish(courseId);
-        alert("Publish request submitted successfully!");
-        fetchCourses();
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Failed to submit publish request.");
-      }
+  const changePage = (page) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
     }
   };
 
-  const sortedCourses = [...courses].sort((a, b) => {
-    if (sortBy === "Popular") return (b.averageRating || 0) - (a.averageRating || 0);
-    if (sortBy === "Latest") return b.id - a.id;
-    if (sortBy === "Price Low") return (a.price || 0) - (b.price || 0);
-    if (sortBy === "Price High") return (b.price || 0) - (a.price || 0);
-    return 0;
-  });
-
-  const changePage = (page) => { 
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page); 
+  /* ── Archive handler ── */
+  const handleArchiveConfirm = async () => {
+    if (!archiveTarget) return;
+    setArchiving(true);
+    try {
+      await instructorCourseApi.archiveCourse(archiveTarget.slug);
+      showToast(`"${archiveTarget.title}" has been archived successfully.`);
+      setArchiveTarget(null);
+      await fetchCourses();
+    } catch (err) {
+      showToast(err?.response?.data?.message || "Failed to archive course.", "error");
+    } finally {
+      setArchiving(false);
     }
   };
+
+  /* ── Publish request ── */
+  const handleRequestPublish = async (course) => {
+    if (!window.confirm(`Request publication for "${course.title}"?`)) return;
+    try {
+      await instructorCourseApi.requestCoursePublish(course.slug);
+      showToast("Publish request submitted successfully!");
+      await fetchCourses();
+    } catch (err) {
+      showToast(err?.response?.data?.message || "Failed to submit publish request.", "error");
+    }
+  };
+
+  /* ── Status filter tabs ── */
+  const STATUS_TABS = [
+    { key: "ALL",       label: "All",       count: allCourses.length },
+    { key: "PUBLISHED", label: "Published", count: allCourses.filter(c => c.status === "PUBLISHED").length },
+    { key: "DRAFT",     label: "Draft",     count: allCourses.filter(c => c.status === "DRAFT" || !c.status).length },
+    { key: "ARCHIVED",  label: "Archived",  count: allCourses.filter(c => c.status === "ARCHIVED").length },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#f6f7fb] p-5">
-      {showCreateModal && <CreateCourseModal onClose={() => setShowCreateModal(false)} onCreate={handleCreateCourse} />}
-      {editCourse && (
-        <EditCourseModal
-          course={editCourse}
-          onClose={() => setEditCourse(null)}
-          onUpdate={handleUpdateCourse}
+    <div className="min-h-screen bg-gray-50 p-5 font-sans">
+      <style>{`
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in { animation: fadeIn 0.18s ease; }
+      `}</style>
+
+      <Toast msg={toast?.msg} type={toast?.type} onClose={() => setToast(null)} />
+
+      {/* Archive modal */}
+      {archiveTarget && (
+        <ArchiveModal
+          course={archiveTarget}
+          onClose={() => setArchiveTarget(null)}
+          onConfirm={handleArchiveConfirm}
+          loading={archiving}
         />
       )}
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-start justify-between mb-5">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4">
           <div>
-            <p className="text-sm text-gray-400 mb-1">
+            <p className="text-xs text-gray-400 mb-1">
               <Link to="/instructor/dashboard" className="hover:text-violet-600 transition">Dashboard</Link>
-              <span className="mx-2">&gt;</span>
-              <span className="text-gray-600">My Courses</span>
+              <span className="mx-1.5">&gt;</span>
+              <span className="text-gray-600 font-medium">My Courses</span>
             </p>
-            <h1 className="text-xl font-bold text-gray-900 mt-3">My Courses</h1>
-            <p className="text-sm text-gray-500 mt-2">Manage and track all your created courses.</p>
+            <h1 className="text-xl font-bold text-gray-900 mt-2">My Courses</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage and track all your created courses.</p>
           </div>
-          <button type="button" onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 h-10 px-5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition shadow-sm mt-5">
+          <button
+            type="button"
+            onClick={() => navigate("/instructor/create-course")}
+            className="flex items-center gap-2 h-10 px-5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition shadow-sm"
+          >
             <FaPlus className="text-xs" /> Create New Course
           </button>
         </div>
 
+        {/* ── Error ── */}
         {error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 mb-6 text-sm">
+          <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 mb-5 text-sm flex items-center gap-2">
+            <FaExclamationTriangle className="text-red-400 flex-shrink-0" />
             {error}
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm text-gray-500">
-            {loading ? "Loading..." : `Showing ${courses.length} of ${totalElements} courses`}
-          </p>
-          <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-0 focus:border-gray-200">
-            <option value="Popular">Sort by: Popular</option>
-            <option value="Latest">Sort by: Latest</option>
-            <option value="Price Low">Sort by: Price Low</option>
-            <option value="Price High">Sort by: Price High</option>
-          </select>
+        {/* ── Stat cards ── */}
+        <StatCards courses={allCourses} />
+
+        {/* ── Filter tabs + Sort ── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+          {/* Status tabs */}
+          <div className="flex bg-white border border-gray-200 rounded-xl p-1 gap-1 overflow-x-auto w-full sm:w-auto">
+            {STATUS_TABS.map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => {
+                  setStatusFilter(key);
+                  setCurrentPage(0);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap
+                  ${statusFilter === key
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : "text-gray-500 hover:text-violet-600 hover:bg-violet-50"}`}
+              >
+                {label}
+                <span className={`text-[10px] font-bold ${statusFilter === key ? "text-violet-200" : "text-gray-400"}`}>
+                  {count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <p className="text-xs text-gray-500 whitespace-nowrap">
+              {loading ? "Loading..." : `${totalElements} courses`}
+            </p>
+            <select
+              value={sortBy}
+              onChange={e => {
+                setSortBy(e.target.value);
+                setCurrentPage(0);
+              }}
+              className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-xs font-medium outline-none focus:border-violet-400 transition"
+            >
+              <option value="Popular">Sort: Popular</option>
+              <option value="Latest">Sort: Latest</option>
+              <option value="Price Low">Sort: Price Low</option>
+              <option value="Price High">Sort: Price High</option>
+            </select>
+          </div>
         </div>
 
+        {/* ── Course Grid ── */}
         {loading ? (
           <div className="py-20 text-center text-gray-500">
-            <div className="w-10 h-10 border-4 border-t-violet-600 border-gray-200 rounded-full animate-spin mx-auto mb-4"></div>
-            <span>Fetching courses...</span>
+            <div className="w-10 h-10 border-4 border-t-violet-600 border-gray-200 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm">Fetching courses…</p>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="py-20 text-center bg-white rounded-2xl border border-gray-200">
+            <div className="text-5xl mb-3">📚</div>
+            <p className="text-sm font-semibold text-gray-500">
+              {statusFilter !== "ALL" 
+                ? `No ${statusFilter.toLowerCase()} courses found` 
+                : "No courses found"}
+            </p>
+            {statusFilter === "ALL" && (
+              <button onClick={() => navigate("/instructor/create-course")}
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition">
+                <FaPlus className="text-xs" /> Create your first course
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {sortedCourses.map((course, idx) => {
-              const fallbackImage = defaultImages[idx % defaultImages.length];
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {courses.map((course, idx) => {
+              const fallback = defaultImages[idx % defaultImages.length];
+              const isArchived = course.status === "ARCHIVED";
+
               return (
-                <div key={course.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300">
+                <div
+                  key={course.id}
+                  className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200
+                    ${isArchived ? "border-orange-200 opacity-80" : "border-gray-200"}`}
+                >
+                  {/* Thumbnail */}
                   <div className="relative">
-                    <img src={course.thumbnailUrl || fallbackImage} alt={course.title} className="w-full h-[180px] object-cover" />
-                    <span className={`absolute top-3 right-3 text-[11px] font-bold px-3 py-1 rounded-full ${
-                      course.status === "PUBLISHED" 
-                        ? "bg-green-100 text-green-700" 
-                        : course.publishRequested 
-                          ? "bg-blue-100 text-blue-700" 
-                          : "bg-yellow-100 text-yellow-700"
-                    }`}>
-                      {course.status === "PUBLISHED" ? "PUBLISHED" : course.publishRequested ? "PUBLISH PENDING" : course.status || "DRAFT"}
-                    </span>
+                    <img
+                      src={course.thumbnailUrl || fallback}
+                      alt={course.title}
+                      className={`w-full h-[160px] object-cover ${isArchived ? "grayscale-[30%]" : ""}`}
+                    />
+                    <div className="absolute top-3 right-3">
+                      <StatusBadge course={course} />
+                    </div>
+                    {isArchived && (
+                      <div className="absolute top-3 left-3 flex items-center gap-1 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <FaArchive className="text-[9px]" /> Archived
+                      </div>
+                    )}
                   </div>
+
+                  {/* Body */}
                   <div className="p-4">
-                    <h2 className="font-bold text-gray-900 text-sm leading-5 min-h-[40px] line-clamp-2">{course.title}</h2>
-                    <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+                    <h2 className="font-bold text-gray-900 text-sm leading-5 min-h-[38px] line-clamp-2 mb-2">
+                      {course.title}
+                    </h2>
+
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
                       <span className="text-yellow-400">★</span>
-                      <span>{course.averageRating || "0.0"} ({course.totalRatings || 0} reviews)</span>
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] uppercase font-semibold">{course.level}</span>
+                      <span>{course.averageRating || "0.0"} ({course.totalRatings || 0})</span>
+                      {course.level && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] uppercase font-semibold">
+                          {course.level}
+                        </span>
+                      )}
+                      {course.language && (
+                        <span className="px-2 py-0.5 bg-violet-50 text-violet-600 rounded text-[10px] font-semibold">
+                          {course.language.toUpperCase()}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-3 leading-5 min-h-[40px] line-clamp-2">{course.description || "No description provided."}</p>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+
+                    <p className="text-xs text-gray-500 leading-5 min-h-[36px] line-clamp-2 mb-3">
+                      {course.shortDescription || "No description provided."}
+                    </p>
+
+                    {/* Price row */}
+                    <div className="flex items-center justify-between py-2.5 border-t border-b border-gray-100 mb-3">
                       <div className="text-center">
-                        <p className="text-[11px] text-gray-400">Language</p>
-                        <p className="text-xs font-bold text-gray-800">{course.language || "English"}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[11px] text-gray-400">Price</p>
+                        <p className="text-[10px] text-gray-400">Price</p>
                         <p className="text-sm font-bold text-gray-800">
-                          {course.discountPrice ? `₹${course.discountPrice}` : `₹${course.price}`}
+                          {course.free ? "Free" : `₹${course.displayPrice || course.price || 0}`}
                         </p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[11px] text-gray-400">Discount</p>
-                        <p className="text-xs font-bold text-green-600">
-                          {course.discountPrice && course.price ? `${Math.round(((course.price - course.discountPrice) / course.price) * 100)}% OFF` : "None"}
+                        <p className="text-[10px] text-gray-400">Discount</p>
+                        <p className="text-xs font-bold text-emerald-600">
+                          {course.discountPrice && course.price
+                            ? `${Math.round(((course.price - course.discountPrice) / course.price) * 100)}% OFF`
+                            : "—"}
                         </p>
                       </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-gray-400">Students</p>
+                        <p className="text-xs font-bold text-gray-800">{course.totalEnrollments || 0}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 mb-2">
                       <Link
-                        to={`/instructor/course-preview/${course.id}`}
-                        className="flex-1 h-9 rounded-lg border border-violet-500 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
+                        to={`/instructor/course-builder/${course.slug}`}
+                        className="flex-1 h-8 rounded-lg border border-violet-300 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
                       >
-                        <FaEye className="text-[11px]" /> View Details
+                        <FaEye className="text-[10px]" /> View
                       </Link>
-                      <button type="button"
-                        onClick={() => setEditCourse(course)}
-                        className="flex-1 h-9 rounded-lg border border-gray-300 text-gray-600 text-xs font-semibold hover:bg-gray-100 transition flex items-center justify-center gap-1">
-                        <FaEdit className="text-[11px]" /> Edit
-                      </button>
+                      <Link
+                        to={`/instructor/section-settings`}
+                        className="flex-1 h-8 rounded-lg border border-violet-300 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
+                      >
+                        <FaEdit className="text-[10px]" /> Edit
+                      </Link>
+
+                      {!isArchived && (
+                        <button
+                          type="button"
+                          onClick={() => setArchiveTarget(course)}
+                          title="Archive Course"
+                          className="h-8 w-8 rounded-lg border border-orange-200 text-orange-400 text-xs hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-center"
+                        >
+                          <FaArchive className="text-[10px]" />
+                        </button>
+                      )}
+
                       <button
                         type="button"
-                        onClick={() => handleDeleteCourse(course.id)}
-                        className="h-9 w-9 rounded-lg border border-red-200 text-red-400 text-xs hover:bg-red-50 hover:text-red-600 transition flex items-center justify-center animate-pulse"
+                        onClick={() => alert("Course deletion is disabled. Please contact an administrator.")}
+                        className="h-8 w-8 rounded-lg border border-red-200 text-red-400 text-xs hover:bg-red-50 hover:text-red-600 transition flex items-center justify-center"
                       >
-                        <FaTrash className="text-[11px]" />
+                        <FaTrash className="text-[10px]" />
                       </button>
                     </div>
-                    {course.status !== "PUBLISHED" && (
+
+                    {/* Publish request / archived notice */}
+                    {isArchived ? (
+                      <div className="w-full h-8 rounded-lg bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold flex items-center justify-center gap-1.5">
+                        <FaArchive className="text-[10px]" /> Course is Archived
+                      </div>
+                    ) : course.status !== "PUBLISHED" && (
                       <button
                         type="button"
-                        onClick={() => handleRequestPublish(course.id)}
+                        onClick={() => handleRequestPublish(course)}
                         disabled={course.publishRequested}
-                        className={`w-full mt-3 h-9 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                          course.publishRequested
+                        className={`w-full h-8 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5
+                          ${course.publishRequested
                             ? "bg-blue-50 border border-blue-100 text-blue-500 cursor-not-allowed"
-                            : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm border-none cursor-pointer"
-                        }`}
+                            : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm"}`}
                       >
-                        {course.publishRequested ? "Sent for Approval" : "Request Course Publish"}
+                        {course.publishRequested
+                          ? "⏳ Sent for Approval"
+                          : <><MdPublish className="text-sm" /> Request Publish</>
+                        }
                       </button>
                     )}
                   </div>
@@ -895,24 +536,55 @@ const InstructorCourses = () => {
           </div>
         )}
 
+        {/* ── Pagination ── */}
         {!loading && totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-7">
-            <button type="button" onClick={() => changePage(currentPage - 1)} disabled={currentPage === 1}
-              className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-violet-50">
-              <FaChevronLeft />
+          <div className="flex justify-center items-center gap-2 mt-7 flex-wrap">
+            <button
+              type="button"
+              onClick={() => changePage(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="w-9 h-9 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
+            >
+              <FaChevronLeft className="text-xs text-gray-600" />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button type="button" key={page} onClick={() => changePage(page)}
-                className={`w-9 h-9 rounded-md text-sm font-semibold ${currentPage === page ? "bg-violet-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-violet-50"}`}>
-                {page}
-              </button>
-            ))}
-            <button type="button" onClick={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}
-              className="w-9 h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-violet-50">
-              <FaChevronRight />
+
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 2) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 1 + i;
+              }
+              return (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => changePage(pageNum - 1)}
+                  className={`w-9 h-9 rounded-lg text-sm font-semibold transition
+                    ${currentPage === pageNum - 1
+                      ? "bg-violet-600 text-white shadow-sm"
+                      : "bg-white border border-gray-200 text-gray-600 hover:bg-violet-50 hover:border-violet-300"}`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => changePage(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+              className="w-9 h-9 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
+            >
+              <FaChevronRight className="text-xs text-gray-600" />
             </button>
           </div>
         )}
+
       </div>
     </div>
   );

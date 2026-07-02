@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useInstructorAuth } from "./auth/AuthContext";
 import instructorImage from "../assets/LoginImage.png";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const InstructorLogin = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const { login, verifyOtp } = useInstructorAuth();
   const navigate = useNavigate();
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  
+
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [sessionId, setSessionId] = useState("");
@@ -56,7 +58,7 @@ const InstructorLogin = () => {
   return (
     <div className="min-h-screen bg-[#f6f5f7] flex items-center justify-center px-4">
       <div className="relative w-[820px] max-w-full min-h-[500px] bg-white rounded-lg overflow-hidden shadow-xl transition-all duration-300 hover:shadow-2xl flex">
-        
+
         {/* Sign In Panel */}
         <div className="w-1/2 flex flex-col items-center justify-center px-14 py-8 z-20">
           <h1 className="text-3xl font-extrabold mb-6">Instructor Sign In</h1>
@@ -78,14 +80,24 @@ const InstructorLogin = () => {
                 disabled={loading}
               />
 
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full bg-gray-100 px-4 py-3 mb-5 outline-none text-sm rounded border border-transparent focus:border-purple-500 transition"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                disabled={loading}
-              />
+              <div className="relative w-full mb-5">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="w-full bg-gray-100 px-4 py-3 pr-12 outline-none text-sm rounded border border-transparent focus:border-purple-500 transition"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  disabled={loading}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#7c3aed]"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
 
               <Link to="/instructor/forgot-password" className="text-sm text-gray-600 hover:text-purple-600 font-semibold mb-5 transition">
                 Forgot your password?
@@ -94,9 +106,8 @@ const InstructorLogin = () => {
               <button
                 onClick={handleSignIn}
                 disabled={loading}
-                className={`px-12 py-3 bg-[#7c3aed] text-white rounded-full text-xs font-bold uppercase transition hover:bg-[#6d28d9] ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`px-12 py-3 bg-[#7c3aed] text-white rounded-full text-xs font-bold uppercase transition hover:bg-[#6d28d9] ${loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 {loading ? "Sending OTP..." : "Sign In"}
               </button>

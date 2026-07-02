@@ -136,23 +136,25 @@ export const studentQuizApi = {
   getQuizById: (quizId) => api.get(`/api/student/quizzes/${quizId}`),
   startQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/start`),
   retryQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/retry`),
-  resumeQuiz: (quizId) => api.get(`/api/student/quizzes/${quizId}/resume`),
+  resumeQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/resume`),
   getLeaderboard: (quizId) => api.get(`/api/student/quizzes/${quizId}/leaderboard`),
   getAttempts: () => api.get('/api/student/quizzes/attempts'),
   getAttemptResult: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/result`),
   getAttemptQuestions: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/questions`),
   saveAnswer: (attemptId, data) => api.post(`/api/student/quizzes/attempts/${attemptId}/save-answer`, data),
   submitAttempt: (attemptId, data) => {
-    // Ensure data has an answers array (even if empty) to prevent backend null error
     const payload = {
       answers: data?.answers || []
     };
     return api.post(`/api/student/quizzes/attempts/${attemptId}/submit`, payload);
   },
+
+getLeaderboard: (quizId, page = 0, size = 10) =>
+  api.get(`/api/student/quizzes/${quizId}/leaderboard?page=${page}&size=${size}`),
 };
 
 export const studentJobApi = {
-  // Get all jobs with pagination
+  
   getJobs: (page = 0, size = 10) =>
     api.get(`/api/student/jobs?page=${page}&size=${size}`),
 
@@ -170,25 +172,25 @@ export const studentAssignmentApi = {
     api.get(`/api/student/assignments/${assignmentId}`),
 
   submitAssignment: (assignmentId, submissionText, file) => {
-  const formData = new FormData();
+    const formData = new FormData();
 
-  if (file) {
-    formData.append("file", file);
-  }
-
-  return api.post(
-    `/api/student/assignments/${assignmentId}/submit`,
-    formData,
-    {
-      params: {
-        submissionText,
-      },
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    if (file) {
+      formData.append("file", file);
     }
-  );
-},
+
+    return api.post(
+      `/api/student/assignments/${assignmentId}/submit`,
+      formData,
+      {
+        params: {
+          submissionText,
+        },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
 
   updateSubmission: (assignmentId, data) =>
     api.put(`/api/student/assignments/${assignmentId}/submission`, data),
@@ -199,5 +201,6 @@ export const studentAssignmentApi = {
   getSubmissionById: (submissionId) =>
     api.get(`/api/student/assignments/submissions/${submissionId}`),
 };
+
 
 export default api;

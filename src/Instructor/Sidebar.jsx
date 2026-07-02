@@ -15,7 +15,9 @@ import {
   FaKey,
   FaChalkboardTeacher,
   FaChartBar,
+  FaCreditCard,
 } from "react-icons/fa";
+import {MdQuiz} from "react-icons/md"
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
@@ -23,13 +25,13 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   const menuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/instructor/dashboard" },
     { icon: <FaChalkboardTeacher />, label: "My Courses", path: "/instructor/courses" },
+    { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans"},
     { icon: <FaUsers />, label: "Students", path: "/instructor/students" },
     { icon: <FaClipboardList />, label: "Assignments", path: "/instructor/assignments" },
+    { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz"},
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/instructor/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/instructor/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/instructor/discussions" },
-    { icon: <FaFolder />, label: "Resources", path: "/instructor/resources" },
-    { icon: <FaStickyNote />, label: "Notes", path: "/instructor/notes" },
     { icon: <FaChartBar />, label: "Reports", path: "/instructor/reports" },
   ];
 

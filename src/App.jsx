@@ -65,13 +65,21 @@ import InstructorChangePassword from "./Instructor/pages/ChangePassword";
 import InstructorAssignments from "./Instructor/pages/Assignments";
 import InstructorProfile from "./Instructor/pages/InstructorProfile";
 import StudentAllCourses from "./students/AllCourses";
-import CourseViewDetails from "./Instructor/pages/CourseViewDetails";
 import AdminCourseViewDetails from "./Admin/pages/CourseViewDetails";
 import AdminLessonView from "./Admin/pages/LessonView";
 import LessonView from "./Instructor/pages/LessonView";
 import Resume from "./students/Resume";
 import JobNotifications from "./students/JobNotification";
 import AssignmentDetail from "./students/AssignmentDetail";
+import Quiz from "./Instructor/pages/Quizzes";
+import QuizResults from "./Instructor/pages/QuizResults";
+import CreateCourse from "./Instructor/pages/CreateCourse";
+import CourseBuilder from "./Instructor/pages/CourseBuilder";
+import LessonBuilder from "./Instructor/pages/LessonBuilder";
+import LessonSettings from "./Instructor/pages/LessonSettings";
+import SectionSettings from "./Instructor/pages/SectionSettings";
+import Plans from "./Instructor/pages/Plans";
+import BrandingPage from "./Instructor/pages/BrandingPage";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -198,7 +206,6 @@ function App() {
                 <Route path="/instructor" element={<InstructorLayoutRoutes />}>
                   <Route path="dashboard" element={<InstructorDashboard />} />
                   <Route path="courses" element={<MyCourses />} />
-                  <Route path="course-preview/:id" element={<CourseViewDetails />} />
                   <Route path="students" element={<InstructorStudents />} />
                   <Route path="schedule" element={<InstructorSchedules />} />
                   <Route path="recordings" element={<InstructorRecordings />} />
@@ -209,8 +216,17 @@ function App() {
                   <Route path="change-password" element={<InstructorChangePassword />} />
                   <Route path="assignments" element={<InstructorAssignments />} />
                   <Route path="profile" element={<InstructorProfile />} />
+                  <Route path="quiz" element={<Quiz />} />
+                  <Route path="/instructor/create-course" element={<CreateCourse />} />
+                  <Route path="/instructor/course-builder/:courseSlug" element={<CourseBuilder />} />
+                  <Route path="/instructor/lesson-builder" element={<LessonBuilder />} />
+                  <Route path="/instructor/lesson-settings" element={<LessonSettings />} />
+                  <Route path="/instructor/section-settings/:courseSlug/:page?" element={<SectionSettings />} />
+                  <Route path="/instructor/plans" element={<Plans />} />
+                  <Route path="/instructor/branding" element={<BrandingPage />} />
                 </Route>
                 <Route path="/instructor/course/:courseId/lesson/:lessonId" element={<LessonView />} />
+                <Route path="/instructor/quiz/:quizId/results" element={<QuizResults />} />
               </Route>
             </Routes>
           </InstructorAuthProvider>
