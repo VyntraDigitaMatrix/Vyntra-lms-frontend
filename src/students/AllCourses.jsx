@@ -165,7 +165,7 @@ const AllCourses = () => {
                     </span>
                   </div>
                   <Link
-                    to={`/student/course-preview/${course.id}`}
+                    to={`/student/course-preview/${course.slug || course.courseId || course.id}`}
                     className="block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium text-white bg-[#043573] px-3 py-1.5 sm:py-2 rounded-lg hover:bg-blue-900 transition"
                   >
                     View Course

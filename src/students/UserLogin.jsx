@@ -196,7 +196,14 @@ const UserLogin = () => {
     if (regPassword !== regConfirm) { setError("Passwords do not match"); return; }
     if (!agreeTerms) { setError("Please agree to the Terms of Service"); return; }
     setError(""); setLoading(true);
-    const result = await register({ fullName: regName, email: regEmail, phone: regPhone, password: regPassword });
+    const username = regEmail.split('@')[0];
+    const result = await register({ 
+      fullName: regName, 
+      email: regEmail, 
+      username: username,
+      password: regPassword, 
+      mobileNumber: regPhone 
+    });
     setLoading(false);
     if (result.success) {
       alert("Registration successful! Please sign in.");

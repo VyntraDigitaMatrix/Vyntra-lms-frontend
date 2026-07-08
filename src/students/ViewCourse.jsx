@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { studentCourseApi, studentPaymentApi } from "./auth/api";
+import { studentLearningApi, studentPaymentApi } from "./auth/api";
 import { useAuth } from "./auth/AuthContext";
 import S1 from "../assets/S1.jpg";
 import S2 from "../assets/S2.jpg";
@@ -62,18 +62,10 @@ const modulesData = [
     { title: "Module 6: Google Ads & Analytics", lessons: 3, color: "#D97706", icon: <FaChartLine className="text-amber-600 text-base" /> },
 ];
 
-const reviewsData = [
-    { name: "Rajesh Kumar", initial: "R", rating: 5, time: "2 weeks ago", text: "Excellent course! Very detailed and practical examples." },
-    { name: "Priya Sharma", initial: "P", rating: 4, time: "1 month ago", text: "Great content, very helpful for my career." },
-    { name: "Amit Patel", initial: "A", rating: 5, time: "2 months ago", text: "Best course I've taken! Highly recommend." },
-];
 
-const faqsData = [
-    { q: "Is this course for beginners?", a: "Yes, this course is designed for absolute beginners with no prior experience." },
-    { q: "Will I get a certificate?", a: "Yes, you will receive a certificate of completion after finishing the course." },
-    { q: "How long do I have access?", a: "You get lifetime access to all course materials." },
-    { q: "Is there any support?", a: "Yes, you can ask questions in the discussion forum and get instructor support." },
-];
+
+
+
 
 const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLesson, isEnrolled, courseId }) => {
     const [open, setOpen] = useState(false);
@@ -84,10 +76,10 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
     const handleLessonClick = (lesson) => {
         const canAccess = isEnrolled || lesson.previewAllowed;
         if (!canAccess) return;
-        
+
         const lessonKey = `${mod.id}-${lesson.id}`;
         setActiveLesson(lessonKey);
-        
+
         if (isEnrolled) {
             navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
         } else {
@@ -130,11 +122,9 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
                                 <div
                                     key={lesson.id || li}
                                     onClick={() => handleLessonClick(lesson)}
-                                    className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                                        canAccess ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
-                                    } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : canAccess ? "hover:bg-blue-50" : ""} ${
-                                        li !== lessons.length - 1 ? "border-b border-gray-50" : ""
-                                    }`}
+                                    className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${canAccess ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
+                                        } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : canAccess ? "hover:bg-blue-50" : ""} ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""
+                                        }`}
                                 >
                                     <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
                                         {canAccess ? (
@@ -187,13 +177,13 @@ const CurriculumSection = ({ modules, isEnrolled, courseId, navigate }) => {
             )}
             <div className="space-y-2">
                 {modules.map((mod, i) => (
-                    <ModuleAccordionItem 
-                        key={mod.id || i} 
-                        mod={mod} 
-                        index={i} 
-                        navigate={navigate} 
-                        activeLesson={activeLesson} 
-                        setActiveLesson={setActiveLesson} 
+                    <ModuleAccordionItem
+                        key={mod.id || i}
+                        mod={mod}
+                        index={i}
+                        navigate={navigate}
+                        activeLesson={activeLesson}
+                        setActiveLesson={setActiveLesson}
                         isEnrolled={isEnrolled}
                         courseId={courseId}
                     />
@@ -218,17 +208,47 @@ const loadRazorpayScript = () => {
     });
 };
 
+/* ── FAQ ACCORDION ── */
+const FaqAccordionItem = ({ faq }) => {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className={`border rounded-xl overflow-hidden transition-all duration-200 bg-white ${open ? "border-blue-200 shadow-sm" : "border-gray-100"}`}>
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between gap-3 p-3.5 hover:bg-gray-50 transition text-left"
+            >
+                <span className="text-xs sm:text-sm font-semibold text-gray-800 flex-1">{faq.question}</span>
+                <span className="text-gray-400 flex-shrink-0">
+                    {open ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}
+                </span>
+            </button>
+            {open && (
+                <div className="px-4 pb-4 pt-0 border-t border-gray-100">
+                    <p className="text-xs text-gray-600 leading-relaxed pt-3">{faq.answer}</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const ViewCourse = () => {
-    const { courseId } = useParams();
+    const { courseSlug } = useParams();
     const [courseData, setCourseData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [reviews, setReviews] = useState(reviewsData);
-    const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [reviewsError, setReviewsError] = useState(false);
+    const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState("");
     const navigate = useNavigate();
 
     const { student, isAuthenticated } = useAuth();
     const [paymentLoading, setPaymentLoading] = useState(false);
+
+    const courseId = courseData?.courseId;
 
     const handlePayment = async () => {
         if (!isAuthenticated) {
@@ -296,7 +316,7 @@ const ViewCourse = () => {
             };
 
             const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response){
+            rzp.on('payment.failed', function (response) {
                 alert("Payment failed: " + response.error.description);
                 setPaymentLoading(false);
             });
@@ -315,7 +335,7 @@ const ViewCourse = () => {
         setLoading(true);
         setError("");
         try {
-            const res = await studentCourseApi.getCourseStructure(courseId);
+            const res = await studentLearningApi.getCourseBySlug(courseSlug);
             if (res.data && res.data.data) {
                 setCourseData(res.data.data);
             }
@@ -327,11 +347,39 @@ const ViewCourse = () => {
         }
     };
 
+    const fetchReviews = async () => {
+        if (!courseSlug) return;
+        setReviewsLoading(true);
+        setReviewsError(false);
+        try {
+            const res = await studentLearningApi.getCourseReviews(courseSlug);
+            if (res.data && res.data.data) {
+                const raw = res.data.data;
+                const list = Array.isArray(raw) ? raw : (raw.content || []);
+                setReviews(list);
+            }
+        } catch (err) {
+            // API may not be available yet — fail silently
+            setReviewsError(true);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        if (courseId) {
+        if (courseSlug) {
             fetchCourseStructure();
         }
-    }, [courseId]);
+    }, [courseSlug]);
+
+    // Fetch reviews lazily when the reviews tab is opened
+    const [reviewsFetched, setReviewsFetched] = useState(false);
+    useEffect(() => {
+        if (activeTab === "reviews" && !reviewsFetched && courseSlug) {
+            setReviewsFetched(true);
+            fetchReviews();
+        }
+    }, [activeTab]);
 
     const course = courseData ? {
         ...courseData,
@@ -342,7 +390,8 @@ const ViewCourse = () => {
         desc: courseData.description || "",
         price: courseData.free ? "Free" : (courseData.discountPrice ? `₹${courseData.discountPrice}` : (courseData.actualPrice ? `₹${courseData.actualPrice}` : "")),
         oldPrice: courseData.free ? "" : (courseData.actualPrice && courseData.discountPrice ? `₹${courseData.actualPrice}` : ""),
-        offer: courseData.free ? "" : (courseData.discountPrice && courseData.actualPrice ? `${Math.round(((courseData.actualPrice - courseData.discountPrice) / courseData.actualPrice) * 100)}% OFF` : "")
+        offer: courseData.free ? "" : (courseData.discountPrice && courseData.actualPrice ? `${Math.round(((courseData.actualPrice - courseData.discountPrice) / courseData.actualPrice) * 100)}% OFF` : ""),
+        isEnrolled: courseData.enrolled ?? courseData.isEnrolled ?? false,
     } : {
         title: "Loading Course...",
         image: S1,
@@ -368,16 +417,25 @@ const ViewCourse = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const handleReviewSubmit = () => {
-        if (!newReview.name || !newReview.text) return;
-        setReviews([{
-            name: newReview.name,
-            initial: newReview.name.charAt(0).toUpperCase(),
-            rating: newReview.rating,
-            time: "Just now",
-            text: newReview.text,
-        }, ...reviews]);
-        setNewReview({ name: "", rating: 5, text: "" });
+    const handleReviewSubmit = async () => {
+        if (!newReview.comment.trim()) return;
+        setSubmitLoading(true);
+        setSubmitError("");
+        setSubmitSuccess("");
+        try {
+            await studentLearningApi.submitCourseReview(courseSlug, {
+                rating: newReview.rating,
+                comment: newReview.comment,
+            });
+            setSubmitSuccess("Review submitted successfully!");
+            setNewReview({ rating: 5, comment: "" });
+            fetchReviews();
+        } catch (err) {
+            console.error(err);
+            setSubmitError(err.response?.data?.message || "Failed to submit review. Please try again.");
+        } finally {
+            setSubmitLoading(false);
+        }
     };
 
     const pad = (n) => String(n).padStart(2, "0");
@@ -426,17 +484,17 @@ const ViewCourse = () => {
                 </div>
 
                 <div className="space-y-2">
-                    {courseData?.isEnrolled ? (
-                        <button 
+                    {course?.isEnrolled ? (
+                        <button
                             type="button"
-                            onClick={() => navigate(`/student/continue-learning/${courseId}`)}
+                            onClick={() => navigate(`/student/continue-learning/${courseData?.courseId || courseSlug}`)}
                             className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
                         >
                             Continue Learning
                         </button>
                     ) : (
                         <>
-                            <button 
+                            <button
                                 type="button"
                                 onClick={handlePayment}
                                 disabled={paymentLoading}
@@ -451,7 +509,7 @@ const ViewCourse = () => {
                                 )}
                                 {paymentLoading ? "Processing..." : "Pay Now"}
                             </button>
-                            <button 
+                            <button
                                 type="button"
                                 className="w-full h-11 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2 border-none cursor-pointer bg-white"
                             >
@@ -577,7 +635,7 @@ const ViewCourse = () => {
                                         <span className="inline-block text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{course.badge}</span>
                                     )}
                                     <h1 className="text-base sm:text-lg md:text-xl font-extrabold text-gray-900 leading-snug">{course.title}</h1>
-                                    <p className="text-xs text-gray-500 line-clamp-2 md:line-clamp-none">{course.desc}</p>
+                                    <p className="text-xs text-gray-500 line-clamp-2 md:line-clamp-none">{course.shortDescription}</p>
                                 </div>
 
                                 <div className="space-y-2.5 pt-1">
@@ -630,29 +688,18 @@ const ViewCourse = () => {
                                 <div className="space-y-5">
                                     <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                                         <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2.5">What you'll learn</h3>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {[
-                                                "Understand Digital Marketing Basics",
-                                                "Run Google Ads Campaigns",
-                                                "Learn SEO and Keyword Research",
-                                                "Track Performance using Analytics",
-                                                "Create Social Media Marketing Strategy",
-                                                "Build a Career in Digital Marketing",
-                                            ].map((item, i) => (
-                                                <div key={i} className="flex items-start gap-2 text-xs text-gray-600">
-                                                    <FaCheckCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={12} />
-                                                    <span>{item}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        <div
+                                            className="course-description text-sm text-gray-600 leading-relaxed"
+                                            dangerouslySetInnerHTML={{ __html: course.description || "" }}
+                                        />
                                     </div>
                                     <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                                         <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Course Syllabus</h3>
-                                        <CurriculumSection 
-                                            modules={courseData?.modules || []} 
-                                            isEnrolled={courseData?.isEnrolled || false} 
-                                            courseId={courseId} 
-                                            navigate={navigate} 
+                                        <CurriculumSection
+                                            modules={courseData?.modules || []}
+                                            isEnrolled={courseData?.enrolled || false}
+                                            courseId={courseData?.courseId}
+                                            navigate={navigate}
                                         />
                                     </div>
                                 </div>
@@ -661,34 +708,56 @@ const ViewCourse = () => {
                             {/* CURRICULUM PANEL */}
                             {activeTab === "curriculum" && (
                                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                                    <CurriculumSection 
-                                        modules={courseData?.modules || []} 
-                                        isEnrolled={courseData?.isEnrolled || false} 
-                                        courseId={courseId} 
-                                        navigate={navigate} 
+                                    <CurriculumSection
+                                        modules={courseData?.modules || []}
+                                        isEnrolled={courseData?.enrolled || false}
+                                        courseId={courseData?.courseId}
+                                        navigate={navigate}
                                     />
                                 </div>
                             )}
 
                             {/* INSTRUCTOR PANEL */}
                             {activeTab === "instructor" && (
-                                <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                                    <div className="flex flex-col sm:flex-row gap-3.5 items-center sm:items-start text-center sm:text-left">
-                                        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
-                                            R
-                                        </div>
-                                        <div className="space-y-1">
-                                            <h4 className="font-bold text-gray-900 text-sm sm:text-base">Rahul Mehta</h4>
-                                            <p className="text-xs text-blue-600">Digital Marketing Expert &amp; Educator</p>
-                                            <div className="flex items-center justify-center sm:justify-start gap-3 text-[11px] text-gray-400">
-                                                <span className="flex items-center gap-0.5"><FaStar className="text-yellow-400" size={10} /> 4.8 Rating</span>
-                                                <span className="flex items-center gap-0.5"><FaUser size={9} /> 12.5k Students</span>
+                                <div className="space-y-3">
+                                    {(courseData?.instructors || []).length === 0 ? (
+                                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center text-xs text-gray-400">No instructor information available.</div>
+                                    ) : (
+                                        (courseData.instructors).map((inst) => (
+                                            <div key={inst.instructorId} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                                <div className="flex flex-col sm:flex-row gap-3.5 items-center sm:items-start text-center sm:text-left">
+                                                    {inst.profileImage ? (
+                                                        <img src={inst.profileImage} alt={inst.fullName} className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-blue-100" />
+                                                    ) : (
+                                                        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                                                            {inst.fullName?.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <div className="space-y-1.5 flex-1">
+                                                        <h4 className="font-bold text-gray-900 text-sm sm:text-base">{inst.fullName}</h4>
+                                                        {inst.headline && <p className="text-xs text-blue-600 font-medium">{inst.headline}</p>}
+                                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-gray-400">
+                                                            {inst.averageRating > 0 && (
+                                                                <span className="flex items-center gap-0.5"><FaStar className="text-yellow-400" size={10} /> {inst.averageRating.toFixed(1)} Rating</span>
+                                                            )}
+                                                            {inst.totalStudents > 0 && (
+                                                                <span className="flex items-center gap-0.5"><FaUser size={9} /> {inst.totalStudents.toLocaleString()} Students</span>
+                                                            )}
+                                                            {inst.totalCourses > 0 && (
+                                                                <span className="flex items-center gap-0.5"><FaBook size={9} /> {inst.totalCourses} Courses</span>
+                                                            )}
+                                                            {inst.yearsOfExperience > 0 && (
+                                                                <span className="flex items-center gap-0.5"><FaClock size={9} /> {inst.yearsOfExperience}+ yrs exp</span>
+                                                            )}
+                                                        </div>
+                                                        {inst.shortBio && (
+                                                            <p className="text-xs text-gray-600 leading-relaxed pt-1">{inst.shortBio}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-gray-600 leading-relaxed pt-1">
-                                                10+ years of digital ecosystem experience driving value channels. Specializes in performance matrices, SEO schemas, and enterprise ad operations across continuous cohorts.
-                                            </p>
-                                        </div>
-                                    </div>
+                                        ))
+                                    )}
                                 </div>
                             )}
 
@@ -699,68 +768,107 @@ const ViewCourse = () => {
                                         <div className="text-center sm:border-r border-gray-100 sm:pr-6 flex-shrink-0">
                                             <div className="text-4xl font-black text-gray-900">{course.rating}</div>
                                             <div className="flex justify-center my-1 gap-0.5">
-                                                {[1, 2, 3, 4, 5].map(s => <FaStar key={s} className="w-2.5 h-2.5 text-yellow-400" />)}
+                                                {[1, 2, 3, 4, 5].map(s => (
+                                                    <FaStar key={s} className={`w-2.5 h-2.5 ${s <= Math.round(courseData?.averageRating || 0) ? "text-yellow-400" : "text-gray-200"}`} />
+                                                ))}
                                             </div>
-                                            <div className="text-[10px] text-gray-400 font-medium">Course Rating</div>
+                                            <div className="text-[10px] text-gray-400 font-medium">{courseData?.totalRatings || 0} Ratings</div>
                                         </div>
                                         <div className="flex-1 w-full space-y-1.5">
                                             {[5, 4, 3, 2, 1].map(s => (
                                                 <div key={s} className="flex items-center gap-2">
-                                                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: s === 5 ? "72%" : s === 4 ? "18%" : s === 3 ? "7%" : "3%" }} />
-                                                    </div>
-                                                    <div className="flex gap-0.5 w-12 justify-end">
+                                                    <div className="flex gap-0.5 flex-shrink-0">
                                                         {Array(s).fill(0).map((_, i) => <FaStar key={i} className="w-2 h-2 text-yellow-400" />)}
                                                     </div>
+                                                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: s === 5 ? `${Math.min(100, Math.round((courseData?.averageRating || 0) >= 4.5 ? 70 : (courseData?.averageRating || 0) >= 3.5 ? 50 : 20))}%` : s === 4 ? "18%" : s === 3 ? "7%" : "3%" }} />
+                                                    </div>
+                                                    <span className="text-[10px] text-gray-400 w-6 text-right">{s}★</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
-                                        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Leave Feedback</h3>
-                                        <input
-                                            type="text" placeholder="Your Name" value={newReview.name}
-                                            onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
-                                        />
-                                        <select
-                                            value={newReview.rating}
-                                            onChange={(e) => setNewReview({ ...newReview, rating: Number(e.target.value) })}
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
-                                        />
-                                        <textarea
-                                            rows="3" placeholder="Share your experience..." value={newReview.text}
-                                            onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
-                                        />
-                                        <button onClick={handleReviewSubmit} className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition">
-                                            Submit Review
-                                        </button>
-                                    </div>
-
-                                    <div className="bg-white border border-gray-100 rounded-2xl px-4 divide-y divide-gray-50 shadow-sm">
-                                        {reviews.map((r, i) => (
-                                            <div key={i} className="py-3.5">
-                                                <div className="flex items-center gap-2.5 mb-1.5">
-                                                    <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 font-bold text-xs flex items-center justify-center flex-shrink-0">
-                                                        {r.initial}
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="font-bold text-xs text-gray-900 truncate">{r.name}</div>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <div className="flex gap-0.5">
-                                                                {Array(5).fill(0).map((_, j) => (
-                                                                    <FaStar key={j} className={`w-2 h-2 ${j < r.rating ? "text-yellow-400" : "text-gray-100"}`} />
-                                                                ))}
-                                                            </div>
-                                                            <span className="text-[10px] text-gray-400">{r.time}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p className="text-xs text-gray-600 pl-9.5">{r.text}</p>
+                                    {!reviewsError && (
+                                        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
+                                            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Leave Feedback</h3>
+                                            <div className="flex gap-2 items-center">
+                                                {[1,2,3,4,5].map(star => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setNewReview(r => ({ ...r, rating: star }))}
+                                                        className="focus:outline-none transition-transform hover:scale-110"
+                                                    >
+                                                        <FaStar className={`w-5 h-5 ${star <= newReview.rating ? "text-yellow-400" : "text-gray-200"}`} />
+                                                    </button>
+                                                ))}
+                                                <span className="text-xs text-gray-500 ml-1">{newReview.rating}/5</span>
                                             </div>
-                                        ))}
+                                            <textarea
+                                                rows="3" placeholder="Share your experience..."
+                                                value={newReview.comment}
+                                                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                            />
+                                            {submitError && <p className="text-[11px] text-red-500 font-medium">{submitError}</p>}
+                                            {submitSuccess && <p className="text-[11px] text-green-600 font-medium">{submitSuccess}</p>}
+                                            <button
+                                                onClick={handleReviewSubmit}
+                                                disabled={submitLoading || !newReview.comment.trim()}
+                                                className={`bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition ${submitLoading || !newReview.comment.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            >
+                                                {submitLoading ? "Submitting..." : "Submit Review"}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <div className="bg-white border border-gray-100 rounded-2xl px-4 shadow-sm">
+                                        {reviewsLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <div className="w-6 h-6 border-2 border-t-blue-500 border-gray-200 rounded-full animate-spin" />
+                                            </div>
+                                        ) : reviewsError ? (
+                                            <p className="text-center text-xs text-gray-400 py-8">Reviews are not available at the moment.</p>
+                                        ) : reviews.length === 0 ? (
+                                            <p className="text-center text-xs text-gray-400 py-8">No reviews yet. Be the first to review!</p>
+                                        ) : (
+                                            <div className="divide-y divide-gray-50">
+                                                {reviews.map((r, i) => {
+                                                    const name = r.studentName || r.student?.fullName || r.name || "Student";
+                                                    const rating = r.rating ?? 0;
+                                                    const comment = r.comment || r.review || r.text || "";
+                                                    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : (r.time || "");
+                                                    const avatar = r.student?.profileImage || r.profileImage || null;
+                                                    const initial = name.charAt(0).toUpperCase();
+                                                    return (
+                                                        <div key={r.id || i} className="py-3.5">
+                                                            <div className="flex items-center gap-2.5 mb-1.5">
+                                                                {avatar ? (
+                                                                    <img src={avatar} alt={name} className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                                                ) : (
+                                                                    <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                                                        {initial}
+                                                                    </div>
+                                                                )}
+                                                                <div className="min-w-0">
+                                                                    <div className="font-bold text-xs text-gray-900 truncate">{name}</div>
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <div className="flex gap-0.5">
+                                                                            {Array(5).fill(0).map((_, j) => (
+                                                                                <FaStar key={j} className={`w-2 h-2 ${j < rating ? "text-yellow-400" : "text-gray-100"}`} />
+                                                                            ))}
+                                                                        </div>
+                                                                        <span className="text-[10px] text-gray-400">{date}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-xs text-gray-600 pl-9">{comment}</p>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -768,12 +876,15 @@ const ViewCourse = () => {
                             {/* FAQS PANEL */}
                             {activeTab === "faqs" && (
                                 <div className="space-y-2">
-                                    {faqsData.map((faq, i) => (
-                                        <div key={i} className="border border-gray-100 rounded-xl p-3 bg-white shadow-sm">
-                                            <div className="font-bold text-xs text-gray-900 mb-1">{faq.q}</div>
-                                            <p className="text-xs text-gray-600 leading-relaxed">{faq.a}</p>
-                                        </div>
-                                    ))}
+                                    {(courseData?.faqs || []).length === 0 ? (
+                                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center text-xs text-gray-400">No FAQs available for this course.</div>
+                                    ) : (
+                                        [...(courseData.faqs)]
+                                            .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+                                            .map((faq) => (
+                                                <FaqAccordionItem key={faq.id} faq={faq} />
+                                            ))
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -789,7 +900,7 @@ const ViewCourse = () => {
             {/* ── MOBILE OVERLAY STICKY CONVERSION BAR ── */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] px-4 py-3 flex items-center justify-between z-50 transform-gpu">
                 {courseData?.isEnrolled ? (
-                    <button 
+                    <button
                         type="button"
                         onClick={() => navigate(`/student/continue-learning/${courseId}`)}
                         className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
@@ -807,7 +918,7 @@ const ViewCourse = () => {
                                 {course.offer} SAVINGS
                             </span>
                         </div>
-                        <button 
+                        <button
                             type="button"
                             onClick={handlePayment}
                             disabled={paymentLoading}

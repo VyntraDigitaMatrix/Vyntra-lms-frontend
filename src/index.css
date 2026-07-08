@@ -6,3 +6,45 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Styles for HTML content rendered from API description */
+.course-description p {
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+.course-description h1,
+.course-description h2,
+.course-description h3,
+.course-description h4 {
+  font-weight: 700;
+  color: #111827;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.course-description h1 { font-size: 1.125rem; }
+.course-description h2 { font-size: 1rem; }
+.course-description h3 { font-size: 0.9rem; }
+.course-description ul,
+.course-description ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.course-description ul { list-style-type: disc; }
+.course-description ol { list-style-type: decimal; }
+.course-description li {
+  margin-bottom: 0.3rem;
+  line-height: 1.6;
+}
+.course-description a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.course-description strong { font-weight: 600; }
+.course-description em { font-style: italic; }
+.course-description blockquote {
+  border-left: 3px solid #e5e7eb;
+  padding-left: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  margin: 0.75rem 0;
+}

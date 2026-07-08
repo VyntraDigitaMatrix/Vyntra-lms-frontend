@@ -123,6 +123,10 @@ export const studentLearningApi = {
   getCourses: (page = 0, size = 10, sort = "id,desc") =>
     api.get(`/api/student/learning/courses?page=${page}&size=${size}&sort=${sort}`),
 
+  // GET /api/student/learning/courses/{courseSlug}
+  getCourseBySlug: (courseSlug) =>
+    api.get(`/api/student/learning/courses/${courseSlug}`),
+
   // GET /api/student/learning/courses/{courseSlug}/modules
   getCourseModules: (courseSlug) =>
     api.get(`/api/student/learning/courses/${courseSlug}/modules`),
@@ -142,6 +146,14 @@ export const studentLearningApi = {
   // POST /api/student/learning/lessons/{lessonSlug}/complete
   completeLesson: (lessonSlug) =>
     api.post(`/api/student/learning/lessons/${lessonSlug}/complete`),
+
+  // GET /api/student/learning/courses/{courseSlug}/reviews
+  getCourseReviews: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/student/learning/courses/${courseSlug}/reviews?page=${page}&size=${size}`),
+
+  // POST /api/student/learning/courses/{courseSlug}/reviews
+  submitCourseReview: (courseSlug, data) =>
+    api.post(`/api/student/learning/courses/${courseSlug}/reviews`, data),
 };
 
 export const studentNotesApi = {

@@ -145,7 +145,7 @@ function App() {
                 <Route path="/student" element={<StudentLayoutRoutes />}>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="/student/all-courses" element={<StudentAllCourses />} />
-                  <Route path="/student/course-preview/:courseId" element={<ViewCourse />} />
+                  <Route path="/student/course-preview/:courseSlug" element={<ViewCourse />} />
                   <Route path="assignments" element={<Assignments />} />
                   <Route path="courses" element={<Courses />} />
                   <Route path="classes" element={<Classes />} />
