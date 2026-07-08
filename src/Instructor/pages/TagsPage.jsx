@@ -1,27 +1,47 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
+import { useParams } from "react-router-dom";
 import { MdAdd } from "react-icons/md";
-
+import { instructorCourseApi } from "../auth/api";
 
 const TagsPage = ({ data, setData }) => {
+    const { courseSlug } = useParams();
     const [input, setInput] = useState("");
+
     const addTag = () => {
-    const tag = input.trim();
+        const tag = input.trim();
 
-    if (!tag) return;
+        if (!tag) return;
 
-    // Prevent duplicates
-    if ((data.tags || []).includes(tag)) {
+        // Prevent duplicates
+        if ((data.tags || []).includes(tag)) {
+            setInput("");
+            return;
+        }
+
+        setData(prev => ({
+            ...prev,
+            tags: [...(prev.tags || []), tag]
+        }));
+
         setInput("");
-        return;
-    }
+    };
 
-    setData(prev => ({
-        ...prev,
-        tags: [...(prev.tags || []), tag]
-    }));
+    const handleDeleteTag = async (tagToDelete) => {
+        // Optimistic UI update: filter out locally first
+        setData(prev => ({
+            ...prev,
+            tags: (prev.tags || []).filter(t => t !== tagToDelete)
+        }));
 
-    setInput("");
-};
+        if (courseSlug) {
+            try {
+                await instructorCourseApi.deleteTag(courseSlug, tagToDelete);
+            } catch (err) {
+                console.warn("Failed to delete tag from server (it might not be saved yet):", err);
+            }
+        }
+    };
+
     return (
         <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Tags</h2>
@@ -43,7 +63,7 @@ const TagsPage = ({ data, setData }) => {
                 {(data.tags || []).map((tag, i) => (
                     <span key={i} className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full text-sm text-violet-700 font-medium">
                         {tag}
-                        <button onClick={() => setData(d => ({ ...d, tags: d.tags.filter((_, j) => j !== i) }))}
+                        <button onClick={() => handleDeleteTag(tag)}
                             className="text-violet-400 hover:text-violet-700 text-base leading-none">&times;</button>
                     </span>
                 ))}
@@ -53,4 +73,4 @@ const TagsPage = ({ data, setData }) => {
     );
 }
 
-export default TagsPage
+export default TagsPage;

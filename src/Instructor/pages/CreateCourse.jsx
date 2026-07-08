@@ -302,15 +302,13 @@ const CreateCourse = () => {
     const [plans, setPlans] = useState([]);
     const [selectedPlan, setSelectedPlan] = useState("");
 
-    const handleFreeToggle = (e) => {
-        setIsFree(e.target.checked);
-        if (e.target.checked) setPrice("0");
-        else setPrice("");
-    };
-
     const handleSubmit = async () => {
         if (!title.trim()) {
             setError("Title is required.");
+            return;
+        }
+        if (!selectedPlan) {
+            setError("Pricing Plan is required.");
             return;
         }
 
@@ -318,31 +316,37 @@ const CreateCourse = () => {
         setError("");
 
         try {
-    const body = {
-        title: title.trim(),
-        free: isFree,
-        pricingPlanId: selectedPlan || DEFAULT_PRICING_PLAN_ID,
-        encrypted: encryption === "ENCRYPTION",
-    };
+            const body = {
+                title: title.trim(),
+                pricingPlanId: selectedPlan,
+                encrypted: encryption === "ENCRYPTION",
+                free: isFree,
+            };
 
-    const res = await instructorCourseApi.createCourse(body);
-    const course = res.data.data;
+            const res = await instructorCourseApi.createCourse(body);
+            const course = res.data.data;
 
-    navigate(`/instructor/course-builder/${course.slug}`);
-} catch (err) {
-    console.log("Status:", err.response?.status);
-    console.log("Response:", err.response?.data);
-    setError(err.response?.data?.message || "Failed to create course.");
-} finally {
-    setSubmitting(false);
-}
+            navigate(`/instructor/course-builder/${course.slug}`);
+        } catch (err) {
+            console.log("Status:", err.response?.status);
+            console.log("Response:", err.response?.data);
+            let msg = err.response?.data?.message || "Failed to create course.";
+            if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+                msg += ": " + err.response.data.errors.map(e => `${e.field} ${e.defaultMessage}`).join(", ");
+            } else if (err.response?.data?.details) {
+                msg += ": " + err.response.data.details;
+            }
+            setError(msg);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     useEffect(() => {
         const fetchPlans = async () => {
             try {
                 const res = await instructorPricingApi.getPricingPlans();
-                setPlans(res.data.data || []);
+                setPlans(res.data?.data?.content || res.data?.data || []);
             } catch (err) {
                 console.error("Failed to fetch pricing plans:", err);
                 setPlans([]);
@@ -399,45 +403,83 @@ const CreateCourse = () => {
                     <select
                         value={selectedPlan}
                         onChange={(e) => {
-    setSelectedPlan(e.target.value);
-    const plan = plans.find(p => p.id === e.target.value);
-    if (plan) setPrice(plan.discountPrice || plan.actualPrice);
-}}
+                            setSelectedPlan(e.target.value);
+                            const plan = plans.find(p => p.id === e.target.value);
+                            if (plan && (plan.pricingType || plan.type || "").toUpperCase() === "FREE") {
+                                setIsFree(true);
+                            }
+                        }}
                         className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-violet-400 focus:bg-white transition"
                         disabled={submitting}
                     >
                         <option value="">Select Pricing Plan</option>
                         {plans.map(plan => (
-    <option key={plan.id} value={plan.id}>{plan.planTitle}</option>
-))}
+                            <option key={plan.id} value={plan.id}>{plan.planTitle || plan.title}</option>
+                        ))}
                     </select>
                 </div>
 
-                {/* Price */}
+                {/* Price Display */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1.5">Price</label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm select-none">₹</span>
-                        <input
-                            type="number"
-                            min={0}
-                            value={isFree ? "" : price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            placeholder={isFree ? "Free" : "0"}
-                            disabled={isFree || submitting}
-                            className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-violet-400 focus:bg-white transition placeholder:text-gray-400 disabled:opacity-60 disabled:cursor-not-allowed"
-                        />
-                    </div>
-                    <label className="flex items-center gap-2.5 mt-3 cursor-pointer w-fit">
-                        <input
-                            type="checkbox"
-                            checked={isFree}
-                            onChange={handleFreeToggle}
-                            disabled={submitting}
-                            className="w-4 h-4 rounded border-gray-300 accent-violet-600 cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-700">Make this a free course</span>
-                    </label>
+                    <label className="block text-sm font-semibold text-gray-800 mb-1.5">Price Details</label>
+                    {(() => {
+                        const plan = plans.find(p => p.id === selectedPlan);
+                        if (!plan) {
+                            return (
+                                <div className="p-4 border border-dashed border-gray-200 rounded-xl text-center">
+                                    <p className="text-sm text-gray-500">Select a pricing plan to view details</p>
+                                </div>
+                            );
+                        }
+
+                        const type = (plan.pricingType || plan.type || "").toUpperCase();
+
+                        if (type === "FREE") {
+                            return (
+                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                                    <p className="text-sm font-semibold text-gray-800">Free Plan</p>
+                                    <p className="text-xs text-gray-500 mt-1">Learners can access this course for free.</p>
+                                </div>
+                            );
+                        }
+
+                        if (type === "INSTALLMENT" || type === "INSTALMENT") {
+                            return (
+                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-800">Installment Plan</p>
+                                        <p className="text-xs text-gray-500 mt-1">{plan.installmentMonths || 3} monthly payments</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold text-gray-900">₹{plan.amountPerMonth || 0} <span className="text-xs text-gray-500 font-normal">/ month</span></p>
+                                    </div>
+                                </div>
+                            );
+                        }
+
+                        // ONE_TIME / LIMITED_OFFER
+                        const price = plan.actualPrice ?? plan.price ?? 0;
+                        const discount = plan.discountPrice;
+                        return (
+                            <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-800">{type.includes("LIMITED") ? "Limited Time Offer" : "One-Time Payment"}</p>
+                                    <p className="text-xs text-gray-500 mt-1">Total price for the course</p>
+                                </div>
+                                <div className="text-right">
+                                    {discount ? (
+                                        <>
+                                            <p className="text-sm font-bold text-gray-900">₹{discount}</p>
+                                            <p className="text-xs text-gray-400 line-through">₹{price}</p>
+                                        </>
+                                    ) : (
+                                        <p className="text-sm font-bold text-gray-900">₹{price}</p>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
+
                 </div>
 
                 {/* Content Security */}

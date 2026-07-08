@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import LogoName from "../assets/LOGO BG.jpg.jpeg";
+import LogoPlain from "../assets/Vyntra One Plain BG Image.png";
 import {
   FaHome,
   FaClipboardList,
@@ -67,8 +69,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           className={({ isActive }) =>
             `flex items-center ${collapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
             } rounded-xl cursor-pointer transition text-sm font-medium ${isActive
-              ? "bg-blue-600 text-white"
-              : "text-gray-600 hover:bg-slate-100 hover:text-blue-600"
+              ? "bg-[#043573] text-white"
+              : "text-gray-600 hover:bg-slate-100 hover:text-blue-900"
             }`
           }
         >
@@ -82,7 +84,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         type="button"
         onClick={() => setOpenClasses(!openClasses)}
         className={`flex items-center ${collapsed ? "justify-center py-3 mx-2" : "justify-between px-4 py-3 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-900`}
       >
         <div className={`flex items-center ${collapsed ? "" : "gap-3"}`}>
           <FaUsers className="text-[14px]" />
@@ -103,8 +105,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition ${isActive
-                ? "bg-blue-600 text-white"
-                : "text-gray-500 hover:bg-blue-600 hover:text-white"
+                ? "bg-[#043573] text-white"
+                : "text-gray-500 hover:bg-blue-900 hover:text-white"
               }`
             }
           >
@@ -116,8 +118,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition ${isActive
-                ? "bg-blue-600 text-white"
-                : "text-gray-500 hover:bg-blue-600 hover:text-white"
+                ? "bg-[#043573] text-white"
+                : "text-gray-500 hover:bg-blue-900 hover:text-white"
               }`
             }
           >
@@ -135,8 +137,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           className={({ isActive }) =>
             `flex items-center ${collapsed ? "justify-center py-3 mx-2" : "gap-3 px-4 py-3 mx-2"
             } rounded-xl cursor-pointer transition text-sm font-medium ${isActive
-              ? "bg-blue-600 text-white"
-              : "text-gray-600 hover:bg-slate-100 hover:text-blue-600"
+              ? "bg-[#043573] text-white"
+              : "text-gray-600 hover:bg-slate-100 hover:text-blue-900"
             }`
           }
         >
@@ -150,7 +152,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         type="button"
         onClick={() => setOpenSettings(!openSettings)}
         className={`flex items-center ${collapsed ? "justify-center py-3 mx-2" : "justify-between px-4 py-3 mx-2"
-          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-600`}
+          } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-slate-100 hover:text-blue-800`}
       >
         <div className={`flex items-center ${collapsed ? "" : "gap-3"}`}>
           <FaCog className="text-[14px]" />
@@ -171,8 +173,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition ${isActive
-                ? "bg-blue-600 text-white"
-                : "text-gray-500 hover:bg-blue-600 hover:text-white"
+                ? "bg-[#043573] text-white"
+                : "text-gray-500 hover:bg-blue-900 hover:text-white"
               }`
             }
           >
@@ -231,20 +233,18 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
       {/* Collapse toggle */}
       <button
         onClick={toggleSidebar}
-        className="absolute top-6 -right-4 w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition z-50"
+        className="absolute top-6 -right-4 w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-800 hover:border-blue-800 transition z-50"
       >
         {isCollapsed ? "›" : "‹"}
       </button>
 
       {/* Logo */}
-      <div
-        className={`flex items-center mt-7 mb-6 ${isCollapsed ? "justify-center" : "justify-center gap-2"
-          }`}
-      >
-        <div className="w-5 h-5 border-4 border-blue-600 rounded-md"></div>
-        {!isCollapsed && (
-          <h1 className="text-[20px] font-bold tracking-[4px] text-[#111]">VYNTRA</h1>
-        )}
+      <div className={`flex items-center justify-center gap-2 border-b border-gray-100 ${isCollapsed ? "py-3" : "py-2"}`}>
+        <img
+          src={LogoPlain}
+          alt="Vyntra Icon"
+          className="h-13 w-auto object-contain -ml-5"
+        />
       </div>
 
       <SidebarContent />

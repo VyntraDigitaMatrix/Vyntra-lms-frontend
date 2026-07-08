@@ -1,9 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaAlignLeft, FaAlignCenter, FaAlignRight, FaUndo, FaRedo } from "react-icons/fa";
 import { MdLink, MdUpload, MdInfo, MdVideocam, MdImage } from "react-icons/md";
 
 function RichEditor({ value, onChange, placeholder }) {
     const editorRef = useRef(null);
+    useEffect(() => {
+        if (editorRef.current && editorRef.current.innerHTML !== value) {
+            editorRef.current.innerHTML = value || "";
+        }
+    }, [value]);
     const exec = (cmd, val = null) => {
         editorRef.current?.focus();
         document.execCommand(cmd, false, val);

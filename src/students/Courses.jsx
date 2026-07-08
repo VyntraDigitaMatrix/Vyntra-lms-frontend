@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { studentEnrolledCourseApi } from "./auth/api";
+import { studentLearningApi } from "./auth/api";
 import {
     FaBookOpen, FaChevronLeft, FaChevronRight,
     FaSearch, FaGraduationCap, FaPlay,
@@ -47,7 +47,7 @@ const Courses = () => {
         setLoading(true);
         setError("");
         try {
-            const res = await studentEnrolledCourseApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
+            const res = await studentLearningApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
             if (res.data?.data) {
                 const pageData = res.data.data;
                 setCourses(pageData.content || []);
@@ -100,7 +100,7 @@ const Courses = () => {
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-5">
                     <div className="flex-1">
                         <p className="text-xs sm:text-sm text-gray-400 mb-1">
-                            <Link to="/student/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
+                            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
                             <span className="mx-2">&gt;</span>
                             <span className="text-gray-600 font-medium">My Courses</span>
                         </p>
@@ -112,11 +112,10 @@ const Courses = () => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
-                                        activeTab === tab
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "text-gray-500 hover:bg-gray-100"
-                                    }`}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${activeTab === tab
+                                        ? "bg-blue-600 text-white shadow-sm"
+                                        : "text-gray-500 hover:bg-gray-100"
+                                        }`}
                                 >
                                     {tab}
                                 </button>
@@ -258,13 +257,12 @@ const Courses = () => {
                                         {/* CTA Button */}
                                         <button
                                             onClick={() => navigate(`/student/continue-learning/${courseId}`)}
-                                            className={`w-full mt-3 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
-                                                course.completed
-                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-                                                    : progress > 0
+                                            className={`w-full mt-3 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${course.completed
+                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                                                : progress > 0
                                                     ? "bg-blue-600 text-white hover:bg-blue-700"
                                                     : "border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white"
-                                            }`}
+                                                }`}
                                         >
                                             {course.completed ? (
                                                 <><FaTrophy className="text-xs" /> Review Course</>
@@ -295,11 +293,10 @@ const Courses = () => {
                             <button
                                 key={i}
                                 onClick={() => setCurrentPage(i)}
-                                className={`w-9 h-9 rounded-xl text-xs font-bold transition ${
-                                    i === currentPage
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                                }`}
+                                className={`w-9 h-9 rounded-xl text-xs font-bold transition ${i === currentPage
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                    }`}
                             >
                                 {i + 1}
                             </button>

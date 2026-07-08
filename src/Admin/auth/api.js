@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://107.20.36.39:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://98.93.255.158:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     // If the error is 401 Unauthorized and we haven't retried yet
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -39,14 +39,14 @@ api.interceptors.response.use(
           const response = await axios.post(`${API_BASE_URL}/api/admin/auth/refresh`, {
             refreshToken: refreshToken,
           });
-          
+
           if (response.data && response.data.data) {
             const { accessToken, refreshToken: newRefreshToken } = response.data.data;
             localStorage.setItem("admin_accessToken", accessToken);
             if (newRefreshToken) {
               localStorage.setItem("admin_refreshToken", newRefreshToken);
             }
-            
+
             // Retry original request with new access token
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return api(originalRequest);

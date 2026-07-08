@@ -15,7 +15,7 @@ import { instructorCourseApi, instructorModuleApi, instructorLessonApi } from ".
 
 const LESSON_TYPES = [
     { id: "VIDEO", label: "Video", Icon: MdVideoLibrary, color: "#22c55e", bg: "#f0fdf4" },
-    { id: "AUDIO", label: "Audio", Icon: MdAudiotrack, color: "#f97316", bg: "#fff7ed" },
+    { id: "TEXT", label: "Text", Icon: MdMenuBook, color: "#f97316", bg: "#fff7ed" },
     { id: "PDF", label: "PDF", Icon: MdPictureAsPdf, color: "#ef4444", bg: "#fef2f2" },
     { id: "ARTICLE", label: "Article", Icon: MdArticle, color: "#3b82f6", bg: "#eff6ff" },
     { id: "QUIZ", label: "Section Quiz", Icon: MdQuiz, color: "#8b5cf6", bg: "#f5f3ff" },
@@ -64,6 +64,34 @@ function RightPanel({ title, subtitle, onClose, children, onSave, saveLabel = "S
     );
 }
 
+function AddSectionPanel({ onClose, onSave, editData }) {
+    const [title, setTitle] = useState(editData?.title || "");
+
+    return (
+        <RightPanel
+            title={editData ? "Edit Section" : "Add Section"}
+            subtitle="Create a course section"
+            onClose={onClose}
+            onSave={() => onSave(title)}
+            saveLabel={editData ? "UPDATE SECTION" : "CREATE SECTION"}
+            saveDisabled={!title.trim()}
+        >
+            <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Section Title
+                </label>
+
+                <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter section title"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+            </div>
+        </RightPanel>
+    );
+}
+
 /* ── Add Lesson Panel ────────────────────────────────── */
 function AddLessonPanel({ onClose, onSave }) {
     const [title, setTitle] = useState("");
@@ -86,9 +114,9 @@ function AddLessonPanel({ onClose, onSave }) {
     const [videoPreview, setVideoPreview] = useState(null);
 
     const canSave = title.trim() && description.trim() && lessonType &&
-        ((thumbnailInputType === "FILE_UPLOAD" && thumbnailFile) ||
+        (thumbnailInputType === "" || (thumbnailInputType === "FILE_UPLOAD" && thumbnailFile) ||
             (thumbnailInputType === "URL" && thumbnailUrl.trim())) &&
-        ((videoInputType === "FILE_UPLOAD" && videoFile) ||
+        (videoInputType === "" || (videoInputType === "FILE_UPLOAD" && videoFile) ||
             (videoInputType === "URL" && videoUrl.trim()));
 
     // Handle thumbnail file selection
@@ -124,7 +152,7 @@ function AddLessonPanel({ onClose, onSave }) {
 
         // Required fields (marked with * in Swagger)
         formData.append("title", title.trim());
-        formData.append("description", description.trim());
+        if (description) formData.append("description", description.trim());
         formData.append("lessonType", lessonType);
         formData.append("sortOrder", sortOrder.toString());
         formData.append("previewAllowed", previewAllowed.toString());
@@ -133,25 +161,24 @@ function AddLessonPanel({ onClose, onSave }) {
         // Optional fields
         formData.append("durationInMinutes", "1");
 
-        // Thumbnail - only one should be sent
-        if (thumbnailInputType === "URL" && thumbnailUrl.trim()) {
-            formData.append("thumbnailInputType", "URL");
-            formData.append("thumbnailUrl", thumbnailUrl.trim());
-            // Send empty value for thumbnailFile when using URL
-            formData.append("thumbnailFile", "");
-        } else if (thumbnailInputType === "FILE_UPLOAD" && thumbnailFile) {
-            formData.append("thumbnailInputType", "FILE_UPLOAD");
-            formData.append("thumbnailFile", thumbnailFile);
-            formData.append("thumbnailUrl", "");
+        // Thumbnail
+        if (thumbnailInputType) {
+            formData.append("thumbnailInputType", thumbnailInputType);
+            if (thumbnailInputType === "URL" && thumbnailUrl) {
+                formData.append("thumbnailUrl", thumbnailUrl);
+            } else if (thumbnailInputType === "FILE_UPLOAD" && thumbnailFile) {
+                formData.append("thumbnailFile", thumbnailFile);
+            }
         }
 
-        if (videoInputType === "URL") {
-            formData.append("videoInputType", "URL");
-            formData.append("videoUrl", videoUrl);
-        } else if (videoInputType === "FILE_UPLOAD" && videoFile) {
-            formData.append("videoInputType", "FILE_UPLOAD");
-            formData.append("videoFile", videoFile);
-            formData.append("videoUrl", "");
+        // Video
+        if (lessonType === "VIDEO" || videoInputType) {
+            if (videoInputType) formData.append("videoInputType", videoInputType);
+            if (videoInputType === "URL" && videoUrl) {
+                formData.append("videoUrl", videoUrl);
+            } else if (videoInputType === "FILE_UPLOAD" && videoFile) {
+                formData.append("videoFile", videoFile);
+            }
         }
 
         // Log FormData entries for debugging
@@ -216,7 +243,19 @@ function AddLessonPanel({ onClose, onSave }) {
                                 <button
                                     key={t.id}
                                     type="button"
-                                    onClick={() => setLessonType(t.id)}
+                                    onClick={() => {
+                                        setLessonType(t.id);
+                                        if (t.id === "AUDIO") {
+                                            setThumbnailInputType("");
+                                            setThumbnailFile(null);
+                                            setThumbnailPreview(null);
+                                            setThumbnailUrl("");
+                                            setVideoInputType("");
+                                            setVideoFile(null);
+                                            setVideoPreview(null);
+                                            setVideoUrl("");
+                                        }
+                                    }}
                                     className="flex flex-col items-center py-3 px-2 rounded-xl border-2 transition cursor-pointer"
                                     style={{
                                         borderColor: selected ? t.color : "#e5e7eb",
@@ -278,37 +317,26 @@ function AddLessonPanel({ onClose, onSave }) {
                         Thumbnail <span className="text-red-500">*</span>
                     </label>
                     <div className="space-y-3">
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setThumbnailInputType("FILE_UPLOAD");
-                                    setThumbnailUrl("");
-                                }}
-                                className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${thumbnailInputType === "FILE_UPLOAD"
-                                        ? "bg-violet-600 text-white"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
-                            >
-                                File Upload
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setThumbnailInputType("URL");
+                        <select
+                            value={thumbnailInputType || ""}
+                            onChange={(e) => {
+                                setThumbnailInputType(e.target.value);
+                                if (e.target.value !== "FILE_UPLOAD") {
                                     setThumbnailFile(null);
                                     setThumbnailPreview(null);
-                                }}
-                                className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${thumbnailInputType === "URL"
-                                        ? "bg-violet-600 text-white"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
-                            >
-                                URL
-                            </button>
-                        </div>
+                                }
+                                if (e.target.value !== "URL") {
+                                    setThumbnailUrl("");
+                                }
+                            }}
+                            className="w-full px-4 py-2 mb-2 border border-gray-200 rounded-lg text-sm text-gray-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition"
+                        >
+                            <option value="">--</option>
+                            <option value="URL">URL</option>
+                            <option value="FILE_UPLOAD">FILE_UPLOAD</option>
+                        </select>
 
-                        {thumbnailInputType === "FILE_UPLOAD" ? (
+                        {thumbnailInputType === "FILE_UPLOAD" && (
                             <div>
                                 <input
                                     type="file"
@@ -327,7 +355,8 @@ function AddLessonPanel({ onClose, onSave }) {
                                     </div>
                                 )}
                             </div>
-                        ) : (
+                        )}
+                        {thumbnailInputType === "URL" && (
                             <div>
                                 <input
                                     type="url"
@@ -359,37 +388,26 @@ function AddLessonPanel({ onClose, onSave }) {
                         Video <span className="text-red-500">*</span>
                     </label>
                     <div className="space-y-3">
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setVideoInputType("FILE_UPLOAD");
-                                    setVideoUrl("");
-                                }}
-                                className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${videoInputType === "FILE_UPLOAD"
-                                        ? "bg-violet-600 text-white"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
-                            >
-                                File Upload
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setVideoInputType("URL");
+                        <select
+                            value={videoInputType || ""}
+                            onChange={(e) => {
+                                setVideoInputType(e.target.value);
+                                if (e.target.value !== "FILE_UPLOAD") {
                                     setVideoFile(null);
                                     setVideoPreview(null);
-                                }}
-                                className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${videoInputType === "URL"
-                                        ? "bg-violet-600 text-white"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
-                            >
-                                URL
-                            </button>
-                        </div>
+                                }
+                                if (e.target.value !== "URL") {
+                                    setVideoUrl("");
+                                }
+                            }}
+                            className="w-full px-4 py-2 mb-2 border border-gray-200 rounded-lg text-sm text-gray-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition"
+                        >
+                            <option value="">--</option>
+                            <option value="URL">URL</option>
+                            <option value="FILE_UPLOAD">FILE_UPLOAD</option>
+                        </select>
 
-                        {videoInputType === "FILE_UPLOAD" ? (
+                        {videoInputType === "FILE_UPLOAD" && (
                             <div>
                                 <input
                                     type="file"
@@ -409,7 +427,8 @@ function AddLessonPanel({ onClose, onSave }) {
                                     </div>
                                 )}
                             </div>
-                        ) : (
+                        )}
+                        {videoInputType === "URL" && (
                             <div>
                                 <input
                                     type="url"
@@ -668,8 +687,9 @@ const CourseBuilderView = ({ onBack }) => {
     const openLesson = (secIdx, lessonIdx) => {
         const lesson = sections[secIdx].lessons[lessonIdx];
         const section = sections[secIdx];
+        const currentLessonSlug = lesson?.slug || lesson?.lessonSlug || "new";
 
-        navigate("/instructor/lesson-builder", {
+        navigate(`/instructor/lesson-builder/${courseSlug}/${currentLessonSlug}`, {
             state: {
                 lesson,
                 section,
@@ -753,8 +773,8 @@ const CourseBuilderView = ({ onBack }) => {
                                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
                                     {course?.title ?? "Untitled Course"}
                                 </h1>
-                                {course?.description && (
-                                    <p className="text-sm text-gray-500 mt-1">{course.description}</p>
+                                {course?.shortDescription && (
+                                    <p className="text-sm text-gray-500 mt-1">{course.shortDescription}</p>
                                 )}
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">

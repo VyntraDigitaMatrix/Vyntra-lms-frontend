@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://107.20.36.39:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://98.93.255.158:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -71,7 +71,7 @@ export const instructorCourseApi = {
     api.put(`/api/instructor/courses/${slug}/basic-info`, data),
 
   updateInstructors: (slug, data) =>
-  api.put(`/api/instructor/courses/${slug}/instructors`, data),
+    api.put(`/api/instructor/courses/${slug}/instructors`, data),
 
   // Pricing
   updatePricing: (slug, data) =>
@@ -80,6 +80,9 @@ export const instructorCourseApi = {
   // Tags
   updateTags: (slug, data) =>
     api.put(`/api/instructor/courses/${slug}/tags`, data),
+
+  deleteTag: (slug, tagId) =>
+    api.delete(`/api/instructor/courses/${slug}/tags/${tagId}`),
 
   // Features
   updateFeatures: (slug, data) =>
@@ -91,28 +94,28 @@ export const instructorCourseApi = {
 
   // Course Content
   updateCourseContent: (slug, formData) =>
-  api.put(
-    `/api/instructor/courses/${slug}/content`,
-    formData
-  ),
+    api.put(
+      `/api/instructor/courses/${slug}/content`,
+      formData
+    ),
 
   updateBasicInfoMultipart: (slug, formData) =>
-  api.put(
-    `/api/instructor/courses/${slug}/basic-info`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  ),
+    api.put(
+      `/api/instructor/courses/${slug}/basic-info`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    ),
 
   getAvailableInstructors: (page = 0, size = 100) =>
-  api.get(`/api/instructor/instructors?page=${page}&size=${size}`),
- 
-// PUT instructors on a course (already in your api.js — keep this)
-updateCourseInstructors: (courseSlug, data) =>
-  api.put(`/api/instructor/courses/${courseSlug}/instructors`, data),
+    api.get(`/api/instructor/instructors?page=${page}&size=${size}`),
+
+  // PUT instructors on a course (already in your api.js — keep this)
+  updateCourseInstructors: (courseSlug, data) =>
+    api.put(`/api/instructor/courses/${courseSlug}/instructors`, data),
 
   publishCourse: (slug) =>
     api.post(`/api/instructor/courses/${slug}/publish`),
@@ -240,24 +243,72 @@ export const instructorQuizAnalyticsApi = {
 };
 
 export const instructorAssignmentApi = {
-  getByModule: (moduleId, page = 0, size = 50) =>
-    api.get(`/api/instructor/assignments/modules/${moduleId}?page=${page}&size=${size}`),
-  createByModule: (moduleId, data) =>
-    api.post(`/api/instructor/assignments/modules/${moduleId}`, data),
-  update: (id, data) =>
-    api.put(`/api/instructor/assignments/${id}`, data),
-  delete: (id) =>
-    api.delete(`/api/instructor/assignments/${id}`),
-  getSubmissions: (id, page = 0, size = 50) =>
-    api.get(`/api/instructor/assignments/${id}/submissions?page=${page}&size=${size}`),
+  // GET /api/instructor/assignments
+  getAllAssignments: (page = 0, size = 10, sort = "id,desc") =>
+    api.get(`/api/instructor/assignments?page=${page}&size=${size}&sort=${sort}`),
+
+  // GET /api/instructor/assignments/lessons/{lessonSlug}
+  getByLesson: (lessonSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments/lessons/${lessonSlug}?page=${page}&size=${size}`),
+
+  // GET /api/instructor/assignments/lessons/{lessonSlug}/type/{assignmentType}
+  getByLessonAndType: (lessonSlug, assignmentType, page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments/lessons/${lessonSlug}/type/${assignmentType}?page=${page}&size=${size}`),
+
+  // POST /api/instructor/assignments/lessons/{lessonSlug}
+  createByLesson: (lessonSlug, data) =>
+    api.post(`/api/instructor/assignments/lessons/${lessonSlug}`, data),
+
+  // PUT /api/instructor/assignments/{assignmentSlug}
+  update: (assignmentSlug, data) =>
+    api.put(`/api/instructor/assignments/${assignmentSlug}`, data),
+
+  // DELETE /api/instructor/assignments/{assignmentSlug}
+  delete: (assignmentSlug) =>
+    api.delete(`/api/instructor/assignments/${assignmentSlug}`),
+
+  // PATCH /api/instructor/assignments/{assignmentSlug}/publish
+  publish: (assignmentSlug) =>
+    api.patch(`/api/instructor/assignments/${assignmentSlug}/publish`),
+
+  // PATCH /api/instructor/assignments/{assignmentSlug}/archive
+  archive: (assignmentSlug) =>
+    api.patch(`/api/instructor/assignments/${assignmentSlug}/archive`),
+
+  // GET /api/instructor/assignments/{assignmentSlug}/submissions
+  getSubmissions: (assignmentSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments/${assignmentSlug}/submissions?page=${page}&size=${size}`),
+
+  // GET /api/instructor/assignments/submissions/{submissionId}
   getSubmission: (submissionId) =>
     api.get(`/api/instructor/assignments/submissions/${submissionId}`),
+
+  // POST /api/instructor/assignments/submissions/{submissionId}/grade
   grade: (submissionId, data) =>
     api.post(`/api/instructor/assignments/submissions/${submissionId}/grade`, data),
 };
 
 export const instructorPricingApi = {
-  getPricingPlans: () => api.get("/api/instructor/pricing-plans"),
+  getPricingPlans: (page = 0, size = 100) =>
+    api.get(`/api/course-pricing-plans?page=${page}&size=${size}`),
+
+  getPricingPlan: (id) =>
+    api.get(`/api/course-pricing-plans/${id}`),
+
+  createPricingPlan: (data) =>
+    api.post("/api/course-pricing-plans", data),
+
+  updatePricingPlan: (id, data) =>
+    api.put(`/api/course-pricing-plans/${id}`, data),
+
+  deletePricingPlan: (id) =>
+    api.delete(`/api/course-pricing-plans/${id}`),
+
+  getDefaultPricingPlan: () =>
+    api.get("/api/course-pricing-plans/default"),
+
+  getActivePricingPlans: () =>
+    api.get("/api/course-pricing-plans/active"),
 };
 
 export const instructorApi = {

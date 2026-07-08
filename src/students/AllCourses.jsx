@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { studentCourseApi } from "./auth/api";
+import { studentLearningApi } from "./auth/api";
 import S1 from "../assets/S1.jpg";
 import S2 from "../assets/S2.jpg";
 import S3 from "../assets/S3.jpg";
@@ -31,7 +31,7 @@ const AllCourses = () => {
       else if (sortBy === "Price Low") sortParam = "price,asc";
       else if (sortBy === "Price High") sortParam = "price,desc";
 
-      const res = await studentCourseApi.getPublishedCourses(currentPage - 1, coursesPerPage, sortParam);
+      const res = await studentLearningApi.getCourses(currentPage - 1, coursesPerPage, sortParam);
       if (res.data && res.data.data) {
         setCourses(res.data.data.content || []);
         setTotalPages(res.data.data.totalPages || 1);
@@ -51,17 +51,17 @@ const AllCourses = () => {
 
   const displayCourses = courses.map(course => ({
     ...course,
-    id: course.id,
-    title: course.title || "Untitled Course",
+    id: course.courseId || course.id,
+    title: course.title,
     badge: course.averageRating >= 4.7 ? "Bestseller" : "",
     image: course.thumbnailUrl || S1,
-    rating: course.averageRating ? course.averageRating.toFixed(1) : "4.5",
-    reviews: course.totalRatings || "0",
-    lessons: `${course.level || "Beginner"} Level`,
-    desc: `Learn ${course.title || "digital marketing"} and boost your career.`,
-    price: course.discountPrice ? `₹${course.discountPrice}` : (course.price ? `₹${course.price}` : "₹999"),
-    oldPrice: course.price ? `₹${course.price}` : "₹2,499",
-    offer: course.discountPrice && course.price ? `${Math.round(((course.price - course.discountPrice) / course.price) * 100)}% OFF` : "60% OFF"
+    rating: course.averageRating ? course.averageRating.toFixed(1) : "0.0",
+    reviews: course.totalRatings || 0,
+    lessons: `${course.level || "BEGINNER"} Level`,
+    desc: course.shortDescription || "",
+    price: course.free ? "Free" : (course.discountPrice ? `₹${course.discountPrice}` : (course.actualPrice ? `₹${course.actualPrice}` : (course.displayPrice ? `₹${course.displayPrice}` : ""))),
+    oldPrice: course.free ? "" : (course.actualPrice && course.discountPrice ? `₹${course.actualPrice}` : ""),
+    offer: course.free ? "" : (course.actualPrice && course.discountPrice ? `${Math.round(((course.actualPrice - course.discountPrice) / course.actualPrice) * 100)}% OFF` : "")
   }));
 
   const paginatedCourses = displayCourses;
@@ -78,7 +78,7 @@ const AllCourses = () => {
         {/* Header Section */}
         <div className="mb-4 sm:mb-5">
           <p className="text-xs sm:text-sm text-gray-400 mb-1">
-            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
+            <Link to="/student/dashboard" className="hover:text-[#043573] transition">
               Dashboard
             </Link>
             <span className="mx-2">&gt;</span>
@@ -115,7 +115,7 @@ const AllCourses = () => {
         {/* Courses Grid - Responsive */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="w-8 h-8 border-4 border-t-blue-600 border-gray-200 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-t-[#043573] border-gray-200 rounded-full animate-spin"></div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-xs font-semibold">
@@ -135,45 +135,45 @@ const AllCourses = () => {
                     className="w-full h-[120px] sm:h-[130px] object-cover"
                   />
                   {course.badge && (
-                    <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-blue-600 text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                    <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#043573] text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                       {course.badge}
                     </span>
                   )}
                 </div>
-              <div className="p-3 sm:p-4">
-                <h2 className="font-bold text-gray-900 text-xs sm:text-sm leading-5 min-h-[36px] sm:min-h-[40px] line-clamp-2">
-                  {course.title}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[11px] sm:text-xs text-gray-500">
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-yellow-400">★</span>
-                    <span>{course.rating}</span>
+                <div className="p-3 sm:p-4">
+                  <h2 className="font-bold text-gray-900 text-xs sm:text-sm leading-5 min-h-[36px] sm:min-h-[40px] line-clamp-2">
+                    {course.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[11px] sm:text-xs text-gray-500">
+                    <div className="flex items-center gap-0.5">
+                      <span className="text-yellow-400">★</span>
+                      <span>{course.rating}</span>
+                    </div>
+                    <span>({course.reviews})</span>
+                    <span>{course.lessons}</span>
                   </div>
-                  <span>({course.reviews})</span>
-                  <span>{course.lessons}</span>
+                  <p className="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 leading-4 sm:leading-5 min-h-[32px] sm:min-h-[40px] line-clamp-2">
+                    {course.desc}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+                    <span className="font-bold text-gray-900 text-xs sm:text-sm">{course.price}</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+                      {course.oldPrice}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-green-600 font-bold">
+                      {course.offer}
+                    </span>
+                  </div>
+                  <Link
+                    to={`/student/course-preview/${course.id}`}
+                    className="block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium text-white bg-[#043573] px-3 py-1.5 sm:py-2 rounded-lg hover:bg-blue-900 transition"
+                  >
+                    View Course
+                  </Link>
                 </div>
-                <p className="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 leading-4 sm:leading-5 min-h-[32px] sm:min-h-[40px] line-clamp-2">
-                  {course.desc}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
-                  <span className="font-bold text-gray-900 text-xs sm:text-sm">{course.price}</span>
-                  <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                    {course.oldPrice}
-                  </span>
-                  <span className="text-[10px] sm:text-xs text-green-600 font-bold">
-                    {course.offer}
-                  </span>
-                </div>
-                <Link
-                  to={`/student/course-preview/${course.id}`}
-                  className="block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium text-white bg-blue-600 px-3 py-1.5 sm:py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  View Course
-                </Link>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
 
         {/* Pagination - Responsive with horizontal scroll on mobile */}
@@ -181,7 +181,7 @@ const AllCourses = () => {
           <button
             onClick={() => changePage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50 transition-colors shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-800/10 transition-colors shrink-0"
           >
             <FaChevronLeft size={12} className="sm:text-sm" />
           </button>
@@ -190,11 +190,10 @@ const AllCourses = () => {
             <button
               key={page}
               onClick={() => changePage(page)}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
-                currentPage === page
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-blue-50"
-              }`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md text-xs sm:text-sm font-semibold transition-colors shrink-0 ${currentPage === page
+                ? "bg-[#043573] text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:bg-"
+                }`}
             >
               {page}
             </button>
@@ -203,7 +202,7 @@ const AllCourses = () => {
           <button
             onClick={() => changePage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-50 transition-colors shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-800/10 transition-colors shrink-0"
           >
             <FaChevronRight size={12} className="sm:text-sm" />
           </button>

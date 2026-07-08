@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "./auth/AuthContext";
+import { useAuth } from "../students/auth/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import {
   MdEmail, MdLock, MdPerson, MdPhone,
@@ -169,6 +169,7 @@ const UserLogin = () => {
 
   const [regName, setRegName] = useState("");
   const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
   const [showRegPwd, setShowRegPwd] = useState(false);
@@ -191,15 +192,15 @@ const UserLogin = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    if (!regName || !regEmail || !regPassword) { setError("Please fill in all required fields"); return; }
+    if (!regName || !regEmail || !regPhone || !regPassword) { setError("Please fill in all required fields"); return; }
     if (regPassword !== regConfirm) { setError("Passwords do not match"); return; }
     if (!agreeTerms) { setError("Please agree to the Terms of Service"); return; }
     setError(""); setLoading(true);
-    const result = await register({ fullName: regName, email: regEmail, password: regPassword });
+    const result = await register({ fullName: regName, email: regEmail, phone: regPhone, password: regPassword });
     setLoading(false);
     if (result.success) {
       alert("Registration successful! Please sign in.");
-      setRegName(""); setRegEmail(""); setRegPassword(""); setRegConfirm(""); setAgreeTerms(false);
+      setRegName(""); setRegEmail(""); setRegPhone(""); setRegPassword(""); setRegConfirm(""); setAgreeTerms(false);
       switchTo(false);
     } else { setError(result.message); }
   };
@@ -231,118 +232,124 @@ const UserLogin = () => {
         <div className="w-px bg-gray-200 flex-shrink-0" />
 
         {/* Right - Form */}
-        <div className="w-1/2 bg-white flex justify-center items-center px-8 xl:px-12">
+        <div className="w-1/2 bg-white overflow-y-auto h-screen">
+          <div className="min-h-full flex justify-center pt-10 pb-10 px-8 xl:px-12">
 
-          {/* ── SIGN IN ── */}
-          {!isSignUp && (
-            <div className="w-full max-w-sm mx-auto">
-              <h1 className="text-2xl lg:text-3xl font-black text-gray-900 mb-1">Sign In</h1>
-              <p className="text-sm text-gray-400 mb-6 lg:mb-7">Enter your credentials to access your account</p>
+            {/* ── SIGN IN ── */}
+            {!isSignUp && (
+              <div className="w-full max-w-sm mx-auto">
+                <h1 className="text-2xl lg:text-3xl font-black text-gray-900 mb-1">Sign In</h1>
+                <p className="text-sm text-gray-400 mb-6 lg:mb-7">Enter your credentials to access your account</p>
 
-              {error && (
-                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">{error}</div>
-              )}
+                {error && (
+                  <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">{error}</div>
+                )}
 
-              <div className="flex flex-col gap-4 mb-3">
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Email Address</label>
-                  <Field icon={MdEmail} type="email" placeholder="Enter your email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+                <div className="flex flex-col gap-4 mb-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1.5">Email Address</label>
+                    <Field icon={MdEmail} type="email" placeholder="Enter your email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1.5">Password</label>
+                    <Field icon={MdLock} type={showLoginPwd ? "text" : "password"} placeholder="Enter your password"
+                      value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
+                      right={<EyeToggle show={showLoginPwd} onToggle={() => setShowLoginPwd(v => !v)} />} />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1.5">Password</label>
-                  <Field icon={MdLock} type={showLoginPwd ? "text" : "password"} placeholder="Enter your password"
-                    value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
-                    right={<EyeToggle show={showLoginPwd} onToggle={() => setShowLoginPwd(v => !v)} />} />
+
+                <div className="flex items-center justify-between mb-6 lg:mb-7 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-blue-600" />
+                    <span className="text-xs text-gray-600">Remember me</span>
+                  </label>
+                  <Link to="/ForgotPassword" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">Forgot Password?</Link>
+                </div>
+
+                <PrimaryBtn onClick={handleSignIn} disabled={loading}>
+                  {loading ? "Signing In…" : "Sign In"}
+                </PrimaryBtn>
+
+                <OrDivider />
+                <GoogleBtn onClick={googleLogin} />
+
+                <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
+                  Don't have an account?{" "}
+                  <button onClick={() => switchTo(true)} className="text-blue-600 font-bold hover:underline">Sign Up</button>
+                </p>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
+                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
+                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-center justify-between mb-6 lg:mb-7 mt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-blue-600" />
-                  <span className="text-xs text-gray-600">Remember me</span>
+            {/* ── SIGN UP ── */}
+            {isSignUp && (
+              <div className="w-full max-w-sm mx-auto">
+                <h1 className="text-3xl lg:text-2xl font-black text-gray-900 mb-1">Create Account</h1>
+                <p className="text-sm text-gray-400 mb-5 lg:mb-3">Fill in the details to create your account</p>
+
+                {error && (
+                  <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">{error}</div>
+                )}
+
+                <div className="flex flex-col gap-2.5 lg:gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
+                    <Field icon={MdPerson} placeholder="Enter your full name" value={regName} onChange={e => setRegName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Email Address</label>
+                    <Field icon={MdEmail} type="email" placeholder="Enter your email" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Phone Number</label>
+                    <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Password</label>
+                    <Field icon={MdLock} type={showRegPwd ? "text" : "password"} placeholder="Create a password"
+                      value={regPassword} onChange={e => setRegPassword(e.target.value)}
+                      right={<EyeToggle show={showRegPwd} onToggle={() => setShowRegPwd(v => !v)} />} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Confirm Password</label>
+                    <Field icon={MdLock} type={showConfPwd ? "text" : "password"} placeholder="Confirm your password"
+                      value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
+                      right={<EyeToggle show={showConfPwd} onToggle={() => setShowConfPwd(v => !v)} />} />
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5">
+                  <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-blue-600 flex-shrink-0" />
+                  <span className="text-xs text-gray-600 leading-relaxed">
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-blue-600 font-semibold hover:underline">Terms of Service</Link>
+                    {" "}and{" "}
+                    <Link to="/privacy" className="text-blue-600 font-semibold hover:underline">Privacy Policy</Link>
+                  </span>
                 </label>
-                <Link to="/ForgotPassword" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">Forgot Password?</Link>
-              </div>
 
-              <PrimaryBtn onClick={handleSignIn} disabled={loading}>
-                {loading ? "Signing In…" : "Sign In"}
-              </PrimaryBtn>
+                <PrimaryBtn onClick={handleSignUp} disabled={loading}>
+                  {loading ? "Creating Account…" : "Create Account"}
+                </PrimaryBtn>
 
-              <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
+                <OrDivider />
+                <GoogleBtn onClick={googleLogin} />
 
-              <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
-                Don't have an account?{" "}
-                <button onClick={() => switchTo(true)} className="text-blue-600 font-bold hover:underline">Sign Up</button>
-              </p>
-              <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
-                <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
-                <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
-              </div>
-            </div>
-          )}
-
-          {/* ── SIGN UP ── */}
-          {isSignUp && (
-            <div className="w-full max-w-sm mx-auto">
-              <h1 className="text-3xl lg:text-2xl font-black text-gray-900 mb-1">Create Account</h1>
-              <p className="text-sm text-gray-400 mb-5 lg:mb-3">Fill in the details to create your account</p>
-
-              {error && (
-                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">{error}</div>
-              )}
-
-              <div className="flex flex-col gap-2.5 lg:gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
-                  <Field icon={MdPerson} placeholder="Enter your full name" value={regName} onChange={e => setRegName(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1">Email Address</label>
-                  <Field icon={MdEmail} type="email" placeholder="Enter your email" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1">Password</label>
-                  <Field icon={MdLock} type={showRegPwd ? "text" : "password"} placeholder="Create a password"
-                    value={regPassword} onChange={e => setRegPassword(e.target.value)}
-                    right={<EyeToggle show={showRegPwd} onToggle={() => setShowRegPwd(v => !v)} />} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1">Confirm Password</label>
-                  <Field icon={MdLock} type={showConfPwd ? "text" : "password"} placeholder="Confirm your password"
-                    value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
-                    right={<EyeToggle show={showConfPwd} onToggle={() => setShowConfPwd(v => !v)} />} />
+                <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
+                  Already have an account?{" "}
+                  <button onClick={() => switchTo(false)} className="text-blue-600 font-bold hover:underline">Sign In</button>
+                </p>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
+                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
+                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
                 </div>
               </div>
-
-              <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5">
-                <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-blue-600 flex-shrink-0" />
-                <span className="text-xs text-gray-600 leading-relaxed">
-                  I agree to the{" "}
-                  <Link to="/terms" className="text-blue-600 font-semibold hover:underline">Terms of Service</Link>
-                  {" "}and{" "}
-                  <Link to="/privacy" className="text-blue-600 font-semibold hover:underline">Privacy Policy</Link>
-                </span>
-              </label>
-
-              <PrimaryBtn onClick={handleSignUp} disabled={loading}>
-                {loading ? "Creating Account…" : "Create Account"}
-              </PrimaryBtn>
-
-              <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
-
-              <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
-                Already have an account?{" "}
-                <button onClick={() => switchTo(false)} className="text-blue-600 font-bold hover:underline">Sign In</button>
-              </p>
-              <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
-                <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
-                <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

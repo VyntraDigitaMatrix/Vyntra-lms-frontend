@@ -336,23 +336,23 @@ const ViewCourse = () => {
     const course = courseData ? {
         ...courseData,
         image: courseData.thumbnailUrl || S1,
-        rating: "4.7",
-        reviews: "1,250",
+        rating: courseData.averageRating ? courseData.averageRating.toFixed(1) : "0.0",
+        reviews: courseData.totalRatings || 0,
         lessons: `${(courseData.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lessons`,
-        desc: courseData.description || "Learn from industry experts and enhance your skills.",
-        price: courseData.discountPrice ? `₹${courseData.discountPrice}` : (courseData.price ? `₹${courseData.price}` : "₹999"),
-        oldPrice: courseData.price ? `₹${courseData.price}` : "₹2,499",
-        offer: courseData.discountPrice && courseData.price ? `${Math.round(((courseData.price - courseData.discountPrice) / courseData.price) * 100)}% OFF` : "60% OFF"
+        desc: courseData.description || "",
+        price: courseData.free ? "Free" : (courseData.discountPrice ? `₹${courseData.discountPrice}` : (courseData.actualPrice ? `₹${courseData.actualPrice}` : "")),
+        oldPrice: courseData.free ? "" : (courseData.actualPrice && courseData.discountPrice ? `₹${courseData.actualPrice}` : ""),
+        offer: courseData.free ? "" : (courseData.discountPrice && courseData.actualPrice ? `${Math.round(((courseData.actualPrice - courseData.discountPrice) / courseData.actualPrice) * 100)}% OFF` : "")
     } : {
         title: "Loading Course...",
         image: S1,
-        rating: "4.5",
+        rating: "0.0",
         reviews: "0",
         lessons: "0 Lessons",
         desc: "",
-        price: "₹0",
-        oldPrice: "₹0",
-        offer: "0% OFF"
+        price: "",
+        oldPrice: "",
+        offer: ""
     };
 
     useEffect(() => {

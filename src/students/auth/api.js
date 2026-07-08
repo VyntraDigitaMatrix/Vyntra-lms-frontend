@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://107.20.36.39:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://98.93.255.158:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -114,6 +114,36 @@ export const studentEnrolledCourseApi = {
     api.get(`/api/v1/student/my-courses/${courseId}/lessons/${lessonId}`),
 };
 
+export const studentLearningApi = {
+  // GET /api/student/learning/my-courses (paginated)
+  getMyEnrolledCourses: (page = 0, size = 10) =>
+    api.get(`/api/student/learning/my-courses?page=${page}&size=${size}&sort=createdAt,desc`),
+
+  // GET /api/student/learning/courses
+  getCourses: (page = 0, size = 10, sort = "id,desc") =>
+    api.get(`/api/student/learning/courses?page=${page}&size=${size}&sort=${sort}`),
+
+  // GET /api/student/learning/courses/{courseSlug}/modules
+  getCourseModules: (courseSlug) =>
+    api.get(`/api/student/learning/courses/${courseSlug}/modules`),
+
+  // GET /api/student/learning/courses/{courseSlug}/progress
+  getCourseProgress: (courseSlug) =>
+    api.get(`/api/student/learning/courses/${courseSlug}/progress`),
+
+  // GET /api/student/learning/modules/{moduleSlug}/lessons
+  getModuleLessons: (moduleSlug) =>
+    api.get(`/api/student/learning/modules/${moduleSlug}/lessons`),
+
+  // GET /api/student/learning/lessons/{lessonSlug}
+  getLessonById: (lessonSlug) =>
+    api.get(`/api/student/learning/lessons/${lessonSlug}`),
+
+  // POST /api/student/learning/lessons/{lessonSlug}/complete
+  completeLesson: (lessonSlug) =>
+    api.post(`/api/student/learning/lessons/${lessonSlug}/complete`),
+};
+
 export const studentNotesApi = {
   getNotes: (courseId, page = 0, size = 10) =>
     api.get(`/api/v1/student/notes?courseId=${courseId}&page=${page}&size=${size}`),
@@ -149,12 +179,12 @@ export const studentQuizApi = {
     return api.post(`/api/student/quizzes/attempts/${attemptId}/submit`, payload);
   },
 
-getLeaderboard: (quizId, page = 0, size = 10) =>
-  api.get(`/api/student/quizzes/${quizId}/leaderboard?page=${page}&size=${size}`),
+  getLeaderboard: (quizId, page = 0, size = 10) =>
+    api.get(`/api/student/quizzes/${quizId}/leaderboard?page=${page}&size=${size}`),
 };
 
 export const studentJobApi = {
-  
+
   getJobs: (page = 0, size = 10) =>
     api.get(`/api/student/jobs?page=${page}&size=${size}`),
 

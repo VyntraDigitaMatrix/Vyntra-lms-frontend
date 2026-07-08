@@ -15,7 +15,7 @@ import {
     MdClose, MdSearch, MdFilterList, MdPeople, MdTimer,
     MdQuiz, MdOutlineAddCircle, MdErrorOutline, MdRefresh,
     MdMenuBook, MdViewModule, MdPlayCircleOutline, MdEdit,
-    MdHelpOutline, MdBugReport,
+    MdHelpOutline, MdListAlt,
 } from "react-icons/md";
 import {
     FaTrophy, FaChevronRight, FaTrash, FaEdit,
@@ -28,28 +28,28 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 ══════════════════════════════════════════════════════════ */
 const extractList = (res) => {
     const body = res?.data?.data ?? res?.data;
+    if (!body) return [];
     if (Array.isArray(body)) return body;
     if (Array.isArray(body?.content)) return body.content;
+    if (typeof body === 'object' && body !== null && body.id) return [body];
     return [];
 };
 
 const extractObj = (res) => res?.data?.data ?? res?.data ?? {};
 
-const resolvePublished = (raw) => {
-    return (
-        raw.published === true ||
+const resolveStatus = (raw) => {
+    if (raw.quizStatus === "ARCHIVED" || raw.status === "ARCHIVED") return "archived";
+    if (raw.published === true ||
         raw.isPublished === true ||
         raw.quizStatus === "PUBLISHED" ||
         raw.status === "PUBLISHED" ||
-        raw.status === "ACTIVE"
-    );
+        raw.status === "ACTIVE") return "active";
+    return "draft";
 };
 
 const normalizeQuiz = (raw, course) => {
-    const published = resolvePublished(raw);
-    console.log("Quiz Raw:", raw);
-    console.log("Quiz Status:", raw.quizStatus);
-    console.log("Published:", resolvePublished(raw));
+    const status = resolveStatus(raw);
+    const published = status === "active";
     const questionCount =
         raw.questionCount ?? raw.totalQuestions ?? raw.noOfQuestions ??
         raw.questionsCount ?? (Array.isArray(raw.questions) ? raw.questions.length : null) ?? 0;
@@ -74,7 +74,7 @@ const normalizeQuiz = (raw, course) => {
         attempts: raw.attemptCount ?? raw.totalAttempts ?? 0,
         avgScore: raw.avgScore ?? raw.averageScore ?? 0,
         published,
-        status: published ? "active" : "draft",
+        status,
         maxAttempts: raw.maxAttempts ?? 0,
         totalStudents: raw.totalStudents ?? course?.enrolledStudents ?? course?.studentsCount ?? 0,
         totalMarks: raw.totalMarks ?? raw.maxScore ?? 30,
@@ -93,48 +93,13 @@ const parseOptions = (rawOpts) => {
 const parseQuestion = (q) => {
     const opts = parseOptions(q.options ?? q.optionList ?? []);
     return {
-        _isNew: false,
         id: q.id ?? q.questionId,
         question: q.questionText ?? q.question ?? q.text ?? "",
         explanation: q.explanation ?? q.explanationText ?? "",
         marks: q.marks ?? q.marksPerQuestion ?? 1,
         sortOrder: q.sortOrder ?? 0,
-        options: opts.length > 0
-            ? opts.map(o => o.optionText ?? o.text ?? o.option ?? "")
-            : ["", "", "", ""],
-        correct: opts.length > 0
-            ? Math.max(0, opts.findIndex(o => o.isCorrect === true || o.correct === true))
-            : 0,
         optionObjects: opts,
     };
-};
-
-const createQuestionWithOptions = async (quizSlug, q, sortOrder = 1) => {
-    const qRes = await instructorQuizQuestionApi.createQuestion(quizSlug, {
-        questionText: q.question.trim(),
-        explanation: q.explanation?.trim() ?? "",
-        marks: q.marks ?? 1,
-        sortOrder,
-    });
-    const qData = extractObj(qRes);
-    const questionId = qData.id ?? qData.questionId;
-    if (!questionId) throw new Error("createQuestion returned no ID");
-
-    const validOptions = q.options
-        .map((text, i) => ({ text: text?.trim() ?? "", idx: i }))
-        .filter(o => o.text.length > 0);
-
-    for (let pos = 0; pos < validOptions.length; pos++) {
-        const { text, idx } = validOptions[pos];
-        await instructorQuizOptionApi.createOption(questionId, {
-            optionText: text,
-            correct: idx === q.correct,
-            isCorrect: idx === q.correct,
-            sortOrder: pos + 1,
-        });
-    }
-
-    return questionId;
 };
 
 const fetchQuestionsWithOptions = async (quizSlug) => {
@@ -153,35 +118,21 @@ const fetchQuestionsWithOptions = async (quizSlug) => {
                 const optBody = optRes?.data?.data ?? optRes?.data;
                 const optList = Array.isArray(optBody) ? optBody
                     : Array.isArray(optBody?.content) ? optBody.content : [];
-                const opts = parseOptions(optList);
-                parsed = {
-                    ...parsed,
-                    options: opts.length > 0 ? opts.map(o => o.optionText ?? o.text ?? "") : ["", "", "", ""],
-                    correct: opts.length > 0 ? Math.max(0, opts.findIndex(o => o.isCorrect === true || o.correct === true)) : 0,
-                    optionObjects: opts,
-                };
+                parsed = { ...parsed, optionObjects: parseOptions(optList) };
             } catch {
-                // leave with empty options
             }
         }
         return parsed;
     }));
 
-    return questions;
+    return questions.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 };
 
-/* BLANK QUESTION */
-const blankQ = () => ({
-    _isNew: true, id: null,
-    question: "", explanation: "", marks: 1,
-    options: ["", "", "", ""], correct: 0, optionObjects: [],
-});
+const blankQuestion = () => ({ question: "", explanation: "", marks: 1 });
 
-/* QUESTION EDITOR */
-const QuestionEditor = ({ question, onChange, onCancel, onSave, saving, label }) => {
+const QuestionEditor = ({ question, onChange, onCancel, onSave, saving, label, saveLabel }) => {
     const inp = "w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 transition bg-white placeholder-slate-400";
     const up = (k, v) => onChange({ ...question, [k]: v });
-    const upOpt = (i, val) => { const o = [...question.options]; o[i] = val; up("options", o); };
 
     return (
         <div className="rounded-2xl border border-violet-200 bg-gradient-to-b from-violet-50/60 to-white p-4 space-y-3">
@@ -205,30 +156,6 @@ const QuestionEditor = ({ question, onChange, onCancel, onSave, saving, label })
                     value={question.question} onChange={e => up("question", e.target.value)} />
             </div>
 
-            <div>
-                <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide">Options</label>
-                    <span className="text-[10px] text-slate-400">Click the circle to mark the correct answer</span>
-                </div>
-                <div className="space-y-2">
-                    {question.options.map((opt, i) => (
-                        <div key={i} className={`flex items-center gap-2 p-2 rounded-xl border transition ${i === question.correct ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"}`}>
-                            <button type="button" onClick={() => up("correct", i)}
-                                title={`Mark option ${String.fromCharCode(65 + i)} as correct`}
-                                className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-black flex-shrink-0 transition ${i === question.correct ? "border-emerald-500 bg-emerald-500 text-white shadow-sm" : "border-slate-300 text-slate-500 hover:border-emerald-400 hover:text-emerald-500"}`}>
-                                {i === question.correct ? <FaCheck /> : String.fromCharCode(65 + i)}
-                            </button>
-                            <input className={`flex-1 bg-transparent border-0 text-xs text-slate-700 placeholder-slate-400 focus:outline-none py-0.5 ${i === question.correct ? "font-semibold" : ""}`}
-                                placeholder={`Option ${String.fromCharCode(65 + i)}${i === 0 ? " (e.g. True)" : i === 1 ? " (e.g. False)" : ""}`}
-                                value={opt} onChange={e => upOpt(i, e.target.value)} />
-                            {i === question.correct && (
-                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-md flex-shrink-0">CORRECT</span>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Explanation (optional)</label>
@@ -246,23 +173,185 @@ const QuestionEditor = ({ question, onChange, onCancel, onSave, saving, label })
                 <button onClick={onSave} disabled={saving || !question.question.trim()}
                     className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
                     {saving ? <AiOutlineLoading3Quarters className="animate-spin text-xs" /> : <FaCheck className="text-[9px]" />}
-                    {saving ? "Saving…" : "Save Changes"}
+                    {saving ? "Saving…" : (saveLabel ?? "Save Question")}
                 </button>
             )}
         </div>
     );
 };
 
+const OptionRow = ({ option, isCorrect, onSave, onDelete }) => {
+    const [editing, setEditing] = useState(false);
+    const [text, setText] = useState(option.optionText ?? option.text ?? "");
+    const [correct, setCorrect] = useState(isCorrect);
+    const [sortOrder, setSortOrder] = useState(option.sortOrder ?? 1);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    useEffect(() => {
+        setText(option.optionText ?? option.text ?? "");
+        setCorrect(isCorrect);
+        setSortOrder(option.sortOrder ?? 1);
+    }, [option, isCorrect]);
+
+    const handleSave = async () => {
+        if (!text.trim()) return;
+        setSaving(true);
+        try {
+            await onSave(text.trim(), correct, Number(sortOrder) || 1);
+            setEditing(false);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm("Delete this option?")) return;
+        setDeleting(true);
+        try {
+            await onDelete();
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    if (editing) {
+        return (
+            <div className="flex items-center gap-2 p-2 bg-white border border-violet-200 rounded-xl">
+                <input
+                    autoFocus
+                    className="flex-1 text-xs text-slate-700 bg-transparent border-0 focus:outline-none focus:ring-0"
+                    value={text}
+                    onChange={e => setText(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSave()}
+                />
+                <div className="w-px h-4 bg-slate-200 mx-1" />
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Order</span>
+                    <input
+                        type="number"
+                        className="w-12 text-xs text-center border border-slate-200 rounded p-1"
+                        value={sortOrder}
+                        onChange={e => setSortOrder(e.target.value)}
+                        min="1"
+                    />
+                </div>
+                <label className="flex items-center gap-1.5 cursor-pointer flex-shrink-0 ml-2">
+                    <input type="checkbox" checked={correct} onChange={e => setCorrect(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-emerald-500 rounded-sm cursor-pointer" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Correct</span>
+                </label>
+                <div className="w-px h-4 bg-slate-200 mx-1" />
+                <button disabled={saving || !text.trim()} onClick={handleSave}
+                    className="px-3 py-1.5 text-[10px] font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg disabled:opacity-50 transition">
+                    {saving ? "Saving…" : "Save"}
+                </button>
+                <button disabled={saving} onClick={() => setEditing(false)}
+                    className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                    <MdClose className="text-sm" />
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl border transition ${isCorrect ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-200"}`}>
+            <div className="flex items-center gap-2 min-w-0">
+                <span className="flex-shrink-0 text-[10px] font-bold text-slate-400 w-4 text-center">
+                    {option.sortOrder ?? 1}
+                </span>
+                <span className="text-xs font-medium text-slate-700 flex items-center gap-1.5 min-w-0">
+                    {isCorrect && <FaCheck className="text-emerald-500 text-[9px] flex-shrink-0" />}
+                    <span className="truncate">{option.optionText ?? option.text}</span>
+                </span>
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+                <button onClick={() => setEditing(true)}
+                    className="w-6 h-6 rounded-lg bg-violet-50 text-violet-500 hover:bg-violet-100 flex items-center justify-center transition">
+                    <MdEdit className="text-xs" />
+                </button>
+                <button onClick={handleDelete} disabled={deleting}
+                    className="w-6 h-6 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition disabled:opacity-50">
+                    {deleting ? <AiOutlineLoading3Quarters className="animate-spin text-[9px]" /> : <FaTrash className="text-[9px]" />}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const InlineOptionEditor = ({ questionId, existingOptions, sortOrder: initialSortOrder, onSaveSuccess, onCancel }) => {
+    const [optText, setOptText] = useState("");
+    const [isCorrect, setIsCorrect] = useState(false);
+    const [sortOrder, setSortOrder] = useState(initialSortOrder || 1);
+    const [saving, setSaving] = useState(false);
+
+    const handleSave = async () => {
+        if (!optText.trim()) return;
+        setSaving(true);
+        try {
+            // Use POST /bulk for adding new options, because PUT doesn't support creation.
+            await instructorQuizOptionApi.bulkCreateOptions(questionId, [{
+                optionText: optText.trim(),
+                correct: isCorrect,
+                sortOrder: Number(sortOrder) || 1,
+            }]);
+            onSaveSuccess();
+        } catch (err) {
+            console.error("Save option failed", err);
+            alert("Failed to save option.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-2 p-2 bg-violet-50/50 border border-violet-200 border-dashed rounded-xl mt-2">
+            <input
+                autoFocus
+                placeholder="Option text..."
+                className="flex-1 text-xs text-slate-700 bg-transparent border-0 focus:outline-none focus:ring-0"
+                value={optText}
+                onChange={e => setOptText(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSave()}
+            />
+            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-[10px] font-bold text-slate-500 uppercase">Order</span>
+                <input
+                    type="number"
+                    className="w-12 text-xs text-center border border-slate-200 rounded p-1"
+                    value={sortOrder}
+                    onChange={e => setSortOrder(e.target.value)}
+                    min="1"
+                />
+            </div>
+            <label className="flex items-center gap-1.5 cursor-pointer flex-shrink-0 ml-2">
+                <input type="checkbox" checked={isCorrect} onChange={e => setIsCorrect(e.target.checked)}
+                    className="w-3.5 h-3.5 accent-emerald-500 rounded-sm" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase">Correct</span>
+            </label>
+            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <button disabled={saving || !optText.trim()} onClick={handleSave}
+                className="px-3 py-1.5 text-[10px] font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg disabled:opacity-50 transition">
+                {saving ? "Saving..." : "Save"}
+            </button>
+            <button disabled={saving} onClick={onCancel}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                <MdClose className="text-sm" />
+            </button>
+        </div>
+    );
+};
+
 /* ══════════════════════════════════════════════════════════
-   ADD / EDIT QUIZ MODAL
+   QUIZ FORM MODAL — metadata ONLY. No questions/options here.
+   Used for both Create and Edit.
 ══════════════════════════════════════════════════════════ */
-const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
-    const isEditMode = Boolean(initialData);
-    const [step, setStep] = useState(1);
+const QuizFormModal = ({ mode = "create", courses, initialData, onClose, onSaved }) => {
+    const isEditMode = mode === "edit";
     const [form, setForm] = useState({
         title: initialData?.title || "",
         description: initialData?.description || "",
-        // Store courseSlug for API calls, courseId for display matching
         courseId: initialData?.courseId ? String(initialData.courseId) : "",
         courseSlug: initialData?.courseSlug || "",
         moduleId: initialData?.moduleId ? String(initialData.moduleId) : "",
@@ -277,31 +366,15 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
         published: initialData?.published ?? false,
         resumeAllowed: initialData?.resumeAllowed ?? true,
         autoSubmitOnDisconnect: initialData?.autoSubmitOnDisconnect ?? true,
-        questions: [],
     });
 
-    const [newQ, setNewQ] = useState(blankQ());
-    const [editingIdx, setEditingIdx] = useState(null);
-    const [qSaving, setQSaving] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
-    const [qLoading, setQLoading] = useState(false);
     const [modules, setModules] = useState([]);
     const [lessons, setLessons] = useState([]);
 
     const up = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
-    // Load existing questions when editing
-    useEffect(() => {
-        if (!isEditMode || !initialData?.slug) return;
-        setQLoading(true);
-        fetchQuestionsWithOptions(initialData.slug)
-            .then(qs => setForm(p => ({ ...p, questions: qs })))
-            .catch(err => { setError("Failed to load existing questions."); console.error(err); })
-            .finally(() => setQLoading(false));
-    }, [isEditMode, initialData?.slug]);
-
-    // Load modules when courseSlug changes
     useEffect(() => {
         if (!form.courseSlug) { setModules([]); return; }
         instructorModuleApi.getCourseModules(form.courseSlug, 0, 100)
@@ -309,7 +382,6 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
             .catch(console.error);
     }, [form.courseSlug]);
 
-    // Load lessons when moduleSlug changes
     useEffect(() => {
         if (!form.moduleSlug) { setLessons([]); return; }
         instructorLessonApi.getModuleLessons(form.moduleSlug, 0, 100)
@@ -317,114 +389,16 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
             .catch(console.error);
     }, [form.moduleSlug]);
 
-    const reloadQuestions = async (quizSlug) => {
-        const qs = await fetchQuestionsWithOptions(quizSlug);
-        setForm(p => ({ ...p, questions: qs }));
-        return qs;
-    };
-
-    const handleAddQuestion = async () => {
-        if (!newQ.question.trim()) { setError("Please enter a question."); return; }
-        const filledOptions = newQ.options.filter(o => o?.trim());
-        if (filledOptions.length < 2) { setError("Please fill in at least 2 options."); return; }
-
-        const quizSlug = initialData?.slug;
-        if (!quizSlug) {
-            // New quiz — store locally, flush on save
-            setForm(p => ({ ...p, questions: [...p.questions, { ...newQ, id: `local_${Date.now()}`, _isNew: true }] }));
-            setNewQ(blankQ());
-            setError("");
-            return;
-        }
-
-        setQSaving(true);
-        setError("");
-        try {
-            await createQuestionWithOptions(quizSlug, newQ, form.questions.length + 1);
-            await reloadQuestions(quizSlug);
-            setNewQ(blankQ());
-        } catch (err) {
-            console.error("Add question failed:", err?.response?.data ?? err);
-            setError(err?.response?.data?.message || "Failed to add question.");
-        } finally {
-            setQSaving(false);
-        }
-    };
-
-    const handleSaveExistingQuestion = async (idx) => {
-        const q = form.questions[idx];
-        if (!q.id || q._isNew) return;
-        setQSaving(true);
-        setError("");
-        try {
-            await instructorQuizQuestionApi.updateQuestion(q.id, {
-                questionText: q.question.trim(),
-                explanation: q.explanation?.trim() ?? "",
-                marks: q.marks ?? 1,
-            });
-
-            const existingOpts = q.optionObjects ?? [];
-            for (let i = 0; i < existingOpts.length; i++) {
-                const opt = existingOpts[i];
-                if (!opt?.id) continue;
-                await instructorQuizOptionApi.updateOption(opt.id, {
-                    optionText: q.options[i]?.trim() ?? opt.optionText ?? "",
-                    correct: i === q.correct,
-                    isCorrect: i === q.correct,
-                    sortOrder: i + 1,
-                });
-            }
-
-            if (q.options.length > existingOpts.length) {
-                for (let i = existingOpts.length; i < q.options.length; i++) {
-                    const text = q.options[i]?.trim();
-                    if (!text) continue;
-                    await instructorQuizOptionApi.createOption(q.id, {
-                        optionText: text,
-                        correct: i === q.correct,
-                        isCorrect: i === q.correct,
-                        sortOrder: i + 1,
-                    });
-                }
-            }
-
-            setEditingIdx(null);
-            if (initialData?.slug) await reloadQuestions(initialData.slug);
-        } catch (err) {
-            console.error("Save question failed:", err?.response?.data ?? err);
-            setError(err?.response?.data?.message || "Failed to save question changes.");
-        } finally {
-            setQSaving(false);
-        }
-    };
-
-    const handleDeleteQuestion = async (idx) => {
-        const q = form.questions[idx];
-        const isLocal = q._isNew || (typeof q.id === "string" && q.id.startsWith("local_"));
-        if (isLocal) {
-            setForm(p => ({ ...p, questions: p.questions.filter((_, i) => i !== idx) }));
-            return;
-        }
-        if (!window.confirm("Delete this question and all its options?")) return;
-        try {
-            await instructorQuizQuestionApi.deleteQuestion(q.id);
-            if (initialData?.slug) await reloadQuestions(initialData.slug);
-            else setForm(p => ({ ...p, questions: p.questions.filter((_, i) => i !== idx) }));
-        } catch (err) {
-            console.error("Delete failed:", err?.response?.data ?? err);
-            setError("Failed to delete question.");
-        }
-    };
-
     const handleSave = async () => {
         if (!form.title.trim()) { setError("Quiz title is required."); return; }
         if (!form.courseId) { setError("Please select a course."); return; }
+        if (form.type === "MODULE" && !form.moduleId) { setError("Please select a module."); return; }
+        if (form.type === "LESSON" && (!form.moduleId || !form.lessonId)) { setError("Please select a module and a lesson."); return; }
 
         setSaving(true);
         setError("");
 
         try {
-            // Build payload — backend uses numeric IDs for relations
             const payload = {
                 title: form.title.trim(),
                 description: form.description.trim(),
@@ -435,49 +409,39 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
                 maxAttempts: Number(form.maxAttempts),
                 resumeAllowed: form.resumeAllowed ?? true,
                 autoSubmitOnDisconnect: form.autoSubmitOnDisconnect ?? true,
-                published: form.published,
-                status: form.published ? "PUBLISHED" : "DRAFT",
             };
 
-            // Attach relation IDs based on quiz type
             if (form.type === "COURSE") {
-                payload.courseId = Number(form.courseId);
+                payload.courseId = form.courseId;
             } else if (form.type === "MODULE") {
-                payload.courseId = Number(form.courseId);
-                payload.moduleId = Number(form.moduleId);
+                payload.courseId = form.courseId;
+                payload.moduleId = form.moduleId;
             } else if (form.type === "LESSON") {
-                payload.courseId = Number(form.courseId);
-                payload.moduleId = Number(form.moduleId);
-                payload.lessonId = Number(form.lessonId);
+                payload.courseId = form.courseId;
+                payload.moduleId = form.moduleId;
+                payload.lessonId = form.lessonId;
             }
 
             let savedSlug = initialData?.slug ?? null;
+            let savedData = {};
 
             if (savedSlug) {
-                // Edit mode — use slug
-                await instructorQuizApi.updateQuiz(savedSlug, payload);
+                const res = await instructorQuizApi.updateQuiz(savedSlug, payload);
+                savedData = extractObj(res);
             } else {
-                console.log("QUIZ PAYLOAD", payload);
-                // Create mode — get slug from response
-                const saveRes = await instructorQuizApi.createQuiz(payload);
-                const data = extractObj(saveRes);
-                savedSlug = data.slug ?? data.quizSlug;
+                const res = await instructorQuizApi.createQuiz(payload);
+                savedData = extractObj(res);
+                savedSlug = savedData.slug ?? savedData.quizSlug;
                 if (!savedSlug) throw new Error("Quiz created but no slug returned from API.");
             }
 
-            // Flush any locally-queued questions
-            const localQs = form.questions.filter(
-                q => q._isNew && typeof q.id === "string" && q.id.startsWith("local_")
-            );
-            for (let i = 0; i < localQs.length; i++) {
-                try {
-                    await createQuestionWithOptions(savedSlug, localQs[i], i + 1);
-                } catch (err) {
-                    console.error("Failed to save local question:", err?.response?.data ?? err);
-                }
-            }
-
-            await onSave();
+            onSaved({
+                ...savedData,
+                id: savedData.id ?? initialData?.id,
+                slug: savedSlug,
+                title: form.title.trim(),
+                isNew: !isEditMode,
+            });
             onClose();
         } catch (err) {
             console.error("Quiz save failed:", err?.response?.data || err);
@@ -494,13 +458,10 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
     const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition bg-white placeholder-slate-400";
     const labelCls = "block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide";
 
-    const savedQCount = form.questions.filter(q => !q._isNew).length;
-    const localQCount = form.questions.filter(q => q._isNew).length;
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
@@ -508,18 +469,10 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
                         <MdOutlineAddCircle className="text-white text-lg" />
                     </div>
                     <div className="flex-1">
-                        <h2 className="text-sm font-black text-white">{isEditMode ? "Edit Quiz" : "Create New Quiz"}</h2>
+                        <h2 className="text-sm font-black text-white">{isEditMode ? "Edit Quiz Details" : "Create New Quiz"}</h2>
                         <p className="text-[11px] text-violet-200 mt-0.5">
-                            Step {step} of 2 — {step === 1 ? "Quiz Details" : `Questions (${form.questions.length} total)`}
+                            {isEditMode ? "Update quiz settings — questions are managed separately" : "Set up the quiz — you'll add questions next"}
                         </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mr-2">
-                        {[1, 2].map(s => (
-                            <button key={s} onClick={() => setStep(s)}
-                                className={`w-7 h-7 rounded-full text-xs font-bold transition ${step === s ? "bg-white text-violet-600" : "bg-white/20 text-white hover:bg-white/30"}`}>
-                                {s}
-                            </button>
-                        ))}
                     </div>
                     <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30 transition">
                         <MdClose />
@@ -527,256 +480,119 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                    <div>
+                        <label className={labelCls}>Quiz Title *</label>
+                        <input className={inputCls} placeholder="e.g. React Fundamentals Assessment"
+                            value={form.title} onChange={e => up("title", e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelCls}>Description</label>
+                        <textarea className={inputCls} rows={2} placeholder="Brief description of this quiz…"
+                            value={form.description} onChange={e => up("description", e.target.value)} />
+                    </div>
 
-                    {/* ── STEP 1: Quiz Details ── */}
-                    {step === 1 && (
-                        <div className="space-y-4">
-                            <div>
-                                <label className={labelCls}>Quiz Title *</label>
-                                <input className={inputCls} placeholder="e.g. React Fundamentals Assessment"
-                                    value={form.title} onChange={e => up("title", e.target.value)} />
-                            </div>
-                            <div>
-                                <label className={labelCls}>Description</label>
-                                <textarea className={inputCls} rows={2} placeholder="Brief description of this quiz…"
-                                    value={form.description} onChange={e => up("description", e.target.value)} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Course selector — stores both id (for payload) and slug (for API calls) */}
-                                <div>
-                                    <label className={labelCls}>Course *</label>
-                                    <select className={inputCls} value={form.courseId}
-                                        onChange={e => {
-                                            const selected = courses.find(c => String(c.id) === e.target.value);
-                                            up("courseId", e.target.value);
-                                            up("courseSlug", selected?.slug ?? selected?.courseSlug ?? "");
-                                            up("moduleId", ""); up("moduleSlug", "");
-                                            up("lessonId", ""); up("lessonSlug", "");
-                                        }}>
-                                        <option value="">Select a course</option>
-                                        {courses.map(c => <option key={c.id} value={c.id}>{c.title || c.name}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={labelCls}>Quiz Type</label>
-                                    <select className={inputCls} value={form.type}
-                                        onChange={e => {
-                                            up("type", e.target.value);
-                                            up("moduleId", ""); up("moduleSlug", "");
-                                            up("lessonId", ""); up("lessonSlug", "");
-                                        }}>
-                                        <option value="COURSE">Course-level Quiz</option>
-                                        <option value="MODULE">Module-level Quiz</option>
-                                        <option value="LESSON">Lesson-level Quiz</option>
-                                    </select>
-                                </div>
-
-                                {/* Module selector for MODULE/LESSON types */}
-                                {(form.type === "MODULE" || form.type === "LESSON") && (
-                                    <div className="col-span-2">
-                                        <label className={labelCls}>Module *</label>
-                                        <select className={inputCls} value={form.moduleId}
-                                            onChange={e => {
-                                                const selected = modules.find(m => String(m.id) === e.target.value);
-                                                up("moduleId", e.target.value);
-                                                up("moduleSlug", selected?.slug ?? selected?.moduleSlug ?? "");
-                                                up("lessonId", ""); up("lessonSlug", "");
-                                            }}>
-                                            <option value="">Select Module</option>
-                                            {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {/* Lesson selector for LESSON type */}
-                                {form.type === "LESSON" && form.moduleSlug && (
-                                    <div className="col-span-2">
-                                        <label className={labelCls}>Lesson *</label>
-                                        <select className={inputCls} value={form.lessonId}
-                                            onChange={e => {
-                                                const selected = lessons.find(l => String(l.id) === e.target.value);
-                                                up("lessonId", e.target.value);
-                                                up("lessonSlug", selected?.lessonSlug ?? selected?.slug ?? "");
-                                            }}>
-                                            <option value="">Select Lesson</option>
-                                            {lessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                                        </select>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div>
-                                    <label className={labelCls}>Total Marks</label>
-                                    <input type="number" className={inputCls} min={1} value={form.totalMarks}
-                                        onChange={e => up("totalMarks", Number(e.target.value))} />
-                                </div>
-                                <div>
-                                    <label className={labelCls}>Duration (mins)</label>
-                                    <input type="number" className={inputCls} min={5} max={300} value={form.duration}
-                                        onChange={e => up("duration", Number(e.target.value))} />
-                                </div>
-                                <div>
-                                    <label className={labelCls}>Max Attempts</label>
-                                    <input type="number" className={inputCls} min={1} max={10} value={form.maxAttempts}
-                                        onChange={e => up("maxAttempts", Number(e.target.value))} />
-                                </div>
-                                <div>
-                                    <label className={labelCls}>Passing Marks</label>
-                                    <input type="number" className={inputCls} min={0} value={form.passingScore}
-                                        onChange={e => up("passingScore", Number(e.target.value))} />
-                                </div>
-                            </div>
-
-                            {/* Published toggle */}
-                            <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${form.published ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-200"}`}>
-                                <button type="button" onClick={() => up("published", !form.published)}
-                                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${form.published ? "bg-emerald-500" : "bg-slate-300"}`}>
-                                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.published ? "translate-x-5" : "translate-x-0.5"}`} />
-                                </button>
-                                <div className="flex-1">
-                                    <p className={`text-xs font-bold ${form.published ? "text-emerald-700" : "text-slate-700"}`}>
-                                        {form.published ? "Published — visible to students" : "Draft — only you can see this"}
-                                    </p>
-                                    <p className="text-[10px] text-slate-400 mt-0.5">
-                                        {form.published ? "Students can attempt this quiz now" : "Toggle to publish when ready, then click Save"}
-                                    </p>
-                                </div>
-                                <div className={`flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full border flex-shrink-0 ${form.published ? "text-emerald-700 bg-emerald-100 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200"}`}>
-                                    {form.published ? <FaLockOpen className="text-[9px]" /> : <FaLock className="text-[9px]" />}
-                                    {form.published ? "Published" : "Draft"}
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>Course *</label>
+                            <select className={inputCls} value={form.courseId}
+                                onChange={e => {
+                                    const selected = courses.find(c => String(c.id) === e.target.value);
+                                    up("courseId", e.target.value);
+                                    up("courseSlug", selected?.slug ?? selected?.courseSlug ?? "");
+                                    up("moduleId", ""); up("moduleSlug", "");
+                                    up("lessonId", ""); up("lessonSlug", "");
+                                }}>
+                                <option value="">Select a course</option>
+                                {courses.map(c => <option key={c.id} value={c.id}>{c.title || c.name}</option>)}
+                            </select>
                         </div>
-                    )}
-
-                    {/* ── STEP 2: Questions ── */}
-                    {step === 2 && (
-                        <div className="space-y-4">
-                            {isEditMode ? (
-                                <div className="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                                    <MdHelpOutline className="text-blue-500 flex-shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs font-bold text-blue-700">Edit Mode</p>
-                                        <p className="text-[11px] text-blue-600 mt-0.5">
-                                            Questions added here are saved to the server immediately. Edit or delete existing questions using the icons on each row.
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                                    <MdHelpOutline className="text-amber-500 flex-shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs font-bold text-amber-700">New Quiz — Questions are saved with the quiz</p>
-                                        <p className="text-[11px] text-amber-600 mt-0.5">
-                                            Add questions below, then click <strong>Save Quiz</strong>. All questions and options will be saved together.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {qLoading && (
-                                <div className="space-y-2">
-                                    {[1, 2].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
-                                </div>
-                            )}
-
-                            {!qLoading && form.questions.length > 0 && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                        <p className="text-xs font-black text-slate-500 uppercase tracking-wide flex-1">
-                                            {form.questions.length} Question{form.questions.length !== 1 ? "s" : ""}
-                                        </p>
-                                        {savedQCount > 0 && (
-                                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <FaCheck className="text-[8px]" /> {savedQCount} saved
-                                            </span>
-                                        )}
-                                        {localQCount > 0 && (
-                                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                                                {localQCount} pending save
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {form.questions.map((q, idx) => (
-                                        <div key={q.id ?? idx}>
-                                            {editingIdx === idx ? (
-                                                <QuestionEditor
-                                                    question={q}
-                                                    label={`Edit Question ${idx + 1}`}
-                                                    onChange={updated => setForm(p => {
-                                                        const qs = [...p.questions]; qs[idx] = updated;
-                                                        return { ...p, questions: qs };
-                                                    })}
-                                                    onCancel={() => setEditingIdx(null)}
-                                                    onSave={() => handleSaveExistingQuestion(idx)}
-                                                    saving={qSaving}
-                                                />
-                                            ) : (
-                                                <div className={`flex items-start gap-3 p-3 rounded-xl border group hover:shadow-sm transition ${q._isNew ? "bg-amber-50/50 border-amber-200" : "bg-slate-50 border-slate-200 hover:border-violet-200"}`}>
-                                                    <span className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 ${q._isNew ? "bg-amber-100 text-amber-700" : "bg-violet-100 text-violet-600"}`}>
-                                                        {idx + 1}
-                                                    </span>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-xs font-semibold text-slate-800 leading-snug">{q.question}</p>
-                                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                            {q.options.filter(Boolean).map((opt, oi) => (
-                                                                <span key={oi} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${oi === q.correct ? "bg-emerald-100 text-emerald-700 font-bold" : "bg-slate-100 text-slate-500"}`}>
-                                                                    {String.fromCharCode(65 + oi)}. {opt}
-                                                                    {oi === q.correct && " ✓"}
-                                                                </span>
-                                                            ))}
-                                                            {q.marks > 1 && <span className="text-[10px] text-slate-400">{q.marks} marks</span>}
-                                                            {q._isNew && <span className="text-[10px] text-amber-600 font-bold">unsaved</span>}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
-                                                        <button onClick={() => setEditingIdx(idx)}
-                                                            className="w-6 h-6 rounded-lg bg-violet-50 text-violet-500 hover:bg-violet-100 flex items-center justify-center transition">
-                                                            <MdEdit className="text-xs" />
-                                                        </button>
-                                                        <button onClick={() => handleDeleteQuestion(idx)}
-                                                            className="w-6 h-6 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition">
-                                                            <FaTrash className="text-[9px]" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {!qLoading && form.questions.length > 0 && (
-                                <div className="flex items-center gap-3">
-                                    <div className="flex-1 h-px bg-slate-200" />
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Add Another</span>
-                                    <div className="flex-1 h-px bg-slate-200" />
-                                </div>
-                            )}
-
-                            {!qLoading && (
-                                <>
-                                    <QuestionEditor question={newQ} onChange={setNewQ} />
-                                    <button type="button" onClick={handleAddQuestion}
-                                        disabled={qSaving || !newQ.question.trim()}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
-                                        {qSaving
-                                            ? <><AiOutlineLoading3Quarters className="animate-spin text-xs" /> Adding question…</>
-                                            : <><FaPlus className="text-[9px]" /> Add Question</>}
-                                    </button>
-                                </>
-                            )}
-
-                            {!qLoading && form.questions.length === 0 && (
-                                <p className="text-[11px] text-slate-400 text-center -mt-1">
-                                    No questions yet — fill in the form above and click Add Question.
-                                </p>
-                            )}
+                        <div>
+                            <label className={labelCls}>Quiz Type</label>
+                            <select className={inputCls} value={form.type}
+                                onChange={e => {
+                                    up("type", e.target.value);
+                                    up("moduleId", ""); up("moduleSlug", "");
+                                    up("lessonId", ""); up("lessonSlug", "");
+                                }}>
+                                <option value="COURSE">Course-level Quiz</option>
+                                <option value="MODULE">Module-level Quiz</option>
+                                <option value="LESSON">Lesson-level Quiz</option>
+                            </select>
                         </div>
-                    )}
+
+                        {(form.type === "MODULE" || form.type === "LESSON") && (
+                            <div className="col-span-2">
+                                <label className={labelCls}>Module *</label>
+                                <select className={inputCls} value={form.moduleId}
+                                    onChange={e => {
+                                        const selected = modules.find(m => String(m.id) === e.target.value);
+                                        up("moduleId", e.target.value);
+                                        up("moduleSlug", selected?.slug ?? selected?.moduleSlug ?? "");
+                                        up("lessonId", ""); up("lessonSlug", "");
+                                    }}>
+                                    <option value="">Select Module</option>
+                                    {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                                </select>
+                            </div>
+                        )}
+
+                        {form.type === "LESSON" && form.moduleSlug && (
+                            <div className="col-span-2">
+                                <label className={labelCls}>Lesson *</label>
+                                <select className={inputCls} value={form.lessonId}
+                                    onChange={e => {
+                                        const selected = lessons.find(l => String(l.id) === e.target.value);
+                                        up("lessonId", e.target.value);
+                                        up("lessonSlug", selected?.lessonSlug ?? selected?.slug ?? "");
+                                    }}>
+                                    <option value="">Select Lesson</option>
+                                    {lessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label className={labelCls}>Total Marks</label>
+                            <input type="number" className={inputCls} min={1} value={form.totalMarks}
+                                onChange={e => up("totalMarks", Number(e.target.value))} />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Duration (mins)</label>
+                            <input type="number" className={inputCls} min={5} max={300} value={form.duration}
+                                onChange={e => up("duration", Number(e.target.value))} />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Max Attempts</label>
+                            <input type="number" className={inputCls} min={1} max={10} value={form.maxAttempts}
+                                onChange={e => up("maxAttempts", Number(e.target.value))} />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Passing Marks</label>
+                            <input type="number" className={inputCls} min={0} value={form.passingScore}
+                                onChange={e => up("passingScore", Number(e.target.value))} />
+                        </div>
+                    </div>
+
+                    <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${form.published ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-200"}`}>
+                        <button type="button" onClick={() => up("published", !form.published)}
+                            className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${form.published ? "bg-emerald-500" : "bg-slate-300"}`}>
+                            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.published ? "translate-x-5" : "translate-x-0.5"}`} />
+                        </button>
+                        <div className="flex-1">
+                            <p className={`text-xs font-bold ${form.published ? "text-emerald-700" : "text-slate-700"}`}>
+                                {form.published ? "Published — visible to students" : "Draft — only you can see this"}
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                                {form.published ? "Students can attempt this quiz now" : "Toggle to publish when ready, then click Save"}
+                            </p>
+                        </div>
+                        <div className={`flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full border flex-shrink-0 ${form.published ? "text-emerald-700 bg-emerald-100 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200"}`}>
+                            {form.published ? <FaLockOpen className="text-[9px]" /> : <FaLock className="text-[9px]" />}
+                            {form.published ? "Published" : "Draft"}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Footer */}
@@ -791,25 +607,307 @@ const AddQuizModal = ({ courses, initialData, onClose, onSave }) => {
                         <button onClick={onClose} className="px-4 py-2 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-100 transition bg-white">
                             Cancel
                         </button>
-                        <div className="flex items-center gap-2">
-                            {step === 1 ? (
-                                <button onClick={() => setStep(2)} disabled={!form.title.trim() || !form.courseId}
-                                    className="flex items-center gap-1.5 px-5 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
-                                    Next: Add Questions <FaChevronRight className="text-[9px]" />
-                                </button>
-                            ) : (
-                                <>
-                                    <button onClick={() => setStep(1)} className="px-4 py-2 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-100 transition bg-white">
-                                        Back
-                                    </button>
-                                    <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.courseId}
-                                        className="flex items-center gap-2 px-5 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-sm">
-                                        {saving ? <AiOutlineLoading3Quarters className="animate-spin" /> : <MdCheckCircle />}
-                                        {saving ? "Saving…" : isEditMode ? "Save Changes" : `Save Quiz${localQCount > 0 ? ` + ${localQCount} Q` : ""}`}
-                                    </button>
-                                </>
-                            )}
+                        <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.courseId}
+                            className="flex items-center gap-2 px-5 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                            {saving ? <AiOutlineLoading3Quarters className="animate-spin" /> : <MdCheckCircle />}
+                            {saving ? "Saving…" : isEditMode ? "Save Changes" : "Create Quiz"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ══════════════════════════════════════════════════════════
+   QUESTIONS MANAGER MODAL — separate from quiz metadata.
+   Questions and options are each managed independently:
+   every add/edit/delete hits the API immediately.
+══════════════════════════════════════════════════════════ */
+const QuestionsManagerModal = ({ quiz, onClose }) => {
+    const [questions, setQuestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const [newQ, setNewQ] = useState(blankQuestion());
+    const [addingQuestion, setAddingQuestion] = useState(false);
+
+    const [editingQuestionId, setEditingQuestionId] = useState(null);
+    const [editDraft, setEditDraft] = useState(null);
+    const [savingQuestion, setSavingQuestion] = useState(false);
+
+    const [addingOptionForQuestionId, setAddingOptionForQuestionId] = useState(null);
+
+    const loadQuestions = useCallback(async () => {
+        if (!quiz?.slug) return;
+        setLoading(true);
+        try {
+            const qs = await fetchQuestionsWithOptions(quiz.slug);
+            setQuestions(qs);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load questions.");
+        } finally {
+            setLoading(false);
+        }
+    }, [quiz?.slug]);
+
+    useEffect(() => { loadQuestions(); }, [loadQuestions]);
+
+    /* ── Question CRUD ── */
+    /* ── Question CRUD ── */
+    const handleAddQuestion = async () => {
+        if (!newQ.question.trim()) { setError("Please enter a question."); return; }
+        setAddingQuestion(true);
+        setError("");
+        try {
+            const res = await instructorQuizQuestionApi.createQuestion(quiz.slug, {
+                questionText: newQ.question.trim(),
+                explanation: newQ.explanation?.trim() ?? "",
+                marks: Number(newQ.marks || 1),
+                sortOrder: questions.length + 1,
+            });
+
+            // Extract the new question's ID so we can open its option editor right away
+            let created = res?.data?.data ?? res?.data;
+            if (Array.isArray(created)) created = created[0];
+            const newQuestionId = created?.id ?? created?.questionId ?? null;
+
+            setNewQ(blankQuestion());
+            await loadQuestions();
+
+            // Auto-open "Add Option" for the question just created, instead of
+            // leaving the user to hunt for it in the list
+            if (newQuestionId) {
+                setAddingOptionForQuestionId(newQuestionId);
+            }
+        } catch (err) {
+            console.error("Add question failed:", err?.response?.data ?? err);
+            setError(err?.response?.data?.message || "Failed to add question.");
+        } finally {
+            setAddingQuestion(false);
+        }
+    };
+    const startEditQuestion = (q) => {
+        setEditingQuestionId(q.id);
+        setEditDraft({ question: q.question, explanation: q.explanation, marks: q.marks });
+    };
+
+    const handleSaveQuestionEdit = async (q) => {
+        if (!editDraft?.question?.trim()) return;
+        setSavingQuestion(true);
+        setError("");
+        try {
+            await instructorQuizQuestionApi.updateQuestion(q.id, {
+                questionText: editDraft.question.trim(),
+                explanation: editDraft.explanation?.trim() ?? "",
+                marks: Number(editDraft.marks || 1),
+            });
+            setEditingQuestionId(null);
+            setEditDraft(null);
+            await loadQuestions();
+        } catch (err) {
+            console.error("Update question failed:", err?.response?.data ?? err);
+            setError(err?.response?.data?.message || "Failed to update question.");
+        } finally {
+            setSavingQuestion(false);
+        }
+    };
+
+    const handleDeleteQuestion = async (q) => {
+        if (!window.confirm("Delete this question and all its options?")) return;
+        setError("");
+        try {
+            await instructorQuizQuestionApi.deleteQuestion(q.id);
+            await loadQuestions();
+        } catch (err) {
+            console.error("Delete question failed:", err?.response?.data ?? err);
+            setError("Failed to delete question.");
+        }
+    };
+
+    /* ── Option CRUD (independent of question editing) ── */
+    const handleUpdateOption = async (questionId, option, newText, newCorrect, newSortOrder) => {
+        try {
+            const question = questions.find(q => q.id === questionId);
+            const existingOptions = question?.optionObjects || [];
+
+            const payload = existingOptions.map(o => {
+                if (o.id === option.id) {
+                    return {
+                        id: o.id,
+                        optionId: o.id,
+                        optionText: newText,
+                        correct: newCorrect,
+                        sortOrder: newSortOrder ?? o.sortOrder ?? 1,
+                    };
+                }
+                return {
+                    id: o.id,
+                    optionId: o.id,
+                    optionText: o.optionText ?? o.text,
+                    correct: newCorrect ? false : (o.correct === true || o.isCorrect === true),
+                    sortOrder: o.sortOrder ?? 1,
+                };
+            });
+
+            await instructorQuizOptionApi.updateOptions(questionId, payload);
+            await loadQuestions();
+        } catch (err) {
+            console.error("Update option failed:", JSON.stringify(err?.response?.data || err.message));
+            setError(err?.response?.data?.message || "Failed to update option.");
+        }
+    };
+
+    const handleDeleteOption = async (optionId) => {
+        try {
+            await instructorQuizOptionApi.deleteOption(optionId);
+            await loadQuestions();
+        } catch (err) {
+            console.error("Delete option failed:", err?.response?.data ?? err);
+            setError("Failed to delete option.");
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden">
+
+                {/* Header */}
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                        <MdListAlt className="text-white text-lg" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-sm font-black text-white truncate">Manage Questions</h2>
+                        <p className="text-[11px] text-violet-200 mt-0.5 truncate">{quiz?.title} · {questions.length} question{questions.length !== 1 ? "s" : ""}</p>
+                    </div>
+                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30 transition flex-shrink-0">
+                        <MdClose />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                    {loading && (
+                        <div className="space-y-2">
+                            {[1, 2].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
                         </div>
+                    )}
+
+                    {!loading && questions.length === 0 && (
+                        <p className="text-[11px] text-slate-400 text-center py-4">
+                            No questions yet — add your first question below.
+                        </p>
+                    )}
+
+                    {!loading && questions.map((q, idx) => {
+                        const isEditing = editingQuestionId === q.id;
+                        return (
+                            <div key={q.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+                                {/* Question section */}
+                                {isEditing ? (
+                                    <QuestionEditor
+                                        question={editDraft}
+                                        label={`Edit Question ${idx + 1}`}
+                                        saveLabel="Save Question"
+                                        onChange={setEditDraft}
+                                        onCancel={() => { setEditingQuestionId(null); setEditDraft(null); }}
+                                        onSave={() => handleSaveQuestionEdit(q)}
+                                        saving={savingQuestion}
+                                    />
+                                ) : (
+                                    <div className="flex items-start gap-3">
+                                        <span className="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 bg-violet-100 text-violet-600">
+                                            {idx + 1}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-semibold text-slate-800 leading-snug">{q.question}</p>
+                                            {q.explanation && <p className="text-[11px] text-slate-400 mt-1">{q.explanation}</p>}
+                                            <span className="inline-block text-[10px] text-slate-400 mt-1">{q.marks} mark{q.marks !== 1 ? "s" : ""}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            <button onClick={() => startEditQuestion(q)}
+                                                className="w-6 h-6 rounded-lg bg-violet-50 text-violet-500 hover:bg-violet-100 flex items-center justify-center transition">
+                                                <MdEdit className="text-xs" />
+                                            </button>
+                                            <button onClick={() => handleDeleteQuestion(q)}
+                                                className="w-6 h-6 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition">
+                                                <FaTrash className="text-[9px]" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Options section — fully separate UI */}
+                                <div className="pl-9 space-y-2">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wide">Options</p>
+
+                                    {q.optionObjects.length === 0 && addingOptionForQuestionId !== q.id && (
+                                        <p className="text-[11px] text-slate-400">No options yet.</p>
+                                    )}
+
+                                    {q.optionObjects.map(opt => (
+                                        <OptionRow
+                                            key={opt.id}
+                                            option={opt}
+                                            isCorrect={opt.isCorrect === true || opt.correct === true}
+                                            onSave={(text, correct, newSortOrder) => handleUpdateOption(q.id, opt, text, correct, newSortOrder)}
+                                            onDelete={() => handleDeleteOption(opt.id)}
+                                        />
+                                    ))}
+
+                                    {addingOptionForQuestionId === q.id ? (
+                                        <InlineOptionEditor
+                                            questionId={q.id}
+                                            existingOptions={q.optionObjects || []}
+                                            sortOrder={(q.optionObjects?.length || 0) + 1}
+                                            onSaveSuccess={() => { setAddingOptionForQuestionId(null); loadQuestions(); }}
+                                            onCancel={() => setAddingOptionForQuestionId(null)}
+                                        />
+                                    ) : (
+                                        <button onClick={() => setAddingOptionForQuestionId(q.id)}
+                                            className="flex items-center gap-1.5 text-[11px] font-bold text-violet-600 hover:text-violet-700 transition">
+                                            <FaPlus className="text-[8px]" /> Add Option
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* Add new question section — always at the bottom, separate from options entirely */}
+                    {!loading && (
+                        <div className="pt-2 space-y-2">
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 h-px bg-slate-200" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Add New Question</span>
+                                <div className="flex-1 h-px bg-slate-200" />
+                            </div>
+                            <QuestionEditor question={newQ} onChange={setNewQ} />
+                            <button type="button" onClick={handleAddQuestion}
+                                disabled={addingQuestion || !newQ.question.trim()}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
+                                {addingQuestion
+                                    ? <><AiOutlineLoading3Quarters className="animate-spin text-xs" /> Adding question…</>
+                                    : <><FaPlus className="text-[9px]" /> Add Question</>}
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="flex flex-col gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex-shrink-0">
+                    {error && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-[11px] font-semibold">
+                            <MdErrorOutline className="text-sm flex-shrink-0" /> {error}
+                            <button onClick={() => setError("")} className="ml-auto flex-shrink-0"><MdClose className="text-xs" /></button>
+                        </div>
+                    )}
+                    <div className="flex justify-end">
+                        <button onClick={onClose} className="px-5 py-2 text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-xl transition">
+                            Done
+                        </button>
                     </div>
                 </div>
             </div>
@@ -843,13 +941,16 @@ const DeleteModal = ({ quiz, deleting, onClose, onConfirm }) => (
 );
 
 /* ══════════════════════════════════════════════════════════
-   QUIZ CARD
+   QUIZ CARD — clicking the card opens the Questions Manager.
+   Dropdown menu handles Edit Details / Manage Questions / Results / Delete.
 ══════════════════════════════════════════════════════════ */
-const QuizCard = ({ quiz, onEdit, onDelete, onViewResults }) => {
+const QuizCard = ({ quiz, onEditDetails, onManageQuestions, onDelete, onViewResults, onPublish, onArchive }) => {
     const [menuOpen, setMenuOpen] = useState(false);
-    const s = (quiz.status === "active" || quiz.published)
-        ? { label: "Published", color: "text-emerald-700 bg-emerald-50 border-emerald-200" }
-        : { label: "Draft", color: "text-amber-700 bg-amber-50 border-amber-200" };
+    const s = quiz.status === "archived"
+        ? { label: "Archived", color: "text-slate-600 bg-slate-100 border-slate-300" }
+        : (quiz.status === "active" || quiz.published)
+            ? { label: "Published", color: "text-emerald-700 bg-emerald-50 border-emerald-200" }
+            : { label: "Draft", color: "text-amber-700 bg-amber-50 border-amber-200" };
     const typeColor = {
         LESSON: "bg-violet-50 text-violet-700 border-violet-200",
         COURSE: "bg-purple-50 text-purple-700 border-purple-200",
@@ -860,8 +961,11 @@ const QuizCard = ({ quiz, onEdit, onDelete, onViewResults }) => {
         : quiz.type === "LESSON" && quiz.lessonName ? quiz.lessonName : null;
     const qCount = quiz.questions ?? 0;
 
+    const stop = (fn) => (e) => { e.stopPropagation(); fn(); };
+
     return (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+        <div onClick={() => onManageQuestions(quiz)}
+            className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-violet-200 transition-all group cursor-pointer">
             <div className="flex items-start gap-4 p-5">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border ${s.label === "Published" ? "bg-violet-50 border-violet-100" : "bg-slate-50 border-slate-200"}`}>
                     <MdOutlineQuiz className={`text-2xl ${s.label === "Published" ? "text-violet-500" : "text-slate-400"}`} />
@@ -887,24 +991,32 @@ const QuizCard = ({ quiz, onEdit, onDelete, onViewResults }) => {
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${s.color}`}>{s.label}</span>
                             <div className="relative">
-                                <button onClick={() => setMenuOpen(v => !v)}
+                                <button onClick={stop(() => setMenuOpen(v => !v))}
                                     className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
                                     <MdMoreVert />
                                 </button>
                                 {menuOpen && (
                                     <>
-                                        <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                                        <div className="absolute right-0 top-9 z-20 w-44 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
-                                            <button onClick={() => { onEdit(quiz); setMenuOpen(false); }}
+                                        <div className="fixed inset-0 z-10" onClick={stop(() => setMenuOpen(false))} />
+                                        <div className="absolute right-0 top-9 z-20 w-48 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                                            <button onClick={stop(() => { onEditDetails(quiz); setMenuOpen(false); })}
                                                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition text-left">
-                                                <FaEdit className="text-violet-400 w-3 h-3" /> Edit Quiz
+                                                <FaEdit className="text-violet-400 w-3 h-3" /> Edit Details
                                             </button>
-                                            <button onClick={() => { onViewResults(quiz); setMenuOpen(false); }}
+                                            <button onClick={stop(() => { onManageQuestions(quiz); setMenuOpen(false); })}
                                                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition text-left">
-                                                <MdBarChart className="text-purple-400 w-3.5 h-3.5" /> View Results
+                                                <MdListAlt className="text-indigo-400 w-3.5 h-3.5" /> Manage Questions
+                                            </button>
+                                            <button onClick={stop(() => { onPublish(quiz); setMenuOpen(false); })}
+                                                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition text-left">
+                                                <MdCheckCircle className="text-emerald-400 w-3.5 h-3.5" /> Publish Quiz
+                                            </button>
+                                            <button onClick={stop(() => { onArchive(quiz); setMenuOpen(false); })}
+                                                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition text-left">
+                                                <FaLock className="text-amber-400 w-3 h-3" /> Archive Quiz
                                             </button>
                                             <div className="border-t border-slate-100" />
-                                            <button onClick={() => { onDelete(quiz); setMenuOpen(false); }}
+                                            <button onClick={stop(() => { onDelete(quiz); setMenuOpen(false); })}
                                                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-50 transition text-left">
                                                 <FaTrash className="w-3 h-3" /> Delete Quiz
                                             </button>
@@ -916,7 +1028,7 @@ const QuizCard = ({ quiz, onEdit, onDelete, onViewResults }) => {
                     </div>
                 </div>
             </div>
-            <div className="border-t border-slate-100 px-5 py-3 flex items-center gap-4 bg-slate-50/50">
+            <div className="border-t border-slate-100 px-5 py-3 flex items-center gap-4 bg-slate-50/50 rounded-b-2xl">
                 <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${quiz.avgScore >= 60 ? "bg-emerald-50" : "bg-rose-50"}`}>
                         <FaTrophy className={`text-xs ${quiz.avgScore >= 60 ? "text-emerald-500" : "text-rose-400"}`} />
@@ -942,13 +1054,13 @@ const QuizCard = ({ quiz, onEdit, onDelete, onViewResults }) => {
                     <p className="text-sm font-black text-slate-700">{quiz.maxAttempts === 0 ? "Unlimited" : quiz.maxAttempts}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={() => onViewResults(quiz)}
+                    <button onClick={stop(() => onViewResults(quiz))}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition">
                         <MdBarChart className="text-sm" /> Results
                     </button>
-                    <button onClick={() => onEdit(quiz)}
+                    <button onClick={stop(() => onManageQuestions(quiz))}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-xl hover:bg-violet-100 transition">
-                        <FaEdit className="text-[10px]" /> Edit
+                        <MdListAlt className="text-[11px]" /> Questions
                     </button>
                 </div>
             </div>
@@ -968,10 +1080,13 @@ const Quizzes = () => {
     const [fetchError, setFetchError] = useState("");
     const [activeTab, setActiveTab] = useState("all");
     const [search, setSearch] = useState("");
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState(null);
+
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingQuizMeta, setEditingQuizMeta] = useState(null);
+    const [managingQuestionsFor, setManagingQuestionsFor] = useState(null);
+    const [deletingQuiz, setDeletingQuiz] = useState(null);
     const [deleting, setDeleting] = useState(false);
-    const [editTarget, setEditTarget] = useState(null);
+
     const [typeFilter, setTypeFilter] = useState("ALL");
     const [courseFilter, setCourseFilter] = useState("ALL");
     const [moduleFilter, setModuleFilter] = useState("ALL");
@@ -979,21 +1094,6 @@ const Quizzes = () => {
     const [filterModules, setFilterModules] = useState([]);
     const [filterLessons, setFilterLessons] = useState([]);
     const [scopedQuizzes, setScopedQuizzes] = useState(null);
-
-    // Fetch analytics safely — uses quiz slug
-    const fetchQuizAnalytics = useCallback(async (quizSlug) => {
-        if (!quizSlug) return { attempts: 0, avgScore: 0 };
-        try {
-            const response = await instructorQuizAnalyticsApi.getQuizAnalytics(quizSlug);
-            const data = extractObj(response);
-            return {
-                attempts: data.totalAttempts ?? data.attemptCount ?? 0,
-                avgScore: data.averageScore ?? data.avgScore ?? 0,
-            };
-        } catch {
-            return { attempts: 0, avgScore: 0 };
-        }
-    }, []);
 
     const fetchQuizzes = useCallback(async () => {
         setLoading(true);
@@ -1008,17 +1108,14 @@ const Quizzes = () => {
                     const courseSlug = course.slug ?? course.courseSlug;
                     if (!courseSlug) return [];
 
-                    // Course-level quizzes
                     const cq = await instructorQuizApi.getQuizzesByCourse(courseSlug, 0, 100)
                         .then(r => extractList(r).map(raw => normalizeQuiz(raw, course)))
                         .catch(() => []);
 
-                    // Modules — use courseSlug
                     const mods = extractList(
                         await instructorModuleApi.getCourseModules(courseSlug, 0, 100).catch(() => null)
                     );
 
-                    // Module-level quizzes — use module.slug
                     const mq = (await Promise.all(mods.map(async (mod) => {
                         const modSlug = mod.slug ?? mod.moduleSlug;
                         if (!modSlug) return [];
@@ -1032,7 +1129,6 @@ const Quizzes = () => {
                             .catch(() => []);
                     }))).flat();
 
-                    // Lesson-level quizzes — use lesson.lessonSlug
                     const lq = (await Promise.all(mods.map(async (mod) => {
                         const modSlug = mod.slug ?? mod.moduleSlug;
                         if (!modSlug) return [];
@@ -1040,27 +1136,17 @@ const Quizzes = () => {
                             await instructorLessonApi.getModuleLessons(modSlug, 0, 100).catch(() => null)
                         );
                         return (await Promise.all(lessons.map(async (lesson) => {
-                            console.log("Lesson:", lesson);
-                            console.log("Lesson Slug:", lesson.lessonSlug);
-                            console.log("Lesson Slug 2:", lesson.slug);
-                            const lessonSlug = lesson.lessonSlug;
+                            const lessonSlug = lesson.slug ?? lesson.lessonSlug;
                             if (!lessonSlug) return [];
-                            return instructorQuizApi.getQuizzesByLesson(
-                                lessonSlug,
-                                0,
-                                50
-                            )
-                                .then(r => {
-                                    console.log("Lesson Quiz Response:", r.data);
-                                    return extractList(r).map(raw => ({
-                                        ...normalizeQuiz(raw, course),
-                                        lessonId: lesson.id,
-                                        lessonSlug,
-                                        lessonName: lesson.title,
-                                    }));
-                                })
+                            return instructorQuizApi.getQuizzesByLesson(lessonSlug, 0, 50)
+                                .then(r => extractList(r).map(raw => ({
+                                    ...normalizeQuiz(raw, course),
+                                    lessonId: lesson.id,
+                                    lessonSlug,
+                                    lessonName: lesson.title,
+                                })))
                                 .catch(err => {
-                                    console.error("Lesson Quiz Error:", lessonSlug, err.response?.data);
+                                    if (err?.response?.status !== 404) console.warn("Lesson quiz fetch:", err?.message);
                                     return [];
                                 });
                         }))).flat();
@@ -1086,7 +1172,6 @@ const Quizzes = () => {
 
     useEffect(() => { fetchQuizzes(); }, [fetchQuizzes]);
 
-    // Filter: load modules when course changes
     useEffect(() => {
         setModuleFilter("ALL"); setFilterModules([]);
         if ((typeFilter !== "MODULE" && typeFilter !== "LESSON") || courseFilter === "ALL") return;
@@ -1097,7 +1182,6 @@ const Quizzes = () => {
             .then(r => setFilterModules(extractList(r))).catch(console.error);
     }, [typeFilter, courseFilter, courses]);
 
-    // Filter: load lessons when module changes
     useEffect(() => {
         setLessonFilter("ALL"); setFilterLessons([]);
         if (typeFilter !== "LESSON" || moduleFilter === "ALL") return;
@@ -1108,7 +1192,6 @@ const Quizzes = () => {
             .then(r => setFilterLessons(extractList(r))).catch(console.error);
     }, [typeFilter, moduleFilter, filterModules]);
 
-    // Scoped filter fetch
     useEffect(() => {
         let cancelled = false;
         const load = async () => {
@@ -1161,6 +1244,7 @@ const Quizzes = () => {
     const totalQuizzes = quizzes.length;
     const publishedCount = quizzes.filter(q => q.status === "active").length;
     const draftCount = quizzes.filter(q => q.status === "draft").length;
+    const archivedCount = quizzes.filter(q => q.status === "archived").length;
     const totalAttempts = useMemo(() => quizzes.reduce((s, q) => s + (q.attempts || 0), 0), [quizzes]);
     const avgScore = useMemo(() => {
         const scored = quizzes.filter(q => (q.avgScore || 0) > 0);
@@ -1175,7 +1259,12 @@ const Quizzes = () => {
         LESSON: quizzes.filter(q => q.type === "LESSON").length,
     }), [quizzes]);
 
-    const tabFilter = { all: () => true, published: q => q.status === "active", draft: q => q.status === "draft" };
+    const tabFilter = {
+        all: () => true,
+        published: q => q.status === "active",
+        draft: q => q.status === "draft",
+        archived: q => q.status === "archived"
+    };
     const baseList = scopedQuizzes ?? quizzes;
     const filtered = baseList
         .filter(tabFilter[activeTab] ?? (() => true))
@@ -1183,22 +1272,61 @@ const Quizzes = () => {
         .filter(q => scopedQuizzes ? true : (courseFilter === "ALL" || String(q.courseId) === String(courseFilter)))
         .filter(q => q.title.toLowerCase().includes(search.toLowerCase()) || q.course.toLowerCase().includes(search.toLowerCase()));
 
-    // Delete — uses quiz.slug
     const handleDelete = async () => {
-        if (!deleteTarget?.slug) {
+        if (!deletingQuiz?.slug) {
             alert("Cannot delete: quiz slug not found.");
             return;
         }
         setDeleting(true);
         try {
-            await instructorQuizApi.deleteQuiz(deleteTarget.slug);
-            setQuizzes(prev => prev.filter(q => q.id !== deleteTarget.id));
-            setScopedQuizzes(prev => prev ? prev.filter(q => q.id !== deleteTarget.id) : prev);
-            setDeleteTarget(null);
+            await instructorQuizApi.deleteQuiz(deletingQuiz.slug);
+            setQuizzes(prev => prev.filter(q => q.id !== deletingQuiz.id));
+            setScopedQuizzes(prev => prev ? prev.filter(q => q.id !== deletingQuiz.id) : prev);
+            setDeletingQuiz(null);
         } catch (err) {
             alert(err?.response?.data?.message || "Couldn't delete the quiz.");
         } finally {
             setDeleting(false);
+        }
+    };
+
+    const handlePublish = async (quiz) => {
+        if (!quiz?.slug) return;
+        try {
+            await instructorQuizApi.publishQuiz(quiz.slug);
+            fetchQuizzes();
+        } catch (err) {
+            alert(err?.response?.data?.message || "Failed to publish quiz.");
+        }
+    };
+
+    const handleArchive = async (quiz) => {
+        if (!quiz?.slug) return;
+        try {
+            await instructorQuizApi.archiveQuiz(quiz.slug);
+            fetchQuizzes();
+        } catch (err) {
+            alert(err?.response?.data?.message || "Failed to archive quiz.");
+        }
+    };
+
+    const handleDraft = async (quiz) => {
+        if (!quiz?.slug) return;
+        try {
+            await instructorQuizApi.draftQuiz(quiz.slug);
+            fetchQuizzes();
+        } catch (err) {
+            alert(err?.response?.data?.message || "Failed to move quiz to draft.");
+        }
+    };
+
+
+    // After Create or Edit of quiz metadata: refresh list.
+    // If it was a brand-new quiz, immediately open the Questions Manager for it.
+    const handleQuizFormSaved = (savedQuiz) => {
+        fetchQuizzes();
+        if (savedQuiz.isNew) {
+            setManagingQuestionsFor({ id: savedQuiz.id, slug: savedQuiz.slug, title: savedQuiz.title });
         }
     };
 
@@ -1209,6 +1337,7 @@ const Quizzes = () => {
         { id: "all", label: "All", count: totalQuizzes },
         { id: "published", label: "Published", count: publishedCount },
         { id: "draft", label: "Draft", count: draftCount },
+        { id: "archived", label: "Archived", count: archivedCount },
     ];
     const typeFilters = [
         { id: "ALL", label: "All Types", icon: <MdFilterList /> },
@@ -1235,7 +1364,7 @@ const Quizzes = () => {
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Quizzes</h1>
                         <p className="text-sm text-slate-500 mt-0.5">Manage your assessments and track student performance</p>
                     </div>
-                    <button onClick={() => setShowAddModal(true)}
+                    <button onClick={() => setIsCreateModalOpen(true)}
                         className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0">
                         <MdAdd className="text-lg" /> Add Quiz
                     </button>
@@ -1250,7 +1379,6 @@ const Quizzes = () => {
                     </div>
                 )}
 
-                {/* Stat cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {statCards.map((s, i) => (
                         <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
@@ -1263,7 +1391,6 @@ const Quizzes = () => {
                     ))}
                 </div>
 
-                {/* Filter panel */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5 mr-1">
@@ -1304,7 +1431,6 @@ const Quizzes = () => {
                     )}
                 </div>
 
-                {/* Tabs + search */}
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
                         {tabs.map(tab => (
@@ -1326,7 +1452,6 @@ const Quizzes = () => {
                     <p className="text-[11px] text-slate-400 font-medium -mt-3">Showing {filtered.length} quiz{filtered.length !== 1 ? "zes" : ""}</p>
                 )}
 
-                {/* Quiz list */}
                 {loading || filterLoading ? (
                     <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-32 bg-white border border-slate-200 rounded-2xl animate-pulse" />)}</div>
                 ) : filtered.length === 0 ? (
@@ -1337,7 +1462,7 @@ const Quizzes = () => {
                         <p className="text-sm font-black text-slate-700 mb-1">{search || isFiltering ? "No quizzes match your filters" : "No quizzes yet"}</p>
                         <p className="text-xs text-slate-400 mb-5">{search || isFiltering ? "Try a different filter or search term" : "Create your first quiz to get started"}</p>
                         {!search && !isFiltering && (
-                            <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                            <button onClick={() => setIsCreateModalOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
                                 <MdAdd className="text-base" /> Create First Quiz
                             </button>
                         )}
@@ -1345,26 +1470,37 @@ const Quizzes = () => {
                 ) : (
                     <div className="space-y-3">
                         {filtered.map(quiz => (
-                            <QuizCard key={quiz.id} quiz={quiz} onEdit={setEditTarget} onDelete={setDeleteTarget}
+                            <QuizCard key={quiz.id} quiz={quiz}
+                                onEditDetails={q => setEditingQuizMeta(q)}
+                                onManageQuestions={q => setManagingQuestionsFor(q)}
+                                onDelete={setDeletingQuiz}
+                                onPublish={handlePublish}
+                                onArchive={handleArchive}
+                                onDraft={handleDraft}
                                 onViewResults={q => navigate(`/instructor/quiz/${q.slug}/results`)} />
                         ))}
                     </div>
                 )}
             </div>
 
-            {showAddModal && (
-                <AddQuizModal courses={courses}
-                    onClose={() => setShowAddModal(false)}
-                    onSave={fetchQuizzes} />
+            {isCreateModalOpen && (
+                <QuizFormModal mode="create" courses={courses}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSaved={handleQuizFormSaved} />
             )}
-            {deleteTarget && (
-                <DeleteModal quiz={deleteTarget} deleting={deleting}
-                    onClose={() => !deleting && setDeleteTarget(null)} onConfirm={handleDelete} />
+            {editingQuizMeta && (
+                <QuizFormModal mode="edit" courses={courses} initialData={editingQuizMeta}
+                    onClose={() => setEditingQuizMeta(null)}
+                    onSaved={handleQuizFormSaved} />
             )}
-            {editTarget && (
-                <AddQuizModal courses={courses} initialData={editTarget}
-                    onClose={() => setEditTarget(null)}
-                    onSave={fetchQuizzes} />
+            {managingQuestionsFor && (
+                <QuestionsManagerModal
+                    quiz={managingQuestionsFor}
+                    onClose={() => { setManagingQuestionsFor(null); fetchQuizzes(); }} />
+            )}
+            {deletingQuiz && (
+                <DeleteModal quiz={deletingQuiz} deleting={deleting}
+                    onClose={() => !deleting && setDeletingQuiz(null)} onConfirm={handleDelete} />
             )}
         </div>
     );

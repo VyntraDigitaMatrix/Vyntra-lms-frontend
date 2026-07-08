@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { instructorCourseApi } from "../auth/api";
+import { instructorCourseApi, instructorPricingApi } from "../auth/api";
 import {
     FaChevronLeft, FaBold, FaItalic, FaUnderline, FaStrikethrough,
     FaAlignLeft, FaAlignCenter, FaAlignRight, FaUndo, FaRedo,
@@ -10,8 +10,8 @@ import {
 import {
     MdSearch, MdBrush, MdLanguage, MdLabel, MdPerson, MdQuestionAnswer,
     MdAttachMoney, MdStar, MdForum, MdLeaderboard, MdFlashOn, MdCardMembership,
-    MdWaterDrop, MdPeople, MdPublish, MdDelete, MdLink,
-    MdSettings, MdClose, MdAdd, MdImage, MdInfo,
+    MdWaterDrop, MdPeople, MdPublish, MdDelete, MdLink, MdPhoneAndroid,
+    MdSettings, MdClose, MdAdd, MdImage, MdInfo, MdPhoneIphone,
     MdCheckCircle, MdWarning, MdVideocam, MdUpload,
 } from 'react-icons/md';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -29,25 +29,26 @@ const SETTINGS_GROUPS = [
             { id: "tags", label: "Tags", Icon: MdLabel, desc: "Add course tag to make the course easy to filter for…" },
             { id: "authors", label: "Authors", Icon: MdPerson, desc: "Add authors associated with the course" },
             { id: "faqs", label: "FAQs", Icon: MdQuestionAnswer, desc: "Add and manage frequently asked questions for your…" },
+            { id: "pricing", label: "Pricing & Plans", Icon: MdAttachMoney, desc: "Set up pricing plans, free status, and encryption." },
         ],
     },
     {
         id: "features", label: "Features", description: "Use course features to enhance your course",
         items: [
-            { id: "ratings", label: "Ratings & Reviews", Icon: MdStar, desc: "Course reviews allow learners to provide feedback…" },
-            { id: "discussions", label: "Discussions & Bookmarks", Icon: MdForum, desc: "Allow learners to create discussions and bookmark…" },
-            { id: "leaderboard", label: "Leaderboard", Icon: MdLeaderboard, desc: "Enable leaderboards to increase competition amon…" },
-            { id: "fast_checkout", label: "Fast Checkout", Icon: MdFlashOn, desc: "Allow learners to buy your course with quick & easy…" },
+            { id: "reviews", label: "Reviews & Ratings", Icon: MdStar, desc: "Course reviews allow learners to provide feedback and ratings" },
+            { id: "discussions", label: "Discussions", Icon: MdForum, desc: "Allow learners to create discussions and bookmark…" },
+            { id: "bookmarks", label: "Bookmarks", Icon: MdLabel, desc: "Allow learners to bookmark lessons in this course" },
+            { id: "leaderboard", label: "Leaderboard", Icon: MdLeaderboard, desc: "Enable leaderboards to increase competition among learners" },
             { id: "certificates", label: "Certificates", Icon: MdCardMembership, desc: "Enable course certification for your learners to issue…" },
-            { id: "dripping", label: "Content Dripping", Icon: MdWaterDrop, desc: "Configure content dripping to pre-schedule release of…" },
-            { id: "learner_config", label: "Learner Configurations", Icon: MdPeople, desc: "Configure learner gstin and invoice settings for this…" },
+            { id: "web", label: "Web", Icon: MdLanguage, desc: "Allow learners to access this course through the web application." },
+            { id: "android", label: "Android", Icon: MdPhoneAndroid, desc: "Allow learners to access this course using the Android mobile app." },
+            { id: "ios", label: "iOS", Icon: MdPhoneIphone, desc: "Allow learners to access this course using the iOS mobile app." },
         ],
     },
     {
-        id: "publish", label: "Publish/Delete Course", description: "Delete or disable course and learners",
+        id: "publish", label: "Publish/Archive Course", description: "Publish or archive course",
         items: [
             { id: "publish_course", label: "Publish Course", Icon: MdPublish, desc: "Publish/Unpublish the course for your learners" },
-            { id: "delete_course", label: "Delete Course", Icon: MdDelete, desc: "Delete your course if you no longer require it", danger: true },
         ],
     },
 ];
@@ -281,24 +282,201 @@ function PublishPage({ data, onPublish, onArchive, publishing }) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   DELETE PAGE
+}
+
+/* ══════════════════════════════════════════════════════════
+   PRICING PAGE
 ══════════════════════════════════════════════════════════ */
-function DeletePage() {
-    const [confirm, setConfirm] = useState("");
+function PricingPage({ data, setData }) {
+    const [plans, setPlans] = useState([]);
+    
+    useEffect(() => {
+        instructorPricingApi.getPricingPlans(0, 100)
+            .then(res => setPlans(res.data?.data?.content || []))
+            .catch(err => console.error("Failed to fetch plans", err));
+    }, []);
+
+    const handleSelectPlan = (e) => {
+        const planId = e.target.value;
+        const selected = plans.find(p => p.id === planId);
+        if (selected) {
+            setData(d => ({
+                ...d,
+                pricingPlanId: selected.id,
+                free: selected.pricingType === "FREE",
+                pricingType: selected.pricingType || "ONE_TIME_PURCHASE",
+                actualPrice: selected.actualPrice || 0,
+                discountPrice: selected.discountPrice || 0,
+                lifetimeAccess: selected.lifetimeAccess || false,
+                validityInDays: selected.validityInDays || 0,
+                offerStartDate: selected.offerStartDate || null,
+                offerEndDate: selected.offerEndDate || null,
+                installmentMonths: selected.installmentMonths || 0,
+                amountPerMonth: selected.amountPerMonth || 0,
+            }));
+        }
+    };
+
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Delete Course</h2>
-            <p className="text-sm text-gray-500 mb-8">Delete your course if you no longer require it</p>
-            <div className="p-5 bg-red-50 border border-red-200 rounded-2xl">
-                <p className="text-sm font-semibold text-red-700 mb-1">⚠ Warning: This action is irreversible</p>
-                <p className="text-xs text-red-600 mb-4">Deleting this course will permanently remove all lessons, quizzes, learner data, and enrollments.</p>
-                <label className="text-sm font-semibold text-gray-700 block mb-2">Type <strong>DELETE</strong> to confirm</label>
-                <input value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="DELETE"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400 transition mb-4" />
-                <button disabled={confirm !== "DELETE"}
-                    className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white text-sm font-bold rounded-xl transition">
-                    Delete Course
-                </button>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Pricing & Plans</h2>
+            <p className="text-sm text-gray-500 mb-8">Set up the pricing model, encryption, and display price for your course</p>
+            
+            <div className="space-y-6">
+                {/* Select from existing plans */}
+                <div className="p-5 border border-gray-200 rounded-xl bg-white">
+                    <label className="text-sm font-semibold text-gray-800 block mb-2">Import from Global Plans</label>
+                    <p className="text-xs text-gray-500 mb-3">Select a plan you've created in the Plans page to auto-fill these settings.</p>
+                    <select 
+                        onChange={handleSelectPlan}
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition bg-white"
+                        defaultValue=""
+                    >
+                        <option value="" disabled>-- Select a Plan --</option>
+                        {plans.map(plan => (
+                            <option key={plan.id} value={plan.id}>
+                                {plan.planTitle} ({plan.pricingType === "FREE" ? "Free" : `₹${plan.actualPrice}`})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Free Toggle */}
+                <div className="p-5 border border-gray-200 rounded-xl bg-white flex items-start justify-between gap-4">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-800">Free Course</h3>
+                        <p className="text-xs text-gray-500 mt-1">Make this course entirely free for learners</p>
+                    </div>
+                    <button onClick={() => setData(d => ({ ...d, free: !d.free }))}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors ${data.free ? "bg-violet-500" : "bg-gray-300"}`}>
+                        <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${data.free ? "translate-x-5" : ""}`} />
+                    </button>
+                </div>
+
+                {!data.free && (
+                    <>
+                        <div className="p-5 border border-gray-200 rounded-xl bg-white">
+                            <label className="text-sm font-semibold text-gray-800 block mb-2">Pricing Type</label>
+                            <select 
+                                value={data.pricingType || "ONE_TIME_PURCHASE"} 
+                                onChange={e => setData(d => ({ ...d, pricingType: e.target.value }))}
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition bg-white mb-4"
+                            >
+                                <option value="ONE_TIME_PURCHASE">One Time</option>
+                                <option value="LIMITED_TIME_OFFER">Limited Offer</option>
+                                <option value="INSTALLMENT_PURCHASE">Installment</option>
+                            </select>
+
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-800 block mb-2">Actual Price</label>
+                                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-violet-400 transition">
+                                        <span className="px-4 py-2 bg-gray-50 border-r border-gray-200 text-gray-600 font-semibold text-sm">₹</span>
+                                        <input 
+                                            type="number" 
+                                            value={data.actualPrice || 0} 
+                                            onChange={e => setData(d => ({ ...d, actualPrice: parseFloat(e.target.value) || 0 }))}
+                                            className="flex-1 px-4 py-2 text-sm text-gray-800 outline-none" 
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-800 block mb-2">Discount Price</label>
+                                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-violet-400 transition">
+                                        <span className="px-4 py-2 bg-gray-50 border-r border-gray-200 text-gray-600 font-semibold text-sm">₹</span>
+                                        <input 
+                                            type="number" 
+                                            value={data.discountPrice || 0} 
+                                            onChange={e => setData(d => ({ ...d, discountPrice: parseFloat(e.target.value) || 0 }))}
+                                            className="flex-1 px-4 py-2 text-sm text-gray-800 outline-none" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-4">
+                                <label className="text-sm font-semibold text-gray-800">Lifetime Access</label>
+                                <button onClick={() => setData(d => ({ ...d, lifetimeAccess: !d.lifetimeAccess }))}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors ${data.lifetimeAccess ? "bg-violet-500" : "bg-gray-300"}`}>
+                                    <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${data.lifetimeAccess ? "translate-x-5" : ""}`} />
+                                </button>
+                            </div>
+
+                            {!data.lifetimeAccess && (
+                                <div className="mb-4">
+                                    <label className="text-sm font-semibold text-gray-800 block mb-2">Validity In Days</label>
+                                    <input 
+                                        type="number" 
+                                        value={data.validityInDays || 0} 
+                                        onChange={e => setData(d => ({ ...d, validityInDays: parseInt(e.target.value, 10) || 0 }))}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-violet-400 transition bg-white" 
+                                    />
+                                </div>
+                            )}
+
+                            {data.pricingType === "LIMITED_TIME_OFFER" && (
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="text-sm font-semibold text-gray-800 block mb-2">Offer Start Date</label>
+                                        <input 
+                                            type="datetime-local" 
+                                            value={data.offerStartDate ? data.offerStartDate.slice(0, 16) : ""} 
+                                            onChange={e => setData(d => ({ ...d, offerStartDate: e.target.value ? new Date(e.target.value).toISOString() : null }))}
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-violet-400 transition bg-white" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-semibold text-gray-800 block mb-2">Offer End Date</label>
+                                        <input 
+                                            type="datetime-local" 
+                                            value={data.offerEndDate ? data.offerEndDate.slice(0, 16) : ""} 
+                                            onChange={e => setData(d => ({ ...d, offerEndDate: e.target.value ? new Date(e.target.value).toISOString() : null }))}
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-violet-400 transition bg-white" 
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {data.pricingType === "INSTALLMENT_PURCHASE" && (
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="text-sm font-semibold text-gray-800 block mb-2">Installment Months</label>
+                                        <input 
+                                            type="number" 
+                                            value={data.installmentMonths || 0} 
+                                            onChange={e => setData(d => ({ ...d, installmentMonths: parseInt(e.target.value, 10) || 0 }))}
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-violet-400 transition bg-white" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-semibold text-gray-800 block mb-2">Amount Per Month</label>
+                                        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-violet-400 transition">
+                                            <span className="px-4 py-2 bg-gray-50 border-r border-gray-200 text-gray-600 font-semibold text-sm">₹</span>
+                                            <input 
+                                                type="number" 
+                                                value={data.amountPerMonth || 0} 
+                                                onChange={e => setData(d => ({ ...d, amountPerMonth: parseFloat(e.target.value) || 0 }))}
+                                                className="flex-1 px-4 py-2 text-sm text-gray-800 outline-none" 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
+
+                {/* Encrypted Toggle */}
+                <div className="p-5 border border-gray-200 rounded-xl bg-white flex items-start justify-between gap-4">
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-800">Encrypted Content</h3>
+                        <p className="text-xs text-gray-500 mt-1">Enable video encryption to protect your content from unauthorized downloading</p>
+                    </div>
+                    <button onClick={() => setData(d => ({ ...d, encrypted: !d.encrypted }))}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors ${data.encrypted ? "bg-violet-500" : "bg-gray-300"}`}>
+                        <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${data.encrypted ? "translate-x-5" : ""}`} />
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -323,7 +501,7 @@ function GenericPage({ title, description }) {
 /* ══════════════════════════════════════════════════════════
    DETAIL VIEW
 ══════════════════════════════════════════════════════════ */
-function SettingDetailView({ group, activePage, onNavigate, onBack, courseData, setCourseData, onSave, saving, onPublish, onArchive, publishing }) {
+function SettingDetailView({ group, activePage, courseSlug, onNavigate, onBack, courseData, setCourseData, onSave, saving, onPublish, onArchive, publishing }) {
     const groupData = SETTINGS_GROUPS.find(g => g.id === group);
     if (!groupData) return null;
 
@@ -331,18 +509,19 @@ function SettingDetailView({ group, activePage, onNavigate, onBack, courseData, 
         switch (activePage) {
             case "branding": return <BrandingPage data={courseData} setData={setCourseData} />;
             case "tags": return <TagsPage data={courseData} setData={setCourseData} />;
-            case "authors": return <AuthorsPage data={courseData} setData={setCourseData} />;
+            case "authors": return <AuthorsPage courseSlug={courseSlug} course={courseData} data={courseData} setData={setCourseData} />;
             case "faqs": return <FaqsPage data={courseData} setData={setCourseData} />;
+            case "pricing": return <PricingPage data={courseData} setData={setCourseData} />;
             case "permissions": return <PermissionsPage data={courseData} setData={setCourseData} />;
-            case "ratings": return <FeaturePage title="Ratings & Reviews" desc="Course reviews allow learners to provide feedback." toggleKey="ratingsEnabled" data={courseData} setData={setCourseData} />;
-            case "discussions": return <FeaturePage title="Discussions & Bookmarks" desc="Allow learners to create discussions and bookmark lessons." toggleKey="discussionsEnabled" data={courseData} setData={setCourseData} />;
+            case "reviews": return <FeaturePage title="Reviews & Ratings" desc="Course reviews allow learners to provide feedback and ratings." toggleKey="reviewsEnabled" data={courseData} setData={setCourseData} />;
+            case "discussions": return <FeaturePage title="Discussions" desc="Allow learners to create discussions." toggleKey="discussionsEnabled" data={courseData} setData={setCourseData} />;
+            case "bookmarks": return <FeaturePage title="Bookmarks" desc="Allow learners to create bookmark lessons." toggleKey="bookmarksEnabled" data={courseData} setData={setCourseData} />;
             case "leaderboard": return <FeaturePage title="Leaderboard" desc="Enable leaderboards to increase competition among learners." toggleKey="leaderboardEnabled" data={courseData} setData={setCourseData} />;
-            case "fast_checkout": return <FeaturePage title="Fast Checkout" desc="Allow learners to buy your course with quick & easy checkout." toggleKey="fastCheckoutEnabled" data={courseData} setData={setCourseData} />;
             case "certificates": return <FeaturePage title="Certificates" desc="Enable course certification for your learners." toggleKey="certificatesEnabled" data={courseData} setData={setCourseData} />;
-            case "dripping": return <FeaturePage title="Content Dripping" desc="Configure content dripping to pre-schedule release of lessons." toggleKey="drippingEnabled" data={courseData} setData={setCourseData} />;
-            case "learner_config": return <FeaturePage title="Learner Configurations" desc="Configure learner gstin and invoice settings for this course." toggleKey="learnerConfigEnabled" data={courseData} setData={setCourseData} />;
+            case "web": return <FeaturePage title="Web" desc="Enable Web" toggleKey="webEnabled" data={courseData} setData={setCourseData} />;
+            case "android": return <FeaturePage title="Android" desc="Enable Android" toggleKey="androidEnabled" data={courseData} setData={setCourseData} />;
+            case "ios": return <FeaturePage title="iOS" desc="Enable iOS" toggleKey="iosEnabled" data={courseData} setData={setCourseData} />;
             case "publish_course": return <PublishPage data={courseData} onPublish={onPublish} onArchive={onArchive} publishing={publishing} />;
-            case "delete_course": return <DeletePage />;
             default: {
                 const item = groupData.items.find(i => i.id === activePage);
                 return <GenericPage title={item?.label || ""} description={item?.desc || ""} />;
@@ -351,9 +530,7 @@ function SettingDetailView({ group, activePage, onNavigate, onBack, courseData, 
     };
 
     const noFooterPages = [
-        "delete_course", "publish_course", "permissions",
-        "ratings", "discussions", "leaderboard", "fast_checkout",
-        "certificates", "dripping", "learner_config", "pricing_plans",
+        "publish_course", "permissions", "authors",
     ];
     const hasFooter = !noFooterPages.includes(activePage);
 
@@ -422,12 +599,15 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
         if (
             [
                 "ratings",
+                "reviews",
                 "discussions",
+                "bookmarks",
                 "leaderboard",
                 "fast_checkout",
                 "certificates",
-                "dripping",
-                "learner_config",
+                "web",
+                "android",
+                "ios",
             ].includes(page)
         ) {
             group = "features";
@@ -465,6 +645,8 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
             console.log("courseSlug =", courseSlug);
             const res = await instructorCourseApi.getInstructorCourseBySlug(courseSlug);
             const course = res?.data?.data ?? res?.data ?? {};
+            const settings = course.settings || {};
+            const platform = course.platformAvailability || {};
             setCourseData(prev => ({
                 ...prev,
                 // Basic info
@@ -503,14 +685,28 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
                 faqs: course.faqs ?? [],
                 // Status
                 status: course.status ?? "DRAFT",
-                // Features
-                ratingsEnabled: course.ratingsEnabled ?? false,
-                discussionsEnabled: course.discussionsEnabled ?? false,
-                leaderboardEnabled: course.leaderboardEnabled ?? false,
-                fastCheckoutEnabled: course.fastCheckoutEnabled ?? false,
-                certificatesEnabled: course.certificatesEnabled ?? false,
-                drippingEnabled: course.drippingEnabled ?? false,
-                learnerConfigEnabled: course.learnerConfigEnabled ?? false,
+                // Pricing
+                free: course.free ?? false,
+                encrypted: course.encrypted ?? false,
+                pricingType: course.pricingType || "ONE_TIME_PURCHASE",
+                actualPrice: course.actualPrice || 0,
+                discountPrice: course.discountPrice || 0,
+                lifetimeAccess: course.lifetimeAccess ?? true,
+                validityInDays: course.validityInDays || 0,
+                offerStartDate: course.offerStartDate || null,
+                offerEndDate: course.offerEndDate || null,
+                installmentMonths: course.installmentMonths || 0,
+                amountPerMonth: course.amountPerMonth || 0,
+                // Features — read from backend's nested settings and platformAvailability objects
+                reviewsEnabled: settings.reviewsEnabled ?? false,
+                discussionsEnabled: settings.discussionsEnabled ?? false,
+                bookmarksEnabled: settings.bookmarksEnabled ?? false,
+                leaderboardEnabled: settings.leaderboardEnabled ?? false,
+                certificatesEnabled: settings.certificatesEnabled ?? false,
+                webEnabled: platform.webEnabled ?? false,
+                androidEnabled: platform.androidEnabled ?? false,
+                iosEnabled: platform.iosEnabled ?? false,
+
                 // Permissions
                 sellIndependently: course.sellIndependently ?? true,
                 courseAccess: course.courseAccess ?? "public",
@@ -530,6 +726,7 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
         const page = view?.page;
         setSaving(true);
         try {
+            let updatedCourse = null;
             switch (page) {
                 case "branding": {
                     const fd = new FormData();
@@ -541,71 +738,126 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
                     fd.append("level", courseData.level || "");
                     fd.append("visibility", courseData.visibility || "");
 
-                    fd.append("thumbnailInputType", courseData.thumbnailInputType);
-
-                    if (courseData.thumbnailInputType === "URL") {
-                        fd.append("thumbnailUrl", courseData.thumbnailUrl || "");
-                    } else {
-                        fd.append("thumbnailFile", courseData.thumbnailFile);
+                    if (courseData.thumbnailInputType) {
+                        fd.append("thumbnailInputType", courseData.thumbnailInputType);
+                        if (courseData.thumbnailInputType === "URL") {
+                            fd.append("thumbnailUrl", courseData.thumbnailUrl || "");
+                        } else {
+                            if (courseData.thumbnailFile) fd.append("thumbnailFile", courseData.thumbnailFile);
+                        }
                     }
 
-                    fd.append("promoVideoInputType", courseData.promoVideoInputType);
-
-                    if (courseData.promoVideoInputType === "URL") {
-                        fd.append("promoVideoUrl", courseData.promoVideoUrl || "");
-                    } else {
-                        fd.append("promoVideoFile", courseData.promoVideoFile);
+                    if (courseData.promoVideoInputType) {
+                        fd.append("promoVideoInputType", courseData.promoVideoInputType);
+                        if (courseData.promoVideoInputType === "URL") {
+                            fd.append("promoVideoUrl", courseData.promoVideoUrl || "");
+                        } else {
+                            if (courseData.promoVideoFile) fd.append("promoVideoFile", courseData.promoVideoFile);
+                        }
                     }
 
-                    await instructorCourseApi.updateBasicInfoMultipart(courseSlug, fd);
+                    const res = await instructorCourseApi.updateBasicInfoMultipart(courseSlug, fd);
+                    updatedCourse = res?.data?.data ?? res?.data;
                     break;
                 }
+                case "tags": {
                     console.log("Course Slug:", courseSlug);
                     console.log("Request Body:", {
                         tags: courseData.tags,
                     });
-                case "tags":
                     const res = await instructorCourseApi.updateTags(courseSlug, {
                         tags: courseData.tags,
                     });
 
                     console.log(res.data);
+                    updatedCourse = res?.data?.data ?? res?.data;
                     break;
-                case "authors":
-                    await instructorCourseApi.updateInstructors(courseSlug, { instructors: courseData.authors || [] });
+                }
+                case "authors": {
+                    const authorIds = (courseData.authors || []).map(a => a.id).filter(Boolean);
+                    const res = await instructorCourseApi.updateCourseInstructors(courseSlug, { instructorIds: authorIds });
+                    updatedCourse = res?.data?.data ?? res?.data;
                     break;
-                case "faqs":
-                    await instructorCourseApi.updateFaqs(courseSlug, { faqs: courseData.faqs || [] });
+                }
+                case "faqs": {
+                    // Force displayOrder for all FAQs to avoid "null value in column display_order" constraint error
+                    const formattedFaqs = (courseData.faqs || []).map((faq, index) => ({
+                        ...faq,
+                        displayOrder: index
+                    }));
+                    const res = await instructorCourseApi.updateFaqs(courseSlug, { faqs: formattedFaqs });
+                    updatedCourse = res?.data?.data ?? res?.data;
                     break;
-                case "ratings":
+                }
+                case "pricing": {
+                    const payload = {
+                        pricingPlanId: courseData.pricingPlanId || null,
+                        free: courseData.free,
+                        pricingType: courseData.free ? "FREE" : (courseData.pricingType || "ONE_TIME_PURCHASE"),
+                        actualPrice: courseData.actualPrice || 0,
+                        discountPrice: courseData.discountPrice || 0,
+                        lifetimeAccess: courseData.lifetimeAccess || false,
+                        validityInDays: courseData.validityInDays || 0,
+                        offerStartDate: courseData.offerStartDate || null,
+                        offerEndDate: courseData.offerEndDate || null,
+                        installmentMonths: courseData.installmentMonths || 0,
+                        amountPerMonth: courseData.amountPerMonth || 0,
+                        encrypted: courseData.encrypted || false,
+                    };
+                    const res = await instructorCourseApi.updatePricing(courseSlug, payload);
+                    updatedCourse = res?.data?.data ?? res?.data;
+                    break;
+                }
+                case "reviews":
                 case "discussions":
+                case "bookmarks":
                 case "leaderboard":
-                case "fast_checkout":
                 case "certificates":
-                case "dripping":
-                case "learner_config":
-                    await instructorCourseApi.updateFeatures(courseSlug, {
-                        ratingsEnabled: courseData.ratingsEnabled,
+                case "web":
+                case "android":
+                case "ios": {
+                    const featuresPayload = {
+                        reviewsEnabled: courseData.reviewsEnabled,
                         discussionsEnabled: courseData.discussionsEnabled,
+                        bookmarksEnabled: courseData.bookmarksEnabled,
                         leaderboardEnabled: courseData.leaderboardEnabled,
-                        fastCheckoutEnabled: courseData.fastCheckoutEnabled,
                         certificatesEnabled: courseData.certificatesEnabled,
-                        drippingEnabled: courseData.drippingEnabled,
-                        learnerConfigEnabled: courseData.learnerConfigEnabled,
-                    });
-                    break;
-                case "permissions":
-                    await instructorCourseApi.updateBasicInfo(courseSlug, {
+                        webEnabled: courseData.webEnabled,
+                        androidEnabled: courseData.androidEnabled,
+                        iosEnabled: courseData.iosEnabled,
+                    };
+                    console.log("[Features Save] page:", page, "payload:", JSON.stringify(featuresPayload));
+                    const res = await instructorCourseApi.updateFeatures(courseSlug, featuresPayload);
+                    console.log("[Features Save] response:", JSON.stringify(res?.data));
+                    // Merge saved values directly so UI reflects what was saved
+                    setCourseData(prev => ({ ...prev, ...featuresPayload }));
+                    showToast("Settings saved successfully!");
+                    return;
+                }
+                case "permissions": {
+                    const res = await instructorCourseApi.updateBasicInfo(courseSlug, {
                         sellIndependently: courseData.sellIndependently,
                         courseAccess: courseData.courseAccess,
                         offlineAccess: courseData.offlineAccess,
                     });
+                    updatedCourse = res?.data?.data ?? res?.data;
                     break;
+                }
                 default:
                     break;
             }
             showToast("Settings saved successfully!");
-            await loadCourse();
+
+            const newSlug = updatedCourse?.slug;
+            if (newSlug && newSlug !== courseSlug) {
+                if (view?.page) {
+                    navigate(`/instructor/section-settings/${newSlug}/${view.page}`, { replace: true });
+                } else {
+                    navigate(`/instructor/section-settings/${newSlug}`, { replace: true });
+                }
+            } else {
+                await loadCourse();
+            }
         } catch (err) {
             console.log("FULL ERROR");
             console.log(err);
@@ -628,8 +880,8 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
         if (!courseSlug) return;
         setPublishing(true);
         try {
-            await instructorCourseApi.requestCoursePublish(courseSlug);
-            showToast("Publish request submitted!");
+            await instructorCourseApi.publishCourse(courseSlug);
+            showToast("Course published successfully!");
             await loadCourse();
         } catch (err) {
             showToast(err?.response?.data?.message || "Failed to publish course.", "error");
@@ -681,6 +933,7 @@ export default function CourseSettings({ courseTitle = "Test Course", onBack }) 
                 <SettingDetailView
                     group={view.group}
                     activePage={view.page}
+                    courseSlug={courseSlug}
                     onNavigate={(page) =>
                         navigate(
                             `/instructor/section-settings/${courseSlug}/${page}`

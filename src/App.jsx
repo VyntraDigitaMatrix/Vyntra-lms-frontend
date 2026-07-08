@@ -219,8 +219,8 @@ function App() {
                   <Route path="quiz" element={<Quiz />} />
                   <Route path="/instructor/create-course" element={<CreateCourse />} />
                   <Route path="/instructor/course-builder/:courseSlug" element={<CourseBuilder />} />
-                  <Route path="/instructor/lesson-builder" element={<LessonBuilder />} />
-                  <Route path="/instructor/lesson-settings" element={<LessonSettings />} />
+                  <Route path="/instructor/lesson-builder/:courseSlug/:lessonSlug" element={<LessonBuilder />} />
+                  <Route path="/instructor/lesson-settings/:courseSlug/:lessonSlug" element={<LessonSettings />} />
                   <Route path="/instructor/section-settings/:courseSlug/:page?" element={<SectionSettings />} />
                   <Route path="/instructor/plans" element={<Plans />} />
                   <Route path="/instructor/branding" element={<BrandingPage />} />

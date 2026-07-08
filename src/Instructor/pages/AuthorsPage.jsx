@@ -16,15 +16,10 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
     const fetchInstructors = async () => {
       setLoading(true);
       try {
-        // Fetch all instructors available to add
         const res = await instructorCourseApi.getAvailableInstructors?.();
-        const list = res?.data?.data || res?.data || [];
-        // Filter out already added ones
-        setInstructors(
-          Array.isArray(list)
-            ? list.filter(i => !existingIds.includes(i.id))
-            : []
-        );
+        const list = res?.data?.data?.content || res?.data?.content || res?.data?.data || res?.data || [];
+        // Do not filter out already added ones so we can show them as "already added"
+        setInstructors(Array.isArray(list) ? list : []);
       } catch (err) {
         console.error("Failed to fetch instructors:", err);
         // Fallback: show empty list gracefully
@@ -46,14 +41,18 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
     setSaving(true);
     setError("");
     try {
-      await instructorCourseApi.updateCourseInstructors(courseSlug, {
+      const payload = {
         instructorIds: [...existingIds, ...selected],
-      });
+      };
+      console.log("courseSlug =", courseSlug);
+      console.log("POST payload:", JSON.stringify(payload));
+      await instructorCourseApi.updateCourseInstructors(courseSlug, payload);
       const added = instructors.filter(i => selected.includes(i.id));
       onAdded(added);
       onClose();
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to add authors.");
+      console.error("updateCourseInstructors error:", err?.response?.data);
+      setError(err?.response?.data?.message || JSON.stringify(err?.response?.data) || "Failed to add authors.");
     } finally {
       setSaving(false);
     }
@@ -125,7 +124,8 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
           ) : (
             <div className="space-y-2">
               {filtered.map(instructor => {
-                const isSelected = selected.includes(instructor.id);
+                const isAlreadyAdded = existingIds.includes(instructor.id);
+                const isSelected = selected.includes(instructor.id) || isAlreadyAdded;
                 const name = instructor.fullName || instructor.name || "Unknown";
                 const email = instructor.gmail || instructor.email || "";
                 const avatar = instructor.profilePic || instructor.avatarUrl || null;
@@ -135,12 +135,14 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
                   <button
                     key={instructor.id}
                     type="button"
-                    onClick={() => toggle(instructor.id)}
+                    onClick={isAlreadyAdded ? undefined : () => toggle(instructor.id)}
                     className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition text-left ${
-                      isSelected
-                        ? "border-violet-400 bg-violet-50"
-                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
-                    }`}
+                      isAlreadyAdded 
+                        ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+                        : isSelected
+                          ? "border-violet-400 bg-violet-50"
+                          : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      }`}
                   >
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
@@ -165,8 +167,8 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${isSelected ? "text-violet-700" : "text-gray-800"}`}>
-                        {name}
+                      <p className={`text-sm font-semibold truncate ${isSelected && !isAlreadyAdded ? "text-violet-700" : "text-gray-800"}`}>
+                        {name} {isAlreadyAdded && <span className="text-xs font-normal text-gray-500 ml-1">(Already added)</span>}
                       </p>
                       {email && (
                         <p className="text-xs text-gray-400 truncate mt-0.5">{email}</p>
@@ -174,9 +176,8 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
                     </div>
 
                     {/* Right check */}
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${
-                      isSelected ? "border-violet-500 bg-violet-500" : "border-gray-300"
-                    }`}>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition ${isSelected ? "border-violet-500 bg-violet-500" : "border-gray-300"
+                      }`}>
                       {isSelected && <MdCheck className="text-white text-[10px]" />}
                     </div>
                   </button>
@@ -218,14 +219,14 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
 };
 
 /* ─── Main AuthorsPage ─── */
-const AuthorsPage = ({ courseSlug, course }) => {
+const AuthorsPage = ({ courseSlug, course, data, setData }) => {
   const [authors, setAuthors] = useState(
-    course?.instructors?.map(i => ({
+    (course?.instructors || course?.authors || []).map(i => ({
       id: i.id,
       name: i.fullName || i.name || "Unknown",
       email: i.gmail || i.email || "",
       role: "Instructor",
-    })) || []
+    }))
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [removing, setRemoving] = useState(null);
@@ -237,15 +238,27 @@ const AuthorsPage = ({ courseSlug, course }) => {
   };
 
   const handleAdded = (newAuthors) => {
-    setAuthors(prev => [
-      ...prev,
+    const updated = [
+      ...authors,
       ...newAuthors.map(i => ({
         id: i.id,
         name: i.fullName || i.name || "Unknown",
         email: i.gmail || i.email || "",
         role: "Instructor",
       })),
-    ]);
+    ];
+    setAuthors(updated);
+
+    // Keep parent courseData synced
+    setData?.(prev => ({
+      ...prev,
+      authors: updated.map(a => ({
+        id: a.id,
+        fullName: a.name,
+        gmail: a.email,
+      })),
+    }));
+
     showToast(
       `${newAuthors.length} author${newAuthors.length > 1 ? "s" : ""} added successfully!`
     );
@@ -255,13 +268,27 @@ const AuthorsPage = ({ courseSlug, course }) => {
     setRemoving(idx);
     try {
       const remaining = authors.filter((_, i) => i !== idx);
-      await instructorCourseApi.updateCourseInstructors(courseSlug, {
+      const payload = {
         instructorIds: remaining.filter(a => a.id).map(a => a.id),
-      });
+      };
+      console.log("handleRemove payload:", JSON.stringify(payload));
+      await instructorCourseApi.updateCourseInstructors(courseSlug, payload);
       setAuthors(remaining);
+
+      // Keep parent courseData synced
+      setData?.(prev => ({
+        ...prev,
+        authors: remaining.map(a => ({
+          id: a.id,
+          fullName: a.name,
+          gmail: a.email,
+        })),
+      }));
+
       showToast("Author removed.");
     } catch (err) {
-      showToast(err?.response?.data?.message || "Failed to remove author.", "error");
+      console.error("handleRemove error:", err?.response?.data);
+      showToast(err?.response?.data?.message || JSON.stringify(err?.response?.data) || "Failed to remove author.", "error");
     } finally {
       setRemoving(null);
     }
@@ -341,7 +368,7 @@ const AuthorsPage = ({ courseSlug, course }) => {
 
               return (
                 <div
-                  key={i}
+                  key={author.id || i}
                   className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition group"
                 >
                   <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-sm flex-shrink-0">

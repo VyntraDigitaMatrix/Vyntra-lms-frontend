@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import S1 from "../../assets/S1.jpg";
-import S2 from "../../assets/S2.jpg";
-import S3 from "../../assets/S3.jpg";
-import S4 from "../../assets/S4.jpg";
-import S5 from "../../assets/S5.jpg";
-import S6 from "../../assets/S6.jpg";
-import S7 from "../../assets/S7.jpg";
-import S8 from "../../assets/S8.jpg";
 import {
   FaChevronLeft, FaChevronRight, FaEdit, FaTrash,
   FaEye, FaPlus, FaArchive, FaTimes, FaExclamationTriangle,
@@ -17,7 +10,7 @@ import {
 } from "react-icons/md";
 import { instructorCourseApi } from "../auth/api";
 
-const defaultImages = [S1, S2, S3, S4, S5, S6, S7, S8];
+const defaultImage = S1;
 
 /* ══════════════════════════════════════════════════════════
    TOAST
@@ -64,7 +57,7 @@ function ArchiveModal({ course, onClose, onConfirm, loading }) {
         <div className="px-6 py-4">
           <div className="flex items-center gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-4">
             <img
-              src={course.thumbnailUrl || defaultImages[0]}
+              src={course.thumbnailUrl || defaultImage}
               alt={course.title}
               className="w-12 h-9 object-cover rounded-lg flex-shrink-0"
             />
@@ -400,7 +393,7 @@ const InstructorCourses = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {courses.map((course, idx) => {
-              const fallback = defaultImages[idx % defaultImages.length];
+              const fallback = defaultImage;
               const isArchived = course.status === "ARCHIVED";
 
               return (
@@ -456,15 +449,13 @@ const InstructorCourses = () => {
                       <div className="text-center">
                         <p className="text-[10px] text-gray-400">Price</p>
                         <p className="text-sm font-bold text-gray-800">
-                          {course.free ? "Free" : `₹${course.displayPrice || course.price || 0}`}
+                          {course.free ? "Free" : (course.actualPrice ? `₹${course.actualPrice}` : "—")}
                         </p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] text-gray-400">Discount</p>
                         <p className="text-xs font-bold text-emerald-600">
-                          {course.discountPrice && course.price
-                            ? `${Math.round(((course.price - course.discountPrice) / course.price) * 100)}% OFF`
-                            : "—"}
+                          {course.discountPrice ? `₹${course.discountPrice}` : "—"}
                         </p>
                       </div>
                       <div className="text-center">
@@ -482,7 +473,7 @@ const InstructorCourses = () => {
                         <FaEye className="text-[10px]" /> View
                       </Link>
                       <Link
-                        to={`/instructor/section-settings`}
+                        to={`/instructor/section-settings/${course.slug}`}
                         className="flex-1 h-8 rounded-lg border border-violet-300 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
                       >
                         <FaEdit className="text-[10px]" /> Edit
