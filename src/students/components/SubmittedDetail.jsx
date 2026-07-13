@@ -48,7 +48,10 @@ export default function SubmittedDetail({ assignment, onBack, onResubmit, allowR
                 </button>
                 <div className="flex-1">
                     <h1 className="text-base sm:text-xl font-bold text-gray-900">{assignment.title}</h1>
-                    <p className="text-xs sm:text-sm text-gray-500">Module {assignment.moduleId}</p>
+                    <p className="text-[11px] sm:text-sm font-semibold text-gray-700 mt-0.5 sm:mt-1">
+                        {assignment.courseTitle || assignment.courseName || `Course ${assignment.courseId}`}
+
+                    </p>
                 </div>
                 <div className="sm:ml-auto">
                     <Badge status={assignment.status} />

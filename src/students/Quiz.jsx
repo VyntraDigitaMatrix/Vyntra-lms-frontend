@@ -94,17 +94,27 @@ const Quizzes = () => {
         }
     }, []);
 
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = "error") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
     const handleStart = async (quiz) => {
         try {
             if (quiz.canResume) {
                 setQuizPlayerState({ quiz, mode: "resume" });
                 return;
             }
+            if (quiz.remainingAttempts === 0) {
+                showToast("You have reached the maximum number of attempts for this quiz.", "error");
+                return;
+            }
             if (quiz.remainingAttempts > 0 || quiz.remainingAttempts === undefined) {
                 setQuizPlayerState({ quiz, mode: "start" });
                 return;
             }
-            setLeaderboardQuiz(quiz);
         } catch (err) {
             console.error(err);
         }
@@ -126,9 +136,12 @@ const Quizzes = () => {
 
         return {
             ...q,
-            id: q.quizId,
+            id: q.quizId ?? q.id,
+            quizSlug: q.quizSlug ?? q.slug,
             status,
             questionCount: q.totalQuestions || 0,
+            maxAttempts: q.attemptsChance ?? q.maxAttempts ?? 0,
+            remainingAttempts: q.remainingAttempts ?? q.attemptsLeft ?? 0,
             scoreLabel,
             scoreData,
             attempt,
@@ -140,8 +153,8 @@ const Quizzes = () => {
     const filteredQuizzes = displayQuizzes.filter(q => {
         if (activeTab === "All") return true;
         if (activeTab === "Pending") return q.status === "Not Attempted" || q.status === "In Progress";
-        if (activeTab === "Upcoming") return q.status === "Upcoming";
         if (activeTab === "Completed") return q.status === "Completed";
+        if (activeTab === "Course") return q.quizType === "COURSE";
         return true;
     });
 
@@ -152,8 +165,8 @@ const Quizzes = () => {
     const tabCounts = {
         All: displayQuizzes.length,
         Pending: displayQuizzes.filter(q => q.status === "Not Attempted" || q.status === "In Progress").length,
-        Upcoming: displayQuizzes.filter(q => q.status === "Upcoming").length,
         Completed: displayQuizzes.filter(q => q.status === "Completed").length,
+        Course: displayQuizzes.filter(q => q.quizType === "COURSE").length,
     };
 
     const stats = {
@@ -201,66 +214,78 @@ const Quizzes = () => {
     };
 
     return (
-        <div className="p-3 sm:p-5 md:p-6 min-h-screen bg-gradient-to-br from-[#f7f8fc] to-[#f0f2f8]">
-            <div className="max-w-5xl mx-auto">
+        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] font-sans">
+            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
 
-                {/* Header */}
-                <div className="mb-6">
-                    <p className="text-xs sm:text-sm text-gray-400 mb-1">
-                        <Link to="/student/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
-                        <span className="mx-2">&gt;</span>
-                        <span className="text-gray-600 font-medium">Quizzes</span>
-                    </p>
-                    <h1 className="text-2xl font-bold text-gray-900">Quizzes</h1>
-                    <p className="text-sm text-gray-500 mt-1">Test your knowledge and track your progress</p>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                    {[
-                        { label: "Total Quizzes", val: stats.total, icon: <MdQuiz className="text-xl" />, bg: "bg-purple-50", text: "text-purple-600" },
-                        { label: "Attempted", val: stats.attempted, icon: <FaClipboardCheck className="text-lg" />, bg: "bg-blue-50", text: "text-blue-600" },
-                        { label: "Completed", val: stats.completed.length, icon: <FaCheckCircle className="text-lg" />, bg: "bg-emerald-50", text: "text-emerald-600" },
-                        { label: "Avg. Score", val: `${avgScore}%`, icon: <FaTrophy className="text-lg" />, bg: "bg-amber-50", text: "text-amber-600" },
-                    ].map(s => (
-                        <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition">
-                            <div className={`w-12 h-12 rounded-xl ${s.bg} ${s.text} flex items-center justify-center flex-shrink-0`}>
-                                {s.icon}
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500">{s.label}</p>
-                                <p className="text-2xl font-black text-gray-900">
-                                    {loading ? <span className="block w-8 h-6 bg-gray-200 rounded animate-pulse mt-1" /> : s.val}
-                                </p>
-                            </div>
+                {/* Simple Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold mb-2">
+                            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+                            <span>&gt;</span>
+                            <span className="text-gray-900">Quizzes</span>
                         </div>
-                    ))}
+                        <h1 className="text-xl font-bold text-gray-900">My Quizzes</h1>
+                        <p className="text-sm text-gray-500 mt-1">Review your past attempts and track your learning progress.</p>
+                    </div>
+                    <button onClick={fetchQuizzes} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-semibold flex items-center gap-2 transition">
+                        <FaRedo className={loading ? "animate-spin" : ""} /> Refresh
+                    </button>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex items-center gap-1 bg-white rounded-xl p-1 w-fit mb-6 overflow-x-auto shadow-sm border border-gray-100">
-                    {TABS.map(tab => {
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <FaLayerGroup />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Total Quizzes</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                            <FaCheckCircle />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Completed</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.completed.length}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                            <FaHourglassHalf />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Pending</p>
+                            <p className="text-2xl font-bold text-gray-900">{tabCounts.Pending}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                            <FaStar />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Avg Score</p>
+                            <p className="text-2xl font-bold text-gray-900">{avgScore}%</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sleek Tabs */}
+                <div className="flex items-center gap-2 bg-white rounded-xl p-1.5 w-fit overflow-x-auto shadow-sm border border-gray-100">
+                    {["All", "Pending", "Completed", "Course"].map(tab => {
                         const count = tabCounts[tab];
-                        const badgeActiveColor = {
-                            All: "bg-blue-600 text-white",
-                            Pending: "bg-amber-600 text-white",
-                            Upcoming: "bg-blue-600 text-white",
-                            Completed: "bg-emerald-600 text-white",
-                        };
-                        const badgeInactiveColor = {
-                            All: "bg-blue-100 text-blue-800",
-                            Pending: "bg-amber-100 text-amber-800",
-                            Upcoming: "bg-blue-100 text-blue-800",
-                            Completed: "bg-emerald-100 text-emerald-800",
-                        };
+                        const isActive = activeTab === tab;
                         return (
                             <button key={tab} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
-                                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab
-                                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
+                                    ? "bg-[#043573] text-white shadow-md"
+                                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                                     }`}>
                                 {tab}
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-tight ${activeTab === tab ? "bg-white/20 text-white" : badgeInactiveColor[tab]
+                                <span className={`text-xs font-extrabold px-2 py-0.5 rounded-full leading-tight ${isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
                                     }`}>
                                     {count}
                                 </span>
@@ -309,24 +334,35 @@ const Quizzes = () => {
 
                                 return (
                                     <div key={quiz.quizId || quiz.id}
-                                        className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-lg transition-all duration-200 hover:border-blue-200">
+                                        className="group bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 relative overflow-hidden">
 
-                                        {/* Left */}
-                                        <div className="flex items-start sm:items-center gap-4">
-                                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${c.bg}`}>
-                                                <MdQuiz className={`text-2xl sm:text-3xl ${c.text}`} />
+                                        {/* Subtle side accent */}
+                                        <div className={`absolute top-0 bottom-0 left-0 w-1 ${c.bg} opacity-0 group-hover:opacity-100 transition-opacity`} />
+
+                                        {/* Left Side: Info */}
+                                        <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-5 flex-1">
+                                            <div className={`w-14 h-14 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${c.bg} shadow-inner`}>
+                                                <MdQuiz className={`text-lg sm:text-xl ${c.text}`} />
                                             </div>
-                                            <div className="min-w-0">
-                                                <h2 className="text-sm font-bold text-gray-900 leading-snug">{quiz.title}</h2>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                    <StatusBadge status={quiz.status} />
+                                                    {quiz.status === "Completed" && (
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold tracking-wide uppercase">
+                                                            <FaRedo /> {quiz.remainingAttempts ?? 0} Attempts Left
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-sm sm:text-sm font-extrabold text-gray-900 leading-snug mb-2 group-hover:text-[#043573] transition-colors">{quiz.title}</h2>
 
                                                 {/* Scope: Course → Module → Lesson */}
                                                 {scopeParts.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                    <div className="flex flex-wrap items-center gap-2 mb-3">
                                                         {scopeParts.map((part, idx) => (
                                                             <React.Fragment key={idx}>
-                                                                {idx > 0 && <span className="text-gray-300 text-[10px]">›</span>}
-                                                                <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
-                                                                    {part.icon}
+                                                                {idx > 0 && <span className="text-gray-300 text-[10px]">/</span>}
+                                                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
+                                                                    <span className="text-blue-400">{part.icon}</span>
                                                                     {part.label}
                                                                 </span>
                                                             </React.Fragment>
@@ -334,94 +370,100 @@ const Quizzes = () => {
                                                     </div>
                                                 )}
 
-                                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-400">
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-xs font-medium text-gray-400 bg-gray-50 w-fit px-3 py-1.5 rounded-lg border border-gray-100">
                                                     <span className="capitalize">{quiz.quizType?.toLowerCase() || "Quiz"}</span>
-                                                    <span>•</span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
                                                     <span>{quiz.questionCount || "—"} Questions</span>
-                                                    <span>•</span>
-                                                    <span className="flex items-center gap-1"><HiOutlineClock />{quiz.durationInMinutes ?? "—"} mins</span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                    <span className="flex items-center gap-1"><HiOutlineClock className="text-sm" />{quiz.durationInMinutes ?? "—"} mins</span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                    <span className="flex items-center gap-1">
+                                                        <FaRedo className="text-[10px]" /> 
+                                                        {(quiz.attemptsChance ?? quiz.maxAttempts) > 0 ? `${quiz.attemptsChance ?? quiz.maxAttempts} Attempts` : "Unlimited Attempts"}
+                                                    </span>
                                                 </div>
-                                                <div className="mt-2 flex items-center gap-2 flex-wrap">
-                                                    <StatusBadge status={quiz.status} />
-                                                    {quiz.status === "Completed" && (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-                                                            <FaRedo className="text-[10px]" />
-                                                            {quiz.remainingAttempts ?? 0} Attempts Left
-                                                        </span>
-                                                    )}
+                                                <div className="mt-1 text-[9px] text-gray-300 hidden">
+                                                    Debug: {Object.keys(quiz).filter(k => k.toLowerCase().includes("attempt")).map(k => `${k}=${quiz[k]}`).join(", ")}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Right */}
-                                        <div className="flex items-center gap-3 sm:gap-4 sm:flex-shrink-0 pl-16 sm:pl-0 flex-wrap">
+                                        {/* Right Side: Actions & Score */}
+                                        <div className="flex flex-row items-center justify-between lg:justify-end gap-4 lg:gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100">
+
+                                            {/* Score Display */}
                                             {quiz.status === "Completed" && quiz.scoreLabel && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
-                                                        <FaTrophy className="text-emerald-600 text-sm" />
+                                                <div className="flex items-center gap-3 bg-gray-50 px-3 py-2 rounded-2xl border border-gray-100">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${quiz.scoreData?.passed !== false ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                                                        <FaTrophy className={`text-base ${quiz.scoreData?.passed !== false ? 'text-emerald-500' : 'text-red-500'}`} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] text-gray-400">Score</p>
-                                                        <p className="text-xl font-black text-emerald-600 leading-none">{quiz.scoreLabel}</p>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Score</p>
+                                                        <p className={`text-xl font-black leading-none ${quiz.scoreData?.passed !== false ? 'text-emerald-600' : 'text-red-600'}`}>{quiz.scoreLabel}</p>
                                                     </div>
                                                 </div>
                                             )}
                                             {quiz.status === "In Progress" && (
-                                                <div>
-                                                    <p className="text-[10px] text-gray-400">Answered</p>
-                                                    <p className="text-xl font-black text-amber-600 leading-none">{quiz.scoreLabel}</p>
+                                                <div className="flex items-center gap-3 bg-amber-50/50 px-4 py-2 rounded-2xl border border-amber-100/50">
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-amber-500/70 uppercase tracking-widest">Answered</p>
+                                                        <p className="text-xl font-black text-amber-600 leading-none">{quiz.scoreLabel}</p>
+                                                    </div>
                                                 </div>
                                             )}
 
-                                            {quiz.status === "Completed" ? (
-                                                <>
-                                                    {/* If attempts still available */}
-                                                    {quiz.remainingAttempts > 0 && (
-                                                        <ActionButton
-                                                            status={quiz.status}
-                                                            accent={c.accent}
-                                                            light={c.light}
-                                                            size="sm"
-                                                            remainingAttempts={quiz.remainingAttempts}
-                                                            onAttemptAgain={() => handleAttemptAgain(quiz)}
-                                                        />
-                                                    )}
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-2">
+                                                {quiz.status === "Completed" ? (
+                                                    <>
+                                                        {quiz.remainingAttempts > 0 && (
+                                                            <ActionButton
+                                                                status={quiz.status}
+                                                                accent={c.accent}
+                                                                light={c.light}
+                                                                size="sm"
+                                                                remainingAttempts={quiz.remainingAttempts}
+                                                                onAttemptAgain={() => handleAttemptAgain(quiz)}
+                                                            />
+                                                        )}
 
-                                                    {/* Always show leaderboard */}
-                                                    <button
-                                                        onClick={() => setLeaderboardQuiz(quiz)}
-                                                        className="h-9 px-3 rounded-xl border border-blue-200 bg-blue-50 flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition"
-                                                    >
-                                                        <FaCrown className="text-amber-400 text-[11px]" />
-                                                        Leaderboard
-                                                    </button>
+                                                        {/* ONLY show leaderboard if attached to a course */}
+                                                        {quiz.quizType === "COURSE" && (
+                                                            <button
+                                                                onClick={() => setLeaderboardQuiz(quiz)}
+                                                                className="h-10 px-3 rounded-xl border border-blue-200 bg-blue-50/50 flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all shadow-sm"
+                                                            >
+                                                                <FaCrown className="text-amber-400 text-sm drop-shadow-sm" />
+                                                                Leaderboard
+                                                            </button>
+                                                        )}
 
-                                                    {/* Always show report */}
-                                                    <button
-                                                        onClick={() => setAnalyticsQuiz(quiz)}
-                                                        className="h-9 px-3 rounded-xl border border-gray-200 flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition"
-                                                    >
-                                                        <FaChartBar className="text-[10px]" />
-                                                        Report
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <ActionButton
-                                                    status={quiz.status}
-                                                    accent={c.accent}
-                                                    light={c.light}
-                                                    size="sm"
-                                                    remainingAttempts={quiz.remainingAttempts}
-                                                    onStart={() => handleStart(quiz)}
-                                                    onResume={() => handleResume(quiz)}
-                                                    onAttemptAgain={() => handleAttemptAgain(quiz)}
-                                                />
-                                            )}
+                                                        <button
+                                                            onClick={() => setAnalyticsQuiz(quiz)}
+                                                            className="h-10 px-3 rounded-xl border border-gray-200 bg-white flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+                                                        >
+                                                            <FaChartBar className="text-sm text-gray-400" />
+                                                            Report
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <ActionButton
+                                                        status={quiz.status}
+                                                        accent={c.accent}
+                                                        light={c.light}
+                                                        size="sm"
+                                                        remainingAttempts={quiz.remainingAttempts}
+                                                        onStart={() => handleStart(quiz)}
+                                                        onResume={() => handleResume(quiz)}
+                                                        onAttemptAgain={() => handleAttemptAgain(quiz)}
+                                                    />
+                                                )}
 
-                                            <button onClick={() => setSelectedQuiz(quiz)}
-                                                className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition flex-shrink-0">
-                                                <FaChevronRight className="text-gray-400 text-xs" />
-                                            </button>
+                                                <button onClick={() => setSelectedQuiz(quiz)}
+                                                    className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center hover:bg-gray-100 hover:border-gray-200 transition flex-shrink-0 text-gray-400 hover:text-gray-600">
+                                                    <FaChevronRight className="text-sm" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -443,11 +485,11 @@ const Quizzes = () => {
                 {!loading && !error && (
                     <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-purple-100 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <h2 className="text-lg font-bold text-blue-900">🚀 Ready for a Challenge?</h2>
-                            <p className="text-sm text-blue-600 mt-1">Take quizzes regularly to boost your learning.</p>
+                            <h2 className="text-lg font-bold text-[#043573]">🚀 Ready for a Challenge?</h2>
+                            <p className="text-sm text-[#043573] mt-1">Take quizzes regularly to boost your learning.</p>
                         </div>
                         <button onClick={fetchQuizzes}
-                            className="h-11 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition rounded-xl text-white font-semibold text-sm flex-shrink-0 shadow-md hover:shadow-lg">
+                            className="h-11 px-6 bg-gradient-to-r from-[#043573] to-indigo-600 hover:from-[#043573] hover:to-indigo-700 transition rounded-xl text-white font-semibold text-sm flex-shrink-0 shadow-md hover:shadow-lg">
                             Refresh Quizzes →
                         </button>
                     </div>
@@ -487,6 +529,12 @@ const Quizzes = () => {
                     quiz={leaderboardQuiz}
                     onClose={() => setLeaderboardQuiz(null)}
                 />
+            )}
+
+            {toast && (
+                <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-semibold ${toast.type === "error" ? "bg-red-600" : "bg-emerald-600"}`}>
+                    {toast.msg}
+                </div>
             )}
         </div>
     );

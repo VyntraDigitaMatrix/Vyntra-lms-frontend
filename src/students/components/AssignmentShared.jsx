@@ -159,6 +159,7 @@ function parseSubmittedDate(sub) {
 
 export function transformAssignment(item, submissionMap = {}) {
     const itemId = item.id ?? item.assignmentId ?? item._id ?? null;
+    const itemSlug = item.slug ?? item.assignmentSlug ?? null;
 
     const sub =
         (itemId !== null && submissionMap[itemId]) ||
@@ -194,6 +195,8 @@ if (sub) {
 
     return {
         id: itemId,
+        slug: itemSlug,
+        assignmentSlug: itemSlug,
         title: item.title,
         description: item.description,
         instructions: item.instructions,

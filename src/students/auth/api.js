@@ -147,18 +147,35 @@ export const studentLearningApi = {
   completeLesson: (lessonSlug) =>
     api.post(`/api/student/learning/lessons/${lessonSlug}/complete`),
 
-  // GET /api/student/learning/courses/{courseSlug}/reviews
+  // GET /api/student/course-ratings/{courseSlug}
   getCourseReviews: (courseSlug, page = 0, size = 10) =>
-    api.get(`/api/student/learning/courses/${courseSlug}/reviews?page=${page}&size=${size}`),
+    api.get(`/api/student/course-ratings/${courseSlug}?page=${page}&size=${size}`),
 
-  // POST /api/student/learning/courses/{courseSlug}/reviews
+  // POST /api/student/course-ratings/{courseSlug}
   submitCourseReview: (courseSlug, data) =>
-    api.post(`/api/student/learning/courses/${courseSlug}/reviews`, data),
+    api.post(`/api/student/course-ratings/${courseSlug}`, data),
+
+  // PUT /api/student/course-ratings/{courseSlug}
+  updateCourseReview: (courseSlug, data) =>
+    api.put(`/api/student/course-ratings/${courseSlug}`, data),
+
+  // GET /api/student/course-ratings/{courseSlug}/my-rating
+  getMyRating: (courseSlug) =>
+    api.get(`/api/student/course-ratings/${courseSlug}/my-rating`),
+
+  // DELETE /api/student/course-ratings/{courseSlug}
+  deleteCourseReview: (courseSlug) =>
+    api.delete(`/api/student/course-ratings/${courseSlug}`),
 };
 
 export const studentNotesApi = {
-  getNotes: (courseId, page = 0, size = 10) =>
-    api.get(`/api/v1/student/notes?courseId=${courseId}&page=${page}&size=${size}`),
+  getNotes: (courseId, page = 0, size = 10) => {
+    let url = `/api/v1/student/notes?page=${page}&size=${size}`;
+    if (courseId) {
+      url += `&courseId=${courseId}`;
+    }
+    return api.get(url);
+  },
 
   createNote: (data) =>
     api.post("/api/v1/student/notes", data),
@@ -174,25 +191,45 @@ export const studentNotesApi = {
 };
 
 export const studentQuizApi = {
-  getQuizzes: () => api.get('/api/student/quizzes'),
-  getQuizById: (quizId) => api.get(`/api/student/quizzes/${quizId}`),
-  startQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/start`),
-  retryQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/retry`),
-  resumeQuiz: (quizId) => api.post(`/api/student/quizzes/${quizId}/resume`),
-  getLeaderboard: (quizId) => api.get(`/api/student/quizzes/${quizId}/leaderboard`),
-  getAttempts: () => api.get('/api/student/quizzes/attempts'),
-  getAttemptResult: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/result`),
-  getAttemptQuestions: (attemptId) => api.get(`/api/student/quizzes/attempts/${attemptId}/questions`),
-  saveAnswer: (attemptId, data) => api.post(`/api/student/quizzes/attempts/${attemptId}/save-answer`, data),
+  getQuizzes: (page = 0, size = 10) =>
+    api.get(`/api/student/quizzes?page=${page}&size=${size}`),
+
+  getQuizBySlug: (quizSlug) =>
+    api.get(`/api/student/quizzes/${quizSlug}`),
+
+  startQuiz: (quizSlug) =>
+    api.post(`/api/student/quizzes/${quizSlug}/start`),
+
+  retryQuiz: (quizSlug) =>
+    api.post(`/api/student/quizzes/${quizSlug}/retry`),
+
+  resumeQuiz: (quizSlug) =>
+    api.post(`/api/student/quizzes/${quizSlug}/resume`),
+
+  getAttemptsByQuiz: (quizSlug, page = 0, size = 10) =>
+    api.get(`/api/student/quizzes/${quizSlug}/attempts?page=${page}&size=${size}`),
+
+  getAttempts: (page = 0, size = 10) =>
+    api.get(`/api/student/quizzes/attempts?page=${page}&size=${size}`),
+
+  getAttemptResult: (attemptId) =>
+    api.get(`/api/student/quizzes/attempts/${attemptId}/result`),
+
+  getAttemptQuestions: (attemptId) =>
+    api.get(`/api/student/quizzes/attempts/${attemptId}/questions`),
+
+  saveAnswer: (attemptId, data) =>
+    api.post(`/api/student/quizzes/attempts/${attemptId}/save-answer`, data),
+
   submitAttempt: (attemptId, data) => {
-    const payload = {
-      answers: data?.answers || []
-    };
-    return api.post(`/api/student/quizzes/attempts/${attemptId}/submit`, payload);
+    return api.post(`/api/student/quizzes/attempts/${attemptId}/submit`, data || {});
   },
 
-  getLeaderboard: (quizId, page = 0, size = 10) =>
-    api.get(`/api/student/quizzes/${quizId}/leaderboard?page=${page}&size=${size}`),
+  getLeaderboard: (quizSlug, page = 0, size = 10) =>
+    api.get(`/api/student/quizzes/${quizSlug}/leaderboard?page=${page}&size=${size}`),
+
+  getLeaderboardByCourse: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/student/quizzes/course/${courseSlug}/leaderboard?page=${page}&size=${size}`),
 };
 
 export const studentJobApi = {
@@ -200,20 +237,38 @@ export const studentJobApi = {
   getJobs: (page = 0, size = 10) =>
     api.get(`/api/student/jobs?page=${page}&size=${size}`),
 
-  // Get job details by ID
-  getJobById: (jobId) =>
-    api.get(`/api/student/jobs/${jobId}`),
+  getJobBySlug: (jobSlug) =>
+    api.get(`/api/student/jobs/${jobSlug}`),
+
+  applyForJob: (jobSlug, formData, coverLetter) => {
+    const query = coverLetter ? `?coverLetter=${encodeURIComponent(coverLetter)}` : '';
+    return api.post(`/api/student/jobs/${jobSlug}/apply${query}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  },
+
+  getMyApplications: () =>
+    api.get(`/api/student/jobs/Myapplications`),
+    
+  getApplicationDetails: (applicationId) =>
+    api.get(`/api/student/jobs/applications/${applicationId}`)
 };
 
 export const studentAssignmentApi = {
 
+  getAssignments: (page = 0, size = 1000) =>
+    api.get(`/api/student/assignments?page=${page}&size=${size}`),
+
   getAssignmentsByModule: (moduleId) =>
     api.get(`/api/student/assignments/module/${moduleId}`),
+
+  getAssignmentBySlug: (assignmentSlug) =>
+    api.get(`/api/student/assignments/${assignmentSlug}`),
 
   getAssignmentById: (assignmentId) =>
     api.get(`/api/student/assignments/${assignmentId}`),
 
-  submitAssignment: (assignmentId, submissionText, file) => {
+  submitAssignment: (assignmentSlug, submissionText, file) => {
     const formData = new FormData();
 
     if (file) {
@@ -221,7 +276,7 @@ export const studentAssignmentApi = {
     }
 
     return api.post(
-      `/api/student/assignments/${assignmentId}/submit`,
+      `/api/student/assignments/${assignmentSlug}/submit`,
       formData,
       {
         params: {
@@ -234,8 +289,8 @@ export const studentAssignmentApi = {
     );
   },
 
-  updateSubmission: (assignmentId, data) =>
-    api.put(`/api/student/assignments/${assignmentId}/submission`, data),
+  updateSubmission: (assignmentSlug, data) =>
+    api.put(`/api/student/assignments/${assignmentSlug}/submission`, data),
 
   getSubmissions: () =>
     api.get(`/api/student/assignments/submissions`),

@@ -161,6 +161,10 @@ export const instructorLessonApi = {
 };
 
 export const instructorQuizApi = {
+  // GET /api/instructor/quizzes
+  getAllQuizzes: (page = 0, size = 100) =>
+    api.get(`/api/instructor/quizzes?page=${page}&size=${size}`),
+
   createQuiz: (data) =>
     api.post("/api/instructor/quizzes", data),
 
@@ -197,6 +201,15 @@ export const instructorQuizApi = {
   // GET /api/instructor/quizzes/courses/{courseSlug}
   getQuizzesByCourse: (courseSlug, page = 0, size = 50) =>
     api.get(`/api/instructor/quizzes/courses/${courseSlug}?page=${page}&size=${size}`),
+
+  // GET /api/instructor/quizzes/course/{courseSlug}/AllQuizzes
+  getAllQuizzesByCourse: (courseSlug, page = 0, size = 100, quizType = "") => {
+    let url = `/api/instructor/quizzes/course/${courseSlug}/AllQuizzes?page=${page}&size=${size}`;
+    if (quizType) {
+      url += `&quizType=${quizType}`;
+    }
+    return api.get(url);
+  },
 };
 
 /* ── Quiz Questions ── */
@@ -244,8 +257,13 @@ export const instructorQuizAnalyticsApi = {
 
 export const instructorAssignmentApi = {
   // GET /api/instructor/assignments
-  getAllAssignments: (page = 0, size = 10, sort = "id,desc") =>
-    api.get(`/api/instructor/assignments?page=${page}&size=${size}&sort=${sort}`),
+  getAllAssignments: (page = 0, size = 50) =>
+    api.get(`/api/instructor/assignments?page=${page}&size=${size}`),
+
+  // GET /api/instructor/assignments/{assignmentSlug}
+  getBySlug: (assignmentSlug) =>
+    api.get(`/api/instructor/assignments/${assignmentSlug}`),
+
 
   // GET /api/instructor/assignments/lessons/{lessonSlug}
   getByLesson: (lessonSlug, page = 0, size = 50) =>

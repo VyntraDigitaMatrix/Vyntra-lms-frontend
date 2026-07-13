@@ -54,21 +54,28 @@ const normalizeQuiz = (raw, course) => {
         raw.questionCount ?? raw.totalQuestions ?? raw.noOfQuestions ??
         raw.questionsCount ?? (Array.isArray(raw.questions) ? raw.questions.length : null) ?? 0;
     const duration = raw.durationInMinutes ?? raw.duration ?? raw.durationMinutes ?? raw.timeLimit ?? 0;
+    const title = raw.title ?? raw.quizTitle ?? raw.name ?? "Untitled Quiz";
+    const generatedSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     return {
         id: raw.id ?? raw.quizId,
-        slug: raw.slug ?? raw.quizSlug,
-        title: raw.title ?? raw.name ?? "Untitled Quiz",
-        description: raw.description ?? "",
+        slug: raw.slug ?? raw.quizSlug ?? generatedSlug ?? raw.id ?? raw.quizId,
+        title: title,
+        description: raw.description ?? raw.quizDescription ?? "",
         course: course?.title ?? course?.name ?? raw.courseTitle ?? "—",
         courseId: course?.id ?? raw.courseId ?? null,
         courseSlug: course?.slug ?? course?.courseSlug ?? raw.courseSlug ?? null,
-        moduleId: raw.moduleId ?? null,
-        moduleSlug: raw.moduleSlug ?? null,
-        moduleName: raw.moduleTitle ?? raw.moduleName ?? null,
-        lessonId: raw.lessonId ?? null,
-        lessonSlug: raw.lessonSlug ?? null,
-        lessonName: raw.lessonTitle ?? raw.lessonName ?? null,
-        type: raw.type ?? raw.quizType ?? "COURSE",
+        moduleId: raw.moduleId ?? raw.module_id ?? raw.module?.id ?? raw.module?.moduleId ?? null,
+        moduleSlug: raw.moduleSlug ?? raw.module?.slug ?? raw.module?.moduleSlug ?? null,
+        moduleName: raw.moduleTitle ?? raw.moduleName ?? raw.module?.title ?? raw.module?.name ?? null,
+        lessonId: raw.lessonId ?? raw.lesson_id ?? raw.lesson?.id ?? raw.lesson?.lessonId ?? null,
+        lessonSlug: raw.lessonSlug ?? raw.lesson?.slug ?? raw.lesson?.lessonSlug ?? null,
+        lessonName: raw.lessonTitle ?? raw.lessonName ?? raw.lesson?.title ?? raw.lesson?.name ?? null,
+        type: (raw.type || raw.quizType || "").toUpperCase() || (
+            (raw.lessonId || raw.lessonSlug || raw.lesson) ? "LESSON" :
+                (raw.moduleId || raw.moduleSlug || raw.module) ? "MODULE" :
+                    "COURSE"
+        ),
         questions: questionCount,
         duration,
         attempts: raw.attemptCount ?? raw.totalAttempts ?? 0,
@@ -287,13 +294,20 @@ const InlineOptionEditor = ({ questionId, existingOptions, sortOrder: initialSor
 
     const handleSave = async () => {
         if (!optText.trim()) return;
+
+        const targetSortOrder = Number(sortOrder) || 1;
+        if (existingOptions?.some(o => o.sortOrder === targetSortOrder)) {
+            alert(`Sort order ${targetSortOrder} already exists for another option!`);
+            return;
+        }
+
         setSaving(true);
         try {
             // Use POST /bulk for adding new options, because PUT doesn't support creation.
             await instructorQuizOptionApi.bulkCreateOptions(questionId, [{
                 optionText: optText.trim(),
                 correct: isCorrect,
-                sortOrder: Number(sortOrder) || 1,
+                sortOrder: targetSortOrder,
             }]);
             onSaveSuccess();
         } catch (err) {
@@ -431,8 +445,8 @@ const QuizFormModal = ({ mode = "create", courses, initialData, onClose, onSaved
             } else {
                 const res = await instructorQuizApi.createQuiz(payload);
                 savedData = extractObj(res);
-                savedSlug = savedData.slug ?? savedData.quizSlug;
-                if (!savedSlug) throw new Error("Quiz created but no slug returned from API.");
+                savedSlug = savedData.slug ?? savedData.quizSlug ?? savedData.id ?? savedData.quizId;
+                if (!savedSlug) throw new Error("Quiz created but no slug/id returned from API.");
             }
 
             onSaved({
@@ -732,6 +746,12 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
             const question = questions.find(q => q.id === questionId);
             const existingOptions = question?.optionObjects || [];
 
+            const targetSortOrder = newSortOrder ?? option.sortOrder ?? 1;
+            if (existingOptions.some(o => o.id !== option.id && o.sortOrder === targetSortOrder)) {
+                alert(`Sort order ${targetSortOrder} already exists for another option!`);
+                return;
+            }
+
             const payload = existingOptions.map(o => {
                 if (o.id === option.id) {
                     return {
@@ -739,7 +759,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                         optionId: o.id,
                         optionText: newText,
                         correct: newCorrect,
-                        sortOrder: newSortOrder ?? o.sortOrder ?? 1,
+                        sortOrder: targetSortOrder,
                     };
                 }
                 return {
@@ -1103,61 +1123,25 @@ const Quizzes = () => {
             const courseList = extractList(coursesRes);
             setCourses(courseList);
 
+            // Fetch all quizzes course-by-course using the new AllQuizzes endpoint for all types
             const all = await Promise.all(
                 courseList.map(async (course) => {
                     const courseSlug = course.slug ?? course.courseSlug;
                     if (!courseSlug) return [];
 
-                    const cq = await instructorQuizApi.getQuizzesByCourse(courseSlug, 0, 100)
-                        .then(r => extractList(r).map(raw => normalizeQuiz(raw, course)))
-                        .catch(() => []);
-
-                    const mods = extractList(
-                        await instructorModuleApi.getCourseModules(courseSlug, 0, 100).catch(() => null)
-                    );
-
-                    const mq = (await Promise.all(mods.map(async (mod) => {
-                        const modSlug = mod.slug ?? mod.moduleSlug;
-                        if (!modSlug) return [];
-                        return instructorQuizApi.getQuizzesByModule(modSlug, 0, 50)
-                            .then(r => extractList(r).map(raw => ({
-                                ...normalizeQuiz(raw, course),
-                                moduleId: mod.id,
-                                moduleSlug: modSlug,
-                                moduleName: mod.title,
-                            })))
-                            .catch(() => []);
-                    }))).flat();
-
-                    const lq = (await Promise.all(mods.map(async (mod) => {
-                        const modSlug = mod.slug ?? mod.moduleSlug;
-                        if (!modSlug) return [];
-                        const lessons = extractList(
-                            await instructorLessonApi.getModuleLessons(modSlug, 0, 100).catch(() => null)
-                        );
-                        return (await Promise.all(lessons.map(async (lesson) => {
-                            const lessonSlug = lesson.slug ?? lesson.lessonSlug;
-                            if (!lessonSlug) return [];
-                            return instructorQuizApi.getQuizzesByLesson(lessonSlug, 0, 50)
-                                .then(r => extractList(r).map(raw => ({
-                                    ...normalizeQuiz(raw, course),
-                                    lessonId: lesson.id,
-                                    lessonSlug,
-                                    lessonName: lesson.title,
-                                })))
-                                .catch(err => {
-                                    if (err?.response?.status !== 404) console.warn("Lesson quiz fetch:", err?.message);
-                                    return [];
-                                });
-                        }))).flat();
-                    }))).flat();
-
-                    return [...cq, ...mq, ...lq];
+                    try {
+                        const res = await instructorQuizApi.getAllQuizzesByCourse(courseSlug, 0, 500, "");
+                        return extractList(res).map(raw => normalizeQuiz(raw, course));
+                    } catch (err) {
+                        console.error(`Error fetching quizzes for course ${courseSlug}:`, err);
+                        return [];
+                    }
                 })
             );
 
             const seen = new Set();
             setQuizzes(all.flat().filter(q => {
+                if (!q.id) return false;
                 if (seen.has(q.id)) return false;
                 seen.add(q.id);
                 return true;
@@ -1203,9 +1187,9 @@ const Quizzes = () => {
                 try {
                     const mod = filterModules.find(m => String(m.id) === String(moduleFilter));
                     const modSlug = mod?.slug ?? mod?.moduleSlug;
-                    if (!modSlug) { if (!cancelled) setScopedQuizzes([]); return; }
+                    if (!courseSlug || !modSlug) { if (!cancelled) setScopedQuizzes([]); return; }
                     const list = extractList(await instructorQuizApi.getQuizzesByModule(modSlug, 0, 100))
-                        .map(raw => ({ ...normalizeQuiz(raw, course), moduleId: moduleFilter, moduleName: mod?.title ?? "" }));
+                        .map(raw => normalizeQuiz(raw, course));
                     if (!cancelled) setScopedQuizzes(list);
                 } catch { if (!cancelled) setScopedQuizzes([]); }
                 finally { if (!cancelled) setFilterLoading(false); }
@@ -1215,10 +1199,10 @@ const Quizzes = () => {
                 setFilterLoading(true);
                 try {
                     const lesson = filterLessons.find(l => String(l.id) === String(lessonFilter));
-                    const lessonSlug = lesson?.lessonSlug;
-                    if (!lessonSlug) { if (!cancelled) setScopedQuizzes([]); return; }
+                    const lessonSlug = lesson?.lessonSlug ?? lesson?.slug;
+                    if (!courseSlug || !lessonSlug) { if (!cancelled) setScopedQuizzes([]); return; }
                     const list = extractList(await instructorQuizApi.getQuizzesByLesson(lessonSlug, 0, 100))
-                        .map(raw => ({ ...normalizeQuiz(raw, course), lessonId: lessonFilter, lessonName: lesson?.title ?? "" }));
+                        .map(raw => normalizeQuiz(raw, course));
                     if (!cancelled) setScopedQuizzes(list);
                 } catch { if (!cancelled) setScopedQuizzes([]); }
                 finally { if (!cancelled) setFilterLoading(false); }

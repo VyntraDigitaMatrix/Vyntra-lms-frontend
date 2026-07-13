@@ -23,8 +23,8 @@ const LeaderboardModal = ({ quiz, onClose }) => {
         setLoading(true);
         setError("");
         try {
-            const quizId = quiz.quizId ?? quiz.id;
-            const res = await studentQuizApi.getLeaderboard(quizId, p, PAGE_SIZE);
+            const slugOrId = quiz.quizSlug || quiz.slug || quiz.quizId || quiz.id;
+            const res = await studentQuizApi.getLeaderboard(slugOrId, p, PAGE_SIZE);
             const body = res?.data?.data ?? res?.data;
             const list = Array.isArray(body) ? body
                 : Array.isArray(body?.content) ? body.content
@@ -53,7 +53,7 @@ const LeaderboardModal = ({ quiz, onClose }) => {
     const normEntry = (e) => ({
         rank: e.rank ?? e.position ?? null,
         name: e.studentName ?? e.name ?? e.userName ?? e.fullName ?? "Student",
-        score: e.score ?? e.totalScore ?? e.marksObtained ?? 0,
+        score: e.obtainedMarks ?? e.score ?? e.totalScore ?? e.marksObtained ?? 0,
         totalMarks: e.totalMarks ?? e.maxScore ?? quiz.totalMarks ?? null,
         percentage: e.percentage ?? e.scorePercentage ?? null,
         timeTaken: e.timeTaken ?? e.durationSeconds ?? null,

@@ -66,7 +66,7 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen bg-[#f6f5f7] flex items-center justify-center px-4 py-8">
       <div className="relative w-[820px] max-w-full min-h-[500px] bg-white rounded-lg overflow-hidden shadow-xl transition-all duration-200 hover:shadow-2xl">
-        
+
         {/* Left Side Info Panel */}
         <div className="absolute top-0 left-0 w-1/2 h-full bg-blue-600 text-white flex flex-col items-center justify-center text-center px-12">
           <div>
@@ -79,11 +79,11 @@ const AdminLogin = () => {
 
         {/* Right Side Interaction Panel */}
         <div className="absolute top-0 right-0 w-1/2 h-full flex flex-col items-center justify-center px-14">
-          
+
           {step === "login" ? (
             <form onSubmit={handleSubmitLogin} className="w-full flex flex-col items-center">
               <h1 className="text-3xl font-extrabold mb-6">Sign In</h1>
-              
+
               {error && (
                 <div className="text-red-500 text-xs mb-4 text-center w-full bg-red-50 p-2 rounded">
                   {error}
@@ -122,9 +122,8 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-12 py-3 bg-blue-600 text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-blue-700 cursor-pointer ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`px-12 py-3 bg-blue-600 text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-blue-700 cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 {loading ? "Requesting OTP..." : "Sign In"}
               </button>
@@ -168,9 +167,8 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-8 py-3 bg-blue-600 text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-blue-700 cursor-pointer ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`px-8 py-3 bg-blue-600 text-white rounded-full text-xs font-bold uppercase transition duration-300 hover:bg-blue-700 cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   {loading ? "Verifying..." : "Verify OTP"}
                 </button>

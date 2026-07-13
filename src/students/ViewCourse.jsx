@@ -239,7 +239,10 @@ const ViewCourse = () => {
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
     const [reviewsError, setReviewsError] = useState(false);
+    const [myReviewData, setMyReviewData] = useState(null);
+    const [isEditingReview, setIsEditingReview] = useState(false);
     const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+    const [hasReviewed, setHasReviewed] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [submitSuccess, setSubmitSuccess] = useState("");
@@ -358,6 +361,22 @@ const ViewCourse = () => {
                 const list = Array.isArray(raw) ? raw : (raw.content || []);
                 setReviews(list);
             }
+            if (isAuthenticated) {
+                try {
+                    const myRatingRes = await studentLearningApi.getMyRating(courseSlug);
+                    if (myRatingRes.data && myRatingRes.data.data) {
+                        const myReview = myRatingRes.data.data;
+                        setMyReviewData(myReview);
+                        setNewReview({ rating: myReview.rating || 5, comment: myReview.review || "" });
+                        setHasReviewed(true);
+                    } else {
+                        setMyReviewData(null);
+                        setHasReviewed(false);
+                    }
+                } catch (e) {
+                    // Ignore if no rating exists
+                }
+            }
         } catch (err) {
             // API may not be available yet — fail silently
             setReviewsError(true);
@@ -369,24 +388,23 @@ const ViewCourse = () => {
     useEffect(() => {
         if (courseSlug) {
             fetchCourseStructure();
+            fetchReviews();
         }
     }, [courseSlug]);
 
-    // Fetch reviews lazily when the reviews tab is opened
-    const [reviewsFetched, setReviewsFetched] = useState(false);
-    useEffect(() => {
-        if (activeTab === "reviews" && !reviewsFetched && courseSlug) {
-            setReviewsFetched(true);
-            fetchReviews();
-        }
-    }, [activeTab]);
+    const actualReviewCount = Math.max(
+        courseData?.totalRatings || 0,
+        reviews.length,
+        myReviewData && !isEditingReview ? 1 : 0
+    );
 
     const course = courseData ? {
         ...courseData,
         image: courseData.thumbnailUrl || S1,
         rating: courseData.averageRating ? courseData.averageRating.toFixed(1) : "0.0",
-        reviews: courseData.totalRatings || 0,
-        lessons: `${(courseData.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lessons`,
+        reviews: actualReviewCount,
+        lessons: courseData.totalLessons || (courseData.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0) || 0,
+        modules: courseData.totalModules || (courseData.modules || []).length || 0,
         desc: courseData.description || "",
         price: courseData.free ? "Free" : (courseData.discountPrice ? `₹${courseData.discountPrice}` : (courseData.actualPrice ? `₹${courseData.actualPrice}` : "")),
         oldPrice: courseData.free ? "" : (courseData.actualPrice && courseData.discountPrice ? `₹${courseData.actualPrice}` : ""),
@@ -396,8 +414,9 @@ const ViewCourse = () => {
         title: "Loading Course...",
         image: S1,
         rating: "0.0",
-        reviews: "0",
-        lessons: "0 Lessons",
+        reviews: 0,
+        lessons: 0,
+        modules: 0,
         desc: "",
         price: "",
         oldPrice: "",
@@ -423,12 +442,20 @@ const ViewCourse = () => {
         setSubmitError("");
         setSubmitSuccess("");
         try {
-            await studentLearningApi.submitCourseReview(courseSlug, {
+            const payload = {
                 rating: newReview.rating,
-                comment: newReview.comment,
-            });
-            setSubmitSuccess("Review submitted successfully!");
-            setNewReview({ rating: 5, comment: "" });
+                review: newReview.comment,
+            };
+            if (hasReviewed) {
+                await studentLearningApi.updateCourseReview(courseSlug, payload);
+                setSubmitSuccess("Review updated successfully!");
+                setIsEditingReview(false);
+            } else {
+                await studentLearningApi.submitCourseReview(courseSlug, payload);
+                setSubmitSuccess("Review submitted successfully!");
+                setHasReviewed(true);
+                setIsEditingReview(false);
+            }
             fetchReviews();
         } catch (err) {
             console.error(err);
@@ -437,6 +464,29 @@ const ViewCourse = () => {
             setSubmitLoading(false);
         }
     };
+
+    const handleReviewDelete = async () => {
+        if (!window.confirm("Are you sure you want to delete your review?")) return;
+        try {
+            await studentLearningApi.deleteCourseReview(courseSlug);
+            setHasReviewed(false);
+            setMyReviewData(null);
+            setNewReview({ rating: 5, comment: "" });
+            setIsEditingReview(false);
+            fetchReviews();
+        } catch (err) {
+            console.error("Failed to delete review", err);
+            alert("Failed to delete review");
+        }
+    };
+
+    // Auto-dismiss success message
+    useEffect(() => {
+        if (submitSuccess) {
+            const timer = setTimeout(() => setSubmitSuccess(""), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [submitSuccess]);
 
     const pad = (n) => String(n).padStart(2, "0");
 
@@ -487,7 +537,7 @@ const ViewCourse = () => {
                     {course?.isEnrolled ? (
                         <button
                             type="button"
-                            onClick={() => navigate(`/student/continue-learning/${courseData?.courseId || courseSlug}`)}
+                            onClick={() => navigate(`/student/continue-learning/${courseData?.slug || courseSlug || courseData?.courseId}`)}
                             className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
                         >
                             Continue Learning
@@ -647,7 +697,7 @@ const ViewCourse = () => {
                                     <div className="flex flex-wrap gap-1.5">
                                         {[
                                             { Icon: FaBook, text: `${course.lessons} Lessons` },
-                                            { Icon: AiOutlinePlaySquare, text: `${modulesData.length} Modules` },
+                                            { Icon: AiOutlinePlaySquare, text: `${course.modules} Modules` },
                                             { Icon: FaTrophy, text: "Certificate" },
                                         ].map(({ Icon, text }, i) => (
                                             <div key={i} className="flex items-center gap-1 border border-gray-100 rounded-md px-2 py-1 text-[10px] font-medium text-gray-600 bg-gray-50">
@@ -687,7 +737,7 @@ const ViewCourse = () => {
                             {activeTab === "overview" && (
                                 <div className="space-y-5">
                                     <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                                        <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2.5">What you'll learn</h3>
+                                        <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2.5">About This Course</h3>
                                         <div
                                             className="course-description text-sm text-gray-600 leading-relaxed"
                                             dangerouslySetInnerHTML={{ __html: course.description || "" }}
@@ -772,7 +822,7 @@ const ViewCourse = () => {
                                                     <FaStar key={s} className={`w-2.5 h-2.5 ${s <= Math.round(courseData?.averageRating || 0) ? "text-yellow-400" : "text-gray-200"}`} />
                                                 ))}
                                             </div>
-                                            <div className="text-[10px] text-gray-400 font-medium">{courseData?.totalRatings || 0} Ratings</div>
+                                            <div className="text-[10px] text-gray-400 font-medium">{actualReviewCount} Ratings</div>
                                         </div>
                                         <div className="flex-1 w-full space-y-1.5">
                                             {[5, 4, 3, 2, 1].map(s => (
@@ -789,11 +839,34 @@ const ViewCourse = () => {
                                         </div>
                                     </div>
 
-                                    {!reviewsError && (
-                                        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
-                                            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Leave Feedback</h3>
+                                    {!reviewsError && isAuthenticated && hasReviewed && !isEditingReview && myReviewData && (
+                                        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 relative">
+                                            <div className="flex justify-between items-start">
+                                                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">My Review</h3>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setIsEditingReview(true)} className="text-xs text-blue-600 font-semibold hover:underline">Edit</button>
+                                                    <button onClick={handleReviewDelete} className="text-xs text-red-600 font-semibold hover:underline">Delete</button>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-1 mb-2">
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <FaStar key={star} className={`w-4 h-4 ${star <= (myReviewData.rating || 0) ? "text-yellow-400" : "text-gray-200"}`} />
+                                                ))}
+                                            </div>
+                                            <p className="text-sm text-gray-700">{myReviewData.review}</p>
+                                        </div>
+                                    )}
+
+                                    {!reviewsError && isAuthenticated && (!hasReviewed || isEditingReview) && (
+                                        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 relative">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">{hasReviewed ? "Update Feedback" : "Leave Feedback"}</h3>
+                                                {hasReviewed && (
+                                                    <button onClick={() => setIsEditingReview(false)} className="text-[10px] text-gray-500 hover:text-gray-800">Cancel</button>
+                                                )}
+                                            </div>
                                             <div className="flex gap-2 items-center">
-                                                {[1,2,3,4,5].map(star => (
+                                                {[1, 2, 3, 4, 5].map(star => (
                                                     <button
                                                         key={star}
                                                         type="button"
@@ -818,7 +891,7 @@ const ViewCourse = () => {
                                                 disabled={submitLoading || !newReview.comment.trim()}
                                                 className={`bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition ${submitLoading || !newReview.comment.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
                                             >
-                                                {submitLoading ? "Submitting..." : "Submit Review"}
+                                                {submitLoading ? "Submitting..." : (hasReviewed ? "Update Review" : "Submit Review")}
                                             </button>
                                         </div>
                                     )}
@@ -902,7 +975,7 @@ const ViewCourse = () => {
                 {courseData?.isEnrolled ? (
                     <button
                         type="button"
-                        onClick={() => navigate(`/student/continue-learning/${courseId}`)}
+                        onClick={() => navigate(`/student/continue-learning/${courseData?.slug || courseSlug || courseId}`)}
                         className="w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 border-none cursor-pointer"
                     >
                         Continue Learning

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { studentNotesApi } from "./auth/api";
+import { studentNotesApi, studentLearningApi } from "./auth/api";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaPlus, FaTimes, FaStickyNote, FaUser, FaClock, FaSearch,
@@ -79,15 +79,38 @@ const NoteViewer = ({ note, onClose, onEdit }) => {
 /* ═══════════════════════════════════
    NOTE EDITOR
 ═══════════════════════════════════ */
-const NoteEditor = ({ onSave, onCancel, editNote, defaultCourseId, defaultCourseName }) => {
+const NoteEditor = ({ onSave, onCancel, editNote, defaultCourseId, defaultCourseName, enrolledCourses = [] }) => {
   const titleRef = useRef(null);
   const [title, setTitle] = useState(editNote?.title || "");
   const [description, setDescription] = useState(editNote?.description || "");
-  const [courseId] = useState(editNote?.courseId || defaultCourseId || 1);
-  const [courseName] = useState(editNote?.courseName || defaultCourseName || "");
+  const [courseId, setCourseId] = useState(editNote?.courseId || defaultCourseId || "");
   const [saved, setSaved] = useState(false);
+  const [courseSearch, setCourseSearch] = useState("");
+  const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+  const courseDropdownRef = useRef(null);
+
+  // Derive display name from selected courseId
+  const selectedCourseName = enrolledCourses.find(c => c.courseId === courseId)?.courseTitle
+    || (courseId === defaultCourseId ? defaultCourseName : "");
+
+  const filteredCourses = courseSearch
+    ? enrolledCourses.filter(c =>
+        (c.courseTitle || "").toLowerCase().includes(courseSearch.toLowerCase())
+      )
+    : enrolledCourses;
 
   useEffect(() => { titleRef.current?.focus(); }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (courseDropdownRef.current && !courseDropdownRef.current.contains(e.target)) {
+        setShowCourseDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const handleSave = () => {
     if (!title.trim()) {
@@ -102,8 +125,8 @@ const NoteEditor = ({ onSave, onCancel, editNote, defaultCourseId, defaultCourse
         title: title.trim(), 
         description: description.trim(), 
         id: editNote?.id,
-        courseId: courseId,
-        courseName: courseName,
+        courseId: courseId || null,
+        courseName: selectedCourseName,
       }),
       500
     );
@@ -128,16 +151,94 @@ const NoteEditor = ({ onSave, onCancel, editNote, defaultCourseId, defaultCourse
           />
           <button 
             onClick={handleSave} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${saved ? "bg-green-500 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex-shrink-0 ${saved ? "bg-green-500 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
           >
             <FaSave className="text-xs" />{saved ? "Saved!" : (editNote ? "Update" : "Save")}
           </button>
         </div>
-        {(defaultCourseName || courseName) && (
+
+        {/* Course selector – hidden while editing (courseId is fixed) */}
+        {!editNote && (
+          <div className="px-4 pb-3" ref={courseDropdownRef}>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowCourseDropdown(v => !v)}
+                className="w-full sm:w-72 flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl bg-white hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-sm"
+              >
+                <FaBook className="text-blue-500 text-[10px] flex-shrink-0" />
+                <span className={`flex-1 text-left truncate ${selectedCourseName ? "text-gray-800 font-medium" : "text-gray-400"}`}>
+                  {selectedCourseName || "Select a course (optional)"}
+                </span>
+                <FaChevronRight className={`text-gray-400 text-[9px] flex-shrink-0 transition-transform ${showCourseDropdown ? "rotate-90" : ""}`} />
+              </button>
+
+              {showCourseDropdown && (
+                <div className="absolute top-full mt-1 left-0 w-full sm:w-80 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  {/* Search */}
+                  <div className="px-3 pt-3 pb-2">
+                    <div className="relative">
+                      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-[10px]" />
+                      <input
+                        type="text"
+                        placeholder="Search courses…"
+                        value={courseSearch}
+                        onChange={e => setCourseSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-100 rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-52 overflow-y-auto pb-2">
+                    {/* None option */}
+                    <button
+                      type="button"
+                      onClick={() => { setCourseId(""); setShowCourseDropdown(false); setCourseSearch(""); }}
+                      className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-left hover:bg-gray-50 transition ${
+                        !courseId ? "text-blue-600 font-semibold bg-blue-50" : "text-gray-500"
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-[9px] flex-shrink-0">—</span>
+                      No course (personal note)
+                    </button>
+                    {filteredCourses.length === 0 && (
+                      <p className="text-center text-xs text-gray-400 py-4">No courses found</p>
+                    )}
+                    {filteredCourses.map(course => {
+                      const id = course.courseId;
+                      const name = course.courseTitle || "Untitled Course";
+                      const isSelected = courseId === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => { setCourseId(id); setShowCourseDropdown(false); setCourseSearch(""); }}
+                          className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-left hover:bg-blue-50 transition ${
+                            isSelected ? "text-blue-600 font-semibold bg-blue-50" : "text-gray-700"
+                          }`}
+                        >
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] flex-shrink-0 ${
+                            isSelected ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"
+                          }`}>
+                            {isSelected ? "✓" : <FaBook />}
+                          </span>
+                          <span className="truncate">{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Show fixed course label when editing */}
+        {editNote && selectedCourseName && (
           <div className="px-4 pb-3">
-            <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg w-fit">
               <FaBook className="text-[10px]" />
-              <span>Note for: <strong>{defaultCourseName || courseName}</strong></span>
+              <span>Note for: <strong>{selectedCourseName}</strong></span>
             </div>
           </div>
         )}
@@ -174,7 +275,7 @@ const Notes = () => {
   const [totalElements, setTotalElements] = useState(0);
 
   const courseFromModule = location.state?.course || null;
-  const defaultCourseId = courseFromModule?.id || 1;
+  const defaultCourseId = courseFromModule?.id || null;
   const defaultCourseName = courseFromModule?.name || "";
 
   const [sortType, setSortType] = useState("Latest");
@@ -185,6 +286,19 @@ const Notes = () => {
   const [activeMenuNote, setActiveMenuNote] = useState(null);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [messageModal, setMessageModal] = useState({ show: false, type: "", message: "" });
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+
+  // Fetch enrolled courses once for the course picker
+  useEffect(() => {
+    studentLearningApi.getMyEnrolledCourses(0, 100)
+      .then(res => {
+        const data = res.data;
+        // studentLearningApi returns { data: { content: [...] } }
+        const list = data?.data?.content || data?.content || [];
+        setEnrolledCourses(list);
+      })
+      .catch(err => console.warn("[Notes] Failed to fetch enrolled courses:", err));
+  }, []);
 
   const sortOptions = ["Latest", "Oldest", "A–Z", "Z–A"];
 
@@ -253,12 +367,17 @@ const Notes = () => {
 
   const handleSaveNote = async ({ title, description, id, courseId, courseName }) => {
     try {
-      const payload = { title, description, courseId };
       if (id) {
-        await studentNotesApi.updateNote(id, payload);
+        const updatePayload = { title, description };
+        await studentNotesApi.updateNote(id, updatePayload);
         setMessageModal({ show: true, type: "success", message: "Note updated successfully!" });
       } else {
-        await studentNotesApi.createNote(payload);
+        const createPayload = { title, description };
+        // Only attach courseId if it's a valid string/uuid, not if it's empty or 1 (the old default)
+        if (courseId && courseId !== 1) {
+            createPayload.courseId = courseId;
+        }
+        await studentNotesApi.createNote(createPayload);
         setMessageModal({ show: true, type: "success", message: "Note created successfully!" });
       }
       setShowEditor(false);
@@ -328,6 +447,7 @@ const Notes = () => {
         editNote={editingNote}
         defaultCourseId={defaultCourseId}
         defaultCourseName={defaultCourseName}
+        enrolledCourses={enrolledCourses}
       />
     );
   }

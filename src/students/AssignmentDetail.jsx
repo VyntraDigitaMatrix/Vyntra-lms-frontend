@@ -46,8 +46,9 @@ const AssignmentDetail = () => {
   const onBack = () => navigate(-1);
 
   const handleSubmitAssignment = async (id, submissionText, file) => {
+    const slugOrId = assignment?.slug ?? assignment?.assignmentSlug ?? id;
     try {
-      await studentAssignmentApi.submitAssignment(id, submissionText, file);
+      await studentAssignmentApi.submitAssignment(slugOrId, submissionText, file);
       await loadAssignment();
     } catch (err) {
       console.error("Submission error:", err.response?.data);

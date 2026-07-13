@@ -80,6 +80,7 @@ import LessonSettings from "./Instructor/pages/LessonSettings";
 import SectionSettings from "./Instructor/pages/SectionSettings";
 import Plans from "./Instructor/pages/Plans";
 import BrandingPage from "./Instructor/pages/BrandingPage";
+import PendingDetail from "./students/components/PendingDetail";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -167,6 +168,7 @@ function App() {
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
                   <Route path="continue-learning" element={<ContinueLearning />} />
+                  <Route path="assignments/:assignmentSlug" element={<Assignments />} />
                   <Route
                     path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
                     element={<AssignmentDetail />}
@@ -215,6 +217,8 @@ function App() {
                   <Route path="reports" element={<InstructorReports />} />
                   <Route path="change-password" element={<InstructorChangePassword />} />
                   <Route path="assignments" element={<InstructorAssignments />} />
+                  <Route path="assignments/:assignmentSlug" element={<InstructorAssignments />} />
+                  <Route path="assignments/:assignmentSlug/submissions" element={<InstructorAssignments />} />
                   <Route path="profile" element={<InstructorProfile />} />
                   <Route path="quiz" element={<Quiz />} />
                   <Route path="/instructor/create-course" element={<CreateCourse />} />

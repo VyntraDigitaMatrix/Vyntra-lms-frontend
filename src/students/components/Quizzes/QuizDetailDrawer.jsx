@@ -11,29 +11,7 @@ import { HiOutlineClock } from "react-icons/hi";
 
 const QuizDetailDrawer = ({ quizSummary, onClose, onStartQuiz, onResumeQuiz, onRetakeQuiz, onViewAnalytics }) => {
     const c = colorFor(quizSummary.id);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [quiz, setQuiz] = useState(quizSummary);
-
-    useEffect(() => {
-        let active = true;
-        const load = async () => {
-            setLoading(true);
-            setError("");
-            try {
-                const res = await studentQuizApi.getQuizById(quizSummary.id);
-                const data = unwrap(res);
-                if (active && data) setQuiz(prev => ({ ...prev, ...data }));
-            } catch (err) {
-                console.error("[QuizDetailDrawer] getQuizById error:", err);
-                if (active) setError("Failed to load quiz details.");
-            } finally {
-                if (active) setLoading(false);
-            }
-        };
-        load();
-        return () => { active = false; };
-    }, [quizSummary.id]);
+    const quiz = quizSummary;
 
     const status = deriveStatus(quiz);
     const questionCount = quiz.questions?.length ?? quiz.questionCount ?? quiz.totalQuestions ?? "—";
@@ -82,12 +60,7 @@ const QuizDetailDrawer = ({ quizSummary, onClose, onStartQuiz, onResumeQuiz, onR
                         )}
                     </div>
 
-                    {loading && (
-                        <div className="flex justify-center py-6">
-                            <FaSpinner className="animate-spin text-purple-400" />
-                        </div>
-                    )}
-                    {error && <p className="text-xs text-red-500 font-semibold">{error}</p>}
+
 
                     {status === "Completed" && (
                         scoreData ? (

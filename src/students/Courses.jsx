@@ -4,7 +4,7 @@ import { studentLearningApi } from "./auth/api";
 import {
     FaBookOpen, FaChevronLeft, FaChevronRight,
     FaSearch, FaGraduationCap, FaPlay,
-    FaTrophy, FaSpinner
+    FaTrophy, FaSpinner, FaGlobe, FaStar, FaUserFriends
 } from "react-icons/fa";
 
 /* ── Fallback thumbnail ── */
@@ -203,7 +203,7 @@ const Courses = () => {
 
                             return (
                                 <div
-                                    key={course.enrollmentId}
+                                    key={course.courseId || course.slug || course.id}
                                     className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col"
                                 >
                                     {/* Thumbnail */}
@@ -227,17 +227,34 @@ const Courses = () => {
                                     {/* Content */}
                                     <div className="p-4 flex flex-col flex-1">
                                         <div className="flex-1">
-                                            <h2 className="font-bold text-gray-900 text-sm leading-snug mb-1 line-clamp-2">
-                                                {course.courseTitle}
+                                            <h2 className="font-bold text-gray-900 text-sm leading-snug mb-1 line-clamp-2 min-h-[40px]">
+                                                {course.title || course.courseTitle}
                                             </h2>
-                                            <p className="text-[11px] text-gray-500 mb-1">
-                                                By {course.instructorName || "Instructor"}
+                                            <p className="text-[11px] text-gray-500 mb-1 line-clamp-1">
+                                                By {course.instructorNames?.join(", ") || course.instructorName || "Instructor"}
                                             </p>
-                                            {course.level && (
-                                                <span className="inline-block text-[10px] font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                                                    {course.level}
+                                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                                {course.level && (
+                                                    <span className="text-[10px] font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                                                        {course.level}
+                                                    </span>
+                                                )}
+                                                {course.language && (
+                                                    <span className="flex items-center gap-1 text-[10px] text-gray-500">
+                                                        <FaGlobe size={10} /> {course.language}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-500">
+                                                <div className="flex items-center gap-0.5 text-yellow-500">
+                                                    <FaStar size={10} />
+                                                    <span className="font-bold">{course.averageRating > 0 ? course.averageRating.toFixed(1) : "0.0"}</span>
+                                                </div>
+                                                <span>({course.totalRatings || 0} reviews)</span>
+                                                <span className="flex items-center gap-1 ml-auto font-medium">
+                                                    <FaUserFriends size={10} /> {course.totalEnrollments || 0}
                                                 </span>
-                                            )}
+                                            </div>
                                         </div>
 
                                         {/* Progress bar */}
@@ -256,7 +273,7 @@ const Courses = () => {
 
                                         {/* CTA Button */}
                                         <button
-                                            onClick={() => navigate(`/student/continue-learning/${courseId}`)}
+                                            onClick={() => navigate(`/student/continue-learning/${course.slug || courseId}`)}
                                             className={`w-full mt-3 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${course.completed
                                                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                                                 : progress > 0

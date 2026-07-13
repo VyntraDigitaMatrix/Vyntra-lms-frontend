@@ -236,8 +236,8 @@ const SecuritySection = () => {
                 value={pwd[k]} onChange={v => setPwd(p => ({ ...p, [k]: v }))}
                 placeholder={k === "current" ? "Enter current password" : k === "new" ? "Min. 8 characters" : "Re-enter new password"}
                 rightElement={
-                  <button onClick={() => setShowPwd(p => ({ ...p, [k]: !p[k] }))} className="text-gray-400 hover:text-gray-600 transition">
-                    {showPwd[k] ? <FaEyeSlash style={{ fontSize: 12 }} /> : <FaEye style={{ fontSize: 12 }} />}
+                  <button onClick={() => setShowPwd(p => ({ ...p, [k]: !p[k] }))} className="text-gray-400 hover:text-gray-600 transition flex items-center justify-center p-1 focus:outline-none focus:ring-2 focus:ring-green-100 rounded">
+                    {showPwd[k] ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                   </button>
                 }
               />

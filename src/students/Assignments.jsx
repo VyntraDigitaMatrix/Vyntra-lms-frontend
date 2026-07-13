@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { studentAssignmentApi, studentEnrolledCourseApi } from "./auth/api";
 import {
   FaFileAlt,
@@ -23,6 +23,7 @@ import GradedDetail from "./components/GradedDetail";
 /* ─── Main Assignments Page ─── */
 const Assignments = () => {
   const navigate = useNavigate();
+  const { assignmentSlug } = useParams();
 
   const [selectedCalDate, setSelectedCalDate] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
@@ -57,7 +58,7 @@ const Assignments = () => {
   }, [assignments, activeTab, selectedCourse, selectedModule]);
 
   const overview = [
-    { label: "Total Assignments", value: assignments.length, color: "bg-blue-100 text-blue-600" },
+    { label: "Total Assignments", value: assignments.length, color: "bg-[#043573]/10 text-[#043573]" },
     { label: "Pending", value: assignments.filter((a) => a.status === "Pending").length, color: "bg-orange-100 text-orange-600" },
     { label: "Submitted", value: assignments.filter((a) => a.status === "Submitted").length, color: "bg-green-100 text-green-600" },
     { label: "Graded", value: assignments.filter((a) => a.status === "Graded").length, color: "bg-purple-100 text-purple-600" },
@@ -65,8 +66,8 @@ const Assignments = () => {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -104,13 +105,11 @@ const Assignments = () => {
 
   /* ── Navigate to the lesson inside the course player ── */
   const openInCoursePlayer = (item) => {
-    // item.lessonId comes from the assignment API (lessonId / lesson_id field)
-    // Route: /student/course/:courseId/module/:moduleId/lesson/:lessonId
-    const lessonId = item.lessonId ?? item.lesson_id ?? item.lessonID;
-    if (item.courseId && item.moduleId && lessonId) {
-      navigate(
-        `/student/course/${item.courseId}/module/${item.moduleId}/lesson/${lessonId}`
-      );
+    const lId = item.lessonSlug ?? item.lessonId ?? item.lesson_id ?? item.lessonID;
+    const mId = item.moduleSlug ?? item.moduleId ?? item.module_id ?? item.moduleID;
+    const cId = item.courseSlug ?? item.courseId ?? item.course_id ?? item.courseID;
+    if (cId && mId && lId) {
+      navigate(`/student/course/${cId}/module/${mId}/lesson/${lId}`);
     }
   };
 
@@ -146,98 +145,56 @@ const Assignments = () => {
     }
   };
 
-  const fetchAssignments = async (submissionMap = {}, coursesData = []) => {
+  const fetchAssignments = async () => {
     try {
       setLoading(true);
       setError("");
-      setFetchProgress({ current: 0, total: 0 });
 
-      if (coursesData.length === 0) {
-        setAssignments([]);
-        return [];
-      }
+      const [assignRes, subMap] = await Promise.all([
+        studentAssignmentApi.getAssignments().catch(err => {
+          console.error("Assignments API error:", err);
+          return { data: [] };
+        }),
+        fetchSubmissions().catch(() => ({}))
+      ]);
 
-      // First pass: count total modules for progress indicator
-      let allModulesByCourse = [];
-      for (const course of coursesData) {
-        if (!course.courseId) continue;
-        try {
-          const modRes = await studentEnrolledCourseApi.getCourseModules(course.courseId);
-          const mods =
-            modRes.data?.data?.content ||
-            modRes.data?.content ||
-            modRes.data?.data ||
-            (Array.isArray(modRes.data) ? modRes.data : []);
-          allModulesByCourse.push({ course, mods: Array.isArray(mods) ? mods : [] });
-        } catch (err) {
-          console.error(`Error fetching modules for course ${course.courseId}:`, err);
-          allModulesByCourse.push({ course, mods: [] });
-        }
-      }
+      const rawItems = extractArray(assignRes.data);
 
-      const totalModules = allModulesByCourse.reduce((sum, x) => sum + x.mods.length, 0);
-      setFetchProgress({ current: 0, total: totalModules });
+      const transformed = rawItems.map((item) => {
+        let status = "Pending";
+        if (item.graded) status = "Graded";
+        else if (item.submitted) status = "Submitted";
 
-      const allAssignments = [];
-      let processedModules = 0;
-
-      for (const { course, mods } of allModulesByCourse) {
-        const courseId = course.courseId;
-
-        for (const mod of mods) {
-          processedModules++;
-          setFetchProgress({ current: processedModules, total: totalModules });
-
-          const moduleId = mod.id ?? mod.moduleId;
-          if (!moduleId) continue;
-
-          try {
-            const res = await studentAssignmentApi.getAssignmentsByModule(moduleId);
-            const rawItems = extractArray(res.data);
-            if (rawItems.length === 0) continue;
-
-            const transformed = rawItems.map((item) => {
-              const base = transformAssignment(item, submissionMap);
-              return {
-                ...base,
-                // Ensure ID is always set
-                id: base.id || item.id || item.assignmentId || item._id,
-                // Stamp course + module context
-                courseId,
-                moduleId,
-                courseName: course.courseTitle,
-                moduleName: mod.title || mod.moduleName || `Module ${moduleId}`,
-                // ── Lesson link fields ──
-                // The assignment API may return the associated lesson ID under
-                // different field names. Capture all common variants here.
-                lessonId:
-                  item.lessonId ??
-                  item.lesson_id ??
-                  item.lessonID ??
-                  item.lesson?.id ??
-                  null,
-              };
-            });
-
-            allAssignments.push(...transformed);
-          } catch (err) {
-            console.error(`Error fetching assignments for module ${moduleId}:`, err);
-          }
-        }
-      }
-
-      // Deduplicate by id
-      const seen = new Set();
-      const unique = allAssignments.filter((a) => {
-        if (!a.id) return false;
-        if (seen.has(a.id)) return false;
-        seen.add(a.id);
-        return true;
+        return {
+          id: item.assignmentId || item.id || item._id,
+          assignmentSlug: item.assignmentSlug,
+          title: item.title,
+          description: item.description,
+          dueDate: item.dueDate,
+          maxMarks: item.maxMarks,
+          status,
+          courseId: item.courseId,
+          moduleId: item.moduleId,
+          lessonId: item.lessonId,
+          courseName: item.courseName,
+          moduleName: item.moduleName,
+          lessonName: item.lessonName,
+          assignmentType: item.assignmentType,
+          submitted: item.submitted,
+          graded: item.graded,
+          assignmentStatus: item.assignmentStatus,
+          scoredMarks: subMap[item.assignmentId || item.id || item._id]?.obtainedMarks
+            ?? subMap[item.assignmentSlug]?.obtainedMarks
+            ?? subMap[item.assignmentId || item.id || item._id]?.score
+            ?? subMap[item.assignmentSlug]?.score
+            ?? item.scoredMarks ?? item.obtainedMarks ?? item.marksObtained ?? item.score ?? item.submission?.obtainedMarks ?? item.submission?.score ?? null,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt
+        };
       });
 
-      console.log(`Total unique assignments: ${unique.length}`);
-      setAssignments(unique);
-      return unique;
+      setAssignments(transformed);
+      return transformed;
     } catch (err) {
       console.error("Error in fetchAssignments:", err);
       setError(err?.response?.data?.message || "Failed to load assignments. Please try again.");
@@ -254,6 +211,8 @@ const Assignments = () => {
       const data =
         response.data?.data?.content ||
         response.data?.content ||
+        response.data?.data?.modules ||
+        response.data?.modules ||
         response.data?.data ||
         (Array.isArray(response.data) ? response.data : []);
       setModules(Array.isArray(data) ? data : []);
@@ -266,16 +225,15 @@ const Assignments = () => {
   };
 
   const loadAll = async () => {
-    const [subMap, coursesData] = await Promise.all([
-      fetchSubmissions(),
+    await Promise.all([
       fetchCourses(),
+      fetchAssignments()
     ]);
-    await fetchAssignments(subMap, coursesData);
   };
 
   /* ── Open assignment detail (existing modal flow) ── */
   const openAssignment = async (assignmentItem) => {
-    if (!assignmentItem?.id) {
+    if (!assignmentItem?.id && !assignmentItem?.assignmentSlug) {
       alert("Cannot open assignment: Invalid assignment data");
       return;
     }
@@ -284,7 +242,8 @@ const Assignments = () => {
     try {
       let detailResponse;
       try {
-        detailResponse = await studentAssignmentApi.getAssignmentById(assignmentItem.id);
+        const slugOrId = assignmentItem.assignmentSlug || assignmentItem.id;
+        detailResponse = await studentAssignmentApi.getAssignmentBySlug(slugOrId);
       } catch (err) {
         const existing = assignmentsRef.current.find((a) => a.id === assignmentItem.id);
         if (existing) { setSelected(existing); return; }
@@ -307,25 +266,39 @@ const Assignments = () => {
       setSelected({
         ...merged,
         id: merged.id || assignmentItem.id,
+        slug: merged.slug || assignmentItem.assignmentSlug || assignmentItem.slug || null,
+        assignmentSlug: merged.assignmentSlug || assignmentItem.assignmentSlug || assignmentItem.slug || null,
         courseId: assignmentItem.courseId,
         moduleId: assignmentItem.moduleId,
         lessonId: assignmentItem.lessonId,
         courseName: assignmentItem.courseName || courseTitleMap[String(assignmentItem.courseId)],
         moduleName: assignmentItem.moduleName,
       });
+      if (assignmentSlug !== slugOrId) {
+        navigate(`/student/assignments/${slugOrId}`);
+      }
     } catch (err) {
       console.error("Error in openAssignment:", err);
       const fallback = assignmentsRef.current.find((a) => a.id === assignmentItem.id);
-      if (fallback) setSelected(fallback);
-      else alert("Failed to load assignment details. Please try again.");
+      if (fallback) {
+        setSelected(fallback);
+        const slugOrId = fallback.assignmentSlug || fallback.slug || fallback.id;
+        if (assignmentSlug !== slugOrId) {
+          navigate(`/student/assignments/${slugOrId}`);
+        }
+      } else {
+        alert("Failed to load assignment details. Please try again.");
+        if (assignmentSlug) navigate("/student/assignments");
+      }
     } finally {
       setDetailLoading(false);
     }
   };
 
   const handleSubmitAssignment = async (assignmentId, submissionText, file) => {
+    const slugOrId = selected?.slug ?? selected?.assignmentSlug ?? assignmentId;
     try {
-      const response = await studentAssignmentApi.submitAssignment(assignmentId, submissionText, file);
+      const response = await studentAssignmentApi.submitAssignment(slugOrId, submissionText, file);
       console.log(response.data);
       alert("Assignment submitted successfully");
       await loadAll();
@@ -342,6 +315,22 @@ const Assignments = () => {
   useEffect(() => { loadAll(); }, []);
 
   useEffect(() => {
+    if (assignmentSlug && !selected && !detailLoading && assignments.length > 0) {
+      const found = assignments.find(
+        (a) => a.assignmentSlug === assignmentSlug || String(a.id) === assignmentSlug
+      );
+      if (found) {
+        openAssignment(found);
+      } else {
+        alert("Assignment not found.");
+        navigate("/student/assignments");
+      }
+    } else if (!assignmentSlug && selected) {
+      setSelected(null);
+    }
+  }, [assignmentSlug, selected, detailLoading, assignments, navigate]);
+
+  useEffect(() => {
     setSelectedModule("All");
     if (selectedCourse === "All" || !selectedCourse) { setModules([]); return; }
     fetchModules(selectedCourse);
@@ -353,7 +342,7 @@ const Assignments = () => {
     return (
       <div className="min-h-screen bg-[#f6f7fb] flex items-center justify-center">
         <div className="text-center">
-          <FaSpinner className="animate-spin text-blue-600 text-3xl mx-auto mb-3" />
+          <FaSpinner className="animate-spin text-[#043573] text-3xl mx-auto mb-3" />
           <p className="text-gray-500 text-sm">
             {fetchProgress.total > 0
               ? `Loading assignments... (${fetchProgress.current}/${fetchProgress.total} modules)`
@@ -370,7 +359,7 @@ const Assignments = () => {
         <div className="text-center">
           <FaExclamationCircle className="text-red-500 text-3xl mx-auto mb-3" />
           <p className="text-red-500 text-sm mb-4">{error}</p>
-          <button onClick={loadAll} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+          <button onClick={loadAll} className="px-4 py-2 bg-[#043573] text-white rounded-lg text-sm hover:bg-[#043573]/90 transition">
             Retry
           </button>
         </div>
@@ -379,7 +368,10 @@ const Assignments = () => {
   }
 
   if (selected) {
-    const onBack = () => setSelected(null);
+    const onBack = () => { 
+      setSelected(null); 
+      navigate("/student/assignments");
+    };
     if (selected.status === "Pending")
       return <PendingDetail assignment={selected} onBack={onBack} onSubmit={handleSubmitAssignment} />;
     if (selected.status === "Submitted")
@@ -394,7 +386,7 @@ const Assignments = () => {
       {detailLoading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-3 shadow-xl">
-            <FaSpinner className="animate-spin text-blue-600 text-2xl" />
+            <FaSpinner className="animate-spin text-[#043573] text-2xl" />
             <p className="text-sm text-gray-600">Loading assignment details...</p>
           </div>
         </div>
@@ -405,7 +397,7 @@ const Assignments = () => {
         <div className="w-full lg:col-span-9">
           <div className="mb-4 sm:mb-5">
             <p className="text-xs sm:text-sm text-gray-400 mb-1">
-              <Link to="/student/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
+              <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
               <span className="mx-1 sm:mx-2">&gt;</span>
               <span className="text-gray-600 font-medium">Assignments</span>
             </p>
@@ -422,14 +414,12 @@ const Assignments = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`pb-2 sm:pb-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap ${
-                    activeTab === tab ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-blue-600"
-                  }`}
+                  className={`pb-2 sm:pb-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap ${activeTab === tab ? "text-[#043573] border-b-2 border-[#043573]" : "text-gray-500 hover:text-[#043573]"
+                    }`}
                 >
                   {tab}
-                  <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
-                    activeTab === tab ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"
-                  }`}>
+                  <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${activeTab === tab ? "bg-[#043573] text-white" : "bg-gray-100 text-gray-500"
+                    }`}>
                     {tab === "All"
                       ? assignments.length
                       : assignments.filter((a) => a.status === tab).length}
@@ -464,14 +454,18 @@ const Assignments = () => {
                 {selectedCourse === "All"
                   ? "Select a course first"
                   : isModulesLoading
-                  ? "Loading modules..."
-                  : "All Modules"}
+                    ? "Loading modules..."
+                    : "All Modules"}
               </option>
-              {modules.map((module) => (
-                <option key={module.id ?? module.moduleId} value={module.id ?? module.moduleId}>
-                  {module.title ?? module.moduleName ?? `Module ${module.id ?? module.moduleId}`}
-                </option>
-              ))}
+              {modules.map((module) => {
+                const modId = module.id ?? module.moduleId;
+                const modName = module.title ?? module.name ?? module.moduleName ?? module.moduleTitle ?? `Module ${modId ?? ""}`;
+                return (
+                  <option key={modId} value={modId}>
+                    {modName}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -518,7 +512,7 @@ const Assignments = () => {
                         <div>
                           <p className="text-[9px] sm:text-xs text-gray-400 font-semibold">Marks</p>
                           {item.status === "Graded" ? (
-                            <p className="text-[10px] sm:text-sm font-bold text-blue-600">
+                            <p className="text-[10px] sm:text-sm font-bold text-[#043573]">
                               {item.scoredMarks}/{item.maxMarks}
                             </p>
                           ) : (
@@ -546,7 +540,7 @@ const Assignments = () => {
                           {/* Primary action — opens detail view */}
                           <button
                             onClick={() => openAssignment(item)}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-blue-500 text-blue-600 text-[10px] sm:text-sm font-semibold hover:bg-blue-600 hover:text-white transition"
+                            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-[#043573] text-[#043573] text-[10px] sm:text-sm font-semibold hover:bg-[#043573] hover:text-white transition"
                           >
                             {buttonLabel(item.status)}
                           </button>
@@ -570,7 +564,7 @@ const Assignments = () => {
                 {(selectedCourse !== "All" || selectedModule !== "All") && (
                   <button
                     onClick={() => { setSelectedCourse("All"); setSelectedModule("All"); }}
-                    className="mt-3 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100 transition"
+                    className="mt-3 px-4 py-2 bg-blue-50 text-[#043573] rounded-lg text-sm hover:bg-[#043573]/10 transition"
                   >
                     Clear Filters
                   </button>
@@ -602,13 +596,13 @@ const Assignments = () => {
           {/* Calendar */}
           <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3 sm:mb-5">
-              <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="text-gray-400 text-base sm:text-xl hover:text-blue-600">‹</button>
+              <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="text-gray-400 text-base sm:text-xl hover:text-[#043573]">‹</button>
               <h2 className="font-bold text-gray-900 text-sm sm:text-base">{monthNames[month]} {year}</h2>
-              <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="text-gray-400 text-base sm:text-xl hover:text-blue-600">›</button>
+              <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="text-gray-400 text-base sm:text-xl hover:text-[#043573]">›</button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-[9px] sm:text-xs text-gray-400 mb-2 sm:mb-3">
-              {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => <span key={d}>{d}</span>)}
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => <span key={d}>{d}</span>)}
             </div>
 
             <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-xs sm:text-sm">
@@ -619,13 +613,13 @@ const Assignments = () => {
                 const statusColor = items
                   ? items.some((a) => a.status === "Pending") ? "bg-orange-100 text-orange-600"
                     : items.some((a) => a.status === "Submitted") ? "bg-green-100 text-green-600"
-                    : "bg-blue-100 text-blue-600"
+                      : "bg-[#043573]/10 text-[#043573]"
                   : "";
                 const isSelected = selectedCalDate === key;
                 const dotColor = items
                   ? items.some((a) => a.status === "Pending") ? "bg-orange-500"
                     : items.some((a) => a.status === "Submitted") ? "bg-green-500"
-                    : "bg-blue-500"
+                      : "bg-blue-500"
                   : "";
                 return (
                   <span
@@ -633,7 +627,7 @@ const Assignments = () => {
                     onClick={() => items && setSelectedCalDate(isSelected ? null : key)}
                     className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full mx-auto text-[11px] sm:text-sm relative
                       ${items ? `cursor-pointer font-semibold ${statusColor}` : "text-gray-600"}
-                      ${isSelected ? "ring-2 ring-blue-500 ring-offset-1" : ""}
+                      ${isSelected ? "ring-2 ring-[#043573] ring-offset-1" : ""}
                     `}
                     title={items ? items.map((a) => a.title).join(", ") : ""}
                   >
@@ -645,7 +639,7 @@ const Assignments = () => {
             </div>
 
             <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-100">
-              {[["bg-orange-500","Pending"],["bg-green-500","Submitted"],["bg-blue-500","Graded"]].map(([color, label]) => (
+              {[["bg-orange-500", "Pending"], ["bg-green-500", "Submitted"], ["bg-blue-500", "Graded"]].map(([color, label]) => (
                 <div key={label} className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
                   <span className={`w-2 h-2 rounded-full ${color}`} />
                   {label}
@@ -659,7 +653,7 @@ const Assignments = () => {
                   <div
                     key={i}
                     onClick={() => openAssignment(a)}
-                    className="flex items-center justify-between bg-gray-50 rounded-xl p-2 sm:p-3 border border-gray-100 cursor-pointer hover:border-blue-200 hover:bg-blue-50 transition"
+                    className="flex items-center justify-between bg-gray-50 rounded-xl p-2 sm:p-3 border border-gray-100 cursor-pointer hover:border-[#043573]/20 hover:bg-[#043573]/5 transition"
                   >
                     <div>
                       <p className="text-[11px] sm:text-xs font-semibold text-gray-800 leading-tight">{a.title}</p>

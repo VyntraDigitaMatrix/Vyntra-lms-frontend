@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { studentEnrolledCourseApi } from "./auth/api";
+import { studentLearningApi } from "./auth/api";
 
 import {
     FaStar, FaUser, FaBook, FaClock, FaTrophy,
@@ -8,6 +8,7 @@ import {
     FaChevronDown,
     FaChevronUp,
     FaPlayCircle,
+    FaGlobe
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 
@@ -60,9 +61,11 @@ const ModuleAccordionItem = ({
     };
 
     const handleLessonClick = (lesson) => {
-        const lessonKey = `${mod.id}-${lesson.id}`;
+        const mId = mod.slug ?? mod.moduleId ?? mod.id;
+        const lId = lesson.slug ?? lesson.lessonId ?? lesson.id;
+        const lessonKey = `${mId}-${lId}`;
         setActiveLesson(lessonKey);
-        navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
+        navigate(`/student/course/${courseId}/module/${mId}/lesson/${lId}`);
     };
 
     return (
@@ -246,49 +249,15 @@ const ContinueLearning = () => {
     const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
 
     /* ══════════════════════════════════════════
-       FETCH COURSE DETAIL
-       Uses getMyCourseById — falls back to list search
-    ══════════════════════════════════════════ */
-    const fetchCourseDetails = useCallback(async () => {
-        if (!courseId) return;
-        setCourseLoading(true);
-        try {
-            // Primary: dedicated endpoint
-            const res = await studentEnrolledCourseApi.getMyCourseById(courseId);
-            const data = res.data?.data || res.data || null;
-            setCourseDetails(data);
-        } catch (err) {
-            // Fallback: search inside paginated list
-            try {
-                const listRes = await studentEnrolledCourseApi.getMyEnrolledCourses(0, 100);
-                const content =
-                    listRes.data?.data?.content ||
-                    listRes.data?.content ||
-                    [];
-                const found = content.find(
-                    (c) =>
-                        String(c.courseId) === String(courseId) ||
-                        String(c.id) === String(courseId)
-                );
-                setCourseDetails(found || null);
-            } catch (fallbackErr) {
-                console.error("fetchCourseDetails fallback error:", fallbackErr);
-            }
-        } finally {
-            setCourseLoading(false);
-        }
-    }, [courseId]);
-
-    /* ══════════════════════════════════════════
        FETCH MODULES  (with nested lessons)
        GET /api/v1/student/my-courses/{courseId}/modules
     ══════════════════════════════════════════ */
-    const fetchModules = useCallback(async () => {
-        if (!courseId) return;
+    const fetchModules = useCallback(async (targetSlug) => {
+        if (!targetSlug) return;
         setModulesLoading(true);
         setModulesError("");
         try {
-            const res = await studentEnrolledCourseApi.getCourseModules(courseId);
+            const res = await studentLearningApi.getCourseModules(targetSlug);
             // API returns { data: { data: [...] } }  OR  { data: [...] }
             const modules =
                 res.data?.data ||
@@ -301,7 +270,46 @@ const ContinueLearning = () => {
         } finally {
             setModulesLoading(false);
         }
-    }, [courseId]);
+    }, []);
+
+    /* ══════════════════════════════════════════
+       FETCH COURSE DETAIL
+       Uses getMyCourseById — falls back to list search
+    ══════════════════════════════════════════ */
+    const fetchCourseDetails = useCallback(async () => {
+        if (!courseId) return;
+        setCourseLoading(true);
+        try {
+            // Primary: dedicated endpoint
+            const res = await studentLearningApi.getCourseBySlug(courseId);
+            const data = res.data?.data || res.data || null;
+            setCourseDetails(data);
+            if (data?.slug) fetchModules(data.slug);
+            else fetchModules(courseId);
+        } catch (err) {
+            // Fallback: search inside paginated list
+            try {
+                const listRes = await studentLearningApi.getMyEnrolledCourses(0, 100);
+                const content =
+                    listRes.data?.data?.content ||
+                    listRes.data?.content ||
+                    [];
+                const found = content.find(
+                    (c) =>
+                        String(c.courseId) === String(courseId) ||
+                        String(c.id) === String(courseId) ||
+                        String(c.slug) === String(courseId)
+                );
+                setCourseDetails(found || null);
+                if (found?.slug) fetchModules(found.slug);
+                else fetchModules(courseId);
+            } catch (fallbackErr) {
+                console.error("fetchCourseDetails fallback error:", fallbackErr);
+            }
+        } finally {
+            setCourseLoading(false);
+        }
+    }, [courseId, fetchModules]);
 
     /* ══════════════════════════════════════════
        FETCH LESSONS for a module (lazy, on expand)
@@ -309,12 +317,7 @@ const ContinueLearning = () => {
     ══════════════════════════════════════════ */
     const fetchLessonsForModule = useCallback(
         async (moduleId) => {
-            const res = await studentEnrolledCourseApi.getModuleLessons(
-                courseId,
-                moduleId,
-                0,
-                100
-            );
+            const res = await studentLearningApi.getModuleLessons(moduleId);
             return (
                 res.data?.data?.content ||
                 res.data?.content ||
@@ -323,13 +326,12 @@ const ContinueLearning = () => {
                 []
             );
         },
-        [courseId]
+        []
     );
 
     useEffect(() => {
         fetchCourseDetails();
-        fetchModules();
-    }, [fetchCourseDetails, fetchModules]);
+    }, [fetchCourseDetails]);
 
     /* ── Derived ── */
     const totalLessons = courseModules.reduce(
@@ -365,12 +367,12 @@ const ContinueLearning = () => {
     ];
 
     const totalDuration = courseModules.reduce((total, module) => {
-  const moduleDuration = (module.lessons || []).reduce(
-    (sum, lesson) => sum + (lesson.durationInMinutes || 0),
-    0
-  );
-  return total + moduleDuration;
-}, 0);
+        const moduleDuration = (module.lessons || []).reduce(
+            (sum, lesson) => sum + (lesson.durationInMinutes || 0),
+            0
+        );
+        return total + moduleDuration;
+    }, 0);
 
     /* ══════════════════════════════════════════
        RENDER
@@ -432,31 +434,39 @@ const ContinueLearning = () => {
                                         {courseDetails?.courseTitle || courseDetails?.title}
                                     </h1>
                                     <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                                        {courseDetails?.courseDescription || courseDetails?.description}
+                                        {courseDetails?.courseDescription || courseDetails?.shortDescription}
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm text-gray-600">
                                     <div className="flex items-center gap-1">
                                         <FaStar className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
                                         <span className="font-bold text-gray-900">
-                                            {courseDetails?.rating || 0}
+                                            {courseDetails?.averageRating || courseDetails?.rating || 0}
                                         </span>
                                         <span className="text-gray-400 text-[10px] sm:text-xs">
-                                            ({courseDetails?.reviews || courseDetails?.reviewCount || 0} ratings)
+                                            ({courseDetails?.totalRatings ?? courseDetails?.reviews ?? courseDetails?.reviewCount ?? 0} ratings)
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-500">
                                         <FaUser className="w-3 h-3 sm:w-4 sm:h-4" />
                                         <span className="text-[11px] sm:text-xs">
-                                            {courseDetails?.students || courseDetails?.studentCount || 0} Students
+                                            {courseDetails?.totalEnrollments ?? courseDetails?.students ?? courseDetails?.studentCount ?? 0} Students
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-500">
                                         <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                                        <span className="text-[11px] sm:text-xs">
+                                        <span className="text-[11px] sm:text-xs font-medium">
                                             {courseDetails?.level || "Beginner"} Level
                                         </span>
                                     </div>
+                                    {courseDetails?.language && (
+                                        <div className="flex items-center gap-1.5 text-gray-500">
+                                            <FaGlobe className="w-3 h-3 sm:w-4 sm:h-4" />
+                                            <span className="text-[11px] sm:text-xs uppercase font-medium">
+                                                {courseDetails.language}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                     {[
@@ -509,28 +519,10 @@ const ContinueLearning = () => {
                                 <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">
                                     About this course
                                 </h3>
-                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5">
-                                    {courseDetails?.desc || courseDetails?.courseDescription || courseDetails?.description}
-                                </p>
-                                <h4 className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">
-                                    What you'll learn
-                                </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 sm:gap-x-6">
-                                    {(courseDetails?.learnings || courseDetails?.whatYouWillLearn || []).map(
-                                        (item, i) => (
-                                            <div
-                                                key={i}
-                                                className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700"
-                                            >
-                                                <FaCheckCircle
-                                                    size={12}
-                                                    className="text-blue-600 mt-1 flex-shrink-0"
-                                                />
-                                                <span className="text-[11px] sm:text-sm">{item}</span>
-                                            </div>
-                                        )
-                                    )}
-                                </div>
+                                <div
+                                    className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4 sm:mb-5 prose prose-sm max-w-none prose-blue"
+                                    dangerouslySetInnerHTML={{ __html: courseDetails?.desc || courseDetails?.courseDescription || courseDetails?.description || "" }}
+                                />
                             </div>
 
                             <div>
@@ -604,33 +596,48 @@ const ContinueLearning = () => {
                             <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
                                 About the Instructor
                             </h3>
-                            {courseDetails?.instructor ? (
-                                <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-2xl">
-                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0 mx-auto sm:mx-0">
-                                        {courseDetails.instructor.initial ||
-                                            courseDetails.instructor.name?.charAt(0)}
-                                    </div>
-                                    <div className="text-center sm:text-left">
-                                        <h4 className="font-bold text-gray-900 text-sm sm:text-base">
-                                            {courseDetails.instructor.name}
-                                        </h4>
-                                        <p className="text-xs sm:text-sm text-blue-600 mb-2 sm:mb-3">
-                                            {courseDetails.instructor.title}
-                                        </p>
-                                        <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 mb-2 sm:mb-3">
-                                            <span className="flex items-center gap-1">
-                                                <FaStar className="w-3 h-3 text-yellow-400" />
-                                                {courseDetails.instructor.rating} Rating
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <FaUser className="w-3 h-3" />
-                                                {courseDetails.instructor.students} Students
-                                            </span>
+                            {courseDetails?.instructors?.length > 0 ? (
+                                <div className="space-y-4">
+                                    {courseDetails.instructors.map((instructor, idx) => (
+                                        <div key={instructor.instructorId || idx} className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-2xl">
+                                            {instructor.profileImage ? (
+                                                <img
+                                                    src={instructor.profileImage}
+                                                    alt={instructor.fullName}
+                                                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0 mx-auto sm:mx-0 shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0 mx-auto sm:mx-0 shadow-sm">
+                                                    {instructor.fullName?.charAt(0) || "I"}
+                                                </div>
+                                            )}
+                                            <div className="text-center sm:text-left">
+                                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
+                                                    {instructor.fullName}
+                                                </h4>
+                                                <p className="text-xs sm:text-sm text-blue-600 mb-2 sm:mb-3">
+                                                    {instructor.headline}
+                                                </p>
+                                                <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 mb-2 sm:mb-3">
+                                                    <span className="flex items-center gap-1">
+                                                        <FaStar className="w-3 h-3 text-yellow-400" />
+                                                        {instructor.averageRating || 0} Rating
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <FaUser className="w-3 h-3" />
+                                                        {instructor.totalStudents || 0} Students
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <FaBook className="w-3 h-3" />
+                                                        {instructor.totalCourses || 0} Courses
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                                    {instructor.shortBio}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                                            {courseDetails.instructor.bio}
-                                        </p>
-                                    </div>
+                                    ))}
                                 </div>
                             ) : (
                                 <p className="text-xs text-gray-400">No instructor info available.</p>

@@ -33,14 +33,16 @@ export const extractScoreData = (obj) => {
         obj.score ?? obj.finalScore ?? undefined;
 
     if (pct === undefined || pct === null) {
-        if (obj.marksObtained != null && obj.totalMarks) pct = (obj.marksObtained / obj.totalMarks) * 100;
-        else if (obj.obtainedMarks != null && obj.totalMarks) pct = (obj.obtainedMarks / obj.totalMarks) * 100;
-        else if (obj.totalScore != null && obj.maxScore) pct = (obj.totalScore / obj.maxScore) * 100;
-        else if (obj.correctCount != null && obj.totalQuestions) pct = (obj.correctCount / obj.totalQuestions) * 100;
-        else if (obj.correctAnswers != null && obj.totalQuestions) pct = (obj.correctAnswers / obj.totalQuestions) * 100;
+        if (obj.marksObtained != null) pct = obj.totalMarks ? (obj.marksObtained / obj.totalMarks) * 100 : 0;
+        else if (obj.obtainedMarks != null) pct = obj.totalMarks ? (obj.obtainedMarks / obj.totalMarks) * 100 : 0;
+        else if (obj.totalScore != null) pct = obj.maxScore ? (obj.totalScore / obj.maxScore) * 100 : 0;
+        else if (obj.correctCount != null) pct = obj.totalQuestions ? (obj.correctCount / obj.totalQuestions) * 100 : 0;
+        else if (obj.correctAnswers != null) pct = obj.totalQuestions ? (obj.correctAnswers / obj.totalQuestions) * 100 : 0;
     }
 
     if (pct === undefined || pct === null || Number.isNaN(pct)) return null;
+
+    pct = Math.min(100, Math.max(0, pct));
 
     const correct =
         obj.correctCount ?? obj.correctAnswers ?? obj.correct ?? 0;
@@ -51,55 +53,64 @@ export const extractScoreData = (obj) => {
         obj.totalQuestionCount ??
         0;
 
+    let calcWrong = 0;
+    let calcSkipped = 0;
+    if (Array.isArray(obj.questions)) {
+        calcSkipped = obj.questions.filter(q => !q.selectedOption).length;
+        calcWrong = obj.questions.filter(q => q.selectedOption && !q.correct).length;
+    }
+
     const wrong =
         obj.wrongCount ??
         obj.incorrectAnswers ??
         obj.incorrectCount ??
         obj.wrong ??
-        Math.max(0, totalQuestions - correct);
+        (Array.isArray(obj.questions) ? calcWrong : Math.max(0, totalQuestions - correct));
 
     const skipped =
         obj.skippedCount ??
         obj.unanswered ??
         obj.unattempted ??
         obj.skipped ??
-        0;
+        calcSkipped;
 
     const timeTaken = obj.timeTaken ?? obj.durationTaken ?? obj.timeSpent ?? obj.timeTakenSeconds ?? null;
     const passingPct = obj.passingPercentage ?? obj.passPercentage ?? 70;
     const passed = obj.passed ?? obj.isPassed ?? (pct >= passingPct);
+    const obtainedMarks = obj.obtainedMarks ?? obj.marksObtained ?? null;
+    const passingMarks = obj.passingMarks ?? null;
+    const totalMarks = obj.totalMarks ?? obj.maxScore ?? null;
 
-    return { percentage: Math.round(pct), correct, wrong, skipped, timeTaken, passed };
+    return { percentage: Math.round(pct), correct, wrong, skipped, timeTaken, passed, obtainedMarks, passingMarks, totalMarks, totalQuestions };
 };
 
 export const buildAttemptMap = (attempts) => {
-    const rank = (s) => {
-        const up = (s || "").toString().toUpperCase();
-        if (["IN_PROGRESS", "STARTED", "ONGOING", "RUNNING"].includes(up)) return 2;
-        if (["SUBMITTED", "COMPLETED", "GRADED", "FINISHED"].includes(up)) return 1;
-        return 0;
-    };
     const map = {};
     (attempts || []).forEach((a) => {
         const qId = a.quizId ?? a.quiz?.id ?? a.quiz_id ?? a.quizID;
         if (qId === undefined || qId === null) return;
         const existing = map[qId];
         if (!existing) { map[qId] = a; return; }
-        const newRank = rank(a.status || a.attemptStatus);
-        const oldRank = rank(existing.status || existing.attemptStatus);
-        if (newRank > oldRank) { map[qId] = a; return; }
-        if (newRank === oldRank) {
-            const newer = new Date(a.updatedAt || a.submittedAt || a.startedAt || a.createdAt || 0).getTime() || a.id || 0;
-            const older = new Date(existing.updatedAt || existing.submittedAt || existing.startedAt || existing.createdAt || 0).getTime() || existing.id || 0;
-            if (newer >= older) map[qId] = a;
-        }
+        
+        // Strict chronological sorting: Always pick the absolute newest attempt
+        const newer = new Date(a.updatedAt || a.submittedAt || a.startedAt || a.createdAt || 0).getTime() || a.id || 0;
+        const older = new Date(existing.updatedAt || existing.submittedAt || existing.startedAt || existing.createdAt || 0).getTime() || existing.id || 0;
+        
+        if (newer >= older) map[qId] = a;
     });
     return map;
 };
 
 export const deriveStatus = (quiz) => {
     if (quiz.startsAt && new Date(quiz.startsAt) > new Date()) return "Upcoming";
-    if (quiz.canResume) return "In Progress";
+
+    const attemptStatus = (quiz.attempt?.status || quiz.attempt?.attemptStatus || "").toUpperCase();
+    const isCompleted = ["SUBMITTED", "COMPLETED", "GRADED", "FINISHED"].includes(attemptStatus);
+    const isInProgress = ["IN_PROGRESS", "STARTED", "ONGOING", "RUNNING"].includes(attemptStatus);
+
+    if (isCompleted) return "Completed";
+    if (isInProgress || quiz.canResume) return "In Progress";
     if (quiz.attempted) return "Completed";
+    
     return "Not Attempted";
 };

@@ -47,9 +47,8 @@ const Toast = ({ message, type, onClose }) => {
     }, [onClose]);
 
     return (
-        <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg animate-in slide-in-from-right-5 ${
-            type === 'success' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
-        }`}>
+        <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg animate-in slide-in-from-right-5 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
+            }`}>
             {type === 'success' ? <FaCheckCircle className="text-white" /> : <FaBell className="text-white" />}
             <span className="text-sm font-medium">{message}</span>
             <button onClick={onClose} className="ml-2 hover:opacity-80"><FaTimes className="text-white text-xs" /></button>
@@ -149,11 +148,10 @@ const FilterModal = ({ filters, onApply, onClose }) => {
                                             const updated = current.includes(opt) ? current.filter(v => v !== opt) : [...current, opt];
                                             setLocalFilters({ ...localFilters, [key]: updated });
                                         }}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                                            (localFilters[key] || []).includes(opt) 
-                                                ? 'bg-blue-600 text-white shadow-md' 
-                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                        }`}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${(localFilters[key] || []).includes(opt)
+                                            ? 'bg-blue-600 text-white shadow-md'
+                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                            }`}
                                     >
                                         {opt}
                                     </button>
@@ -163,8 +161,8 @@ const FilterModal = ({ filters, onApply, onClose }) => {
                     ))}
                     <div className="border-t border-slate-100 pt-4">
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Sort by</label>
-                        <select 
-                            value={localFilters.sortBy} 
+                        <select
+                            value={localFilters.sortBy}
                             onChange={e => setLocalFilters({ ...localFilters, sortBy: e.target.value })}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                         >
@@ -176,17 +174,17 @@ const FilterModal = ({ filters, onApply, onClose }) => {
                     </div>
                 </div>
                 <div className="p-5 border-t border-slate-100 flex gap-3 sticky bottom-0 bg-white">
-                    <button 
-                        onClick={() => { 
+                    <button
+                        onClick={() => {
                             setLocalFilters({ jobType: [], salaryRange: [], sortBy: 'match' });
-                            onApply({}); 
-                        }} 
+                            onApply({});
+                        }}
                         className="flex-1 px-4 py-2 border border-slate-200 rounded-lg font-medium hover:border-slate-300 transition-colors"
                     >
                         Reset
                     </button>
-                    <button 
-                        onClick={() => onApply(localFilters)} 
+                    <button
+                        onClick={() => onApply(localFilters)}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                     >
                         Apply Filters
@@ -221,31 +219,76 @@ const NotificationsPanel = ({ notifications, onClose }) => {
     );
 };
 
-/* ─── APPLY PAGE ─────────────────────────────────────────────────────────── */
-const STEPS = ['Your info', 'Resume & cover', 'Review'];
+/* ─── MY APPLICATIONS PAGE ───────────────────────────────────────────────── */
+const MyApplicationsPage = ({ applications, onBack }) => {
+    return (
+        <div className="min-h-screen bg-[#f7f8fc]">
+            <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 sm:px-6 py-3.5 flex items-center gap-3">
+                <button onClick={onBack} className="flex items-center gap-2 text-[13px] text-slate-600 hover:text-blue-600 transition-colors font-medium">
+                    <FaArrowLeft className="text-xs" /> Back to jobs
+                </button>
+            </div>
+            <div className="mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-5xl">
+                <h1 className="text-xl font-bold text-slate-900 mb-6">My Applications</h1>
+                {applications.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500 text-sm">
+                        You haven't applied to any jobs yet.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {applications.map(app => (
+                            <div key={app.applicationId} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow flex flex-col h-full">
+                                <div className="flex justify-between items-start mb-3">
+                                    <h3 className="text-[15px] font-bold text-slate-900 leading-tight">{app.jobTitle}</h3>
+                                    <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0">
+                                        {app.status || 'PENDING'}
+                                    </span>
+                                </div>
+                                
+                                <div className="space-y-2 mb-4 flex-1 text-[13px]">
+                                    <p className="flex justify-between text-slate-600">
+                                        <span className="text-slate-400">Applicant:</span> 
+                                        <span className="font-medium text-slate-800">{app.studentName || '—'}</span>
+                                    </p>
+                                    <p className="flex justify-between text-slate-600">
+                                        <span className="text-slate-400">Applied on:</span> 
+                                        <span className="font-medium text-slate-800">{app.appliedAt || app.createdAt ? new Date(app.appliedAt || app.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</span>
+                                    </p>
+                                    {app.resumeUrl && (
+                                        <p className="flex justify-between text-slate-600">
+                                            <span className="text-slate-400">Resume:</span> 
+                                            <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 font-medium">
+                                                <FaLink className="text-[10px]" /> View Resume
+                                            </a>
+                                        </p>
+                                    )}
+                                </div>
 
-const ApplyPage = ({ job, onBack }) => {
+                                {app.coverLetter && (
+                                    <div className="bg-slate-50 rounded-lg p-3 text-[12px] text-slate-600 mt-auto">
+                                        <p className="font-semibold text-slate-800 mb-1">Cover Letter</p>
+                                        <p className="line-clamp-4 leading-relaxed">{app.coverLetter}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ─── APPLY PAGE ─────────────────────────────────────────────────────────── */
+const ApplyPage = ({ job, onBack, onApplied }) => {
     const [error, setError] = useState("");
-    const [step, setStep] = useState(0);
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
-        name: '', email: '', phone: '', experience: '',
-        resume: '', ctc: '', cover: '', startDate: '',
+        resumeFile: null, cover: ''
     });
 
     useEffect(() => { window.scrollTo(0, 0); }, []);
-
-    const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-    const validateStep1 = () => {
-        if (!form.name || !form.email || !form.phone || !form.experience) {
-            setError("Please fill all required fields");
-            return false;
-        }
-        setError("");
-        return true;
-    };
-
 
     if (submitted) {
         return (
@@ -268,7 +311,7 @@ const ApplyPage = ({ job, onBack }) => {
                         </p>
                         <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 text-left">
                             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">What's next</p>
-                            {['Application review (2–3 days)', 'Screening call with HR', 'Technical / case round', 'Final interview & offer'].map((s, i) => (
+                            {['Application review', 'Screening call with HR', 'Technical / case round', 'Final interview & offer'].map((s, i) => (
                                 <div key={i} className="flex items-center gap-3 mb-2.5 last:mb-0">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>{i + 1}</div>
                                     <span className={`text-[13px] ${i === 0 ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>{s}</span>
@@ -284,6 +327,12 @@ const ApplyPage = ({ job, onBack }) => {
         );
     }
 
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setForm(f => ({ ...f, resumeFile: e.target.files[0] }));
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#f7f8fc]">
             <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
@@ -297,27 +346,9 @@ const ApplyPage = ({ job, onBack }) => {
                         <p className="text-[11px] text-slate-500">{job.companyName}</p>
                     </div>
                 </div>
-                <div className="text-[12px] text-slate-400">Step {step + 1}/{STEPS.length}</div>
             </div>
 
-            <div className="mx-auto px-4 sm:px-6 py-6 sm:py-10">
-                <div className="mb-6 sm:mb-8">
-                    <div className="flex items-center justify-between mb-2">
-                        {STEPS.map((s, i) => (
-                            <div key={i} className="flex items-center gap-1.5">
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all
-                                    ${i < step ? 'bg-blue-600 text-white' : i === step ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-400'}`}>
-                                    {i < step ? <FaCheck className="text-[10px]" /> : i + 1}
-                                </div>
-                                <span className={`text-[12px] font-medium hidden sm:block ${i === step ? 'text-blue-600' : i < step ? 'text-slate-500' : 'text-slate-300'}`}>{s}</span>
-                                {i < STEPS.length - 1 && (
-                                    <div className={`h-px w-8 sm:w-16 md:w-24 mx-1 sm:mx-2 transition-colors ${i < step ? 'bg-blue-600' : 'bg-slate-200'}`} />
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
+            <div className="mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-3xl">
                 <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5 flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm text-white flex-shrink-0 ${job.logoColor || 'bg-blue-600'}`}>{job.logo || job.companyName?.charAt(0) || 'J'}</div>
                     <div className="flex-1 min-w-0">
@@ -326,105 +357,42 @@ const ApplyPage = ({ job, onBack }) => {
                             <span className="text-[12px] text-slate-500">{job.companyName}</span>
                             <span className="text-slate-300">·</span>
                             <span className="text-[12px] text-slate-500">{job.salary}</span>
-                            <span className="text-slate-300">·</span>
-                            <span className={`text-[12px] font-semibold ${job.matchScore > 89 ? 'text-green-600' : 'text-blue-600'}`}>{job.matchScore}% match</span>
                         </div>
                     </div>
-                    {job.badge && (
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase flex-shrink-0 ${badgeConfig[job.badge]}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${badgeDotConfig[job.badge]}`} />{job.badge}
-                        </span>
-                    )}
                 </div>
 
                 <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 mb-5">
-                    <h2 className="text-[16px] font-bold text-slate-900 mb-1">{STEPS[step]}</h2>
-                    <p className="text-[13px] text-slate-400 mb-5">
-                        {step === 0 && 'Tell us a bit about yourself.'}
-                        {step === 1 && 'Share your resume and a note about why you\'re a great fit.'}
-                        {step === 2 && 'Review your details before submitting.'}
+                    <h2 className="text-[16px] font-bold text-slate-900 mb-1">Submit Application</h2>
+                    <p className="text-[13px] text-slate-400 mb-6">
+                        Share your resume and a note about why you're a great fit.
                     </p>
 
-                    {step === 0 && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Field label="Full name">
-                                    <input type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Priya Sharma" className={inputCls} required />
-                                </Field>
-                                <Field label="Email address">
-                                    <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="priya@example.com" className={inputCls} required />
-                                </Field>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Field label="Phone number">
-                                    <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+91 98765 43210" className={inputCls} required />
-                                </Field>
-                                <Field label="Years of experience">
-                                    <select value={form.experience} onChange={e => set('experience', e.target.value)} className={inputCls} required>
-                                        <option value="">Select…</option>
-                                        {['0–1 year', '1–3 years', '3–5 years', '5–8 years', '8+ years'].map(o => <option key={o}>{o}</option>)}
-                                    </select>
-                                </Field>
-                            </div>
-                        </div>
-                    )}
+                    <div className="space-y-5">
+                        <Field label="Resume (PDF, DOCX)" required>
+                            <input 
+                                type="file" 
+                                accept=".pdf,.doc,.docx"
+                                onChange={handleFileChange} 
+                                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-[13.5px] text-slate-800 bg-white outline-none focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+                            />
+                        </Field>
 
-                    {step === 1 && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Field label="Resume / LinkedIn URL">
-                                    <input type="url" value={form.resume} onChange={e => set('resume', e.target.value)} placeholder="https://linkedin.com/in/yourprofile" className={inputCls} />
-                                </Field>
-                                <Field label="Current CTC (optional)">
-                                    <input type="text" value={form.ctc} onChange={e => set('ctc', e.target.value)} placeholder="e.g. ₹14 LPA" className={inputCls} />
-                                </Field>
-                            </div>
-                            <Field label="Cover note">
-                                <textarea value={form.cover} onChange={e => set('cover', e.target.value)}
-                                    placeholder="Tell us what excites you about this role and what you'd bring to the team…"
-                                    rows={5} className={`${inputCls} resize-none`} />
-                            </Field>
-                            <Field label="Earliest start date">
-                                <input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} className={inputCls} />
-                            </Field>
-                        </div>
-                    )}
-
-                    {step === 2 && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {[
-                                    { label: 'Name', value: form.name || '—' },
-                                    { label: 'Email', value: form.email || '—' },
-                                    { label: 'Phone', value: form.phone || '—' },
-                                    { label: 'Experience', value: form.experience || '—' },
-                                    { label: 'Current CTC', value: form.ctc || '—' },
-                                    { label: 'Start date', value: form.startDate ? new Date(form.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' },
-                                ].map(({ label, value }) => (
-                                    <div key={label} className="bg-slate-50 rounded-lg px-3.5 py-3">
-                                        <p className="text-[11px] text-slate-400 font-medium mb-0.5">{label}</p>
-                                        <p className="text-[13px] text-slate-700 font-medium truncate">{value}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            {form.resume && (
-                                <div className="bg-slate-50 rounded-lg px-3.5 py-3">
-                                    <p className="text-[11px] text-slate-400 font-medium mb-0.5">Resume / LinkedIn</p>
-                                    <p className="text-[13px] text-blue-600 font-medium truncate">{form.resume}</p>
-                                </div>
-                            )}
-                            {form.cover && (
-                                <div className="bg-slate-50 rounded-lg px-3.5 py-3">
-                                    <p className="text-[11px] text-slate-400 font-medium mb-1">Cover note</p>
-                                    <p className="text-[13px] text-slate-600 leading-relaxed line-clamp-4">{form.cover}</p>
-                                </div>
-                            )}
-                            <p className="text-[12px] text-slate-400 leading-relaxed pt-1">
-                                By submitting, you confirm all information is accurate and consent to sharing your details with {job.companyName}.
-                            </p>
-                        </div>
-                    )}
+                        <Field label="Cover Letter">
+                            <textarea 
+                                value={form.cover} 
+                                onChange={e => setForm(f => ({ ...f, cover: e.target.value }))}
+                                placeholder="Tell us what excites you about this role and what you'd bring to the team…"
+                                rows={6} 
+                                className={`${inputCls} resize-none`} 
+                            />
+                        </Field>
+                        
+                        <p className="text-[12px] text-slate-400 leading-relaxed pt-2 border-t border-slate-100">
+                            By submitting, you confirm all information is accurate and consent to sharing your details with {job.companyName}.
+                        </p>
+                    </div>
                 </div>
+
                 {error && (
                     <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                         {error}
@@ -432,30 +400,35 @@ const ApplyPage = ({ job, onBack }) => {
                 )}
 
                 <div className="flex items-center justify-between gap-3">
-                    {step > 0 ? (
-                        <button onClick={() => setStep(s => s - 1)}
-                            className="flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium text-slate-600 border border-slate-200 rounded-xl hover:border-blue-400 hover:text-blue-600 transition-colors bg-white">
-                            <FaArrowLeft className="text-xs" /> Back
-                        </button>
-                    ) : (
-                        <button onClick={onBack}
-                            className="flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors bg-white">
-                            Cancel
-                        </button>
-                    )}
+                    <button onClick={onBack}
+                        className="flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium text-slate-500 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors bg-white">
+                        Cancel
+                    </button>
+                    
                     <button
-                        onClick={() => {
-                            if (step === 0) {
-                                if (validateStep1()) setStep(1);
-                            } else if (step === 1) {
-                                setStep(2);
-                            } else {
+                        disabled={submitting || !form.resumeFile}
+                        onClick={async () => {
+                            setSubmitting(true); 
+                            setError("");
+                            try {
+                                const formData = new FormData();
+                                formData.append("resumeFile", form.resumeFile);
+                                
+                                await studentJobApi.applyForJob(job.slug || job.id, formData, form.cover);
                                 setSubmitted(true);
+                                if (onApplied) onApplied(job.id);
+                            } catch (err) {
+                                console.error("Apply error:", err);
+                                setError(err?.response?.data?.message || "Failed to submit application. Please try again.");
+                            } finally {
+                                setSubmitting(false);
                             }
                         }}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl px-6 py-3 text-[13.5px] font-semibold hover:bg-blue-700 transition-colors"
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-[13.5px] font-semibold transition-colors ${
+                            !form.resumeFile ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
                     >
-                        {step === 2 ? 'Submit application' : 'Continue'}
+                        {submitting ? 'Submitting...' : 'Submit application'}
                     </button>
                 </div>
             </div>
@@ -473,12 +446,18 @@ const DetailPage = ({ job, onBack, onApply }) => {
                 <button onClick={onBack} className="flex items-center gap-2 text-[13px] text-slate-600 hover:text-blue-600 transition-colors font-medium">
                     <FaArrowLeft className="text-xs" /> Back to jobs
                 </button>
-                <button
-                    onClick={() => onApply(job)}
-                    className="flex items-center gap-1.5 bg-blue-600 text-white rounded-lg px-4 py-2 text-[13px] font-semibold hover:bg-blue-700 transition-colors"
-                >
-                    Quick Apply <FaArrowRight className="text-[10px]" />
-                </button>
+                {job.applied ? (
+                    <button disabled className="flex items-center gap-1.5 bg-green-100 text-green-700 rounded-lg px-4 py-2 text-[13px] font-semibold cursor-not-allowed">
+                        <FaCheckCircle className="text-[10px]" /> Applied
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => onApply(job)}
+                        className="flex items-center gap-1.5 bg-blue-600 text-white rounded-lg px-4 py-2 text-[13px] font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                        Quick Apply <FaArrowRight className="text-[10px]" />
+                    </button>
+                )}
             </div>
 
             <div className="mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -559,6 +538,18 @@ const DetailPage = ({ job, onBack, onApply }) => {
                             )}
                         </ul>
                     </Section>
+                    {job.attachmentUrl && (
+                        <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h4 className="text-[13px] font-semibold text-slate-800">Job Attachment</h4>
+                                <p className="text-[12px] text-slate-500">Additional details or brochure</p>
+                            </div>
+                            <a href={job.attachmentUrl} target="_blank" rel="noreferrer"
+                                className="flex items-center gap-2 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg px-4 py-2 text-[12px] font-semibold hover:bg-slate-100 transition-colors">
+                                <FaLink className="text-[10px]" /> View Attachment
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 mb-6">
@@ -575,20 +566,32 @@ const DetailPage = ({ job, onBack, onApply }) => {
                 </div>
 
                 <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 z-10">
-                    <button onClick={() => onApply(job)}
-                        className="w-full bg-blue-600 text-white rounded-xl py-3.5 text-[14px] font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                        Quick Apply <FaArrowRight className="text-xs" />
-                    </button>
+                    {job.applied ? (
+                        <button disabled className="w-full bg-green-100 text-green-700 rounded-xl py-3.5 text-[14px] font-semibold flex items-center justify-center gap-2 cursor-not-allowed">
+                            <FaCheckCircle className="text-xs" /> Applied
+                        </button>
+                    ) : (
+                        <button onClick={() => onApply(job)}
+                            className="w-full bg-blue-600 text-white rounded-xl py-3.5 text-[14px] font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                            Quick Apply <FaArrowRight className="text-xs" />
+                        </button>
+                    )}
                 </div>
                 <div className="hidden sm:flex items-center justify-between bg-white rounded-2xl border border-slate-200 p-5 sm:p-6">
                     <div>
                         <p className="text-[13.5px] font-semibold text-slate-900">{job.title}</p>
                         <p className="text-[12.5px] text-slate-500">{job.companyName} · {job.salary}</p>
                     </div>
-                    <button onClick={() => onApply(job)}
-                        className="flex items-center gap-2 bg-blue-600 text-white rounded-xl px-6 py-3 text-[14px] font-semibold hover:bg-blue-700 transition-colors">
-                        Quick Apply <FaArrowRight className="text-xs" />
-                    </button>
+                    {job.applied ? (
+                        <button disabled className="flex items-center gap-2 bg-green-100 text-green-700 rounded-xl px-6 py-3 text-[14px] font-semibold cursor-not-allowed">
+                            <FaCheckCircle className="text-[12px]" /> Applied
+                        </button>
+                    ) : (
+                        <button onClick={() => onApply(job)}
+                            className="flex items-center gap-2 bg-blue-600 text-white rounded-xl px-6 py-3 text-[14px] font-semibold hover:bg-blue-700 transition-colors">
+                            Quick Apply <FaArrowRight className="text-xs" />
+                        </button>
+                    )}
                 </div>
                 <div className="sm:hidden h-20" />
             </div>
@@ -604,55 +607,79 @@ const JobNotification = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [jobs, setJobs] = useState([]);
+    const [myApplications, setMyApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
         fetchJobs();
+        fetchApplications();
     }, []);
+
+    const fetchApplications = async () => {
+        try {
+            const res = await studentJobApi.getMyApplications();
+            // Response: { success, data: { content: [...] } }
+            const content = res.data?.data?.content || res.data?.content || [];
+            setMyApplications(Array.isArray(content) ? content : []);
+        } catch (e) {
+            console.error("Failed to fetch applications:", e);
+        }
+    };
 
     const fetchJobs = async () => {
         try {
             setLoading(true);
-            const response = await studentJobApi.getJobs(0, 10);
-            console.log("Jobs API Response:", response.data);
-            
-            let jobsData = response.data?.data?.content || response.data?.content || response.data?.data || [];
-            
-            // Transform API data to match UI expectations
-            const transformedJobs = jobsData.map(job => ({
-                id: job.id,
-                title: job.title,
-                companyName: job.companyName,
-                company: job.companyName,
-                description: job.description,
-                requirements: job.requirements,
-                location: job.location,
-                salary: job.salary,
-                experienceLevel: job.experienceLevel,
-                type: job.experienceLevel || 'Full-time',
-                applicationDeadline: job.applicationDeadline,
-                active: job.active,
-                // UI-specific fields with defaults
-                logoColor: 'bg-blue-600',
-                logo: job.companyName?.charAt(0) || 'J',
-                badge: job.experienceLevel === 'Internship' ? 'New' : 
-                       job.experienceLevel === 'Senior' ? 'Hot' : 
-                       job.experienceLevel === 'Mid Level' ? 'Featured' : null,
-                matchScore: Math.floor(Math.random() * 30) + 65,
-                posted: '2 days ago',
-                skills: ['React', 'JavaScript', 'CSS'],
-                perks: ['Flexible hours', 'Health insurance', 'Learning stipend'],
-                about: `${job.companyName} is a leading technology company focused on delivering innovative solutions.`,
-                responsibilities: [
-                    'Develop and maintain web applications',
-                    'Collaborate with cross-functional teams',
-                    'Write clean and scalable code',
-                    'Participate in code reviews'
-                ],
-                category: job.experienceLevel === 'Internship' ? 'internship' : 'paid-media'
-            }));
-            
+            const response = await studentJobApi.getJobs(0, 50);
+
+            // Response shape: { success, data: { content: [...], totalElements, ... } }
+            const jobsData = response.data?.data?.content
+                ?? response.data?.content
+                ?? [];
+
+            // Transform API data to match UI field names
+            const transformedJobs = jobsData.map(job => {
+                let postedStr = 'Recently';
+                if (job.createdAt) {
+                    const days = Math.floor((new Date() - new Date(job.createdAt)) / (1000 * 60 * 60 * 24));
+                    if (days === 0) postedStr = 'Today';
+                    else if (days === 1) postedStr = '1 day ago';
+                    else postedStr = `${days} days ago`;
+                }
+                return {
+                    id: job.id,
+                    // API returns 'slug' directly (not jobSlug)
+                    slug: job.slug,
+                    title: job.title,
+                    companyName: job.companyName,
+                    company: job.companyName,
+                    description: job.description || '',
+                    requirements: job.requirements || '',
+                    location: job.location,
+                    salary: job.salary || 'Not specified',
+                    experienceLevel: job.experienceLevel,
+                    type: job.experienceLevel || 'Full-time',
+                    applicationDeadline: job.applicationDeadline,
+                    active: job.active,
+                    // 'applied' comes from the list API directly
+                    applied: job.applied === true,
+                    attachmentUrl: job.attachmentUrl || null,
+                    skills: Array.isArray(job.skills) ? job.skills : [],
+                    // UI decoration
+                    logoColor: 'bg-blue-600',
+                    logo: job.companyName?.charAt(0)?.toUpperCase() || 'J',
+                    badge: job.experienceLevel === 'Internship' ? 'New'
+                        : job.experienceLevel?.toLowerCase().includes('senior') ? 'Hot'
+                        : job.experienceLevel?.toLowerCase().includes('mid') ? 'Featured'
+                        : null,
+                    matchScore: Math.floor(Math.random() * 30) + 65,
+                    posted: postedStr,
+                    perks: ['Flexible hours', 'Health insurance', 'Learning stipend'],
+                    about: `${job.companyName} is a leading company focused on delivering innovative solutions.`,
+                    category: job.experienceLevel === 'Internship' ? 'internship' : 'full-time'
+                };
+            });
+
             setJobs(transformedJobs);
         } catch (err) {
             console.error("Jobs fetch error:", err);
@@ -661,7 +688,7 @@ const JobNotification = () => {
             setLoading(false);
         }
     };
-    
+
     const [showNotifications, setShowNotifications] = useState(false);
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [shareJob, setShareJob] = useState(null);
@@ -675,31 +702,33 @@ const JobNotification = () => {
 
     const openDetail = async (job) => {
         try {
-            const response = await studentJobApi.getJobById(job.id);
+            const response = await studentJobApi.getJobBySlug(job.slug || job.id);
+            // Response: { success, data: { ...jobDetails } }
             const jobData = response.data?.data || response.data;
-            
-            // Transform detail data
+
             const transformedJob = {
                 ...job,
-                ...jobData,
                 companyName: jobData.companyName || job.companyName,
                 description: jobData.description || job.description,
                 requirements: jobData.requirements || job.requirements,
                 location: jobData.location || job.location,
-                salary: jobData.salary || job.salary,
+                salary: jobData.salary || job.salary || 'Not specified',
                 experienceLevel: jobData.experienceLevel || job.experienceLevel,
-                applicationDeadline: jobData.applicationDeadline || job.applicationDeadline
+                applicationDeadline: jobData.applicationDeadline || job.applicationDeadline,
+                attachmentUrl: jobData.attachmentUrl || job.attachmentUrl,
+                skills: Array.isArray(jobData.skills) && jobData.skills.length > 0 ? jobData.skills : job.skills,
             };
-            
+
             setSelectedJob(transformedJob);
             setView("detail");
         } catch (error) {
             console.error("Job detail error:", error);
+            // Fall back to cached list data
             setSelectedJob(job);
             setView("detail");
         }
     };
-    
+
     const openApply = (job) => { setSelectedJob(job); setView('apply'); };
     const goBack = () => { setView('list'); };
 
@@ -737,12 +766,12 @@ const JobNotification = () => {
                 job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 job.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
-            
+
             let matchesJobType = true;
             if (activeFilters.jobType && activeFilters.jobType.length > 0) {
                 matchesJobType = activeFilters.jobType.includes(job.type);
             }
-            
+
             let matchesSalary = true;
             if (activeFilters.salaryRange && activeFilters.salaryRange.length > 0) {
                 const salaryStr = job.salary;
@@ -754,10 +783,10 @@ const JobNotification = () => {
                     return true;
                 });
             }
-            
+
             return matchesCategory && matchesSearch && matchesJobType && matchesSalary;
         });
-        
+
         const sortBy = activeFilters.sortBy;
         if (sortBy === 'recent') {
             const order = { '2 hours ago': 1, '1 day ago': 2, '2 days ago': 3, '3 days ago': 4, '5 days ago': 5, '1 week ago': 6 };
@@ -775,7 +804,7 @@ const JobNotification = () => {
         } else {
             filtered = [...filtered].sort((a, b) => b.matchScore - a.matchScore);
         }
-        
+
         return filtered;
     };
 
@@ -792,13 +821,25 @@ const JobNotification = () => {
 
     const stats = [
         { label: 'Total Jobs', value: jobs.length, icon: FaBriefcase, iconColor: 'text-blue-600', iconBg: 'bg-blue-50' },
-        { label: 'Applications Sent', value: 12, icon: FaCheckCircle, iconColor: 'text-green-600', iconBg: 'bg-green-50' },
-        { label: 'Interviews', value: 3, icon: FaUsers, iconColor: 'text-amber-600', iconBg: 'bg-amber-50' },
+        { label: 'Applications Sent', value: myApplications.length, icon: FaCheckCircle, iconColor: 'text-green-600', iconBg: 'bg-green-50', onClick: () => setView('applications') },
+        { label: 'Interviews', value: 0, icon: FaUsers, iconColor: 'text-amber-600', iconBg: 'bg-amber-50' },
         { label: 'Saved Jobs', value: bookmarkedJobs.length, icon: FaBookmark, iconColor: 'text-violet-600', iconBg: 'bg-violet-50' },
     ];
 
     if (view === 'detail' && selectedJob) return <DetailPage job={selectedJob} onBack={goBack} onApply={openApply} />;
-    if (view === 'apply' && selectedJob) return <ApplyPage job={selectedJob} onBack={goBack} />;
+    if (view === 'apply' && selectedJob) return (
+        <ApplyPage
+            job={selectedJob}
+            onBack={goBack}
+            onApplied={(jobId) => {
+                // Mark job as applied in the list immediately
+                setJobs(prev => prev.map(j => j.id === jobId ? { ...j, applied: true } : j));
+                // Refresh applications list
+                fetchApplications();
+            }}
+        />
+    );
+    if (view === 'applications') return <MyApplicationsPage applications={myApplications} onBack={goBack} />;
 
     const activeFilterCount = (activeFilters.jobType?.length || 0) + (activeFilters.salaryRange?.length || 0);
 
@@ -833,7 +874,7 @@ const JobNotification = () => {
                         <p className="text-sm text-gray-500 mt-1">Curated digital marketing roles matched to your profile</p>
                     </div>
                     <div className="relative">
-                        <button 
+                        <button
                             onClick={handleNotificationClick}
                             className="bg-white border border-slate-200 rounded-lg w-9 h-9 flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors relative"
                         >
@@ -845,7 +886,7 @@ const JobNotification = () => {
                             )}
                         </button>
                         {showNotifications && (
-                            <NotificationsPanel 
+                            <NotificationsPanel
                                 notifications={notifications.filter(n => !n.read).concat(notifications.filter(n => n.read).slice(0, 3))}
                                 onClose={() => setShowNotifications(false)}
                             />
@@ -907,11 +948,11 @@ const JobNotification = () => {
                                 className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-[13.5px] text-slate-800 bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400"
                             />
                         </div>
-                        <button 
+                        <button
                             onClick={() => setShowFilterModal(true)}
                             className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg font-medium text-[13px] text-slate-600 hover:border-blue-400 hover:text-blue-600 transition-colors relative"
                         >
-                            <FaFilter className="text-[11px]" /> Filter 
+                            <FaFilter className="text-[11px]" /> Filter
                             {activeFilterCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                                     {activeFilterCount}
@@ -977,9 +1018,9 @@ const JobNotification = () => {
                         Showing <span className="text-blue-600 font-semibold">{filteredJobs.length}</span> opportunities
                     </p>
                     <p className="text-slate-400 text-xs">Sorted by: <span className="text-slate-600 font-medium">
-                        {activeFilters.sortBy === 'recent' ? 'Most Recent' : 
-                         activeFilters.sortBy === 'salary-high' ? 'Salary (High-Low)' :
-                         activeFilters.sortBy === 'salary-low' ? 'Salary (Low-High)' : 'Best Match'}
+                        {activeFilters.sortBy === 'recent' ? 'Most Recent' :
+                            activeFilters.sortBy === 'salary-high' ? 'Salary (High-Low)' :
+                                activeFilters.sortBy === 'salary-low' ? 'Salary (Low-High)' : 'Best Match'}
                     </span></p>
                 </div>
 
@@ -1014,7 +1055,7 @@ const JobNotification = () => {
                                                     >
                                                         {isBookmarked ? <FaBookmark className="text-blue-600 text-xs" /> : <FaRegBookmark className="text-slate-400 text-xs" />}
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => handleShare(job, e)}
                                                         className="w-8 h-8 hidden sm:flex items-center justify-center rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
                                                     >
@@ -1061,12 +1102,18 @@ const JobNotification = () => {
                                                     >
                                                         View Details
                                                     </button>
-                                                    <button
-                                                        onClick={() => openApply(job)}
-                                                        className="bg-blue-600 text-white rounded-lg px-3 sm:px-4 py-1.5 text-[12px] sm:text-[13px] font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-                                                    >
-                                                        Quick Apply <FaArrowRight className="text-[9px]" />
-                                                    </button>
+                                                    {job.applied ? (
+                                                        <button disabled className="bg-green-100 text-green-700 rounded-lg px-3 sm:px-4 py-1.5 text-[12px] sm:text-[13px] font-semibold flex items-center gap-1.5 cursor-not-allowed">
+                                                            <FaCheckCircle className="text-[10px]" /> Applied
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => openApply(job)}
+                                                            className="bg-blue-600 text-white rounded-lg px-3 sm:px-4 py-1.5 text-[12px] sm:text-[13px] font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                                                        >
+                                                            Quick Apply <FaArrowRight className="text-[9px]" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -1085,23 +1132,23 @@ const JobNotification = () => {
             </div>
 
             {showFilterModal && (
-                <FilterModal 
+                <FilterModal
                     filters={activeFilters}
                     onApply={applyFilters}
                     onClose={() => setShowFilterModal(false)}
                 />
             )}
             {shareJob && (
-                <ShareModal 
+                <ShareModal
                     job={shareJob}
                     onClose={() => setShareJob(null)}
                 />
             )}
             {toast && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={() => setToast(null)} 
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
                 />
             )}
         </div>

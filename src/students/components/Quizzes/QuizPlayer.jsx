@@ -12,7 +12,7 @@ import {
     FaRegClock
 } from "react-icons/fa";
 
-import { MdQuiz } from "react-icons/md";
+import { MdQuiz, MdList } from "react-icons/md";
 
 import { studentQuizApi } from "../../auth/api";
 import {
@@ -38,24 +38,17 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [savingAnswer, setSavingAnswer] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [debugData, setDebugData] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
     const timerRef = useRef(null);
 
     useEffect(() => {
-        // NOTE: no persistent "already initialized" ref guard here on purpose.
-        // In dev, StrictMode mounts -> tears down -> remounts this effect once.
-        // The first invocation's `active` flag gets set to false by its own
-        // cleanup before the network call resolves (its result is correctly
-        // discarded below). The second invocation gets a fresh `active = true`
-        // and completes normally, calling setLoading(false). A ref-based guard
-        // that blocks the *second* invocation from running at all causes the
-        // component to get stuck in the loading state forever, since the only
-        // invocation that ran already has active=false by the time it resolves.
         let active = true;
 
-        const callStart = () => studentQuizApi.startQuiz(quiz.id);
-        const callResume = () => studentQuizApi.resumeQuiz(quiz.id);
-        const callRetry = () => studentQuizApi.retryQuiz(quiz.id);
+        const slugOrId = quiz.quizSlug || quiz.id;
+        const callStart = () => studentQuizApi.startQuiz(slugOrId);
+        const callResume = () => studentQuizApi.resumeQuiz(slugOrId);
+        const callRetry = () => studentQuizApi.retryQuiz(slugOrId);
 
         const plan = mode === "resume" ? [callResume, callRetry]
             : (mode === "retake" || mode === "retry") ? [callRetry, callResume]
@@ -64,6 +57,7 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
         const init = async () => {
             setLoading(true);
             setError("");
+            setDebugData(null);
 
             let res = null;
             let firstErr = null;
@@ -71,10 +65,16 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
             for (let i = 0; i < plan.length; i++) {
                 try {
                     res = await plan[i]();
+                    if (res?.data?.success === false) {
+                        const errMsg = res.data.message || "API returned failure";
+                        const errorObj = new Error(errMsg);
+                        errorObj.response = res;
+                        throw errorObj;
+                    }
                     break;
                 } catch (err) {
                     if (i === 0) firstErr = err;
-                    console.warn(`[QuizPlayer] init step ${i + 1}/${plan.length} failed:`, err?.response?.status, err?.response?.data);
+                    console.warn(`[QuizPlayer] init step ${i + 1}/${plan.length} failed:`, err?.message || err);
                 }
             }
 
@@ -95,9 +95,25 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                 let qList = data?.questions || data?.attempt?.questions || [];
 
                 if ((!qList || qList.length === 0) && aId) {
-                    const qRes = await studentQuizApi.getAttemptQuestions(aId);
-                    const qData = unwrap(qRes);
-                    qList = qData?.content || qData?.questions || qData || [];
+                    try {
+                        const qRes = await studentQuizApi.getAttemptQuestions(aId);
+                        const qData = unwrap(qRes);
+                        setDebugData(qData);
+                        qList = qData?.content || qData?.questions || qData || [];
+                    } catch (err) {
+                        console.warn("[QuizPlayer] getAttemptQuestions failed", err);
+                    }
+                }
+
+                if (!qList || qList.length === 0) {
+                    try {
+                        const fallbackRes = await studentQuizApi.getQuizBySlug(quiz.quizSlug || quiz.slug || quiz.quizId || quiz.id);
+                        const fallbackData = unwrap(fallbackRes);
+                        qList = fallbackData?.questions || fallbackData?.content || [];
+                        console.log("[QuizPlayer] fallback getQuizBySlug questions:", qList);
+                    } catch (err) {
+                        console.warn("[QuizPlayer] fallback getQuizBySlug failed", err);
+                    }
                 }
 
                 setAttemptId(aId);
@@ -110,8 +126,10 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                 });
                 setAnswers(existing);
 
+                const remaining = data?.remainingTimeInSeconds;
                 const duration = quiz.durationInMinutes || data?.durationInMinutes;
-                if (duration) setTimeLeft(duration * 60);
+                if (remaining !== undefined && remaining !== null) setTimeLeft(remaining);
+                else if (duration) setTimeLeft(duration * 60);
             } catch (err) {
                 console.error("[QuizPlayer] post-init processing error:", err);
                 if (active) setError(err?.response?.data?.message || "Failed to load quiz. Please try again.");
@@ -147,23 +165,29 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
     const answeredCount = Object.keys(answers).length;
     const progress = questions.length ? ((current + 1) / questions.length) * 100 : 0;
 
+    const isSavingRef = useRef(false);
+
     /* ── Save answer ── */
     const selectOption = async (questionId, optionId) => {
+        if (isSavingRef.current) return;
+
         setAnswers(prev => ({ ...prev, [questionId]: optionId }));
 
         if (!attemptId) return;
 
+        isSavingRef.current = true;
         setSavingAnswer(true);
 
         try {
             await studentQuizApi.saveAnswer(attemptId, {
-                questionId,
-                selectedOptionId: optionId
+                questionId: Number(questionId),
+                selectedOptionId: Number(optionId)
             });
         } catch (err) {
             console.error("[QuizPlayer] save-answer error:", err);
         } finally {
             setSavingAnswer(false);
+            isSavingRef.current = false;
         }
     };
 
@@ -173,38 +197,42 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
         isSubmittingRef.current = true;
         setSubmitting(true);
         clearInterval(timerRef.current);
+
+        let submitData = null;
         try {
             const answersArray = Object.entries(answers).map(([qId, oId]) => ({
                 questionId: Number(qId),
-                selectedOptionId: Number(oId),
+                selectedOptionId: Number(oId)
             }));
-
             const submitRes = await studentQuizApi.submitAttempt(attemptId, { answers: answersArray });
-            const submitData = unwrap(submitRes);
+            submitData = unwrap(submitRes);
             console.log("[QuizPlayer] submit response:", submitData);
+        } catch (err) {
+            console.warn("[QuizPlayer] submit error (might be auto-submitted already):", err?.response?.data || err);
+        }
 
-            let resultData = null;
+        let resultData = submitData;
+
+        // Try to fetch result explicitly only if submitData doesn't seem to contain result fields
+        if (!resultData || (resultData.questions === undefined && resultData.obtainedMarks === undefined && resultData.score === undefined)) {
             try {
                 const resRes = await studentQuizApi.getAttemptResult(attemptId);
                 resultData = unwrap(resRes);
-                console.log("[QuizPlayer] result response:", resultData);
-            } catch (resErr) {
-                console.warn("[QuizPlayer] getAttemptResult failed, falling back to submit response only:", resErr);
+                console.log("[QuizPlayer] fetched result response:", resultData);
+            } catch (err) {
+                console.warn("[QuizPlayer] result fetch error (ignoring):", err);
             }
-
-            const merged = mergeNonNull(resultData, submitData);
-            setResult(merged);
-            setSubmitted(true);
-
-            const scoreData = extractScoreData(merged);
-            if (onComplete) onComplete(quiz.id, scoreData?.percentage ?? 0);
-        } catch (err) {
-            console.error("[QuizPlayer] submit error:", err);
-            setError(err?.response?.data?.message || "Submission failed. Please try again.");
-            isSubmittingRef.current = false;
-        } finally {
-            setSubmitting(false);
         }
+
+        const merged = mergeNonNull(resultData || {}, submitData || {});
+        setResult(merged);
+        setSubmitted(true);
+
+        const scoreData = extractScoreData(merged);
+        if (onComplete) onComplete(quiz.id, scoreData?.percentage ?? 0);
+
+        setSubmitting(false);
+        isSubmittingRef.current = false;
     };
 
     /* ── Loading ── */
@@ -272,17 +300,33 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                                             {passed ? "Well Done!" : "Keep Practicing!"}
                                         </h2>
                                         <p className="text-sm text-gray-500 mt-1">{quiz.title}</p>
-                                        <div className="mt-5 inline-flex">
-                                            <svg width="110" height="110" viewBox="0 0 110 110">
-                                                <circle cx="55" cy="55" r="44" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-                                                <circle cx="55" cy="55" r="44" fill="none"
-                                                    stroke={passed ? "#16a34a" : "#dc2626"} strokeWidth="8"
-                                                    strokeDasharray={`${(pct / 100) * 276.5} 276.5`}
-                                                    strokeLinecap="round" transform="rotate(-90 55 55)" />
-                                                <text x="55" y="61" textAnchor="middle" fontSize="22" fontWeight="900"
-                                                    fill={passed ? "#16a34a" : "#dc2626"}>{pct}%</text>
-                                            </svg>
-                                        </div>
+
+                                        {scoreData.obtainedMarks !== null ? (
+                                            <div className="mt-6 flex flex-col items-center">
+                                                <div className="text-4xl font-black" style={{ color: passed ? "#16a34a" : "#dc2626" }}>
+                                                    {scoreData.obtainedMarks}
+                                                </div>
+                                                <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">Marks Obtained</div>
+
+                                                {scoreData.passingMarks !== null && (
+                                                    <div className="mt-3 px-4 py-1.5 rounded-full bg-white/60 text-xs font-semibold text-gray-600">
+                                                        Passing Marks: {scoreData.passingMarks}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="mt-5 inline-flex">
+                                                <svg width="110" height="110" viewBox="0 0 110 110">
+                                                    <circle cx="55" cy="55" r="44" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+                                                    <circle cx="55" cy="55" r="44" fill="none"
+                                                        stroke={passed ? "#16a34a" : "#dc2626"} strokeWidth="8"
+                                                        strokeDasharray={`${(pct / 100) * 276.5} 276.5`}
+                                                        strokeLinecap="round" transform="rotate(-90 55 55)" />
+                                                    <text x="55" y="61" textAnchor="middle" fontSize="22" fontWeight="900"
+                                                        fill={passed ? "#16a34a" : "#dc2626"}>{pct}%</text>
+                                                </svg>
+                                            </div>
+                                        )}
                                     </>
                                 ) : (
                                     <>
@@ -300,7 +344,7 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                                     {[
                                         { label: "Correct", val: correctCount ?? "—", color: "#16a34a" },
                                         { label: "Wrong", val: scoreData.wrong ?? 0, color: "#dc2626" },
-                                        { label: "Skipped", val: skippedCount ?? 0, color: "#6b7280" },
+                                        { label: "Total Qs", val: scoreData.totalQuestions ?? questions.length, color: "#6b7280" },
                                     ].map(s => (
                                         <div key={s.label} className="flex flex-col items-center py-5 bg-white/70">
                                             <span className="text-2xl font-black" style={{ color: s.color }}>{s.val}</span>
@@ -317,13 +361,18 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                             </div>
                             <div className="px-6 py-4 space-y-2">
                                 {reviewQs.map((q, i) => {
-                                    const userOptId = answers[q.id];
-                                    const correctOpt = (q.options || []).find(o => o.correct || o.isCorrect);
-                                    const userOpt = (q.options || []).find(o => o.id === userOptId);
-                                    const skipped = userOptId === undefined;
-                                    const isCorrect = !skipped && correctOpt && userOptId === correctOpt.id;
+                                    // Handle backend result schema or fallback to local question state
+                                    const isResultSchema = q.questionId !== undefined;
+                                    const qId = isResultSchema ? q.questionId : q.id;
+
+                                    const userOptText = isResultSchema ? q.selectedOption : (q.options || []).find(o => o.id === answers[qId])?.optionText;
+                                    const correctOptText = isResultSchema ? q.correctOption : (q.options || []).find(o => o.correct || o.isCorrect)?.optionText;
+
+                                    const skipped = isResultSchema ? (!q.selectedOption) : (answers[qId] === undefined);
+                                    const isCorrect = isResultSchema ? q.correct : (!skipped && correctOptText && userOptText === correctOptText);
+
                                     return (
-                                        <div key={q.id || i} className="flex items-start gap-3 p-3 rounded-xl"
+                                        <div key={qId || i} className="flex items-start gap-3 p-3 rounded-xl"
                                             style={{ background: skipped ? "#f9fafb" : isCorrect ? "#eafaf0" : "#fff1f1" }}>
                                             <span className="text-sm font-bold shrink-0 mt-0.5"
                                                 style={{ color: skipped ? "#9ca3af" : isCorrect ? "#16a34a" : "#dc2626" }}>
@@ -331,13 +380,13 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                                             </span>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs font-medium text-gray-700">{i + 1}. {q.questionText || q.q}</p>
-                                                {!skipped && !isCorrect && correctOpt && (
+                                                {!isCorrect && correctOptText && (
                                                     <p className="text-xs text-green-600 mt-0.5 font-medium">
-                                                        Correct: {correctOpt.optionText}
+                                                        Correct: {correctOptText}
                                                     </p>
                                                 )}
-                                                {!skipped && isCorrect && userOpt && (
-                                                    <p className="text-xs text-gray-400 mt-0.5">Your answer: {userOpt.optionText}</p>
+                                                {!skipped && userOptText && (
+                                                    <p className="text-xs text-gray-400 mt-0.5">Your answer: {userOptText}</p>
                                                 )}
                                                 {q.explanation && (
                                                     <p className="text-[11px] text-gray-400 mt-1 italic">{q.explanation}</p>
@@ -365,16 +414,19 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
     }
 
     /* ── No questions ── */
-    if (!questions.length) return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white p-6">
-            <div className="text-center max-w-sm">
-                <FaListUl className="text-3xl text-gray-300 mx-auto mb-3" />
-                <p className="text-sm font-semibold text-gray-500 mb-4">No questions found for this quiz.</p>
-                <button onClick={onClose}
-                    className="px-5 py-2.5 rounded-xl bg-gray-100 text-sm font-bold text-gray-600 hover:bg-gray-200 transition">
-                    Close
-                </button>
-            </div>
+    /* ── Empty State ── */
+    if (!questions || questions.length === 0) return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white flex-col gap-3 p-6 text-center">
+            <MdList className="text-4xl text-gray-200" />
+            <p className="text-sm font-semibold text-gray-500">No questions found for this quiz.</p>
+            {debugData && (
+                <div className="text-[10px] text-gray-400 bg-gray-50 p-2 rounded max-w-sm max-h-32 overflow-auto text-left">
+                    Debug Attempt API: {JSON.stringify(debugData)}
+                </div>
+            )}
+            <button onClick={onClose} className="px-4 py-2 mt-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-200 transition">
+                Close
+            </button>
         </div>
     );
 
@@ -427,7 +479,7 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                                 </span>
                             </div>
 
-                            <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2 leading-snug">
+                            <h3 className="text-sm font-bold text-gray-900 mb-2 leading-snug">
                                 {q.questionText || q.q}
                             </h3>
                             {q.marks !== undefined && (
@@ -439,7 +491,7 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
                                     const selected = answers[q.id] === opt.id;
                                     return (
                                         <button key={opt.id} onClick={() => selectOption(q.id, opt.id)}
-                                            className="w-full text-left px-5 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-150"
+                                            className="w-full text-left px-4 py-3 rounded-2xl border-2 text-xs font-medium transition-all duration-150"
                                             style={{
                                                 borderColor: selected ? c.accent : "#e5e7eb",
                                                 background: selected ? c.light : "#fff",

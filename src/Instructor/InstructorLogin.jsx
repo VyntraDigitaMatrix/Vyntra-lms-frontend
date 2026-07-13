@@ -93,9 +93,9 @@ const InstructorLogin = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#7c3aed]"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#7c3aed] flex items-center justify-center p-1 focus:outline-none focus:ring-2 focus:ring-[#7c3aed] rounded"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                 </button>
               </div>
 

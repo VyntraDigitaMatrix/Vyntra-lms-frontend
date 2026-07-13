@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { studentEnrolledCourseApi, studentAssignmentApi, studentQuizApi } from "./auth/api";
+import { studentEnrolledCourseApi, studentAssignmentApi, studentQuizApi, studentLearningApi } from "./auth/api";
 import {
     FaPlay, FaCheckCircle, FaChevronLeft, FaChevronRight,
     FaChevronDown, FaChevronUp, FaClock, FaBook, FaTrophy,
@@ -579,27 +579,69 @@ const ModuleLesson = () => {
        FETCH MODULES (sidebar)
     ══════════════════════════════════════════ */
     const fetchModules = useCallback(async () => {
-        if (!courseId) return;
+        if (!courseId || courseId === "undefined") return;
         setModulesLoading(true);
         try {
-            const res = await studentEnrolledCourseApi.getCourseModules(courseId);
-            const mods = res.data?.data || res.data || [];
-            setAllModules(Array.isArray(mods) ? mods : []);
+            // Resolve slug if courseId looks like a UUID
+            let resolvedCourseSlug = courseId;
+            if (courseId.includes("-") && courseId.length > 20) {
+                try {
+                    const listRes = await studentLearningApi.getMyEnrolledCourses(0, 100);
+                    const content = listRes.data?.data?.content || listRes.data?.content || listRes.data?.data || listRes.data || [];
+                    const found = content.find(c => String(c.id) === courseId || String(c.courseId) === courseId);
+                    if (found && (found.slug || found.courseSlug)) {
+                        resolvedCourseSlug = found.slug || found.courseSlug;
+                    }
+                } catch (e) { console.error("Could not resolve course slug", e); }
+            }
+
+            // Using studentLearningApi (requires courseId to actually be a slug from the URL)
+            const res = await studentLearningApi.getCourseModules(resolvedCourseSlug);
+            const mods = res.data?.data?.content || res.data?.content || res.data?.data?.modules || res.data?.modules || res.data?.data || res.data || [];
+            const processedMods = Array.isArray(mods) ? mods : [];
+            setAllModules(processedMods);
+            
             const cache = {};
-            mods.forEach(m => {
+            processedMods.forEach(m => {
                 if (Array.isArray(m.lessons) && m.lessons.length > 0) {
-                    cache[String(m.id)] = m.lessons;
+                    cache[String(m.slug ?? m.moduleId ?? m.id)] = m.lessons;
                 }
             });
             if (Object.keys(cache).length > 0) {
                 setModuleLessonsCache(prev => ({ ...cache, ...prev }));
             }
+
+            // If URL is stuck on "undefined", auto-redirect to first valid lesson
+            if ((moduleId === "undefined" || lessonId === "undefined") && processedMods.length > 0) {
+                const firstMod = processedMods[0];
+                const firstModSlug = firstMod.slug ?? firstMod.moduleId ?? firstMod.id;
+                let firstLessonSlug = "undefined";
+                
+                // We need to fetch the first module's lessons if they aren't nested
+                let lessons = firstMod.lessons || [];
+                if (lessons.length === 0) {
+                    try {
+                        const modRes = await studentLearningApi.getModuleLessons(firstModSlug);
+                        lessons = modRes.data?.data?.content || modRes.data?.content || modRes.data?.data || modRes.data || [];
+                    } catch (e) {}
+                }
+                
+                if (lessons.length > 0) {
+                    const firstL = lessons[0];
+                    firstLessonSlug = firstL.slug ?? firstL.lessonId ?? firstL.id;
+                }
+                
+                if (firstModSlug !== "undefined" && firstLessonSlug !== "undefined") {
+                    navigate(`/student/course/${resolvedCourseSlug}/module/${firstModSlug}/lesson/${firstLessonSlug}`, { replace: true });
+                }
+            }
+
         } catch (err) {
             console.error("fetchModules error:", err);
         } finally {
             setModulesLoading(false);
         }
-    }, [courseId]);
+    }, [courseId, moduleId, lessonId, navigate]);
 
     /* ══════════════════════════════════════════
        FETCH LESSONS + ASSIGNMENTS + QUIZZES FOR A MODULE
@@ -607,21 +649,23 @@ const ModuleLesson = () => {
     ══════════════════════════════════════════ */
     const fetchModuleLessons = useCallback(async (mId) => {
         const key = String(mId);
-        if (loadingModuleLessons[key]) return;
+        if (loadingModuleLessons[key] || mId === "undefined") return;
 
         setLoadingModuleLessons(prev => ({ ...prev, [key]: true }));
 
         try {
             const [lessonRes, assignmentRes, quizRes] = await Promise.all([
-                studentEnrolledCourseApi.getModuleLessons(courseId, mId, 0, 100),
-                studentAssignmentApi.getAssignmentsByModule(mId),
-                studentQuizApi.getQuizzes(),   // ← fetch all quizzes then filter by moduleId
+                // Using studentLearningApi (mId must be the slug)
+                studentLearningApi.getModuleLessons(mId).catch(() => ({ data: [] })),
+                studentAssignmentApi.getAssignmentsByModule(mId).catch(() => ({ data: [] })),
+                studentQuizApi.getQuizzes().catch(() => ({ data: [] })),   // ← fetch all quizzes then filter by moduleId
             ]);
 
             const lessons =
                 lessonRes.data?.data?.content ||
                 lessonRes.data?.content ||
-                lessonRes.data?.data || [];
+                lessonRes.data?.data ||
+                lessonRes.data || [];
 
             const assignments =
                 assignmentRes.data?.data?.content ||
@@ -658,12 +702,13 @@ const ModuleLesson = () => {
        FETCH CURRENT LESSON
     ══════════════════════════════════════════ */
     const fetchLesson = useCallback(async () => {
-        if (!courseId || !lessonId) return;
+        if (!courseId || !lessonId || lessonId === "undefined") return;
         setLessonLoading(true);
         setLessonError("");
         setQuizData(null);
         try {
-            const res = await studentEnrolledCourseApi.getLessonById(courseId, lessonId);
+            // Updated to use studentLearningApi with lessonId (slug or UUID)
+            const res = await studentLearningApi.getLessonById(lessonId);
             const data = res.data?.data || res.data || null;
             setLessonData(data);
 

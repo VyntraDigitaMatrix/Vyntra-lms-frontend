@@ -9,7 +9,7 @@ import S5 from "../assets/S5.jpg";
 import S6 from "../assets/S6.jpg";
 import S7 from "../assets/S7.jpg";
 import S8 from "../assets/S8.jpg";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaGlobe, FaUserFriends } from "react-icons/fa";
 
 const AllCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -19,7 +19,7 @@ const AllCourses = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
-  const coursesPerPage = 8;
+  const coursesPerPage = 6
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -56,12 +56,16 @@ const AllCourses = () => {
     badge: course.averageRating >= 4.7 ? "Bestseller" : "",
     image: course.thumbnailUrl || S1,
     rating: course.averageRating ? course.averageRating.toFixed(1) : "0.0",
-    reviews: course.totalRatings || 0,
+    reviews: course.totalRatings || course.reviewCount || 0,
     lessons: `${course.level || "BEGINNER"} Level`,
     desc: course.shortDescription || "",
     price: course.free ? "Free" : (course.discountPrice ? `₹${course.discountPrice}` : (course.actualPrice ? `₹${course.actualPrice}` : (course.displayPrice ? `₹${course.displayPrice}` : ""))),
     oldPrice: course.free ? "" : (course.actualPrice && course.discountPrice ? `₹${course.actualPrice}` : ""),
-    offer: course.free ? "" : (course.actualPrice && course.discountPrice ? `${Math.round(((course.actualPrice - course.discountPrice) / course.actualPrice) * 100)}% OFF` : "")
+    offer: course.free ? "" : (course.actualPrice && course.discountPrice ? `${Math.round(((course.actualPrice - course.discountPrice) / course.actualPrice) * 100)}% OFF` : ""),
+    language: course.language || "English",
+    totalEnrollments: course.totalEnrollments || 0,
+    instructorNames: course.instructorNames || [],
+    enrolled: course.enrolled || false
   }));
 
   const paginatedCourses = displayCourses;
@@ -126,7 +130,7 @@ const AllCourses = () => {
             {paginatedCourses.map((course, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300"
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col h-full"
               >
                 <div className="relative">
                   <img
@@ -140,22 +144,33 @@ const AllCourses = () => {
                     </span>
                   )}
                 </div>
-                <div className="p-3 sm:p-4">
+                <div className="p-3 sm:p-4 flex flex-col flex-1">
                   <h2 className="font-bold text-gray-900 text-xs sm:text-sm leading-5 min-h-[36px] sm:min-h-[40px] line-clamp-2">
                     {course.title}
                   </h2>
+                  {course.instructorNames?.length > 0 && (
+                    <p className="text-[10px] sm:text-[11px] text-gray-400 mt-1 line-clamp-1">
+                      By {course.instructorNames.join(", ")}
+                    </p>
+                  )}
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[11px] sm:text-xs text-gray-500">
                     <div className="flex items-center gap-0.5">
                       <span className="text-yellow-400">★</span>
                       <span>{course.rating}</span>
                     </div>
-                    <span>({course.reviews})</span>
+                    <span>({course.reviews} reviews)</span>
                     <span>{course.lessons}</span>
+                    {course.language && (
+                      <span className="flex items-center gap-1"><FaGlobe size={10} /> {course.language}</span>
+                    )}
+                    {course.totalEnrollments > 0 && (
+                      <span className="flex items-center gap-1"><FaUserFriends size={10} /> {course.totalEnrollments.toLocaleString()}</span>
+                    )}
                   </div>
                   <p className="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 leading-4 sm:leading-5 min-h-[32px] sm:min-h-[40px] line-clamp-2">
                     {course.desc}
                   </p>
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-auto pt-2 sm:pt-3">
                     <span className="font-bold text-gray-900 text-xs sm:text-sm">{course.price}</span>
                     <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                       {course.oldPrice}
@@ -165,10 +180,13 @@ const AllCourses = () => {
                     </span>
                   </div>
                   <Link
-                    to={`/student/course-preview/${course.slug || course.courseId || course.id}`}
-                    className="block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium text-white bg-[#043573] px-3 py-1.5 sm:py-2 rounded-lg hover:bg-blue-900 transition"
+                    to={course.enrolled ? `/student/continue-learning/${course.slug || course.id}` : `/student/course-preview/${course.slug || course.courseId || course.id}`}
+                    className={`block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium px-3 py-1.5 sm:py-2 rounded-lg transition ${course.enrolled
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+                      : "text-white bg-[#043573] hover:bg-blue-900"
+                      }`}
                   >
-                    View Course
+                    {course.enrolled ? "Continue Learning" : "View Course"}
                   </Link>
                 </div>
               </div>

@@ -49,7 +49,7 @@ const AnalyticsModal = ({ quiz, onClose }) => {
     }, [quiz.id]);
 
     const scoreData = extractScoreData(result);
-    const breakdown = result?.breakdown || result?.sectionBreakdown || [];
+    const reviewQs = result?.questions || [];
 
     const attempt = quiz?.attempt || {};
 
@@ -108,12 +108,12 @@ const AnalyticsModal = ({ quiz, onClose }) => {
                     </div>
                 ) : (
                     <>
-                        <div className="px-6 py-5 flex-shrink-0" style={{ background: `linear-gradient(135deg,${c.light},#fff)` }}>
+                        <div className="px-6 py-5 flex-shrink-0" style={{ background: scoreData.passed ? "linear-gradient(135deg,#eafaf0,#fff)" : "linear-gradient(135deg,#fff1f2,#fff)" }}>
                             <div className="flex items-center gap-5">
-                                <ScoreRing score={scoreData.percentage} color={c.accent} />
+                                <ScoreRing score={scoreData.percentage} color={scoreData.passed ? "#16a34a" : "#dc2626"} />
                                 <div>
                                     <p className="text-xs text-gray-400 mb-1">Final Score</p>
-                                    <p className="text-3xl font-black" style={{ color: c.accent }}>{scoreData.percentage}%</p>
+                                    <p className="text-3xl font-black" style={{ color: scoreData.passed ? "#16a34a" : "#dc2626" }}>{scoreData.percentage}%</p>
                                     <span
                                         className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-bold ${scoreData.passed
                                                 ? "bg-green-100 text-green-700"
@@ -137,7 +137,7 @@ const AnalyticsModal = ({ quiz, onClose }) => {
                         </div>
 
                         <div className="flex border-b border-gray-100 px-6 flex-shrink-0">
-                            {["overview", "breakdown"].map(t => (
+                            {["overview", "questions"].map(t => (
                                 <button key={t} onClick={() => setTab(t)}
                                     className={`pb-3 pt-3 mr-6 text-xs font-semibold capitalize border-b-2 transition ${tab === t ? "text-purple-700" : "border-transparent text-gray-400"}`}
                                     style={{ borderColor: tab === t ? c.accent : "transparent" }}>
@@ -177,23 +177,33 @@ const AnalyticsModal = ({ quiz, onClose }) => {
                                     </div>
                                 </div>
                             )}
-                            {tab === "breakdown" && (
-                                <div className="space-y-4">
-                                    {breakdown.length === 0 ? (
-                                        <p className="text-xs text-gray-400 text-center py-8">No topic breakdown available.</p>
-                                    ) : breakdown.map((s, i) => {
-                                        const sp = Math.round((s.score / s.total) * 100);
+                            {tab === "questions" && (
+                                <div className="space-y-3">
+                                    {reviewQs.length === 0 ? (
+                                        <p className="text-xs text-gray-400 text-center py-8">No question details available.</p>
+                                    ) : reviewQs.map((q, i) => {
+                                        const skipped = !q.selectedOption;
+                                        const isCorrect = q.correct;
                                         return (
-                                            <div key={s.label || i} className="bg-gray-50 rounded-2xl p-4">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-semibold text-gray-900">{s.label}</span>
-                                                    <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                                        style={{ background: sp >= 70 ? "#eafaf0" : "#fff1f1", color: sp >= 70 ? "#16a34a" : "#dc2626" }}>
-                                                        {sp}%
-                                                    </span>
-                                                </div>
-                                                <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div className="h-full rounded-full" style={{ width: `${sp}%`, background: sp >= 70 ? "#16a34a" : "#f59e0b" }} />
+                                            <div key={q.questionId || i} className="flex items-start gap-3 p-3 rounded-xl"
+                                                style={{ background: skipped ? "#f9fafb" : isCorrect ? "#eafaf0" : "#fff1f1" }}>
+                                                <span className="text-sm font-bold shrink-0 mt-0.5"
+                                                    style={{ color: skipped ? "#9ca3af" : isCorrect ? "#16a34a" : "#dc2626" }}>
+                                                    {skipped ? "–" : isCorrect ? "✓" : "✗"}
+                                                </span>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-medium text-gray-700">{i + 1}. {q.questionText}</p>
+                                                    {!skipped && !isCorrect && q.correctOption && (
+                                                        <p className="text-xs text-green-600 mt-0.5 font-medium">
+                                                            Correct: {q.correctOption}
+                                                        </p>
+                                                    )}
+                                                    {!skipped && q.selectedOption && (
+                                                        <p className="text-xs text-gray-400 mt-0.5">Your answer: {q.selectedOption}</p>
+                                                    )}
+                                                    {q.explanation && (
+                                                        <p className="text-[11px] text-gray-400 mt-1 italic">{q.explanation}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
