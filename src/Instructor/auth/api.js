@@ -260,11 +260,6 @@ export const instructorAssignmentApi = {
   getAllAssignments: (page = 0, size = 50) =>
     api.get(`/api/instructor/assignments?page=${page}&size=${size}`),
 
-  // GET /api/instructor/assignments/{assignmentSlug}
-  getBySlug: (assignmentSlug) =>
-    api.get(`/api/instructor/assignments/${assignmentSlug}`),
-
-
   // GET /api/instructor/assignments/lessons/{lessonSlug}
   getByLesson: (lessonSlug, page = 0, size = 50) =>
     api.get(`/api/instructor/assignments/lessons/${lessonSlug}?page=${page}&size=${size}`),
@@ -331,8 +326,63 @@ export const instructorPricingApi = {
 
 export const instructorApi = {
   getAllInstructors: () =>
-    api.get("/api/instructor/instructors"), // Replace with your actual API
+    api.get("/api/instructor/instructors"),
 };
 
+export const instructorManagementApi = {
+  // PUT /api/instructor/profile
+  updateProfile: (data) =>
+    api.put("/api/instructor/profile", data),
 
-export default api;
+  // PUT /api/instructor/profile/image  (multipart — key: profileImage)
+  updateProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+    formData.append("file", file);
+    formData.append("image", file);
+    return api.put("/api/instructor/profile/image", formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
+
+  // POST /api/instructor/request-email-change
+  requestEmailChange: (newEmail) =>
+    api.post("/api/instructor/request-email-change", { newEmail }),
+
+  verifyEmailChange: (otp) =>
+    api.post("/api/instructor/verify-email-change", { otp }),
+};
+
+export const discussionApi = {
+  getGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups?page=${page}&size=${size}`),
+
+  getMyGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/my?page=${page}&size=${size}`),
+
+  getCourseGroup: (courseId) =>
+    api.post(`/api/discussions/groups/course/${courseId}`),
+
+  joinGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/join`),
+
+  leaveGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/leave`),
+
+  getGroupMembers: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/members?page=${page}&size=${size}`),
+
+  getMessages: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/messages?page=${page}&size=${size}`),
+
+  sendMessage: (slug, payload) =>
+    api.post(`/api/discussions/groups/${slug}/messages`, payload),
+
+  markMessageAsSeen: (messageId) =>
+    api.post(`/api/discussions/messages/${messageId}/seen`),
+
+  deleteMessage: (messageId) =>
+    api.delete(`/api/discussions/messages/${messageId}`)
+};
+
+export default api;

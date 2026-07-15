@@ -1,221 +1,342 @@
-import React, { useState } from "react";
-import Me from "../assets/Me.jpg";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "./auth/AuthContext";
+import { studentManagementApi } from "./auth/api";
 import {
-  FaUser,
-  FaEdit,
-  FaEnvelope,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaCamera,
-  FaSave,
-  FaTimes,
-  FaShieldAlt,
-  FaChevronRight,
+  FaEdit, FaEnvelope, FaPhone, FaCamera, FaSave,
+  FaTimes, FaShieldAlt, FaCheckCircle, FaIdCard,
+  FaGift, FaAt, FaUser, FaExclamationCircle,
 } from "react-icons/fa";
 
-const AdminProfile = () => {
-  const { student, logout } = useAuth();
+const StudentProfile = () => {
+  const { student, setStudent } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [toast, setToast] = useState({ text: "", type: "" });
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [profileImage, setProfileImage] = useState(null);
-  const userName = "Harika";
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
+  useEffect(() => {
+    if (student) {
+      setFullName(student.fullName || "");
+      setMobileNumber(student.mobileNumber || "");
     }
+  }, [student]);
+
+  const notify = (text, type = "success") => {
+    setToast({ text, type });
+    setTimeout(() => setToast({ text: "", type: "" }), 3500);
   };
 
-  return (
-    <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-md overflow-hidden">
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const res = await studentManagementApi.updateProfileImage(file);
+      if (res.data?.success) { setStudent(res.data.data); notify("Profile photo updated!"); }
+    } catch (err) { notify(err.response?.data?.message || "Failed to update photo", "error"); }
+    finally { setLoading(false); }
+  };
 
-        {/* Header Banner */}
-        <div className="h-32 sm:h-40 bg-gradient-to-r from-blue-600 to-blue-700 relative">
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="absolute top-3 sm:top-5 right-3 sm:right-5 bg-white/95 backdrop-blur-sm text-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold hover:bg-white shadow-md transition-all"
-          >
-            {isEditing ? <FaTimes size={12} className="sm:text-sm" /> : <FaEdit size={12} className="sm:text-sm" />}
-            {isEditing ? "Cancel" : "Edit Profile"}
-          </button>
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await studentManagementApi.updateProfile({ fullName, mobileNumber });
+      if (res.data?.success) {
+        // Merge with existing student to preserve fields not returned by this API (e.g. profileImage)
+        setStudent(prev => ({ ...prev, ...res.data.data }));
+        setIsEditing(false);
+        notify("Profile saved!");
+      }
+    } catch (err) { notify(err.response?.data?.message || "Failed to save", "error"); }
+    finally { setLoading(false); }
+  };
+
+  const handleRequestEmail = async () => {
+    if (!newEmail) return;
+    setLoading(true);
+    try {
+      await studentManagementApi.requestEmailChange(newEmail);
+      setOtpSent(true);
+      notify("OTP sent to your new email.");
+    } catch (err) { notify(err.response?.data?.message || "Failed to send OTP", "error"); }
+    finally { setLoading(false); }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!otp) return;
+    setLoading(true);
+    try {
+      const res = await studentManagementApi.verifyEmailChange(otp);
+      if (res.data?.success) {
+        setStudent(res.data.data);
+        setIsChangingEmail(false); setOtpSent(false); setNewEmail(""); setOtp("");
+        notify("Email updated!");
+      }
+    } catch (err) { notify(err.response?.data?.message || "Invalid OTP", "error"); }
+    finally { setLoading(false); }
+  };
+
+  if (!student) return (
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[#043573] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  const initials = student.fullName?.split(" ").map(n => n?.[0]).join("").toUpperCase().slice(0, 2) || "?";
+
+  return (
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] font-sans">
+      <div className="max-w-6xl mx-auto space-y-5">
+
+        {/* ── Page Title ── */}
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900">My Profile</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Manage your personal information and account settings</p>
         </div>
 
-        {/* Profile Section */}
-        <div className="px-4 sm:px-6 md:px-8 pb-6 sm:pb-8">
-          {/* Profile Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16">
-            <div className="relative mx-auto sm:mx-0">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                />
-              ) : (
-                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg bg-blue-500 flex items-center justify-center">
-                  <span className="text-white text-3xl sm:text-4xl font-bold">
-                    {userName?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+        {/* ── Toast ── */}
+        {toast.text && (
+          <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold ${
+            toast.type === "error" ? "bg-red-600 text-white" : "bg-emerald-600 text-white"
+          }`}>
+            {toast.type === "error" ? <FaExclamationCircle /> : <FaCheckCircle />}
+            {toast.text}
+          </div>
+        )}
 
-              {isEditing && (
-                <>
+        {/* ── Two-column layout ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+          {/* LEFT: Profile card */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              {/* Top accent */}
+              <div className="h-1 w-full bg-[#043573]" />
+
+              <div className="p-6 flex flex-col items-center text-center">
+                {/* Avatar */}
+                <div className="relative mb-4">
+                  {student.profileImage ? (
+                    <img
+                      src={student.profileImage}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-2xl object-cover shadow ring-4 ring-white"
+                    />
+                  ) : (
+                    <div
+                      className="w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow ring-4 ring-white"
+                      style={{ background: "linear-gradient(135deg,#043573 0%,#1e57c4 100%)" }}
+                    >
+                      {initials}
+                    </div>
+                  )}
                   <label
-                    htmlFor="profile-upload"
-                    className="absolute bottom-1 right-1 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer shadow-md"
+                    htmlFor="photo-upload"
+                    className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#043573] text-white rounded-xl flex items-center justify-center shadow-md cursor-pointer hover:bg-[#032551] transition"
                   >
-                    <FaCamera size={12} />
+                    {loading ? (
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : <FaCamera size={11} />}
                   </label>
+                  <input id="photo-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </div>
 
-                  <input
-                    id="profile-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </>
-              )}
-            </div>
+                <h2 className="text-lg font-black text-gray-900">{student.fullName}</h2>
+                <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                  <FaAt size={9} className="text-gray-300" />{student.username}
+                </p>
 
-            <div className="text-center sm:text-left flex-1">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 sm:mt-20">
-                {student && student.fullName ? student.fullName : "Student"}
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">LMS Administrator</p>
-              <span className="inline-block mt-2 bg-blue-500 text-white px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
-                Active Account
-              </span>
+                <div className="flex flex-wrap gap-2 mt-3 justify-center">
+                  {student.isActive && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Active
+                    </span>
+                  )}
+                  {student.emailVerified && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#043573] text-[10px] font-bold border border-blue-100">
+                      <FaCheckCircle size={9} /> Verified
+                    </span>
+                  )}
+                </div>
+
+                <div className="w-full mt-5 pt-5 border-t border-gray-50 space-y-3 text-left">
+                  <SideInfoItem icon={<FaIdCard size={12} />} label="Student Code" value={student.studentCode} mono />
+                  {student.referralCode && (
+                    <SideInfoItem icon={<FaGift size={12} />} label="Referral Code" value={student.referralCode} mono />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {!isEditing ? (
-            /* Profile View - Responsive */
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
-              {/* Left Column - Profile Info */}
-              <div className="lg:col-span-2 bg-gray-50 rounded-xl p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-5 flex items-center gap-2">
-                  <FaUser className="text-blue-500 text-sm sm:text-base" />
-                  Profile Information
-                </h3>
+          {/* RIGHT: Details / Forms */}
+          <div className="lg:col-span-2 space-y-5">
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
-                  <InfoItem icon={<FaEnvelope className="text-blue-500" />} label="Email" value="admin@lms.com" />
-                  <InfoItem icon={<FaPhone className="text-blue-500" />} label="Mobile" value="+91 98765 43210" />
-                  <InfoItem icon={<FaMapMarkerAlt className="text-blue-500" />} label="Location" value="Bangalore, India" />
-                  <InfoItem icon={<FaShieldAlt className="text-blue-500" />} label="Role" value="Super Admin" />
+            {isChangingEmail ? (
+              /* Email Change */
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <SectionHeader icon={<FaEnvelope />} title="Change Email Address" subtitle="We'll send a verification code to your new email" />
+                <div className="mt-5 space-y-4 max-w-md">
+                  {!otpSent ? (
+                    <>
+                      <Field label="New Email Address">
+                        <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="you@example.com"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition" />
+                      </Field>
+                      <div className="flex gap-3">
+                        <PrimaryBtn onClick={handleRequestEmail} disabled={!newEmail || loading}>{loading ? "Sending..." : "Send OTP"}</PrimaryBtn>
+                        <GhostBtn onClick={() => setIsChangingEmail(false)}>Cancel</GhostBtn>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3 p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-[#043573] font-medium">
+                        <FaEnvelope size={13} className="mt-0.5 flex-shrink-0" />
+                        OTP sent to <strong>{newEmail}</strong>. Check your inbox.
+                      </div>
+                      <Field label="Enter OTP">
+                        <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="Enter code"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition tracking-[0.35em] font-mono text-center" />
+                      </Field>
+                      <div className="flex gap-3">
+                        <PrimaryBtn onClick={handleVerifyEmail} disabled={!otp || loading} variant="green">{loading ? "Verifying..." : "Verify & Update"}</PrimaryBtn>
+                        <GhostBtn onClick={() => { setOtpSent(false); setOtp(""); }}>← Back</GhostBtn>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : isEditing ? (
+              /* Edit Form */
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <SectionHeader icon={<FaEdit />} title="Edit Profile" subtitle="Update your name and contact number" />
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Full Name">
+                    <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition" />
+                  </Field>
+                  <Field label="Mobile Number">
+                    <input type="text" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition" />
+                  </Field>
+                </div>
+                <div className="flex gap-3 mt-5">
+                  <PrimaryBtn onClick={handleSaveProfile} disabled={loading}>
+                    <FaSave size={12} />{loading ? "Saving..." : "Save Changes"}
+                  </PrimaryBtn>
+                  <GhostBtn onClick={() => setIsEditing(false)}>Cancel</GhostBtn>
+                </div>
+              </div>
+            ) : (
+              /* Account Details view */
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <SectionHeader icon={<FaUser />} title="Account Details" subtitle="Your personal and account information" />
+                  <button
+                    onClick={() => { setIsEditing(true); setFullName(student.fullName || ""); setMobileNumber(student.mobileNumber || ""); }}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-[#043573] bg-[#043573]/5 border border-[#043573]/10 hover:bg-[#043573]/10 transition"
+                  >
+                    <FaEdit size={10} /> Edit Profile
+                  </button>
                 </div>
 
-                <div className="mt-4 sm:mt-6">
-                  <h4 className="font-semibold text-gray-700 text-sm sm:text-base mb-2">About</h4>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-5 sm:leading-6">
-                    Manages courses, instructors, students, payments, certificates,
-                    assignments, and overall LMS platform activities.
-                  </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <DetailCard icon={<FaEnvelope />} label="Email Address" value={student.email}>
+                    <button
+                      onClick={() => setIsChangingEmail(true)}
+                      className="text-[10px] font-bold text-[#043573] px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-100 transition"
+                    >
+                      Change
+                    </button>
+                  </DetailCard>
+
+                  <DetailCard icon={<FaPhone />} label="Mobile Number" value={student.mobileNumber || "—"} />
+
+                  <DetailCard
+                    icon={<FaCheckCircle />}
+                    label="Email Status"
+                    value={student.emailVerified ? "Verified" : "Not Verified"}
+                    valueClass={student.emailVerified ? "text-emerald-600" : "text-orange-500"}
+                  />
+
+                  <DetailCard
+                    icon={<FaShieldAlt />}
+                    label="Account Status"
+                    value={student.isActive ? "Active" : "Inactive"}
+                    valueClass={student.isActive ? "text-emerald-600" : "text-red-500"}
+                  />
                 </div>
               </div>
-
-              {/* Right Column - Account Status */}
-              <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-5">
-                  Account Status
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  <StatusItem label="Profile Completion" value="85%" />
-                  <StatusItem label="Courses Managed" value="24" />
-                  <StatusItem label="Students Managed" value="1200+" />
-                  <StatusItem label="Last Login" value="Today" />
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Edit Profile Form - Responsive */
-            <div className="mt-6 sm:mt-8 bg-gray-50 rounded-xl p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-                <FaEdit className="text-blue-500 text-sm sm:text-base" />
-                Edit Profile
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <FormInput label="Full Name" defaultValue="Shankar Admin" />
-                <FormInput label="Username" defaultValue="shankar_admin" />
-                <FormInput label="Email Address" defaultValue="admin@lms.com" />
-                <FormInput label="Mobile Number" defaultValue="+91 98765 43210" />
-                <FormInput label="Role" defaultValue="Super Admin" />
-                <FormInput label="Location" defaultValue="Bangalore, India" />
-              </div>
-
-              <div className="mt-4 sm:mt-5">
-                <label className="text-xs sm:text-sm font-semibold text-gray-600">
-                  About
-                </label>
-                <textarea
-                  rows={4}
-                  defaultValue="Manages LMS courses, students, instructors, payments and reports."
-                  className="w-full mt-1.5 sm:mt-2 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-5 sm:mt-6">
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="order-2 sm:order-1 px-4 sm:px-5 py-2 border border-gray-300 rounded-lg text-gray-600 text-sm font-medium hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="order-1 sm:order-2 px-4 sm:px-5 py-2 bg-blue-500 text-white rounded-lg flex items-center justify-center gap-2 text-sm font-medium hover:bg-blue-600 transition"
-                >
-                  <FaSave size={12} />
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// Info Item Component
-const InfoItem = ({ icon, label, value }) => (
-  <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition">
-    <div className="flex items-center gap-2 sm:gap-3">
-      <div className="text-blue-600 text-base sm:text-lg shrink-0">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">{label}</p>
-        <p className="text-xs sm:text-sm font-semibold text-gray-700 truncate">{value}</p>
-      </div>
+/* ── Sub-components ── */
+const SectionHeader = ({ icon, title, subtitle }) => (
+  <div className="flex items-center gap-3">
+    <div className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-[#043573] text-sm flex-shrink-0">{icon}</div>
+    <div>
+      <h2 className="text-sm font-black text-gray-900">{title}</h2>
+      {subtitle && <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>}
     </div>
   </div>
 );
 
-// Status Item Component
-const StatusItem = ({ label, value }) => (
-  <div className="flex justify-between items-center py-2.5 sm:py-3 border-b border-gray-100 last:border-0">
-    <span className="text-xs sm:text-sm text-gray-500">{label}</span>
-    <span className="font-semibold text-gray-800 text-xs sm:text-sm">{value}</span>
-  </div>
-);
-
-// Form Input Component
-const FormInput = ({ label, defaultValue }) => (
+const Field = ({ label, children }) => (
   <div>
-    <label className="text-xs sm:text-sm font-semibold text-gray-600">{label}</label>
-    <input
-      type="text"
-      defaultValue={defaultValue}
-      className="w-full mt-1.5 sm:mt-2 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-    />
+    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">{label}</label>
+    {children}
   </div>
 );
 
-export default AdminProfile;
+const DetailCard = ({ icon, label, value, valueClass = "text-gray-800", children }) => (
+  <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100 gap-3">
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="w-9 h-9 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#043573] text-xs flex-shrink-0 shadow-sm">{icon}</div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+        <p className={`text-sm font-semibold truncate mt-0.5 ${valueClass}`}>{value}</p>
+      </div>
+    </div>
+    {children && <div className="flex-shrink-0">{children}</div>}
+  </div>
+);
+
+const SideInfoItem = ({ icon, label, value, mono = false }) => (
+  <div className="flex items-center gap-2.5">
+    <div className="text-gray-400 flex-shrink-0">{icon}</div>
+    <div className="min-w-0">
+      <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{label}</p>
+      <p className={`text-xs font-bold text-gray-700 truncate ${mono ? "font-mono" : ""}`}>{value}</p>
+    </div>
+  </div>
+);
+
+const PrimaryBtn = ({ onClick, disabled, children, variant = "blue" }) => {
+  const colors = variant === "green"
+    ? "bg-emerald-600 hover:bg-emerald-700"
+    : "bg-[#043573] hover:bg-[#032551]";
+  return (
+    <button onClick={onClick} disabled={disabled}
+      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-sm transition disabled:opacity-50 ${colors}`}>
+      {children}
+    </button>
+  );
+};
+
+const GhostBtn = ({ onClick, children }) => (
+  <button onClick={onClick} className="px-5 py-2.5 rounded-xl text-gray-500 text-sm font-bold border border-gray-200 hover:bg-gray-50 transition">
+    {children}
+  </button>
+);
+
+export default StudentProfile;

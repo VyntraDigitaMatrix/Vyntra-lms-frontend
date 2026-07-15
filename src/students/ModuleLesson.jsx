@@ -574,6 +574,9 @@ const ModuleLesson = () => {
     const [completedLessons, setCompletedLessons] = useState(new Set());
     const [expandedModules, setExpandedModules] = useState(new Set([moduleId]));
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [markCompleteLoading, setMarkCompleteLoading] = useState(false);
+    const [markCompleteError, setMarkCompleteError] = useState("");
+    const [courseProgress, setCourseProgress] = useState(null);
 
     /* ══════════════════════════════════════════
        FETCH MODULES (sidebar)
@@ -611,6 +614,27 @@ const ModuleLesson = () => {
                 setModuleLessonsCache(prev => ({ ...cache, ...prev }));
             }
 
+            // Extract completed lessons from modules payload
+            const initialCompleted = new Set();
+            processedMods.forEach(m => {
+                const mSlug = String(m.slug ?? m.moduleId ?? m.id);
+                const lessons = m.lessons || [];
+                lessons.forEach(l => {
+                    if (l.completed || l.isCompleted) {
+                        initialCompleted.add(`${mSlug}-${l.slug ?? l.lessonId ?? l.id}`);
+                        if (l.id) initialCompleted.add(String(l.id));
+                        if (l.slug) initialCompleted.add(String(l.slug));
+                    }
+                });
+            });
+            if (initialCompleted.size > 0) {
+                setCompletedLessons(prev => {
+                    const next = new Set(prev);
+                    initialCompleted.forEach(item => next.add(item));
+                    return next;
+                });
+            }
+
             // If URL is stuck on "undefined", auto-redirect to first valid lesson
             if ((moduleId === "undefined" || lessonId === "undefined") && processedMods.length > 0) {
                 const firstMod = processedMods[0];
@@ -621,7 +645,18 @@ const ModuleLesson = () => {
                 let lessons = firstMod.lessons || [];
                 if (lessons.length === 0) {
                     try {
-                        const modRes = await studentLearningApi.getModuleLessons(firstModSlug);
+                        let modRes;
+                        try {
+                            modRes = await studentLearningApi.getModuleLessons(firstModSlug);
+                            if (modRes.data?.success === false) throw new Error();
+                        } catch {
+                            const altId = firstMod.id || firstMod.moduleId;
+                            if (altId && altId !== firstModSlug) {
+                                modRes = await studentLearningApi.getModuleLessons(altId);
+                            } else {
+                                throw new Error();
+                            }
+                        }
                         lessons = modRes.data?.data?.content || modRes.data?.content || modRes.data?.data || modRes.data || [];
                     } catch (e) {}
                 }
@@ -636,12 +671,25 @@ const ModuleLesson = () => {
                 }
             }
 
+            // Fetch course progress to populate completed lessons and overall progress
+            await fetchProgress(resolvedCourseSlug);
+
         } catch (err) {
             console.error("fetchModules error:", err);
         } finally {
             setModulesLoading(false);
         }
     }, [courseId, moduleId, lessonId, navigate]);
+
+    const fetchProgress = useCallback(async (slug) => {
+        try {
+            const progRes = await studentLearningApi.getCourseProgress(slug);
+            const progData = progRes.data?.data || progRes.data || {};
+            setCourseProgress(progData);
+        } catch (progErr) {
+            console.warn("Could not fetch course progress:", progErr);
+        }
+    }, []);
 
     /* ══════════════════════════════════════════
        FETCH LESSONS + ASSIGNMENTS + QUIZZES FOR A MODULE
@@ -654,11 +702,38 @@ const ModuleLesson = () => {
         setLoadingModuleLessons(prev => ({ ...prev, [key]: true }));
 
         try {
-            const [lessonRes, assignmentRes, quizRes] = await Promise.all([
-                // Using studentLearningApi (mId must be the slug)
-                studentLearningApi.getModuleLessons(mId).catch(() => ({ data: [] })),
-                studentAssignmentApi.getAssignmentsByModule(mId).catch(() => ({ data: [] })),
-                studentQuizApi.getQuizzes().catch(() => ({ data: [] })),   // ← fetch all quizzes then filter by moduleId
+            // Locate the module object to extract its identifier
+            const modObj = allModules.find(m => String(m.slug) === key || String(m.id) === key || String(m.moduleId) === key);
+            // Assignments API needs a UUID (moduleId/id), NOT the slug
+            const assignmentTargetId = modObj?.moduleId || modObj?.id;
+
+            // Fetch lessons with automatic UUID fallback if slug fails (avoids 500 error)
+            let lessonRes;
+            try {
+                lessonRes = await studentLearningApi.getModuleLessons(mId);
+                if (lessonRes.data?.success === false) {
+                    throw new Error("Lessons list API returned success=false");
+                }
+            } catch (err) {
+                console.warn("getModuleLessons failed with slug, retrying with UUID...", err);
+                const altId = modObj?.id || modObj?.moduleId;
+                if (altId && altId !== mId) {
+                    try {
+                        lessonRes = await studentLearningApi.getModuleLessons(altId);
+                    } catch (errAlt) {
+                        lessonRes = { data: [] };
+                    }
+                } else {
+                    lessonRes = { data: [] };
+                }
+            }
+
+            const [assignmentRes, quizRes] = await Promise.all([
+                // Only call assignments API if we have a valid UUID (not slug — avoids 500 errors)
+                assignmentTargetId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assignmentTargetId)
+                    ? studentAssignmentApi.getAssignmentsByModule(assignmentTargetId).catch(() => ({ data: [] }))
+                    : Promise.resolve({ data: [] }),
+                studentQuizApi.getQuizzes().catch(() => ({ data: [] })),
             ]);
 
             const lessons =
@@ -691,12 +766,29 @@ const ModuleLesson = () => {
             setModuleLessonsCache(prev => ({ ...prev, [key]: lessons }));
             setModuleAssignmentsCache(prev => ({ ...prev, [key]: assignments }));
             setModuleQuizzesCache(prev => ({ ...prev, [key]: moduleQuizzes })); // ← store
+
+            // Extract completed lessons from lazy-loaded lessons
+            const lazyCompleted = new Set();
+            lessons.forEach(l => {
+                if (l.completed || l.isCompleted) {
+                    lazyCompleted.add(`${key}-${l.slug ?? l.lessonId ?? l.id}`);
+                    if (l.id) lazyCompleted.add(String(l.id));
+                    if (l.slug) lazyCompleted.add(String(l.slug));
+                }
+            });
+            if (lazyCompleted.size > 0) {
+                setCompletedLessons(prev => {
+                    const next = new Set(prev);
+                    lazyCompleted.forEach(item => next.add(item));
+                    return next;
+                });
+            }
         } catch (err) {
             console.error("fetchModuleLessons error:", err);
         } finally {
             setLoadingModuleLessons(prev => ({ ...prev, [key]: false }));
         }
-    }, [courseId]);
+    }, [courseId, allModules]);
 
     /* ══════════════════════════════════════════
        FETCH CURRENT LESSON
@@ -710,12 +802,26 @@ const ModuleLesson = () => {
             // Updated to use studentLearningApi with lessonId (slug or UUID)
             const res = await studentLearningApi.getLessonById(lessonId);
             const data = res.data?.data || res.data || null;
-            setLessonData(data);
+            
+            // Enrich with data from allModules (like lessonType) which might be missing in getLessonById
+            let enrichedData = { ...data };
+            if (allModules && allModules.length > 0) {
+                for (const mod of allModules) {
+                    const lessons = mod.lessons || [];
+                    const found = lessons.find(l => String(l.slug || l.lessonId || l.id) === String(lessonId));
+                    if (found) {
+                        // Merge found data, preferring the API response data where it exists
+                        enrichedData = { ...found, ...data };
+                        break;
+                    }
+                }
+            }
+            setLessonData(enrichedData);
 
             // ── If this lesson is a quiz, fetch its questions ──
-            const lType = getLessonIcon(data?.lessonType || data?.type);
+            const lType = getLessonIcon(enrichedData?.lessonType || enrichedData?.type);
             if (lType === "quiz") {
-                await fetchQuizForLesson(data);
+                await fetchQuizForLesson(enrichedData);
             }
         } catch (err) {
             console.error("fetchLesson error:", err);
@@ -723,27 +829,47 @@ const ModuleLesson = () => {
         } finally {
             setLessonLoading(false);
         }
-    }, [courseId, lessonId]);
+    }, [courseId, lessonId, allModules]);
 
     /* ══════════════════════════════════════════
        FETCH QUIZ DATA FOR A LESSON
        Uses lessonData.quizId (or lessonId itself as quiz id depending on your API)
     ══════════════════════════════════════════ */
     const fetchQuizForLesson = useCallback(async (data) => {
-        // Try quizId from lesson data first, then fall back to lessonId
-        const qId = data?.quizId || data?.quiz_id || data?.id;
-        if (!qId) return;
+        // Only call the quiz API if the lesson has an explicit quizId or quiz_id
+        // Do NOT fall back to lesson id/slug — that causes 404s
+        const qId = data?.quizId || data?.quiz_id;
+        if (!qId) {
+            // No linked quiz — show placeholder in QuizView
+            setQuizData({ title: data?.title || "Module Quiz", questions: [] });
+            return;
+        }
 
         setQuizLoading(true);
         try {
+            // Resolve the quiz slug/id from the list of quizzes
+            let quizSlugOrId = qId;
+            try {
+                const quizzesRes = await studentQuizApi.getQuizzes();
+                const allQuizzes = quizzesRes.data?.data?.content || quizzesRes.data?.content || quizzesRes.data?.data || quizzesRes.data || [];
+                const matchingQuiz = allQuizzes.find(
+                    q => String(q.quizId ?? q.id) === String(qId) || String(q.quizSlug ?? q.slug) === String(qId)
+                );
+                if (matchingQuiz) {
+                    quizSlugOrId = matchingQuiz.quizSlug || matchingQuiz.slug || qId;
+                }
+            } catch (resolveErr) {
+                console.warn("Could not resolve quiz slug from list:", resolveErr);
+            }
+
             // Attempt to start/resume the quiz to get full question data
             let quizRes;
             try {
                 // Try resuming first (idempotent if already started)
-                quizRes = await studentQuizApi.resumeQuiz(qId);
+                quizRes = await studentQuizApi.resumeQuiz(quizSlugOrId);
             } catch {
                 // If resume fails (quiz not started), start it
-                quizRes = await studentQuizApi.startQuiz(qId);
+                quizRes = await studentQuizApi.startQuiz(quizSlugOrId);
             }
 
             const attemptId =
@@ -801,10 +927,11 @@ const ModuleLesson = () => {
 
     useEffect(() => {
         if (moduleId) {
+            // moduleId from URL is the slug, expand it and load its lessons
             setExpandedModules(prev => new Set([...prev, moduleId]));
             fetchModuleLessons(moduleId);
         }
-    }, [moduleId]);
+    }, [moduleId, fetchModuleLessons]);
 
     const handleToggleModule = (mId) => {
         const key = String(mId);
@@ -831,7 +958,7 @@ const ModuleLesson = () => {
 
     const content = {
         title: lessonData?.title || "Loading…",
-        description: lessonData?.description || "",
+        description: lessonData?.longDescription || lessonData?.description || "",
         body: lessonData?.content || null,
         videoUrl: lessonData?.videoUrl || lessonData?.video_url || null,
         resourceUrl: lessonData?.resourceUrl || null,
@@ -839,9 +966,15 @@ const ModuleLesson = () => {
     };
 
     const flatLessons = allModules.flatMap(m => {
-        const key = String(m.id);
-        const lessons = moduleLessonsCache[key] || m.lessons || [];
-        return lessons.map(l => ({ moduleId: String(m.id), lessonId: String(l.id), lesson: l }));
+        // Use slug as key to match URL params
+        const mSlug = String(m.slug ?? m.moduleId ?? m.id);
+        const mId = String(m.id ?? m.moduleId);
+        const lessons = moduleLessonsCache[mSlug] || moduleLessonsCache[mId] || m.lessons || [];
+        return lessons.map(l => ({
+            moduleId: mSlug,
+            lessonId: String(l.slug ?? l.lessonId ?? l.id),
+            lesson: l
+        }));
     });
 
     const currentFlatIdx = flatLessons.findIndex(
@@ -852,17 +985,87 @@ const ModuleLesson = () => {
 
     const goTo = (mId, lId) => navigate(`/student/course/${courseId}/module/${mId}/lesson/${lId}`);
 
-    const totalLessons = flatLessons.length;
-    const completedCount = completedLessons.size;
-    const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+    const totalLessons = courseProgress?.totalLessons ?? flatLessons.length;
+    const completedCount = typeof courseProgress?.completedLessons === 'number'
+        ? courseProgress.completedLessons
+        : completedLessons.size;
+    
+    // progressPercentage from API is already 0-100 (e.g. 100 means 100%)
+    const progressPct = courseProgress?.progressPercentage != null
+        ? Math.round(courseProgress.progressPercentage)
+        : (totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0);
+
+    // Determine if the entire course is fully completed
+    const isCourseFullyComplete = courseProgress?.completed === true || progressPct >= 100;
 
     const lessonKey = `${moduleId}-${lessonId}`;
-    const isDone = completedLessons.has(lessonKey);
-    const markComplete = () => setCompletedLessons(prev => new Set(prev).add(lessonKey));
+    const isDone = completedLessons.has(lessonKey) || 
+                   completedLessons.has(String(lessonData?.id)) || 
+                   completedLessons.has(String(lessonData?.slug)) ||
+                   lessonData?.completed || 
+                   lessonData?.isCompleted ||
+                   isCourseFullyComplete;
 
-    const currentModuleData = allModules.find(m => String(m.id) === String(moduleId));
+    const markComplete = async () => {
+        if (isDone || markCompleteLoading) return;
+        setMarkCompleteLoading(true);
+        setMarkCompleteError("");
+        try {
+            // Use the slug (not UUID, since complete endpoint only accepts slugs)
+            const slugToComplete = lessonData?.slug || lessonId;
+            if (!slugToComplete || slugToComplete === "undefined") {
+                throw new Error("No valid lesson slug available");
+            }
+            let res;
+            try {
+                res = await studentLearningApi.completeLesson(slugToComplete);
+                // Also check if backend returned success:false in a 200 response
+                if (res.data?.success === false) {
+                    const msg = res.data?.message || "";
+                    if (msg.toLowerCase().includes("already")) {
+                        // Already done - treat as success
+                    } else {
+                        throw new Error(msg || "Backend returned success=false");
+                    }
+                }
+            } catch (err) {
+                const serverMessage = err.response?.data?.message || err.message || "";
+                if (serverMessage.toLowerCase().includes("already marked as completed") || serverMessage.toLowerCase().includes("already completed")) {
+                    // Treat as success
+                    res = { data: { data: { completed: true } } };
+                } else {
+                    throw err;
+                }
+            }
+            const data = res.data?.data || res.data;
+            // Mark lesson as done locally
+            setCompletedLessons(prev => new Set(prev).add(lessonKey));
+            if (lessonData?.id) setCompletedLessons(prev => new Set(prev).add(String(lessonData.id)));
+            if (lessonData?.slug) setCompletedLessons(prev => new Set(prev).add(String(lessonData.slug)));
+            
+            // Re-fetch overall course progress to reflect on the bar and certificate eligibility
+            const resolvedCourseSlug = courseProgress?.courseSlug || courseId;
+            if (resolvedCourseSlug && resolvedCourseSlug !== "undefined") {
+                fetchProgress(resolvedCourseSlug);
+            }
+        } catch (err) {
+            console.error("markComplete error:", err);
+            if (err.response?.data) {
+                console.error("markComplete server response data:", err.response.data);
+                setMarkCompleteError(`Failed: ${err.response.data.message || "Bad Request"}`);
+            } else {
+                setMarkCompleteError("Failed to mark complete. Please try again.");
+            }
+            setTimeout(() => setMarkCompleteError(""), 5000);
+        } finally {
+            setMarkCompleteLoading(false);
+        }
+    };
+
+    const currentModuleData = allModules.find(m => String(m.id) === String(moduleId) || String(m.slug) === String(moduleId));
     const moduleColor = currentModuleData?.color || "#2563EB";
-    const moduleName = currentModuleData?.title || `Module ${moduleId}`;
+    const moduleName = lessonData?.moduleName || currentModuleData?.title || `Module ${moduleId}`;
+    const courseName = lessonData?.courseName || "Course";
 
     const noteCount = (() => {
         try { return JSON.parse(localStorage.getItem(`notes_${courseId}-${moduleId}-${lessonId}`) || "[]").length; } catch { return 0; }
@@ -923,7 +1126,7 @@ const ModuleLesson = () => {
                         {/* Breadcrumb */}
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-[11px] tracking-wide text-blue-400 font-bold uppercase flex items-center flex-wrap gap-x-1">
-                                <Link to={`/student/continue-learning/${courseId}`} className="hover:text-blue-700 transition">Course</Link>
+                                <Link to={`/student/continue-learning/${courseId}`} className="hover:text-blue-700 transition">{courseName}</Link>
                                 <span className="font-normal text-blue-300">/</span>
                                 <span className="text-blue-500">{moduleName}</span>
                                 <span className="font-normal text-blue-300">/</span>
@@ -1031,10 +1234,31 @@ const ModuleLesson = () => {
                                     </div>
                                 </div>
                                 {!isDone && !isQuiz && !isAssignment && (
-                                    <button onClick={markComplete}
-                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs flex-shrink-0">
-                                        <FaCheckCircle className="w-3.5 h-3.5" /> Mark as Complete
-                                    </button>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <button
+                                            onClick={markComplete}
+                                            disabled={markCompleteLoading}
+                                            className={`flex items-center gap-2 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs flex-shrink-0 ${
+                                                markCompleteLoading
+                                                    ? "bg-blue-400 cursor-not-allowed"
+                                                    : "bg-blue-600 hover:bg-blue-500"
+                                            }`}>
+                                            {markCompleteLoading ? (
+                                                <>
+                                                    <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                                    </svg>
+                                                    Saving…
+                                                </>
+                                            ) : (
+                                                <><FaCheckCircle className="w-3.5 h-3.5" /> Mark as Complete</>
+                                            )}
+                                        </button>
+                                        {markCompleteError && (
+                                            <p className="text-[10px] text-red-500 font-medium">{markCompleteError}</p>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -1118,18 +1342,20 @@ const ModuleLesson = () => {
                                 </div>
                             ) : (
                                 allModules.map(mod => {
-                                    const key = String(mod.id);
-                                    const isExpandedMod = expandedModules.has(key);
-                                    const isActiveMod = String(mod.id) === String(moduleId);
-                                    const lessons = moduleLessonsCache[key] || mod.lessons || [];
-                                    const assignments = moduleAssignmentsCache[key] || [];
-                                    const quizzes = moduleQuizzesCache[key] || []; // ← NEW
+                                    const mSlug = String(mod.slug ?? mod.moduleId ?? mod.id);
+                                    const mId = String(mod.id ?? mod.moduleId ?? mod.slug);
+                                    const key = mSlug; // Use slug as primary key (matches URL)
+                                    const isExpandedMod = expandedModules.has(key) || expandedModules.has(mId);
+                                    const isActiveMod = mSlug === String(moduleId) || mId === String(moduleId);
+                                    const lessons = moduleLessonsCache[mSlug] || moduleLessonsCache[mId] || mod.lessons || [];
+                                    const assignments = moduleAssignmentsCache[mSlug] || moduleAssignmentsCache[mId] || [];
+                                    const quizzes = moduleQuizzesCache[mSlug] || moduleQuizzesCache[mId] || [];
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.id}-${l.id}`)).length;
 
                                     return (
                                         <div key={mod.id} className="border-b border-slate-50">
                                             {/* Module Header */}
-                                            <button onClick={() => handleToggleModule(mod.id)}
+                                            <button onClick={() => handleToggleModule(mSlug)}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all ${isActiveMod ? "bg-slate-50/80" : "hover:bg-slate-50/40"}`}>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs font-bold text-slate-800 truncate leading-tight">{mod.title}</p>
@@ -1158,10 +1384,16 @@ const ModuleLesson = () => {
                                                         <>
                                                             {/* ── Lessons List ── */}
                                                             {lessons.map((lesson) => {
+                                                                const lSlug = String(lesson.slug ?? lesson.lessonId ?? lesson.id);
                                                                 const isActive =
-                                                                    String(mod.id) === String(moduleId) &&
-                                                                    String(lesson.id) === String(lessonId);
-                                                                const isDoneLesson = completedLessons.has(`${mod.id}-${lesson.id}`);
+                                                                    isActiveMod &&
+                                                                    lSlug === String(lessonId);
+                                                                const isDoneLesson = completedLessons.has(`${mSlug}-${lSlug}`) ||
+                                                                                     completedLessons.has(String(lesson.id)) ||
+                                                                                     completedLessons.has(String(lesson.slug)) ||
+                                                                                     lesson.completed ||
+                                                                                     lesson.isCompleted ||
+                                                                                     isCourseFullyComplete;
                                                                 const lType = getLessonIcon(lesson.lessonType || lesson.type);
                                                                 const isAssignLesson = lType === "assignment";
                                                                 const isQuizLesson = lType === "quiz";
@@ -1177,7 +1409,7 @@ const ModuleLesson = () => {
                                                                     itemClass += "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
 
                                                                 return (
-                                                                    <button key={lesson.id} onClick={() => goTo(mod.id, lesson.id)} className={itemClass}>
+                                                                    <button key={lesson.id || lesson.slug} onClick={() => goTo(mSlug, lSlug)} className={itemClass}>
                                                                         <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                                                                             {isDoneLesson ? (
                                                                                 <FaCheckCircle className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"}`} />
@@ -1302,14 +1534,16 @@ const ModuleLesson = () => {
                             )}
                         </div>
 
-                        {progressPct === 100 && (
+                        {(courseProgress?.completed || courseProgress?.certificateEligible || progressPct === 100) && (
                             <div className="m-4 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-4 text-white text-center shadow-lg">
                                 <FaTrophy className="w-7 h-7 mx-auto mb-2 text-amber-400" />
                                 <p className="font-black text-xs tracking-wide uppercase">Course Complete!</p>
                                 <p className="text-[10px] text-slate-400 mt-0.5">You've finished all lessons.</p>
-                                <button className="mt-3 w-full bg-white text-slate-900 text-xs font-bold py-2 rounded-xl hover:bg-slate-50 transition shadow-sm">
-                                    Claim Certificate
-                                </button>
+                                {courseProgress?.certificateEligible && (
+                                    <button className="mt-3 w-full bg-white text-slate-900 text-xs font-bold py-2 rounded-xl hover:bg-slate-50 transition shadow-sm">
+                                        Claim Certificate
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

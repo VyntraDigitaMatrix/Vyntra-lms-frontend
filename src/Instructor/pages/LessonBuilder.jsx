@@ -130,6 +130,8 @@ const LessonBuilder = () => {
             setIsSaving(true);
             const formData = new FormData();
             formData.append("title", lessonTitle || "");
+            formData.append("lessonTitle", lessonTitle || ""); // Fallback for backend
+            formData.append("name", lessonTitle || ""); // Additional fallback
             
             if (lessonDescription) {
                 formData.append("description", lessonDescription);
@@ -174,8 +176,14 @@ const LessonBuilder = () => {
 
     const handleDelete = async () => {
         if (!window.confirm("Delete lesson?")) return;
-        await instructorLessonApi.deleteLesson(lessonSlug);
-        navigate(`/instructor/course-builder/${courseSlug}`);
+        try {
+            await instructorLessonApi.deleteLesson(lessonSlug);
+            navigate(`/instructor/course-builder/${courseSlug}`);
+        } catch (err) {
+            console.error("Delete lesson error:", err);
+            const errorData = err.response?.data;
+            alert(typeof errorData === 'object' ? JSON.stringify(errorData) : err.message || "Failed to delete lesson");
+        }
     };
 
     const getLessonTypeIcon = () => {

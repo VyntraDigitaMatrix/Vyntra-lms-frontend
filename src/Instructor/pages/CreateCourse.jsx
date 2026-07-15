@@ -469,11 +469,18 @@ const CreateCourse = () => {
                                 <div className="text-right">
                                     {discount ? (
                                         <>
-                                            <p className="text-sm font-bold text-gray-900">₹{discount}</p>
-                                            <p className="text-xs text-gray-400 line-through">₹{price}</p>
+                                            <div className="flex items-baseline justify-end gap-1.5">
+                                                <p className="text-sm font-bold text-gray-900">
+                                                    ₹{(Number(price) - Number(discount)).toLocaleString()}
+                                                </p>
+                                                <p className="text-xs text-gray-400 line-through">₹{Number(price).toLocaleString()}</p>
+                                            </div>
+                                            <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 rounded px-1.5 py-0.5">
+                                                Save ₹{Number(discount).toLocaleString()}
+                                            </span>
                                         </>
                                     ) : (
-                                        <p className="text-sm font-bold text-gray-900">₹{price}</p>
+                                        <p className="text-sm font-bold text-gray-900">₹{Number(price).toLocaleString()}</p>
                                     )}
                                 </div>
                             </div>

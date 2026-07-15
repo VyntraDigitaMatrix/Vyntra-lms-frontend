@@ -368,8 +368,8 @@ const Assignments = () => {
   }
 
   if (selected) {
-    const onBack = () => { 
-      setSelected(null); 
+    const onBack = () => {
+      setSelected(null);
       navigate("/student/assignments");
     };
     if (selected.status === "Pending")
@@ -410,22 +410,49 @@ const Assignments = () => {
           {/* Tabs + Filters */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-gray-200 mb-4 pb-3 gap-4">
             <div className="flex gap-4 sm:gap-8 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-2 sm:pb-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap ${activeTab === tab ? "text-[#043573] border-b-2 border-[#043573]" : "text-gray-500 hover:text-[#043573]"
-                    }`}
-                >
-                  {tab}
-                  <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${activeTab === tab ? "bg-[#043573] text-white" : "bg-gray-100 text-gray-500"
-                    }`}>
-                    {tab === "All"
-                      ? assignments.length
-                      : assignments.filter((a) => a.status === tab).length}
-                  </span>
-                </button>
-              ))}
+              {tabs.map((tab) => {
+                const tabColor =
+                  tab === "Pending"
+                    ? "text-orange-600 border-orange-500"
+                    : tab === "Submitted"
+                      ? "text-green-600 border-green-500"
+                      : tab === "Graded"
+                        ? "text-blue-600 border-blue-500"
+                        : "text-[#043573] border-[#043573]";
+
+                const badgeColor =
+                  tab === "Pending"
+                    ? "bg-orange-100 text-orange-600"
+                    : tab === "Submitted"
+                      ? "bg-green-100 text-green-600"
+                      : tab === "Graded"
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-[#043573] text-white";
+
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`pb-2 sm:pb-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap
+        ${activeTab === tab
+                        ? `border-b-2 ${tabColor}`
+                        : "text-gray-500 hover:text-[#043573]"
+                      }`}
+                  >
+                    {tab}
+                    <span
+                      className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${activeTab === tab
+                          ? badgeColor
+                          : "bg-gray-100 text-gray-500"
+                        }`}
+                    >
+                      {tab === "All"
+                        ? assignments.length
+                        : assignments.filter((a) => a.status === tab).length}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -613,7 +640,7 @@ const Assignments = () => {
                 const statusColor = items
                   ? items.some((a) => a.status === "Pending") ? "bg-orange-100 text-orange-600"
                     : items.some((a) => a.status === "Submitted") ? "bg-green-100 text-green-600"
-                      : "bg-[#043573]/10 text-[#043573]"
+                      : "bg-blue-100 text-blue-600"
                   : "";
                 const isSelected = selectedCalDate === key;
                 const dotColor = items
@@ -621,18 +648,28 @@ const Assignments = () => {
                     : items.some((a) => a.status === "Submitted") ? "bg-green-500"
                       : "bg-blue-500"
                   : "";
+                const ringColor =
+                  items?.[0]?.status?.toLowerCase() === "pending"
+                    ? "ring-orange-400"
+                    : items?.[0]?.status?.toLowerCase() === "graded"
+                      ? "ring-blue-500"
+                      : "ring-gray-400";
                 return (
                   <span
                     key={i}
                     onClick={() => items && setSelectedCalDate(isSelected ? null : key)}
                     className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full mx-auto text-[11px] sm:text-sm relative
                       ${items ? `cursor-pointer font-semibold ${statusColor}` : "text-gray-600"}
-                      ${isSelected ? "ring-2 ring-[#043573] ring-offset-1" : ""}
+                      ${isSelected ? `ring-2 ${ringColor} ring-offset-1` : ""}
                     `}
                     title={items ? items.map((a) => a.title).join(", ") : ""}
                   >
                     {date}
-                    {items && <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${dotColor}`} />}
+                    {items && (
+                      <span
+                        className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${dotColor}`}
+                      />
+                    )}
                   </span>
                 );
               })}

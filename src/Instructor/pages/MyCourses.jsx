@@ -121,18 +121,18 @@ function StatusBadge({ course }) {
    STAT CARDS
 ══════════════════════════════════════════════════════════ */
 function StatCards({ courses }) {
-  const total    = courses.length;
-  const published= courses.filter(c => c.status === "PUBLISHED").length;
-  const draft    = courses.filter(c => c.status === "DRAFT" || (!c.status)).length;
+  const total = courses.length;
+  const published = courses.filter(c => c.status === "PUBLISHED").length;
+  const draft = courses.filter(c => c.status === "DRAFT" || (!c.status)).length;
   const archived = courses.filter(c => c.status === "ARCHIVED").length;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
       {[
-        { label: "Total Courses",   value: total,     color: "text-violet-600", border: "border-t-violet-500", bg: "bg-violet-50", icon: "📚" },
-        { label: "Published",       value: published, color: "text-emerald-600",border: "border-t-emerald-500",bg: "bg-emerald-50",icon: "✅" },
-        { label: "Draft",           value: draft,     color: "text-amber-600",  border: "border-t-amber-500",  bg: "bg-amber-50",  icon: "✎" },
-        { label: "Archived",        value: archived,  color: "text-orange-600", border: "border-t-orange-500", bg: "bg-orange-50", icon: "🗄" },
+        { label: "Total Courses", value: total, color: "text-violet-600", border: "border-t-violet-500", bg: "bg-violet-50", icon: "📚" },
+        { label: "Published", value: published, color: "text-emerald-600", border: "border-t-emerald-500", bg: "bg-emerald-50", icon: "✅" },
+        { label: "Draft", value: draft, color: "text-amber-600", border: "border-t-amber-500", bg: "bg-amber-50", icon: "✎" },
+        { label: "Archived", value: archived, color: "text-orange-600", border: "border-t-orange-500", bg: "bg-orange-50", icon: "🗄" },
       ].map(({ label, value, color, border, bg, icon }) => (
         <div key={label} className={`bg-white rounded-xl border border-gray-200 ${border} border-t-2 p-4 shadow-sm flex items-center gap-3`}>
           <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>{icon}</div>
@@ -152,20 +152,20 @@ function StatCards({ courses }) {
 const InstructorCourses = () => {
   const navigate = useNavigate();
 
-  const [allCourses,    setAllCourses]    = useState([]);
-  const [courses,       setCourses]       = useState([]);
-  const [totalPages,    setTotalPages]    = useState(0);
+  const [allCourses, setAllCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [loading,       setLoading]       = useState(false);
-  const [error,         setError]         = useState("");
-  const [sortBy,        setSortBy]        = useState("Popular");
-  const [currentPage,   setCurrentPage]   = useState(0);
-  const [statusFilter,  setStatusFilter]  = useState("ALL");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [sortBy, setSortBy] = useState("Popular");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [coursesPerPage] = useState(6);
 
   // Archive state
-  const [archiveTarget,  setArchiveTarget]  = useState(null);
-  const [archiving,      setArchiving]      = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState(null);
+  const [archiving, setArchiving] = useState(false);
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -267,10 +267,10 @@ const InstructorCourses = () => {
 
   /* ── Status filter tabs ── */
   const STATUS_TABS = [
-    { key: "ALL",       label: "All",       count: allCourses.length },
+    { key: "ALL", label: "All", count: allCourses.length },
     { key: "PUBLISHED", label: "Published", count: allCourses.filter(c => c.status === "PUBLISHED").length },
-    { key: "DRAFT",     label: "Draft",     count: allCourses.filter(c => c.status === "DRAFT" || !c.status).length },
-    { key: "ARCHIVED",  label: "Archived",  count: allCourses.filter(c => c.status === "ARCHIVED").length },
+    { key: "DRAFT", label: "Draft", count: allCourses.filter(c => c.status === "DRAFT" || !c.status).length },
+    { key: "ARCHIVED", label: "Archived", count: allCourses.filter(c => c.status === "ARCHIVED").length },
   ];
 
   return (
@@ -379,8 +379,8 @@ const InstructorCourses = () => {
           <div className="py-20 text-center bg-white rounded-2xl border border-gray-200">
             <div className="text-5xl mb-3">📚</div>
             <p className="text-sm font-semibold text-gray-500">
-              {statusFilter !== "ALL" 
-                ? `No ${statusFilter.toLowerCase()} courses found` 
+              {statusFilter !== "ALL"
+                ? `No ${statusFilter.toLowerCase()} courses found`
                 : "No courses found"}
             </p>
             {statusFilter === "ALL" && (
@@ -438,6 +438,9 @@ const InstructorCourses = () => {
                           {course.language.toUpperCase()}
                         </span>
                       )}
+                      <span className="text-[10px] text-gray-500 font-medium">
+                        {course.totalModules || (course.modules || []).length || 0} Modules • {course.totalLessons || (course.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0) || 0} Lessons
+                      </span>
                     </div>
 
                     <p className="text-xs text-gray-500 leading-5 min-h-[36px] line-clamp-2 mb-3">
@@ -447,16 +450,28 @@ const InstructorCourses = () => {
                     {/* Price row */}
                     <div className="flex items-center justify-between py-2.5 border-t border-b border-gray-100 mb-3">
                       <div className="text-center">
-                        <p className="text-[10px] text-gray-400">Price</p>
-                        <p className="text-sm font-bold text-gray-800">
-                          {course.free ? "Free" : (course.actualPrice ? `₹${course.actualPrice}` : "—")}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[10px] text-gray-400">Discount</p>
-                        <p className="text-xs font-bold text-emerald-600">
-                          {course.discountPrice ? `₹${course.discountPrice}` : "—"}
-                        </p>
+                        <p className="text-[10px] text-gray-400 mb-0.5">Price</p>
+                        {course.free ? (
+                          <p className="text-sm font-bold text-emerald-600">Free</p>
+                        ) : course.actualPrice && course.discountPrice ? (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-sm font-bold text-gray-900">
+                                ₹{(Number(course.actualPrice) - Number(course.discountPrice)).toLocaleString()}
+                              </span>
+                              <span className="text-[10px] text-gray-400 line-through">
+                                ₹{Number(course.actualPrice).toLocaleString()}
+                              </span>
+                            </div>
+                            <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-50 rounded px-1 py-0.5">
+                              Save ₹{Number(course.discountPrice).toLocaleString()}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="text-sm font-bold text-gray-800">
+                            {course.actualPrice ? `₹${Number(course.actualPrice).toLocaleString()}` : "—"}
+                          </p>
+                        )}
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] text-gray-400">Students</p>

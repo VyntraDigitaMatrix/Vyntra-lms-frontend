@@ -87,8 +87,13 @@ const LessonSettings = () => {
         try {
             const fd = new FormData();
             fd.append("title", formData.title || "");
-            fd.append("description", formData.description || "");
-            fd.append("longDescription", formData.longDescription || "");
+            fd.append("lessonTitle", formData.title || ""); // Fallback for backend
+            fd.append("name", formData.title || ""); // Additional fallback
+
+            if (formData.description) fd.append("description", formData.description);
+            if (formData.longDescription) fd.append("longDescription", formData.longDescription);
+            if (formData.content) fd.append("content", formData.content);
+
             fd.append("lessonType", formData.lessonType || "VIDEO");
             fd.append("content", formData.content || "");
             if (formData.thumbnailInputType) {

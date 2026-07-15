@@ -448,8 +448,21 @@ function PricingPlansDashboard({ onBack, onCreatePlan, onSelectPlan }) {
                                             <td className="px-4 py-4 text-sm text-gray-600">{type}</td>
                                             <td className="px-4 py-4">
                                                 {discount
-                                                    ? <><span className="text-sm font-bold text-gray-900">₹{discount}</span><span className="text-xs text-gray-400 line-through ml-1.5">₹{price}</span></>
-                                                    : <span className="text-sm font-bold text-gray-900">₹{price}</span>}
+                                                    ? (() => {
+                                                        const finalPrice = Number(price) - Number(discount);
+                                                        return (
+                                                            <span className="flex flex-col gap-0.5">
+                                                                <span className="flex items-baseline gap-1.5">
+                                                                    <span className="text-sm font-bold text-gray-900">₹{finalPrice.toLocaleString()}</span>
+                                                                    <span className="text-xs text-gray-400 line-through">₹{Number(price).toLocaleString()}</span>
+                                                                </span>
+                                                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 rounded px-1 py-0.5 w-fit">
+                                                                    Save ₹{Number(discount).toLocaleString()}
+                                                                </span>
+                                                            </span>
+                                                        );
+                                                    })()
+                                                    : <span className="text-sm font-bold text-gray-900">₹{Number(price || 0).toLocaleString()}</span>}
                                             </td>
                                             <td className="px-4 py-4 text-sm text-gray-600">{validity}</td>
                                             <td className="px-4 py-4">

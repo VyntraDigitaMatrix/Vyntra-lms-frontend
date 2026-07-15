@@ -145,7 +145,7 @@ export const studentLearningApi = {
 
   // POST /api/student/learning/lessons/{lessonSlug}/complete
   completeLesson: (lessonSlug) =>
-    api.post(`/api/student/learning/lessons/${lessonSlug}/complete`),
+    api.post(`/api/student/learning/lessons/${lessonSlug}/complete`, {}),
 
   // GET /api/student/course-ratings/{courseSlug}
   getCourseReviews: (courseSlug, page = 0, size = 10) =>
@@ -299,5 +299,75 @@ export const studentAssignmentApi = {
     api.get(`/api/student/assignments/submissions/${submissionId}`),
 };
 
+export const studentInstructorRatingApi = {
+  // GET /api/student/instructor-ratings/{courseSlug}/{instructorId}/my-rating
+  getMyRating: (courseSlug, instructorId) =>
+    api.get(`/api/student/instructor-ratings/${courseSlug}/${instructorId}/my-rating`),
+
+  // POST /api/student/instructor-ratings/{courseSlug}
+  submitRating: (courseSlug, payload) =>
+    api.post(`/api/student/instructor-ratings/${courseSlug}`, payload),
+
+  // PUT /api/student/instructor-ratings/{courseSlug}
+  updateRating: (courseSlug, payload) =>
+    api.put(`/api/student/instructor-ratings/${courseSlug}`, payload),
+
+  // GET /api/student/instructor-ratings/instructors
+  getInstructors: () =>
+    api.get(`/api/student/instructor-ratings/instructors`)
+};
+
+export const studentManagementApi = {
+  updateProfile: (data) =>
+    api.put(`/api/student/profile`, data),
+
+  updateProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("image", file);
+    formData.append("profileImage", file);
+    return api.put(`/api/student/profile/image`, formData, {
+      headers: { "Content-Type": undefined }
+    });
+  },
+
+  requestEmailChange: (newEmail) =>
+    api.post(`/api/student/email/request-change`, { newEmail }),
+
+  verifyEmailChange: (otp) =>
+    api.post(`/api/student/email/verify-change`, { otp }),
+};
+
+export const discussionApi = {
+  getGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups?page=${page}&size=${size}`),
+
+  getMyGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/my?page=${page}&size=${size}`),
+
+  getCourseGroup: (courseId) =>
+    api.post(`/api/discussions/groups/course/${courseId}`),
+
+  joinGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/join`),
+
+  leaveGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/leave`),
+
+  getGroupMembers: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/members?page=${page}&size=${size}`),
+
+  getMessages: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/messages?page=${page}&size=${size}`),
+
+  sendMessage: (slug, payload) =>
+    api.post(`/api/discussions/groups/${slug}/messages`, payload),
+
+  markMessageAsSeen: (messageId) =>
+    api.post(`/api/discussions/messages/${messageId}/seen`),
+
+  deleteMessage: (messageId) =>
+    api.delete(`/api/discussions/messages/${messageId}`)
+};
 
 export default api;

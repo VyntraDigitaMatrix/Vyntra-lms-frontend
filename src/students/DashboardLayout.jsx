@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import ContactSupport from "./ContactSupport";const DashboardLayout = ({ children }) => {
+import ContactSupport from "./ContactSupport"; const DashboardLayout = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
@@ -30,25 +30,25 @@ import ContactSupport from "./ContactSupport";const DashboardLayout = ({ childre
   };
 
   return (
-  <div className="h-screen bg-white overflow-hidden">
-    <div className="flex h-full">
-      <Sidebar
-  isCollapsed={isSidebarCollapsed}
-  toggleSidebar={toggleSidebar}
-/>
+    <div className="h-screen bg-white overflow-hidden">
+      <div className="flex h-full">
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          toggleSidebar={toggleSidebar}
+        />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar />
 
-       <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
-          {children}
-        </main>
+          <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
+            {children}
+          </main>
+        </div>
       </div>
+      <ContactSupport />
     </div>
-     <ContactSupport />
-  </div>
-);
-  
+  );
+
 };
 
 export default DashboardLayout;

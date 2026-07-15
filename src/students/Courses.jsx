@@ -50,7 +50,31 @@ const Courses = () => {
             const res = await studentLearningApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
             if (res.data?.data) {
                 const pageData = res.data.data;
-                setCourses(pageData.content || []);
+                const rawCourses = pageData.content || [];
+                
+                // Fetch progress for each course in parallel
+                const enriched = await Promise.all(
+                    rawCourses.map(async (course) => {
+                        const slug = course.slug || course.courseSlug || course.courseId;
+                        if (!slug) return course;
+                        try {
+                            const progRes = await studentLearningApi.getCourseProgress(slug);
+                            const prog = progRes.data?.data || {};
+                            return {
+                                ...course,
+                                progressPercentage: prog.progressPercentage ?? course.progressPercentage ?? 0,
+                                completed: prog.completed ?? course.completed ?? false,
+                                totalLessons: prog.totalLessons ?? course.totalLessons ?? 0,
+                                completedLessons: prog.completedLessons ?? course.completedLessons ?? 0,
+                                certificateEligible: prog.certificateEligible ?? false,
+                            };
+                        } catch {
+                            return course;
+                        }
+                    })
+                );
+                
+                setCourses(enriched);
                 setTotalPages(pageData.totalPages || 0);
                 setTotalElements(pageData.totalElements || 0);
             }
@@ -244,6 +268,9 @@ const Courses = () => {
                                                         <FaGlobe size={10} /> {course.language}
                                                     </span>
                                                 )}
+                                                <span className="text-[10px] text-gray-500 font-medium ml-1">
+                                                    {course.totalModules || (course.modules || []).length || 0} Modules • {course.totalLessons || (course.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0) || 0} Lessons
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-500">
                                                 <div className="flex items-center gap-0.5 text-yellow-500">
@@ -266,7 +293,11 @@ const Courses = () => {
                                                 />
                                             </div>
                                             <div className="flex justify-between mt-1.5">
-                                                <span className="text-[10px] text-gray-400">{status.label}</span>
+                                                <span className="text-[10px] text-gray-400">
+                                                    {course.completedLessons != null && course.totalLessons != null
+                                                        ? `${course.completedLessons}/${course.totalLessons} Lessons`
+                                                        : status.label}
+                                                </span>
                                                 <span className="text-[10px] text-gray-400">{Math.round(progress)}% Complete</span>
                                             </div>
                                         </div>

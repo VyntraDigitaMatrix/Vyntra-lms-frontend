@@ -57,7 +57,7 @@ const AllCourses = () => {
     image: course.thumbnailUrl || S1,
     rating: course.averageRating ? course.averageRating.toFixed(1) : "0.0",
     reviews: course.totalRatings || course.reviewCount || 0,
-    lessons: `${course.level || "BEGINNER"} Level`,
+    lessons: `${course.totalModules || (course.modules || []).length || 0} Modules • ${course.totalLessons || (course.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0) || 0} Lessons`,
     desc: course.shortDescription || "",
     price: course.free ? "Free" : (course.discountPrice ? `₹${course.discountPrice}` : (course.actualPrice ? `₹${course.actualPrice}` : (course.displayPrice ? `₹${course.displayPrice}` : ""))),
     oldPrice: course.free ? "" : (course.actualPrice && course.discountPrice ? `₹${course.actualPrice}` : ""),

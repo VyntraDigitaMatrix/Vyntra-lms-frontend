@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { studentLearningApi } from "./auth/api";
+import { useAuth } from "./auth/AuthContext";
 
 import {
     FaStar, FaUser, FaBook, FaClock, FaTrophy,
@@ -11,6 +12,7 @@ import {
     FaGlobe
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
+import InstructorRating from "./components/InstructorRating";
 
 /* ── helpers ── */
 const getLessonTypeIcon = (type) => {
@@ -49,7 +51,8 @@ const ModuleAccordionItem = ({
         if (next && !lessonsLoaded) {
             setLessonsLoading(true);
             try {
-                const fetched = await onFetchLessons(mod.id);
+                const mId = mod.slug ?? mod.moduleId ?? mod.id;
+                const fetched = await onFetchLessons(mId);
                 setLessons(fetched);
                 setLessonsLoaded(true);
             } catch (_) {
@@ -120,7 +123,7 @@ const ModuleAccordionItem = ({
                                 : "";
                             return (
                                 <div
-                                    key={lesson.id}
+                                    key={lesson.slug || lesson.lessonId || lesson.id || li}
                                     onClick={() => handleLessonClick(lesson)}
                                     className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 cursor-pointer transition-colors group
                     ${isActive
@@ -188,9 +191,9 @@ const CurriculumSection = ({ moduleList, courseId, navigate, onFetchLessons }) =
                 </p>
             </div>
             <div className="space-y-2">
-                {moduleList.map((mod) => (
+                {moduleList.map((mod, idx) => (
                     <ModuleAccordionItem
-                        key={mod.id}
+                        key={mod.slug || mod.moduleId || mod.id || idx}
                         mod={mod}
                         courseId={courseId}
                         navigate={navigate}
@@ -210,6 +213,7 @@ const CurriculumSection = ({ moduleList, courseId, navigate, onFetchLessons }) =
 const ContinueLearning = () => {
     const navigate = useNavigate();
     const { courseId } = useParams();
+    const { student } = useAuth();
 
     /* ── Course detail ── */
     const [courseDetails, setCourseDetails] = useState(null);
@@ -223,30 +227,12 @@ const ContinueLearning = () => {
     /* ── UI ── */
     const [activeTab, setActiveTab] = useState("overview");
     const [rating, setRating] = useState(0);
-    const [reviews, setReviews] = useState([
-        {
-            name: "Rajesh Kumar",
-            initial: "R",
-            rating: 5,
-            time: "2 weeks ago",
-            text: "Excellent course! Very detailed and practical examples.",
-        },
-        {
-            name: "Priya Sharma",
-            initial: "P",
-            rating: 4,
-            time: "1 month ago",
-            text: "Great content, very helpful for my career.",
-        },
-        {
-            name: "Amit Patel",
-            initial: "A",
-            rating: 5,
-            time: "2 months ago",
-            text: "Best course I've taken! Highly recommend.",
-        },
-    ]);
-    const [newReview, setNewReview] = useState({ name: "", rating: 5, text: "" });
+    const [reviews, setReviews] = useState([]);
+    const [newReview, setNewReview] = useState({ rating: 0, text: "" });
+    const [hasReviewed, setHasReviewed] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState("");
 
     /* ══════════════════════════════════════════
        FETCH MODULES  (with nested lessons)
@@ -258,8 +244,10 @@ const ContinueLearning = () => {
         setModulesError("");
         try {
             const res = await studentLearningApi.getCourseModules(targetSlug);
-            // API returns { data: { data: [...] } }  OR  { data: [...] }
+            // API returns { data: { data: [...] } } OR { data: { content: [...] } }
             const modules =
+                res.data?.data?.content ||
+                res.data?.content ||
                 res.data?.data ||
                 res.data ||
                 [];
@@ -284,8 +272,14 @@ const ContinueLearning = () => {
             const res = await studentLearningApi.getCourseBySlug(courseId);
             const data = res.data?.data || res.data || null;
             setCourseDetails(data);
-            if (data?.slug) fetchModules(data.slug);
-            else fetchModules(courseId);
+            if (data?.modules && Array.isArray(data.modules) && data.modules.length > 0) {
+                setCourseModules(data.modules);
+                setModulesLoading(false);
+            } else if (data?.slug) {
+                fetchModules(data.slug);
+            } else {
+                fetchModules(courseId);
+            }
         } catch (err) {
             // Fallback: search inside paginated list
             try {
@@ -301,8 +295,14 @@ const ContinueLearning = () => {
                         String(c.slug) === String(courseId)
                 );
                 setCourseDetails(found || null);
-                if (found?.slug) fetchModules(found.slug);
-                else fetchModules(courseId);
+                if (found?.modules && Array.isArray(found.modules) && found.modules.length > 0) {
+                    setCourseModules(found.modules);
+                    setModulesLoading(false);
+                } else if (found?.slug) {
+                    fetchModules(found.slug);
+                } else {
+                    fetchModules(courseId);
+                }
             } catch (fallbackErr) {
                 console.error("fetchCourseDetails fallback error:", fallbackErr);
             }
@@ -339,23 +339,82 @@ const ContinueLearning = () => {
         0
     );
 
-    const handleRatingSubmit = (r) => {
-        alert(`Thank you for rating ${r} stars!`);
-    };
+    useEffect(() => {
+        const slug = courseDetails?.slug;
+        if (!slug) return;
 
-    const handleReviewSubmit = () => {
-        if (!newReview.name || !newReview.text) return;
-        setReviews([
-            {
-                name: newReview.name,
-                initial: newReview.name.charAt(0).toUpperCase(),
-                rating: newReview.rating,
-                time: "Just now",
-                text: newReview.text,
-            },
-            ...reviews,
-        ]);
-        setNewReview({ name: "", rating: 5, text: "" });
+        const loadReviews = async () => {
+            let fetchedList = [];
+            try {
+                const res = await studentLearningApi.getCourseReviews(slug);
+                fetchedList = res.data?.data?.content || res.data?.content || [];
+                setReviews(fetchedList);
+            } catch (err) { console.error(err); }
+
+            try {
+                const myRatingRes = await studentLearningApi.getMyRating(slug);
+                const data = myRatingRes.data?.data;
+                if (data && data.rating) {
+                    setHasReviewed(true);
+                    setNewReview({ rating: data.rating, text: data.review || data.comment || data.reviewText || data.text || "" });
+                    setRating(data.rating);
+                    
+                    // Make sure our review is in the list, or update it if it's there
+                    setReviews(prev => {
+                        const existsIndex = prev.findIndex(r => r.id === data.id || r.studentId === data.studentId);
+                        if (existsIndex >= 0) {
+                            const newList = [...prev];
+                            newList[existsIndex] = { ...newList[existsIndex], ...data };
+                            return newList;
+                        } else {
+                            return [{ ...data, studentName: data.studentName || student?.fullName || "You" }, ...prev];
+                        }
+                    });
+                }
+            } catch (err) { }
+        };
+        loadReviews();
+    }, [courseDetails?.slug]);
+
+    const handleRatingSubmit = async () => {
+        const slug = courseDetails?.slug;
+        if (!slug || rating === 0) return;
+        setIsSubmittingReview(true);
+        setSubmitError("");
+        setSubmitSuccess("");
+        try {
+            const payload = { rating, review: newReview.text };
+            let updatedReview;
+            if (hasReviewed) {
+                const updateRes = await studentLearningApi.updateCourseReview(slug, payload);
+                updatedReview = updateRes.data?.data;
+            } else {
+                const submitRes = await studentLearningApi.submitCourseReview(slug, payload);
+                updatedReview = submitRes.data?.data;
+                setHasReviewed(true);
+            }
+            setSubmitSuccess("Review submitted successfully!");
+            
+            // Re-fetch the public reviews just in case
+            const res = await studentLearningApi.getCourseReviews(slug);
+            let list = res.data?.data?.content || res.data?.content || [];
+            
+            // If our updated review is not in the list (e.g., it's pending), or we just want to ensure it has the latest text
+            if (updatedReview) {
+                const existsIndex = list.findIndex(r => r.id === updatedReview.id || r.studentId === updatedReview.studentId);
+                if (existsIndex >= 0) {
+                    list[existsIndex] = { ...list[existsIndex], ...updatedReview };
+                } else {
+                    list = [updatedReview, ...list];
+                }
+            }
+            setReviews(list);
+            setTimeout(() => setSubmitSuccess(""), 3000);
+        } catch (err) {
+            setSubmitError("Failed to submit review.");
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     const tabs = [
@@ -629,12 +688,32 @@ const ContinueLearning = () => {
                                                     </span>
                                                     <span className="flex items-center gap-1">
                                                         <FaBook className="w-3 h-3" />
-                                                        {instructor.totalCourses || 0} Courses
+                                                        {instructor.totalCourses || instructor.courses?.length || 0} Courses
                                                     </span>
                                                 </div>
-                                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4">
                                                     {instructor.shortBio}
                                                 </p>
+
+                                                {/* Render instructor's other courses if provided by the new API format */}
+                                                {instructor.courses && instructor.courses.length > 0 && (
+                                                    <div className="mb-4">
+                                                        <h5 className="text-xs font-bold text-gray-800 mb-2">Other Courses</h5>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {instructor.courses.map(c => (
+                                                                <Link key={c.courseId} to={`/student/course/${c.slug}`} className="text-[10px] sm:text-xs bg-white border border-blue-100 text-blue-600 px-2 py-1 rounded-md hover:bg-blue-50 transition">
+                                                                    {c.title}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Instructor Rating Component */}
+                                                <InstructorRating
+                                                    courseSlug={courseDetails?.slug || courseId}
+                                                    instructorId={instructor.instructorId}
+                                                />
                                             </div>
                                         </div>
                                     ))}
@@ -647,122 +726,176 @@ const ContinueLearning = () => {
 
                     {/* ── REVIEWS ── */}
                     {activeTab === "reviews" && (
-                        <div>
-                            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-5 bg-amber-50 border border-amber-100 rounded-xl sm:rounded-2xl mb-5 sm:mb-6">
-                                <div className="text-center">
-                                    <div className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-none">
-                                        {courseDetails?.rating || 0}
+                        <div className="max-w-4xl">
+                            {/* ── SUMMARY CARD ── */}
+                            <div className="flex flex-col md:flex-row items-center p-6 md:p-8 bg-[#f8faff] rounded-2xl border border-blue-50 mb-8 shadow-sm">
+                                <div className="text-center md:w-1/3 mb-6 md:mb-0">
+                                    <div className="text-5xl md:text-6xl font-black text-slate-800 leading-none mb-2">
+                                        {Number(courseDetails?.rating || 0).toFixed(1)}
                                     </div>
-                                    <div className="flex justify-center mt-1 sm:mt-2 mb-1">
+                                    <div className="flex justify-center mb-2">
                                         {[1, 2, 3, 4, 5].map((s) => (
-                                            <FaStar key={s} className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                                            <FaStar key={s} className={`w-4 h-4 md:w-5 md:h-5 ${s <= Math.round(courseDetails?.rating || 0) ? "text-[#ffb800]" : "text-gray-300"}`} />
                                         ))}
                                     </div>
-                                    <div className="text-[10px] sm:text-xs text-gray-400">Course Rating</div>
+                                    <div className="text-sm font-medium text-slate-500">{reviews.length} ratings</div>
                                 </div>
-                                <div className="flex-1 space-y-1.5 w-full">
-                                    {[5, 4, 3, 2, 1].map((s) => (
-                                        <div key={s} className="flex items-center gap-2">
-                                            <div className="flex-1 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-yellow-400 rounded-full"
-                                                    style={{
-                                                        width:
-                                                            s === 5
-                                                                ? "70%"
-                                                                : s === 4
-                                                                    ? "20%"
-                                                                    : s === 3
-                                                                        ? "6%"
-                                                                        : "3%",
-                                                    }}
-                                                />
+                                <div className="flex-1 w-full space-y-2.5 px-4 md:px-8 border-t md:border-t-0 md:border-l border-gray-200/60 pt-6 md:pt-0">
+                                    {[5, 4, 3, 2, 1].map((s) => {
+                                        const count = reviews.filter(r => Math.round(r.rating) === s).length;
+                                        const percentage = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0;
+                                        return (
+                                            <div key={s} className="flex items-center gap-4">
+                                                <div className="flex items-center gap-1.5 w-8 text-sm font-semibold text-slate-600">
+                                                    {s} <FaStar className="w-3 h-3 text-[#ffb800]" />
+                                                </div>
+                                                <div className="flex-1 h-2.5 bg-slate-200/70 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-[#ffb800] rounded-full transition-all duration-500"
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                                <div className="w-10 text-right text-xs font-semibold text-slate-400">
+                                                    {percentage}%
+                                                </div>
                                             </div>
-                                            <div className="flex gap-0.5 w-12 sm:w-16 justify-end">
-                                                {Array(s)
-                                                    .fill(0)
-                                                    .map((_, i) => (
-                                                        <FaStar
-                                                            key={i}
-                                                            className="w-2 h-2 sm:w-3 sm:h-3 text-yellow-400"
-                                                        />
-                                                    ))}
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Rate this course */}
-                            <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-5 sm:mb-6">
-                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
-                                    Rate this Course
-                                </h3>
-                                <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-5">
-                                    How would you rate your learning experience?
-                                </p>
-                                <div className="flex items-center gap-1 sm:gap-2 mb-4 sm:mb-5">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            onClick={() => setRating(star)}
-                                            className="transition-transform hover:scale-110"
-                                        >
-                                            <FaStar
-                                                size={24}
-                                                className={`sm:text-3xl ${star <= rating ? "text-yellow-400" : "text-gray-300"
-                                                    }`}
-                                            />
-                                        </button>
-                                    ))}
-                                </div>
-                                <button
-                                    onClick={() => handleRatingSubmit(rating)}
-                                    disabled={!rating}
-                                    className="bg-blue-600 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 disabled:bg-gray-300"
-                                >
-                                    Submit Rating
-                                </button>
-                            </div>
-
-                            {/* Review list */}
-                            <div className="divide-y divide-gray-100">
-                                {reviews.map((r, i) => (
-                                    <div key={i} className="py-4 sm:py-5">
-                                        <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs sm:text-sm flex-shrink-0">
-                                                {r.initial}
+                            {/* ── RATE COURSE CARD ── */}
+                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-10 relative">
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+                                <div className="p-6 md:p-8">
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div className="flex gap-4 items-start">
+                                            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                                                <FaStar className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <div className="font-semibold text-xs sm:text-sm text-gray-900">
-                                                    {r.name}
-                                                </div>
-                                                <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
-                                                    <div className="flex gap-0.5">
-                                                        {Array(5)
-                                                            .fill(0)
-                                                            .map((_, j) => (
-                                                                <FaStar
-                                                                    key={j}
-                                                                    className={`w-2 h-2 sm:w-3 sm:h-3 ${j < r.rating ? "text-yellow-400" : "text-gray-200"
-                                                                        }`}
-                                                                />
-                                                            ))}
-                                                    </div>
-                                                    <span className="text-[10px] sm:text-xs text-gray-400">
-                                                        {r.time}
-                                                    </span>
-                                                </div>
+                                                <h3 className="text-xl font-bold text-slate-800 mb-1">
+                                                    {hasReviewed ? "Update Your Review" : "Write a Review"}
+                                                </h3>
+                                                <p className="text-sm text-slate-500">Help the community with your honest feedback</p>
                                             </div>
                                         </div>
-                                        <p className="text-xs sm:text-sm text-gray-600 pl-10 sm:pl-12">
-                                            {r.text}
-                                        </p>
+                                        {hasReviewed && (
+                                            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100">
+                                                <FaCheckCircle className="w-3 h-3" /> Reviewed
+                                            </div>
+                                        )}
                                     </div>
-                                ))}
+
+                                    {submitError && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg mb-4">{submitError}</div>}
+                                    {submitSuccess && <div className="p-3 bg-emerald-50 text-emerald-600 text-sm rounded-lg mb-4">{submitSuccess}</div>}
+
+                                    <div className="bg-slate-50 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-100">
+                                        <div className="text-sm font-semibold text-slate-700">How would you rate this course?</div>
+                                        <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm">
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        onClick={() => {
+                                                            setRating(star);
+                                                            setNewReview(prev => ({ ...prev, rating: star }));
+                                                        }}
+                                                        className="transition-transform hover:scale-110 focus:outline-none"
+                                                    >
+                                                        <FaStar className={`w-6 h-6 ${star <= rating ? "text-[#ffb800]" : "text-slate-200"}`} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="text-sm font-bold text-slate-800 border-l border-slate-200 pl-4 flex items-center gap-1.5">
+                                                {rating || 0} <span className="text-slate-400 font-normal">/ 5.0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-6">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="text-sm font-semibold text-slate-700">Write your review <span className="text-slate-400 font-normal">(optional)</span></label>
+                                            <span className="text-xs text-slate-400 font-medium">{newReview.text.length}/500</span>
+                                        </div>
+                                        <textarea
+                                            value={newReview.text}
+                                            onChange={(e) => {
+                                                if (e.target.value.length <= 500) setNewReview(prev => ({ ...prev, text: e.target.value }));
+                                            }}
+                                            placeholder="Tell us about your experience..."
+                                            className="w-full text-sm p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none min-h-[120px]"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={handleRatingSubmit}
+                                        disabled={!rating || isSubmittingReview}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 transition shadow-sm shadow-blue-600/20 flex items-center gap-2"
+                                    >
+                                        <FaCheckCircle /> {isSubmittingReview ? "Submitting..." : hasReviewed ? "Update Review" : "Submit Review"}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* ── STUDENT REVIEWS ── */}
+                            <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                                <h3 className="text-xl font-black text-slate-800">Student Reviews</h3>
+                                <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">{reviews.length}</span>
+                            </div>
+
+                            <div className="space-y-4">
+                                {reviews.length === 0 ? (
+                                    <p className="text-sm text-slate-500 py-8 text-center bg-slate-50 rounded-2xl border border-slate-100 border-dashed">No reviews yet. Be the first to review!</p>
+                                ) : (
+                                    reviews.map((r, i) => {
+                                        const isMyReview = r.studentId === student?.id || r.studentName === student?.fullName;
+                                        return (
+                                            <div key={r.id || i} className="bg-[#f8faff] rounded-2xl p-5 md:p-6 border border-blue-50">
+                                                <div className="flex items-start gap-4 mb-3">
+                                                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-lg flex-shrink-0 uppercase shadow-sm">
+                                                        {r.studentName?.charAt(0) || "S"}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                            <div className="font-bold text-slate-800">{r.studentName}</div>
+                                                            {isMyReview && (
+                                                                <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                                                    <FaStar className="w-2.5 h-2.5" /> Your Review
+                                                                </span>
+                                                            )}
+                                                            {r.approved === false && (
+                                                                <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Pending Approval
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex gap-0.5">
+                                                                {Array(5).fill(0).map((_, j) => (
+                                                                    <FaStar key={j} className={`w-3 h-3 ${j < r.rating ? "text-[#ffb800]" : "text-slate-200"}`} />
+                                                                ))}
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-600">{Number(r.rating || 0).toFixed(1)}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {(r.review || r.comment || r.reviewText || r.text) && (
+                                                    <p className="text-sm text-slate-600 leading-relaxed pl-14 mb-2">
+                                                        {r.review || r.comment || r.reviewText || r.text}
+                                                    </p>
+                                                )}
+                                                <div className="text-[11px] font-medium text-slate-400 pl-14">
+                                                    {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Just now"}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
                             </div>
                         </div>
                     )}
+
 
                     {/* ── FAQs ── */}
                     {activeTab === "faqs" && (

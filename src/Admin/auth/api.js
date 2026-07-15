@@ -141,4 +141,36 @@ export const adminCourseApi = {
   getModuleLessons: (moduleId) => api.get(`/api/admin/lessons/modules/${moduleId}?page=0&size=100`),
 };
 
+export const discussionApi = {
+  getGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups?page=${page}&size=${size}`),
+
+  getMyGroups: (page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/my?page=${page}&size=${size}`),
+
+  getCourseGroup: (courseId) =>
+    api.post(`/api/discussions/groups/course/${courseId}`),
+
+  joinGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/join`),
+
+  leaveGroup: (slug) =>
+    api.post(`/api/discussions/groups/${slug}/leave`),
+
+  getGroupMembers: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/members?page=${page}&size=${size}`),
+
+  getMessages: (slug, page = 0, size = 10) =>
+    api.get(`/api/discussions/groups/${slug}/messages?page=${page}&size=${size}`),
+
+  sendMessage: (slug, payload) =>
+    api.post(`/api/discussions/groups/${slug}/messages`, payload),
+
+  markMessageAsSeen: (messageId) =>
+    api.post(`/api/discussions/messages/${messageId}/seen`),
+
+  deleteMessage: (messageId) =>
+    api.delete(`/api/discussions/messages/${messageId}`)
+};
+
 export default api;

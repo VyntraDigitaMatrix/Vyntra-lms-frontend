@@ -18,6 +18,8 @@ import {
     FaPlayCircle,
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
+import { HiOutlineLightBulb, HiOutlineArrowRight } from "react-icons/hi";
+import InstructorRating from "./components/InstructorRating";
 import { IoCartOutline } from "react-icons/io5";
 
 /* ── Stable lesson durations ── */
@@ -77,13 +79,15 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
         const canAccess = isEnrolled || lesson.previewAllowed;
         if (!canAccess) return;
 
-        const lessonKey = `${mod.id}-${lesson.id}`;
+        const mId = mod.slug ?? mod.moduleId ?? mod.id;
+        const lId = lesson.slug ?? lesson.lessonId ?? lesson.id;
+        const lessonKey = `${mId}-${lId}`;
         setActiveLesson(lessonKey);
 
         if (isEnrolled) {
-            navigate(`/student/course/${courseId}/module/${mod.id}/lesson/${lesson.id}`);
+            navigate(`/student/course/${courseId}/module/${mId}/lesson/${lId}`);
         } else {
-            navigate(`/student/module/${mod.id}/lesson/${lesson.id}`);
+            navigate(`/student/module/${mId}/lesson/${lId}`);
         }
     };
 
@@ -178,7 +182,7 @@ const CurriculumSection = ({ modules, isEnrolled, courseId, navigate }) => {
             <div className="space-y-2">
                 {modules.map((mod, i) => (
                     <ModuleAccordionItem
-                        key={mod.id || i}
+                        key={mod.slug || mod.moduleId || mod.id || i}
                         mod={mod}
                         index={i}
                         navigate={navigate}
@@ -801,7 +805,29 @@ const ViewCourse = () => {
                                                             )}
                                                         </div>
                                                         {inst.shortBio && (
-                                                            <p className="text-xs text-gray-600 leading-relaxed pt-1">{inst.shortBio}</p>
+                                                            <p className="text-xs text-gray-600 leading-relaxed pt-1 mb-3">{inst.shortBio}</p>
+                                                        )}
+                                                        
+                                                        {/* Render instructor's other courses if provided by the new API format */}
+                                                        {inst.courses && inst.courses.length > 0 && (
+                                                            <div className="mb-3">
+                                                                <h5 className="text-[11px] font-bold text-gray-800 mb-1.5">Other Courses</h5>
+                                                                <div className="flex flex-wrap gap-1.5">
+                                                                    {inst.courses.map(c => (
+                                                                        <Link key={c.courseId} to={`/student/course/${c.slug}`} className="text-[9px] bg-white border border-blue-100 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-50 transition">
+                                                                            {c.title}
+                                                                        </Link>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {/* Instructor Rating Component (Only if enrolled) */}
+                                                        {course.isEnrolled && (
+                                                            <InstructorRating 
+                                                                courseSlug={courseSlug} 
+                                                                instructorId={inst.instructorId} 
+                                                            />
                                                         )}
                                                     </div>
                                                 </div>
