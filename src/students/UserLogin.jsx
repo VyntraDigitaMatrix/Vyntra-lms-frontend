@@ -10,7 +10,7 @@ import logo from "../assets/logo-plain.jpg";
 import logoImage from "../assets/logo-image2.jpg";
 
 const FEATURES = [
-  { Icon: MdSchool, title: "Expert-Led Courses", desc: "Learn from industry experts with hands-on courses.", color: "bg-blue-50 text-blue-600" },
+  { Icon: MdSchool, title: "Expert-Led Courses", desc: "Learn from industry experts with hands-on courses.", color: "bg-blue-50 text-[#043573]" },
   { Icon: MdWork, title: "Real-World Projects", desc: "Build projects that showcase your skills.", color: "bg-indigo-50 text-indigo-600" },
   { Icon: MdRocketLaunch, title: "Career Advancement", desc: "Get hired faster with our career resources.", color: "bg-blue-50 text-blue-700" },
 ];
@@ -27,7 +27,7 @@ function Field({ icon: Icon, type = "text", placeholder, value, onChange, right 
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
+        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-[#043573] focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
       />
       {right && (
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center">{right}</span>
@@ -36,6 +36,7 @@ function Field({ icon: Icon, type = "text", placeholder, value, onChange, right 
   );
 }
 
+/* ── Left branding panel ─────────────────────────────── */
 /* ── Left branding panel ─────────────────────────────── */
 function BrandPanel({ isSignUp }) {
   return (
@@ -52,7 +53,7 @@ function BrandPanel({ isSignUp }) {
 
       {/* Badge */}
       <div className="relative z-10 mb-2 lg:mb-3">
-        <span className="inline-flex items-center gap-2 px-3 lg:px-4 py-1 lg:py-1.5 bg-white/80 backdrop-blur-sm border border-blue-100 rounded-full text-xs font-semibold text-blue-700 shadow-sm">
+        <span className="inline-flex items-center gap-2 px-3 lg:px-4 py-1 lg:py-1.5 bg-white/80 backdrop-blur-sm border border-blue-100 rounded-full text-xs font-semibold text-[#043573] shadow-sm">
           {isSignUp ? "🚀 Create Account!" : "👋 Welcome Back!"}
         </span>
       </div>
@@ -62,7 +63,7 @@ function BrandPanel({ isSignUp }) {
         <h2 className="text-2xl lg:text-3xl font-black text-gray-900 leading-tight">
           {isSignUp ? "Start Your" : "Continue Your"}
           <br />
-          <span className="text-blue-600">Learning</span>{" "}
+          <span className="text-[#043573]">Learning</span>{" "}
           <span className="text-amber-500">Journey</span>
         </h2>
         <p className="text-xs lg:text-sm text-gray-500 mt-2 lg:mt-3 leading-relaxed max-w-xs">
@@ -73,11 +74,11 @@ function BrandPanel({ isSignUp }) {
       </div>
 
       {/* Feature list - hidden on mobile, shown on desktop */}
-      <div className="hidden lg:flex relative z-10 flex-col gap-3 mb-4">
+      <div className="hidden lg:flex relative z-10 flex-col gap-3 mb-6">
         {FEATURES.map((f) => (
           <div key={f.title} className="flex items-start gap-3 p-2 rounded-xl transition">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${f.color}`}>
-              <f.Icon className="text-xl" />
+              <f.Icon className="text-xl text-[#043573]" />
             </div>
             <div>
               <p className="text-sm font-bold text-gray-800">{f.title}</p>
@@ -87,8 +88,8 @@ function BrandPanel({ isSignUp }) {
         ))}
       </div>
 
-      {/* Illustration - Settled into background with better positioning */}
-      <div className="relative flex-1 min-h-[150px] lg:min-h-[180px] mt-1 lg:mt-2">
+      {/* Illustration - Increased gap with more top padding */}
+      <div className="relative flex-1 min-h-[120px] lg:min-h-[150px] mt-4 lg:mt-6 hidden md:block">
         {/* Decorative dots grid - top right */}
         <div className="absolute top-0 lg:top-2 right-4 lg:right-8 grid grid-cols-3 lg:grid-cols-4 gap-1.5 lg:gap-2 z-20">
           {Array.from({ length: 12 }).map((_, i) => (
@@ -99,12 +100,12 @@ function BrandPanel({ isSignUp }) {
           ))}
         </div>
 
-        {/* Decorative circles behind image */}
-        <div className="absolute -right-10 -bottom-10 w-40 lg:w-56 h-40 lg:h-56 rounded-full bg-blue-200/40 z-0" />
-        <div className="absolute left-10 lg:left-20 top-5 lg:top-10 w-20 lg:w-32 h-20 lg:h-32 rounded-full bg-indigo-200/30 z-0" />
+        {/* Decorative circles behind image - adjusted positioning */}
+        <div className="absolute -right-10 -bottom-10 w-40 lg:w-48 h-40 lg:h-48 rounded-full bg-blue-200/40 z-0" />
+        <div className="absolute left-10 lg:left-16 top-5 lg:top-8 w-20 lg:w-28 h-20 lg:h-28 rounded-full bg-indigo-200/30 z-0" />
 
-        {/* Image positioned at bottom center-left with increased width and moved up */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 w-[80%] lg:w-[65%] max-w-[320px] lg:max-w-[420px] z-10">
+        {/* Image - positioned with more bottom padding for extra gap */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 w-[65%] lg:w-[50%] max-w-[250px] lg:max-w-[320px] z-10 pb-2">
           <img
             src={logoImage}
             alt="Learning Illustration"
@@ -113,7 +114,7 @@ function BrandPanel({ isSignUp }) {
         </div>
 
         {/* Bottom gradient fade for better integration */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 lg:h-20 bg-gradient-to-t from-blue-50/80 to-transparent z-5" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 lg:h-16 bg-gradient-to-t from-blue-50/80 to-transparent z-5" />
       </div>
 
       {/* Footer - hidden on mobile */}
@@ -123,7 +124,6 @@ function BrandPanel({ isSignUp }) {
     </div>
   );
 }
-
 /* ── Shared UI pieces ────────────────────────────────── */
 function OrDivider() {
   return (
@@ -148,7 +148,7 @@ function GoogleBtn({ onClick }) {
 function PrimaryBtn({ onClick, disabled, children }) {
   return (
     <button onClick={onClick} disabled={disabled}
-      className="w-full py-3 lg:py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold rounded-lg transition shadow-sm shadow-blue-200 flex items-center justify-center gap-2">
+      className="w-full py-3 lg:py-3 bg-[#043573]/80 hover:bg-[#043573] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold rounded-lg transition shadow-sm shadow-blue-200 flex items-center justify-center gap-2">
       {children}
     </button>
   );
@@ -267,10 +267,10 @@ const UserLogin = () => {
 
                 <div className="flex items-center justify-between mb-6 lg:mb-7 mt-2">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-blue-600" />
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#043573]" />
                     <span className="text-xs text-gray-600">Remember me</span>
                   </label>
-                  <Link to="/ForgotPassword" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">Forgot Password?</Link>
+                  <Link to="/ForgotPassword" className="text-xs font-semibold text-[#043573] hover:text-[#043573] transition">Forgot Password?</Link>
                 </div>
 
                 <PrimaryBtn onClick={handleSignIn} disabled={loading}>
@@ -282,7 +282,7 @@ const UserLogin = () => {
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Don't have an account?{" "}
-                  <button onClick={() => switchTo(true)} className="text-blue-600 font-bold hover:underline">Sign Up</button>
+                  <button onClick={() => switchTo(true)} className="text-[#043573] font-bold hover:underline">Sign Up</button>
                 </p>
                 <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
                   <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
@@ -330,12 +330,12 @@ const UserLogin = () => {
 
                 <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5">
                   <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-blue-600 flex-shrink-0" />
+                    className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
                   <span className="text-xs text-gray-600 leading-relaxed">
                     I agree to the{" "}
-                    <Link to="/terms" className="text-blue-600 font-semibold hover:underline">Terms of Service</Link>
+                    <Link to="/terms" className="text-[#043573] font-semibold hover:underline">Terms of Service</Link>
                     {" "}and{" "}
-                    <Link to="/privacy" className="text-blue-600 font-semibold hover:underline">Privacy Policy</Link>
+                    <Link to="/privacy" className="text-[#043573] font-semibold hover:underline">Privacy Policy</Link>
                   </span>
                 </label>
 
@@ -348,7 +348,7 @@ const UserLogin = () => {
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Already have an account?{" "}
-                  <button onClick={() => switchTo(false)} className="text-blue-600 font-bold hover:underline">Sign In</button>
+                  <button onClick={() => switchTo(false)} className="text-[#043573] font-bold hover:underline">Sign In</button>
                 </p>
                 <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
                   <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
@@ -374,7 +374,7 @@ const UserLogin = () => {
             const active = i === 0 ? !isSignUp : isSignUp;
             return (
               <button key={label} onClick={() => switchTo(i === 1)}
-                className={`flex-1 py-3.5 text-sm font-bold transition border-b-2 ${active ? "border-blue-600 text-blue-600" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
+                className={`flex-1 py-3.5 text-sm font-bold transition border-b-2 ${active ? "border-[#043573] text-[#043573]" : "border-transparent text-gray-400 hover:text-gray-600"}`}>
                 {label}
               </button>
             );
@@ -384,12 +384,12 @@ const UserLogin = () => {
         <div className="flex-1 px-5 py-5 overflow-y-auto">
           {/* Mobile Welcome Section */}
           <div className="mb-5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-xs font-semibold text-blue-700 mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-xs font-semibold text-[#043573] mb-3">
               {isSignUp ? "🚀 Create Account!" : "👋 Welcome Back!"}
             </span>
             <h2 className="text-xl font-black text-gray-900 mb-1">
               {isSignUp ? "Start Your" : "Continue Your"}{" "}
-              <span className="text-blue-600">Learning</span>{" "}
+              <span className="text-[#043573]">Learning</span>{" "}
               <span className="text-amber-500">Journey</span>
             </h2>
             <p className="text-xs text-gray-500 leading-relaxed">
@@ -397,14 +397,7 @@ const UserLogin = () => {
             </p>
           </div>
 
-          {/* Mobile Image - Full width */}
-          <div className="mb-5 -mx-5">
-            <img
-              src={logoImage}
-              alt="Learning Illustration"
-              className="w-full h-auto object-contain"
-            />
-          </div>
+          {/* Mobile Image - HIDDEN ON MOBILE (removed) */}
 
           {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">{error}</div>}
 
@@ -422,15 +415,15 @@ const UserLogin = () => {
               </div>
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-blue-600" />
+                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#043573]" />
                   <span className="text-xs text-gray-600">Remember me</span>
                 </label>
-                <Link to="/ForgotPassword" className="text-xs font-semibold text-blue-600">Forgot Password?</Link>
+                <Link to="/ForgotPassword" className="text-xs font-semibold text-[#043573]">Forgot Password?</Link>
               </div>
               <PrimaryBtn onClick={handleSignIn} disabled={loading}>{loading ? "Signing In…" : "Sign In"}</PrimaryBtn>
               <OrDivider />
               <GoogleBtn onClick={googleLogin} />
-              <p className="text-center text-xs text-gray-500">Don't have an account? <button onClick={() => switchTo(true)} className="text-blue-600 font-bold">Sign Up</button></p>
+              <p className="text-center text-xs text-gray-500">Don't have an account? <button onClick={() => switchTo(true)} className="text-[#043573] font-bold">Sign Up</button></p>
             </div>
           ) : (
             <div className="flex flex-col gap-3.5">
@@ -455,13 +448,13 @@ const UserLogin = () => {
                   right={<button type="button" onClick={() => setShowConfPwd(v => !v)} className="text-gray-400 hover:text-gray-600 transition">{showConfPwd ? <FaEyeSlash /> : <FaEye />}</button>} />
               </div>
               <label className="flex items-start gap-2.5 cursor-pointer">
-                <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-blue-600 flex-shrink-0" />
-                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <Link to="/terms" className="text-blue-600 font-semibold">Terms of Service</Link> and <Link to="/privacy" className="text-blue-600 font-semibold">Privacy Policy</Link></span>
+                <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
+                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <Link to="/terms" className="text-[#043573] font-semibold">Terms of Service</Link> and <Link to="/privacy" className="text-[#043573] font-semibold">Privacy Policy</Link></span>
               </label>
               <PrimaryBtn onClick={handleSignUp} disabled={loading}>{loading ? "Creating Account…" : "Create Account"}</PrimaryBtn>
               <OrDivider />
               <GoogleBtn onClick={googleLogin} />
-              <p className="text-center text-xs text-gray-500">Already have an account? <button onClick={() => switchTo(false)} className="text-blue-600 font-bold">Sign In</button></p>
+              <p className="text-center text-xs text-gray-500">Already have an account? <button onClick={() => switchTo(false)} className="text-[#043573] font-bold">Sign In</button></p>
             </div>
           )}
 

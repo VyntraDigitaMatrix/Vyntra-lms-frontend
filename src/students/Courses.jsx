@@ -13,7 +13,7 @@ import S1 from "../assets/S1.jpg";
 /* ── Status badge helper ── */
 const getStatusInfo = (progress, completed) => {
     if (completed) return { label: "Completed", color: "text-emerald-600 bg-emerald-50 border-emerald-200", bar: "bg-emerald-500" };
-    if (progress > 0) return { label: "In Progress", color: "text-blue-600 bg-blue-50 border-blue-200", bar: "bg-blue-500" };
+    if (progress > 0) return { label: "In Progress", color: "text-[#043573] bg-blue-50 border-blue-200", bar: "bg-blue-500" };
     return { label: "Not Started", color: "text-gray-500 bg-gray-50 border-gray-200", bar: "bg-gray-300" };
 };
 
@@ -44,6 +44,7 @@ const Courses = () => {
     const PAGE_SIZE = 12;
 
     const fetchCourses = useCallback(async () => {
+<<<<<<< Updated upstream
         setLoading(true);
         setError("");
         try {
@@ -83,8 +84,44 @@ const Courses = () => {
             setError("Failed to load your courses. Please try again.");
         } finally {
             setLoading(false);
+=======
+    setLoading(true);
+    setError("");
+    try {
+        const res = await studentLearningApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
+        if (res.data?.data) {
+            const pageData = res.data.data;
+            const baseCourses = pageData.content || [];
+            setCourses(baseCourses);
+            setTotalPages(pageData.totalPages || 0);
+            setTotalElements(pageData.totalElements || 0);
+
+            // The list endpoint's progress fields can be stale — fetch live
+            // progress per course (same endpoint ModuleLesson uses) and merge in.
+            const liveProgress = await Promise.allSettled(
+                baseCourses.map(c => studentLearningApi.getCourseProgress(c.slug))
+            );
+
+            setCourses(prev => prev.map((c, i) => {
+                const result = liveProgress[i];
+                if (result.status !== "fulfilled") return c;
+                const data = result.value.data?.data;
+                if (!data) return c;
+                return {
+                    ...c,
+                    progressPercentage: data.progressPercentage,
+                    completed: data.completed,
+                };
+            }));
+>>>>>>> Stashed changes
         }
-    }, [currentPage]);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load your courses. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+}, [currentPage]);
 
     useEffect(() => { fetchCourses(); }, [fetchCourses]);
 
@@ -92,8 +129,8 @@ const Courses = () => {
 
     const filteredCourses = useMemo(() => {
         return courses.filter((c) => {
-            const title = (c.courseTitle || "").toLowerCase();
-            const instructor = (c.instructorName || "").toLowerCase();
+           const title = (c.title || "").toLowerCase();
+            const instructor = (c.instructorNames || []) .join(", ").toLowerCase();
             const query = searchTerm.toLowerCase();
             const matchesSearch = title.includes(query) || instructor.includes(query);
 
@@ -137,7 +174,7 @@ const Courses = () => {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${activeTab === tab
-                                        ? "bg-blue-600 text-white shadow-sm"
+                                        ? "bg-[#043573] text-white shadow-sm"
                                         : "text-gray-500 hover:bg-gray-100"
                                         }`}
                                 >
@@ -163,7 +200,7 @@ const Courses = () => {
                 {/* ── Stats Cards ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                     {[
-                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-blue-600 bg-blue-50" },
+                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-[#043573] bg-blue-50" },
                         { label: "In Progress", value: stats.inProgress, icon: FaPlay, color: "text-amber-600 bg-amber-50" },
                         { label: "Completed", value: stats.completed, icon: FaTrophy, color: "text-emerald-600 bg-emerald-50" },
                         { label: "Not Started", value: stats.notStarted, icon: FaGraduationCap, color: "text-gray-500 bg-gray-50" },
@@ -198,7 +235,7 @@ const Courses = () => {
                 ) : filteredCourses.length === 0 ? (
                     <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-sm">
                         <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                            <FaBookOpen className="text-blue-400 text-2xl" />
+                            <FaBookOpen className="text-[#043573]/80 text-2xl" />
                         </div>
                         <h3 className="text-base font-bold text-gray-900 mb-1">
                             {searchTerm || activeTab !== "All" ? "No courses match your filters" : "No enrolled courses yet"}
@@ -211,7 +248,7 @@ const Courses = () => {
                         {(!searchTerm && activeTab === "All") && (
                             <Link
                                 to="/student/all-courses"
-                                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition"
+                                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[#043573] text-white text-xs font-bold hover:bg-blue-700 transition"
                             >
                                 Browse Courses
                             </Link>
@@ -223,23 +260,27 @@ const Courses = () => {
                             const progress = course.progressPercentage || 0;
                             const status = getStatusInfo(progress, course.completed);
                             const thumbnail = course.thumbnailUrl || S1;
-                            const courseId = course.courseId;
+                            const courseSlug = course.slug;
 
                             return (
                                 <div
+<<<<<<< Updated upstream
                                     key={course.courseId || course.slug || course.id}
+=======
+                                    key={course.courseId}
+>>>>>>> Stashed changes
                                     className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col"
                                 >
                                     {/* Thumbnail */}
                                     <div className="relative">
                                         <img
                                             src={thumbnail}
-                                            alt={course.courseTitle}
+                                          alt={course.title}
                                             className="w-full h-[130px] object-cover"
                                             onError={(e) => { e.target.src = S1; }}
                                         />
                                         {/* Progress badge */}
-                                        <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                                        <span className="absolute top-2.5 right-2.5 bg-[#043573] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
                                             {Math.round(progress)}%
                                         </span>
                                         {/* Status pill */}
@@ -251,11 +292,19 @@ const Courses = () => {
                                     {/* Content */}
                                     <div className="p-4 flex flex-col flex-1">
                                         <div className="flex-1">
+<<<<<<< Updated upstream
                                             <h2 className="font-bold text-gray-900 text-sm leading-snug mb-1 line-clamp-2 min-h-[40px]">
                                                 {course.title || course.courseTitle}
                                             </h2>
                                             <p className="text-[11px] text-gray-500 mb-1 line-clamp-1">
                                                 By {course.instructorNames?.join(", ") || course.instructorName || "Instructor"}
+=======
+                                            <h2 className="font-bold text-gray-900 text-sm leading-snug mb-1 line-clamp-2">
+                                               {course.title}
+                                            </h2>
+                                            <p className="text-[11px] text-gray-500 mb-1">
+                                               By {course.instructorNames?.join(", ") || "Instructor"}
+>>>>>>> Stashed changes
                                             </p>
                                             <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                                 {course.level && (
@@ -304,12 +353,16 @@ const Courses = () => {
 
                                         {/* CTA Button */}
                                         <button
+<<<<<<< Updated upstream
                                             onClick={() => navigate(`/student/continue-learning/${course.slug || courseId}`)}
+=======
+                                            onClick={() => navigate(`/student/continue-learning/${courseSlug}`)}
+>>>>>>> Stashed changes
                                             className={`w-full mt-3 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${course.completed
                                                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                                                 : progress > 0
-                                                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                    : "border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white"
+                                                    ? "bg-[#043573] text-white hover:bg-blue-700"
+                                                    : "border border-blue-200 text-[#043573] hover:bg-[#043573] hover:text-white"
                                                 }`}
                                         >
                                             {course.completed ? (
@@ -342,7 +395,7 @@ const Courses = () => {
                                 key={i}
                                 onClick={() => setCurrentPage(i)}
                                 className={`w-9 h-9 rounded-xl text-xs font-bold transition ${i === currentPage
-                                    ? "bg-blue-600 text-white"
+                                    ? "bg-[#043573] text-white"
                                     : "border border-gray-200 text-gray-600 hover:bg-gray-50"
                                     }`}
                             >

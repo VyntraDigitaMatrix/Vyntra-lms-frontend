@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo  } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { studentEnrolledCourseApi, studentAssignmentApi, studentQuizApi, studentLearningApi } from "./auth/api";
 import {
@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { MdOutlineQuiz, MdAssignment, MdInfoOutline, MdCloudUpload } from "react-icons/md";
+
 
 /* NOTE COLORS CONFIG */
 const NOTE_COLORS = [
@@ -114,7 +115,7 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
             <div className="fixed inset-0 bg-black/20 z-40 sm:hidden" onClick={onClose} />
             <div className={panelClass}>
                 {/* Header */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#043573] to-indigo-600 rounded-t-2xl flex-shrink-0">
                     <FaStickyNote className="text-white text-sm" />
                     <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-white leading-none">My Notes</p>
@@ -134,7 +135,7 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                     {/* Notes List Sidebar */}
                     <div className="w-36 sm:w-44 border-r border-gray-100 flex flex-col bg-gray-50 flex-shrink-0">
                         <div className="px-2.5 py-2 border-b border-gray-100">
-                            <button onClick={createNote} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+                            <button onClick={createNote} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#043573] hover:bg-blue-700 text-white text-xs font-bold transition">
                                 <FaPlus className="text-[9px]" /> New Note
                             </button>
                         </div>
@@ -178,7 +179,7 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                                     <p className="text-sm font-bold text-gray-700 mb-1">Start taking notes</p>
                                     <p className="text-xs text-gray-400">Create a new note or select one from the list.</p>
                                 </div>
-                                <button onClick={createNote} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition">
+                                <button onClick={createNote} className="flex items-center gap-1.5 px-4 py-2 bg-[#043573] hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition">
                                     <FaPlus className="text-[9px]" /> Create First Note
                                 </button>
                             </div>
@@ -209,13 +210,13 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                                         { icon: <FaListOl />, action: "number", tip: "Numbered list" },
                                     ].map(({ icon, action, tip }) => (
                                         <button key={action} onClick={() => insertFormat(action)} title={tip}
-                                            className="w-6 h-6 flex items-center justify-center rounded text-[10px] text-gray-500 hover:bg-blue-100 hover:text-blue-600 transition">
+                                            className="w-6 h-6 flex items-center justify-center rounded text-[10px] text-gray-500 hover:bg-blue-100 hover:text-[#043573] transition">
                                             {icon}
                                         </button>
                                     ))}
                                     <div className="flex-1" />
                                     <button onClick={saveNote}
-                                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${savedFlash ? "bg-green-100 text-green-600" : "bg-blue-600 text-white hover:bg-blue-700"}`}>
+                                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${savedFlash ? "bg-green-100 text-green-600" : "bg-[#043573] text-white hover:bg-blue-700"}`}>
                                         {savedFlash ? <><FaCheck className="text-[8px]" /> Saved!</> : <><FaSave className="text-[8px]" /> Save</>}
                                     </button>
                                 </div>
@@ -534,6 +535,7 @@ const getLessonIcon = (type) => {
     const t = (type || "").toLowerCase();
     if (t === "quiz") return "quiz";
     if (t === "assignment") return "assignment";
+    if (t === "pdf" || t === "document") return "pdf";
     if (t === "text" || t === "article") return "text";
     return "video";
 };
@@ -548,18 +550,62 @@ const stripHtml = (html) => {
    MAIN MODULE LESSON COMPONENT
 ══════════════════════════════════════════════════════════════ */
 const ModuleLesson = () => {
-    const { courseId, moduleId, lessonId } = useParams();
+   const { lessonSlug: lessonId, courseId: courseSlug, moduleSlug: moduleId } = useParams();
     const navigate = useNavigate();
+
+// resolved course UUID (backend needs the UUID, the URL only has the slug)
+const [courseId, setCourseId] = useState(null);
+const [courseDetails, setCourseDetails] = useState(null);
+const [courseResolving, setCourseResolving] = useState(true);
+const lastResolvedSlugRef = useRef(null);
+
+useEffect(() => {
+    if (!courseSlug) return;
+    if (courseDetails && courseSlug === lastResolvedSlugRef.current) return;
+
+    const cached = sessionStorage.getItem(`courseDetails:${courseSlug}`);
+    if (cached) {
+        try {
+            const data = JSON.parse(cached);
+            setCourseId(data.courseId || data.id || null);
+            setCourseDetails(data);
+            lastResolvedSlugRef.current = courseSlug;
+            setCourseResolving(false);
+            return;
+        } catch { /* fall through to fetch */ }
+    }
+
+    setCourseResolving(true);
+    studentLearningApi.getCourseBySlug(courseSlug)
+        .then(res => {
+            const data = res.data?.data || res.data;
+            setCourseId(data?.courseId || data?.id || null);
+            setCourseDetails(data || null);
+            if (data) sessionStorage.setItem(`courseDetails:${courseSlug}`, JSON.stringify(data));
+            lastResolvedSlugRef.current = courseSlug;
+        })
+        .catch(err => {
+            console.error("resolve course slug -> id failed:", err);
+            setCourseId(null);
+            setCourseDetails(null);
+        })
+        .finally(() => setCourseResolving(false));
+}, [courseSlug]);
 
     /* ══════════════════════════════════════════
        STATE
     ══════════════════════════════════════════ */
-    const [allModules, setAllModules] = useState([]);
-    const [modulesLoading, setModulesLoading] = useState(true);
+    const allModules = courseDetails?.modules || [];
+    const modulesLoading = courseResolving;
 
     const [lessonData, setLessonData] = useState(null);
     const [lessonLoading, setLessonLoading] = useState(true);
     const [lessonError, setLessonError] = useState("");
+
+   const [currentLessonSlug, setCurrentLessonSlug] = useState(null);
+const [completing, setCompleting] = useState(false);
+const [completeError, setCompleteError] = useState("");
+const [courseProgressPct, setCourseProgressPct] = useState(null);
 
     // ── NEW: quiz data for current lesson (if type === quiz) ──
     const [quizData, setQuizData] = useState(null);
@@ -581,6 +627,7 @@ const ModuleLesson = () => {
     /* ══════════════════════════════════════════
        FETCH MODULES (sidebar)
     ══════════════════════════════════════════ */
+<<<<<<< Updated upstream
     const fetchModules = useCallback(async () => {
         if (!courseId || courseId === "undefined") return;
         setModulesLoading(true);
@@ -690,18 +737,39 @@ const ModuleLesson = () => {
             console.warn("Could not fetch course progress:", progErr);
         }
     }, []);
+=======
+      useEffect(() => {
+        if (!courseDetails?.modules) return;
+         console.log("MODULE LESSON SAMPLE:", courseDetails.modules[0]?.lessons?.[0]);
+        const cache = {};
+        courseDetails.modules.forEach(m => {
+            if (Array.isArray(m.lessons) && m.lessons.length > 0) {
+                cache[String(m.moduleId)] = m.lessons;
+            }
+        });
+        if (Object.keys(cache).length > 0) {
+            setModuleLessonsCache(prev => ({ ...cache, ...prev }));
+        }
+    }, [courseDetails]);
+>>>>>>> Stashed changes
 
     /* ══════════════════════════════════════════
        FETCH LESSONS + ASSIGNMENTS + QUIZZES FOR A MODULE
        Called lazily on accordion expand
     ══════════════════════════════════════════ */
     const fetchModuleLessons = useCallback(async (mId) => {
+        if (!courseId) return;
         const key = String(mId);
         if (loadingModuleLessons[key] || mId === "undefined") return;
+
+        // Lessons are already embedded in courseDetails.modules — no fetch needed
+        const mod = allModules.find(m => String(m.moduleId) === key);
+        const lessons = mod?.lessons || [];
 
         setLoadingModuleLessons(prev => ({ ...prev, [key]: true }));
 
         try {
+<<<<<<< Updated upstream
             // Locate the module object to extract its identifier
             const modObj = allModules.find(m => String(m.slug) === key || String(m.id) === key || String(m.moduleId) === key);
             // Assignments API needs a UUID (moduleId/id), NOT the slug
@@ -741,18 +809,26 @@ const ModuleLesson = () => {
                 lessonRes.data?.content ||
                 lessonRes.data?.data ||
                 lessonRes.data || [];
+=======
+            const [assignmentRes, quizRes] = await Promise.allSettled([
+                studentAssignmentApi.getAssignmentsByModule(mId),
+                studentQuizApi.getQuizzes(),
+            ]);
 
-            const assignments =
-                assignmentRes.data?.data?.content ||
-                assignmentRes.data?.content ||
-                assignmentRes.data?.data || [];
+>>>>>>> Stashed changes
 
-            // Support both paginated and plain-array quiz responses
-            const allQuizzes =
-                quizRes.data?.data?.content ||
-                quizRes.data?.content ||
-                quizRes.data?.data ||
-                quizRes.data || [];
+
+const assignments = assignmentRes.status === "fulfilled"
+    ? (assignmentRes.value.data?.data?.content || assignmentRes.value.data?.content || assignmentRes.value.data?.data || [])
+    : [];
+
+const allQuizzes = quizRes.status === "fulfilled"
+    ? (quizRes.value.data?.data?.content || quizRes.value.data?.content || quizRes.value.data?.data || quizRes.value.data || [])
+    : [];
+
+if (assignmentRes.status === "rejected") {
+    console.error("assignments failed (non-fatal):", assignmentRes.reason);
+}
 
             // Filter quizzes that belong to this module.
             // Adjust the field name (moduleId / module_id) to match your API response shape.
@@ -793,12 +869,18 @@ const ModuleLesson = () => {
     /* ══════════════════════════════════════════
        FETCH CURRENT LESSON
     ══════════════════════════════════════════ */
+<<<<<<< Updated upstream
     const fetchLesson = useCallback(async () => {
         if (!courseId || !lessonId || lessonId === "undefined") return;
+=======
+   const fetchLesson = useCallback(async () => {
+        if (!courseId || !lessonId) return;
+>>>>>>> Stashed changes
         setLessonLoading(true);
         setLessonError("");
         setQuizData(null);
         try {
+<<<<<<< Updated upstream
             // Updated to use studentLearningApi with lessonId (slug or UUID)
             const res = await studentLearningApi.getLessonById(lessonId);
             const data = res.data?.data || res.data || null;
@@ -817,6 +899,24 @@ const ModuleLesson = () => {
                 }
             }
             setLessonData(enrichedData);
+=======
+            // Prefer the slug-based endpoint (confirmed working) — find the
+            // lesson's slug from data already loaded in courseDetails.
+            const mod = allModules.find(m => String(m.slug) === String(moduleId));
+const lessonMeta = mod?.lessons?.find(l => String(l.slug) === String(lessonId));
+            setCurrentLessonSlug(lessonMeta?.slug || null);
+            const res = lessonMeta?.slug
+                ? await studentLearningApi.getLessonById(lessonMeta.slug)
+                : await studentEnrolledCourseApi.getLessonById(courseId, lessonId);
+
+            const data = res.data?.data || res.data || null;
+            console.log("LESSON PAYLOAD:", data);
+            setLessonData(data);
+            if (data?.completed) {  // ← use the real field name from Step 3
+    const key = `${moduleId}-${lessonId}`;
+    setCompletedLessons(prev => new Set(prev).add(key));
+}
+>>>>>>> Stashed changes
 
             // ── If this lesson is a quiz, fetch its questions ──
             const lType = getLessonIcon(enrichedData?.lessonType || enrichedData?.type);
@@ -922,16 +1022,42 @@ const ModuleLesson = () => {
     /* ══════════════════════════════════════════
        EFFECTS
     ══════════════════════════════════════════ */
-    useEffect(() => { fetchModules(); }, [fetchModules]);
+    
     useEffect(() => { fetchLesson(); }, [fetchLesson]);
 
+    // On lesson load, silently check true completion status with the backend.
+// The complete endpoint doubles as a status check: success = now complete,
+// "already completed" error = was already done. Either way we learn the truth.
+
+
     useEffect(() => {
+<<<<<<< Updated upstream
         if (moduleId) {
             // moduleId from URL is the slug, expand it and load its lessons
             setExpandedModules(prev => new Set([...prev, moduleId]));
             fetchModuleLessons(moduleId);
         }
     }, [moduleId, fetchModuleLessons]);
+=======
+    if (!courseSlug) return;
+    studentLearningApi.getCourseProgress(courseSlug)
+        .then(res => {
+            const data = res.data?.data;
+             console.log("FULL COURSE PROGRESS RESPONSE:", res.data);  
+            if (typeof data?.progressPercentage === "number") {
+                setCourseProgressPct(data.progressPercentage);
+            }
+        })
+        .catch(err => console.error("getCourseProgress failed (non-fatal):", err));
+}, [courseSlug]);
+
+    useEffect(() => {
+        if (moduleId && courseId) {
+            setExpandedModules(prev => new Set([...prev, moduleId]));
+            fetchModuleLessons(moduleId);
+        }
+    }, [moduleId, courseId]);
+>>>>>>> Stashed changes
 
     const handleToggleModule = (mId) => {
         const key = String(mId);
@@ -953,6 +1079,7 @@ const ModuleLesson = () => {
     const lessonType = getLessonIcon(lessonData?.lessonType || lessonData?.type);
     const isQuiz = lessonType === "quiz";
     const isAssignment = lessonType === "assignment";
+    const isPdf = lessonType === "pdf";
     const isText = lessonType === "text";
     const isVideo = lessonType === "video";
 
@@ -965,6 +1092,7 @@ const ModuleLesson = () => {
         duration: lessonData?.durationInMinutes ? `${lessonData.durationInMinutes} min` : (lessonData?.duration || ""),
     };
 
+<<<<<<< Updated upstream
     const flatLessons = allModules.flatMap(m => {
         // Use slug as key to match URL params
         const mSlug = String(m.slug ?? m.moduleId ?? m.id);
@@ -974,17 +1102,50 @@ const ModuleLesson = () => {
             moduleId: mSlug,
             lessonId: String(l.slug ?? l.lessonId ?? l.id),
             lesson: l
+=======
+    const flatLessons = useMemo(() => {
+    return allModules.flatMap(m => {
+        const key = String(m.moduleId);
+        const lessons = moduleLessonsCache[key] || m.lessons || [];
+        return lessons.map(l => ({
+            moduleId: String(m.moduleId),
+            lessonId: String(l.lessonId),
+            moduleSlug: m.slug,
+            lessonSlug: l.slug,
+            lesson: l,
+>>>>>>> Stashed changes
         }));
     });
+}, [allModules, moduleLessonsCache]);
 
-    const currentFlatIdx = flatLessons.findIndex(
-        f => f.moduleId === String(moduleId) && f.lessonId === String(lessonId)
-    );
+   useEffect(() => {
+    if (courseProgressPct !== 100) return;
+    if (flatLessons.length === 0) return;
+
+    setCompletedLessons(prev => {
+        const allAlreadyMarked = flatLessons.every(f => prev.has(`${f.moduleId}-${f.lessonId}`));
+        if (allAlreadyMarked) return prev; // no-op, skip re-render entirely
+        const next = new Set(prev);
+        flatLessons.forEach(f => next.add(`${f.moduleId}-${f.lessonId}`));
+        return next;
+    });
+}, [courseProgressPct, flatLessons]);
+
+   const currentFlatIdx = flatLessons.findIndex(
+    f => f.moduleSlug === moduleId && f.lessonSlug === lessonId
+);
     const prevEntry = flatLessons[currentFlatIdx - 1];
     const nextEntry = flatLessons[currentFlatIdx + 1];
 
-    const goTo = (mId, lId) => navigate(`/student/course/${courseId}/module/${mId}/lesson/${lId}`);
+    const goTo = (mSlug, lSlug) => {
+  if (!mSlug || !lSlug) {
+    console.warn("goTo called without a valid slug", { mSlug, lSlug });
+    return;
+  }
+  navigate(`/student/course/${courseSlug}/module/${mSlug}/lesson/${lSlug}`);
+};
 
+<<<<<<< Updated upstream
     const totalLessons = courseProgress?.totalLessons ?? flatLessons.length;
     const completedCount = typeof courseProgress?.completedLessons === 'number'
         ? courseProgress.completedLessons
@@ -1066,6 +1227,55 @@ const ModuleLesson = () => {
     const moduleColor = currentModuleData?.color || "#2563EB";
     const moduleName = lessonData?.moduleName || currentModuleData?.title || `Module ${moduleId}`;
     const courseName = lessonData?.courseName || "Course";
+=======
+    const totalLessons = flatLessons.length;
+const completedCount = completedLessons.size;
+const progressPct = courseProgressPct !== null
+    ? Math.round(courseProgressPct)
+    : (totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0);
+
+const currentModuleData = allModules.find(m => String(m.slug) === String(moduleId));
+const currentLessonMeta = currentModuleData?.lessons?.find(l => String(l.slug) === String(lessonId));
+
+const lessonKey = currentModuleData && currentLessonMeta
+    ? `${currentModuleData.moduleId}-${currentLessonMeta.lessonId}`
+    : `${moduleId}-${lessonId}`;
+
+const isDone = completedLessons.has(lessonKey);
+
+const markComplete = async () => {
+    if (isDone || completing) return;
+    if (!currentLessonSlug) {
+        console.error("No lesson slug available to mark complete");
+        return;
+    }
+    setCompleting(true);
+    setCompleteError("");
+    try {
+        const res = await studentLearningApi.completeLesson(currentLessonSlug);
+        console.log("MARK COMPLETE RESPONSE:", res.data);
+        const data = res.data?.data;
+        setCompletedLessons(prev => new Set(prev).add(lessonKey));
+        if (typeof data?.courseProgressPercentage === "number") {
+            setCourseProgressPct(data.courseProgressPercentage);
+        }
+    } catch (err) {
+        console.error("markComplete failed:", err.response?.status, err.response?.data);
+        const backendMsg = err.response?.data?.message;
+        if (backendMsg && backendMsg.toLowerCase().includes("already")) {
+            setCompletedLessons(prev => new Set(prev).add(lessonKey));
+        } else {
+            setCompleteError(backendMsg || "Could not mark this lesson complete. Please try again.");
+        }
+    } finally {
+        setCompleting(false);
+    }
+};
+
+const moduleColor = currentModuleData?.color || "#2563EB";
+const moduleName = currentModuleData?.title || `Module ${moduleId}`;
+    
+>>>>>>> Stashed changes
 
     const noteCount = (() => {
         try { return JSON.parse(localStorage.getItem(`notes_${courseId}-${moduleId}-${lessonId}`) || "[]").length; } catch { return 0; }
@@ -1080,8 +1290,8 @@ const ModuleLesson = () => {
             {/* ── Top Bar ── */}
             <div className="bg-white border-b border-slate-200/80 px-5 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
                 <div className="flex items-center gap-3">
-                    <Link to={`/student/continue-learning/${courseId}`}
-                        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition">
+                    <Link to={`/student/continue-learning/${courseSlug}`}
+                        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#043573] transition">
                         <FaChevronLeft className="w-2.5 h-2.5" /> Course
                     </Link>
                     <span className="text-slate-200 font-light">|</span>
@@ -1092,20 +1302,20 @@ const ModuleLesson = () => {
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-3 py-1.5 border border-slate-200/60 rounded-xl">
                         <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                            <div className="h-full bg-[#043573] rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
                         </div>
-                        <span className="text-[11px] text-blue-500 font-extrabold tracking-wide uppercase">{progressPct}% Done</span>
+                        <span className="text-[11px] text-[#043573]/90 font-extrabold tracking-wide uppercase">{progressPct}% Done</span>
                     </div>
                     <button onClick={() => {
                         localStorage.setItem("openNoteEditor", "true");
                         localStorage.setItem("notesCourseId", courseId);
                         navigate(`/student/notes`);
                     }}
-                        className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex-shrink-0 bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50">
+                        className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex-shrink-0 bg-white border-gray-200 text-gray-600 hover:border-[#043573]/90 hover:text-[#043573] hover:bg-blue-50">
                         <FaStickyNote className="text-[11px]" />
                         <span className="hidden sm:inline">Notes</span>
                         {noteCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center bg-blue-600 text-white">
+                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center bg-[#043573] text-white">
                                 {noteCount}
                             </span>
                         )}
@@ -1125,23 +1335,32 @@ const ModuleLesson = () => {
 
                         {/* Breadcrumb */}
                         <div className="flex items-center justify-between gap-3">
+<<<<<<< Updated upstream
                             <p className="text-[11px] tracking-wide text-blue-400 font-bold uppercase flex items-center flex-wrap gap-x-1">
                                 <Link to={`/student/continue-learning/${courseId}`} className="hover:text-blue-700 transition">{courseName}</Link>
                                 <span className="font-normal text-blue-300">/</span>
                                 <span className="text-blue-500">{moduleName}</span>
                                 <span className="font-normal text-blue-300">/</span>
                                 <span className="text-blue-600 font-extrabold truncate max-w-[200px]">{content.title}</span>
+=======
+                            <p className="text-[11px] tracking-wide text-[#043573]/90 font-bold uppercase flex items-center flex-wrap gap-x-1">
+                                <Link to={`/student/continue-learning/${courseSlug}`} className="hover:text-blue-700 transition">Course</Link>
+                                <span className="font-normal text-[#043573] /80">/</span>
+                                <span className="text-[#043573]">{moduleName}</span>
+                                <span className="font-normal text-[#043573] /80">/</span>
+                                <span className="text-[#043573] font-extrabold truncate max-w-[200px]">{content.title}</span>
+>>>>>>> Stashed changes
                             </p>
                             <button onClick={() => {
                                 localStorage.setItem("openNoteEditor", "true");
                                 localStorage.setItem("notesCourseId", String(courseId));
                                 navigate(`/student/notes`);
                             }}
-                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition flex-shrink-0 border bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600">
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition flex-shrink-0 border bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-[#043573]">
                                 <FaStickyNote className="w-3 h-3" />
                                 Take Notes
                                 {noteCount > 0 && (
-                                    <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{noteCount}</span>
+                                    <span className="bg-[#043573] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{noteCount}</span>
                                 )}
                             </button>
                         </div>
@@ -1175,23 +1394,54 @@ const ModuleLesson = () => {
                                             isCompleted={isDone}
                                         />
                                     )
-                                ) : isAssignment ? (
+                              ) : isAssignment ? (
                                     <AssignmentView lessonData={lessonData} moduleColor={moduleColor} onSubmit={markComplete} isSubmitted={isDone} />
-                                ) : content.videoUrl ? (
-                                    <video className="w-full h-full object-cover" controls key={content.videoUrl}>
+                                ) : isVideo && content.videoUrl ? (
+                                    <video className="w-full h-full object-cover" controls key={content.videoUrl} poster={lessonData?.thumbnailUrl || lessonData?.thumbnail || undefined}>
                                         <source src={content.videoUrl} />
                                         Your browser does not support the video tag.
                                     </video>
-                                ) : isText && content.body ? (
-                                    <div className="w-full h-full bg-white p-6 overflow-y-auto text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                                        {content.body}
-                                    </div>
-                                ) : (
+                                ) : isVideo ? (
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                                        <div className="w-16 h-16 rounded-2xl bg-blue-600/20 flex items-center justify-center">
+                                        <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
                                             <FaPlay className="text-blue-400 text-2xl" />
                                         </div>
                                         <p className="text-white/60 text-xs font-semibold">No video available for this lesson</p>
+                                    </div>
+                                ) : isText ? (
+                                    content.body ? (
+                                        <div className="w-full h-full bg-white p-6 overflow-y-auto text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                            {content.body}
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                                            <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
+                                                <FaBook className="text-blue-400 text-2xl" />
+                                            </div>
+                                            <p className="text-white/60 text-xs font-semibold">No content available for this article</p>
+                                        </div>
+                                    )
+                                ) : isPdf ? (
+                                    content.resourceUrl ? (
+                                        <iframe
+                                            src={content.resourceUrl}
+                                            title={content.title}
+                                            className="w-full h-full bg-white"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                                            <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
+                                                <FaDownload className="text-blue-400 text-2xl" />
+                                            </div>
+                                            <p className="text-white/60 text-xs font-semibold">No document available for this lesson</p>
+                                        </div>
+                                    )
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                                        <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
+                                            <FaPlay className="text-blue-400 text-2xl" />
+                                        </div>
+                                        <p className="text-white/60 text-xs font-semibold">No content available for this lesson</p>
                                     </div>
                                 )}
                             </div>
@@ -1203,7 +1453,7 @@ const ModuleLesson = () => {
                                 <div>
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <span className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider uppercase text-white shadow-2xs"
-                                            style={{ backgroundColor: moduleColor }}>
+                                            style={{ backgroundColor: "#043573" }}>
                                             {moduleName.split(": ")[0] || moduleName}
                                         </span>
                                         {isDone && (
@@ -1233,6 +1483,7 @@ const ModuleLesson = () => {
                                         )}
                                     </div>
                                 </div>
+<<<<<<< Updated upstream
                                 {!isDone && !isQuiz && !isAssignment && (
                                     <div className="flex flex-col items-end gap-1">
                                         <button
@@ -1260,6 +1511,20 @@ const ModuleLesson = () => {
                                         )}
                                     </div>
                                 )}
+=======
+                              {!isDone && !isQuiz && !isAssignment && (
+    <div className="flex flex-col items-end gap-1.5">
+        <button onClick={markComplete} disabled={completing}
+            className="flex items-center gap-2 bg-[#043573] hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs flex-shrink-0 disabled:opacity-50">
+            <FaCheckCircle className="w-3.5 h-3.5" />
+            {completing ? "Marking..." : "Mark as Complete"}
+        </button>
+        {completeError && (
+            <p className="text-[11px] text-red-500 font-medium max-w-[200px] text-right">{completeError}</p>
+        )}
+    </div>
+)}
+>>>>>>> Stashed changes
                             </div>
                         )}
 
@@ -1305,15 +1570,15 @@ const ModuleLesson = () => {
                         {/* Prev / Next Navigation */}
                         <div className="flex justify-between gap-3 pt-2 pb-8">
                             <button
-                                onClick={() => prevEntry && goTo(prevEntry.moduleId, prevEntry.lessonId)}
+                                onClick={() => prevEntry && goTo(prevEntry.moduleSlug, prevEntry.lessonSlug)}
                                 disabled={!prevEntry}
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition ${prevEntry ? "border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-2xs" : "border-slate-100 text-slate-300 bg-slate-50/50 cursor-not-allowed"}`}>
                                 <FaChevronLeft className="w-2.5 h-2.5" /> Previous
                             </button>
                             <button
-                                onClick={() => nextEntry && goTo(nextEntry.moduleId, nextEntry.lessonId)}
+                                onClick={() => nextEntry && goTo(nextEntry.moduleSlug, nextEntry.lessonSlug)}
                                 disabled={!nextEntry}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${nextEntry ? "bg-blue-600 text-white shadow-xs hover:bg-blue-500" : "border-slate-100 text-slate-300 bg-slate-50/50 cursor-not-allowed"}`}>
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${nextEntry ? "bg-[#043573] text-white shadow-xs hover:bg-[#043573]/90" : "border-slate-100 text-slate-300 bg-slate-50/50 cursor-not-allowed"}`}>
                                 Next <FaChevronRight className="w-2.5 h-2.5" />
                             </button>
                         </div>
@@ -1324,12 +1589,12 @@ const ModuleLesson = () => {
                 {sidebarOpen && (
                     <div className="w-80 bg-white border-l border-slate-200 flex-shrink-0 overflow-y-auto hidden lg:block shadow-sm">
                         <div className="sticky top-0 bg-white border-b border-slate-100 px-4 py-4 z-10">
-                            <h2 className="text-xs font-black text-blue-600 uppercase tracking-wider">Course Outline</h2>
+                            <h2 className="text-xs font-black text-[#043573] uppercase tracking-wider">Course Outline</h2>
                             <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wide">
                                 {completedCount} of {totalLessons} Lessons Done
                             </p>
                             <div className="w-full h-1 bg-slate-100 rounded-full mt-2.5 overflow-hidden">
-                                <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                                <div className="h-full bg-[#043573] rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
                             </div>
                         </div>
 
@@ -1341,6 +1606,7 @@ const ModuleLesson = () => {
                                     ))}
                                 </div>
                             ) : (
+<<<<<<< Updated upstream
                                 allModules.map(mod => {
                                     const mSlug = String(mod.slug ?? mod.moduleId ?? mod.id);
                                     const mId = String(mod.id ?? mod.moduleId ?? mod.slug);
@@ -1351,11 +1617,25 @@ const ModuleLesson = () => {
                                     const assignments = moduleAssignmentsCache[mSlug] || moduleAssignmentsCache[mId] || [];
                                     const quizzes = moduleQuizzesCache[mSlug] || moduleQuizzesCache[mId] || [];
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.id}-${l.id}`)).length;
+=======
+                              allModules.map(mod => {
+                                    const key = String(mod.moduleId);
+                                    const isExpandedMod = expandedModules.has(key);
+                                    const isActiveMod = String(mod.moduleId) === String(moduleId);
+                                    const lessons = moduleLessonsCache[key] || mod.lessons || [];
+                                    const assignments = moduleAssignmentsCache[key] || [];
+                                    const quizzes = moduleQuizzesCache[key] || []; // ← NEW
+                                    const modCompleted = lessons.filter(l => completedLessons.has(`${mod.moduleId}-${l.lessonId}`)).length;
+>>>>>>> Stashed changes
 
                                     return (
-                                        <div key={mod.id} className="border-b border-slate-50">
+                                        <div key={mod.moduleId} className="border-b border-slate-50">
                                             {/* Module Header */}
+<<<<<<< Updated upstream
                                             <button onClick={() => handleToggleModule(mSlug)}
+=======
+                                            <button onClick={() => handleToggleModule(mod.moduleId)}
+>>>>>>> Stashed changes
                                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all ${isActiveMod ? "bg-slate-50/80" : "hover:bg-slate-50/40"}`}>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs font-bold text-slate-800 truncate leading-tight">{mod.title}</p>
@@ -1383,6 +1663,7 @@ const ModuleLesson = () => {
                                                     ) : (
                                                         <>
                                                             {/* ── Lessons List ── */}
+<<<<<<< Updated upstream
                                                             {lessons.map((lesson) => {
                                                                 const lSlug = String(lesson.slug ?? lesson.lessonId ?? lesson.id);
                                                                 const isActive =
@@ -1394,13 +1675,20 @@ const ModuleLesson = () => {
                                                                                      lesson.completed ||
                                                                                      lesson.isCompleted ||
                                                                                      isCourseFullyComplete;
+=======
+                                                           {lessons.map((lesson) => {
+                                                                const isActive =
+                                                                    String(mod.moduleId) === String(moduleId) &&
+                                                                    String(lesson.lessonId) === String(lessonId);
+                                                                const isDoneLesson = completedLessons.has(`${mod.moduleId}-${lesson.lessonId}`);
+>>>>>>> Stashed changes
                                                                 const lType = getLessonIcon(lesson.lessonType || lesson.type);
                                                                 const isAssignLesson = lType === "assignment";
                                                                 const isQuizLesson = lType === "quiz";
 
                                                                 let itemClass = "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
                                                                 if (isActive)
-                                                                    itemClass += "bg-blue-600 text-white font-semibold border-l-blue-600";
+                                                                    itemClass += "bg-[#043573] text-white font-semibold border-l-[#043573]";
                                                                 else if (isAssignLesson)
                                                                     itemClass += "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
                                                                 else if (isQuizLesson)
@@ -1408,8 +1696,13 @@ const ModuleLesson = () => {
                                                                 else
                                                                     itemClass += "hover:bg-slate-100/50 text-slate-600 hover:border-l-slate-300";
 
+<<<<<<< Updated upstream
                                                                 return (
                                                                     <button key={lesson.id || lesson.slug} onClick={() => goTo(mSlug, lSlug)} className={itemClass}>
+=======
+                                                               return (
+                                                                    <button key={lesson.lessonId} onClick={() => goTo(mod.slug, lesson.slug)}className={itemClass}>
+>>>>>>> Stashed changes
                                                                         <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                                                                             {isDoneLesson ? (
                                                                                 <FaCheckCircle className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-emerald-500"}`} />
@@ -1454,13 +1747,13 @@ const ModuleLesson = () => {
                                                                         // or quiz.id if they are standalone quiz entities.
                                                                         const quizLessonId = quiz.lessonId || quiz.lesson_id || quiz.id;
                                                                         const isActiveQuiz =
-                                                                            String(mod.id) === String(moduleId) &&
+                                                                            String(mod.moduleId) === String(moduleId) &&
                                                                             String(quizLessonId) === String(lessonId);
 
-                                                                        return (
+                                                                      return (
                                                                             <button
-                                                                                key={quiz.id || quiz.quizId}
-                                                                                onClick={() => goTo(mod.id, quizLessonId)}
+                                                                                key={quiz.id || quiz.quizId || `quiz-${mod.moduleId}-${quizLessonId}`}
+                                                                                onClick={() => quiz.slug && goTo(mod.slug, quiz.slug)}
                                                                                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 transition-all
                                                                                     ${isActiveQuiz
                                                                                         ? "bg-indigo-600 text-white border-l-indigo-600"
@@ -1501,13 +1794,13 @@ const ModuleLesson = () => {
                                                                             Module Assignments
                                                                         </p>
                                                                     </div>
-
-                                                                    {assignments.map((assignment) => (
+                                                                              {assignments.map((assignment) => (
                                                                         <button
                                                                             key={assignment.assignmentId}
                                                                             onClick={() =>
-                                                                                navigate(`/student/course/${courseId}/module/${mod.id}/assignment/${assignment.assignmentId}`)
+                                                                                navigate(`/student/course/${courseSlug}/module/${mod.moduleId}/assignment/${assignment.assignmentId}`)
                                                                             }
+                                                                    
                                                                             className="w-full flex items-center gap-3 px-4 py-3 bg-amber-50 border-b border-amber-100 hover:bg-amber-100/70 transition-colors text-left"
                                                                         >
                                                                             <MdAssignment className="text-amber-500 text-lg flex-shrink-0" />

@@ -436,5 +436,27 @@ export const instructorCalendarApi = {
     api.get(`/api/instructor/calendar?startDate=${startDate}&endDate=${endDate}`),
 };
 
+export const instructorCertificateApi = {
+  // GET /api/instructor/certificates/pending
+  getPendingCertificates: (page = 0, size = 20) =>
+    api.get(`/api/instructor/certificates/pending?page=${page}&size=${size}`),
+ 
+  // GET /api/instructor/certificates/course/{courseSlug}
+  getCertificatesByCourse: (courseSlug, page = 0, size = 20) =>
+    api.get(`/api/instructor/certificates/course/${courseSlug}?page=${page}&size=${size}`),
+ 
+  // GET /api/instructor/certificates/{certificateNumber}
+  getCertificateByNumber: (certificateNumber) =>
+    api.get(`/api/instructor/certificates/${certificateNumber}`),
+ 
+  // PUT /api/instructor/certificates/{certificateId}/approve
+  approveCertificate: (certificateId) =>
+    api.put(`/api/instructor/certificates/${certificateId}/approve`),
+ 
+  // PUT /api/instructor/certificates/{certificateId}/reject
+  rejectCertificate: (certificateId) =>
+    api.put(`/api/instructor/certificates/${certificateId}/reject`),
+};
+
 
 export default api;

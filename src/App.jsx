@@ -91,6 +91,8 @@ import InstructorLogin from "./Instructor/InstructorLogin";
 import InstructorDashboardLayout from "./Instructor/DashboardLayout";
 import InstructorDashboard from "./Instructor/InstructorDashboard";
 
+import InstructorCertificates from "./Instructor/pages/Certificate";
+
 function StudentLayoutRoutes() {
   return (
     <DashboardLayout>
@@ -165,12 +167,15 @@ function App() {
                   <Route path="certificates" element={<Certificate />} />
                   <Route path="quiz" element={<Quizzes />} />
                   <Route path="job-notifications" element={<JobNotifications />} />
-                  <Route path="/student/continue-learning/:courseId" element={<ContinueLearning />} />
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
+<<<<<<< Updated upstream
                   <Route path="continue-learning" element={<ContinueLearning />} />
                   <Route path="assignments/:assignmentSlug" element={<Assignments />} />
                   <Route path="/student/attendance" element={<Attendance />} />
+=======
+                  <Route path="/student/continue-learning/:courseSlug" element={<ContinueLearning />} />
+>>>>>>> Stashed changes
                   <Route
                     path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
                     element={<AssignmentDetail />}
@@ -178,11 +183,8 @@ function App() {
                 </Route>
 
 
-                <Route path="/student/module/:moduleId/lesson/:lessonId" element={<ModuleView />} />
-                <Route
-                  path="/student/course/:courseId/module/:moduleId/lesson/:lessonId"
-                  element={<ModuleLesson />}
-                />
+                <Route path="/student/module/:moduleSlug/lesson/:lessonSlug" element={<ModuleView />} />
+<Route path="/student/course/:courseId/module/:moduleSlug/lesson/:lessonSlug" element={<ModuleLesson />} />
               </Route>
 
               {/* Protected Admin Routes */}
@@ -222,6 +224,7 @@ function App() {
                   <Route path="assignments/:assignmentSlug" element={<InstructorAssignments />} />
                   <Route path="assignments/:assignmentSlug/submissions" element={<InstructorAssignments />} />
                   <Route path="profile" element={<InstructorProfile />} />
+                  <Route path="certificates" element={<InstructorCertificates />} />
                   <Route path="quiz" element={<Quiz />} />
                   <Route path="/instructor/create-course" element={<CreateCourse />} />
                   <Route path="/instructor/course-builder/:courseSlug" element={<CourseBuilder />} />
