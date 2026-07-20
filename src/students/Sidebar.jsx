@@ -21,7 +21,7 @@ import {
   FaBriefcase,
   FaReadme,
 } from "react-icons/fa";
-import { MdQuiz } from "react-icons/md";
+import { MdQuiz, MdFactCheck  } from "react-icons/md";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
@@ -45,15 +45,16 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   ];
 
   const menuItems = [
+    { icon: <MdFactCheck />, label: "Attendance", path: "/student/attendance" },
     { icon: <FaClipboardList />, label: "Assignments", path: "/student/assignments" },
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/student/schedule" },
-    { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
     { icon: <MdQuiz />, label: "Quizzes", path: "/student/quiz" },
     { icon: <FaComments />, label: "Discussions", path: "/student/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/student/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/student/notes" },
     { icon: <FaCertificate />, label: "Certificates", path: "/student/certificates" },
     { icon: <FaBriefcase />, label: "Job Notifications", path: "/student/job-notifications" },
+        { icon: <FaReadme />, label: "Resume", path: "/student/resume" },
   ];
 
   const collapsed = isMobile ? false : isCollapsed;

@@ -4,7 +4,7 @@ import { studentManagementApi } from "./auth/api";
 import {
   FaEdit, FaEnvelope, FaPhone, FaCamera, FaSave,
   FaTimes, FaShieldAlt, FaCheckCircle, FaIdCard,
-  FaGift, FaAt, FaUser, FaExclamationCircle,
+  FaGift, FaAt, FaUser, FaExclamationCircle, FaTicketAlt,
 } from "react-icons/fa";
 
 const StudentProfile = () => {
@@ -18,6 +18,11 @@ const StudentProfile = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Apply referral code
+  const [referralInput, setReferralInput] = useState("");
+  const [applyingReferral, setApplyingReferral] = useState(false);
+  const [referralApplied, setReferralApplied] = useState(false);
 
   useEffect(() => {
     if (student) {
@@ -81,6 +86,23 @@ const StudentProfile = () => {
     finally { setLoading(false); }
   };
 
+  const handleApplyReferral = async () => {
+    if (!referralInput.trim()) return;
+    setApplyingReferral(true);
+    try {
+      const res = await studentManagementApi.applyReferralCode(referralInput.trim());
+      if (res.data?.success) {
+        notify(res.data.message || res.data.data || "Referral code applied!");
+        setReferralApplied(true);
+        setReferralInput("");
+      }
+    } catch (err) {
+      notify(err.response?.data?.message || "Invalid or expired referral code", "error");
+    } finally {
+      setApplyingReferral(false);
+    }
+  };
+
   if (!student) return (
     <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-[#043573] border-t-transparent rounded-full animate-spin" />
@@ -113,7 +135,7 @@ const StudentProfile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* LEFT: Profile card */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-5">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {/* Top accent */}
               <div className="h-1 w-full bg-[#043573]" />
@@ -167,9 +189,39 @@ const StudentProfile = () => {
                 <div className="w-full mt-5 pt-5 border-t border-gray-50 space-y-3 text-left">
                   <SideInfoItem icon={<FaIdCard size={12} />} label="Student Code" value={student.studentCode} mono />
                   {student.referralCode && (
-                    <SideInfoItem icon={<FaGift size={12} />} label="Referral Code" value={student.referralCode} mono />
+                    <SideInfoItem icon={<FaGift size={12} />} label="Your Referral Code" value={student.referralCode} mono />
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* Apply Referral Code */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-[#043573] text-sm flex-shrink-0">
+                  <FaTicketAlt />
+                </div>
+                <div>
+                  <h2 className="text-sm font-black text-gray-900">Apply Referral Code</h2>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Have a friend's code? Apply it here.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={referralInput}
+                  onChange={e => setReferralInput(e.target.value.toUpperCase())}
+                  placeholder="REF-ABC123"
+                  disabled={referralApplied}
+                  className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition font-mono tracking-wide disabled:opacity-60"
+                />
+                <button
+                  onClick={handleApplyReferral}
+                  disabled={!referralInput.trim() || applyingReferral || referralApplied}
+                  className="px-4 py-2.5 rounded-xl bg-[#043573] hover:bg-[#032551] disabled:opacity-50 text-white text-xs font-bold shadow-sm transition flex-shrink-0"
+                >
+                  {applyingReferral ? "Applying..." : referralApplied ? "Applied ✓" : "Apply"}
+                </button>
               </div>
             </div>
           </div>

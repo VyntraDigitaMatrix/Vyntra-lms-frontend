@@ -3,29 +3,66 @@ import { Link } from "react-router-dom";
 import {
   FaComments, FaUsers, FaPaperPlane, FaArrowLeft,
   FaCheck, FaSpinner, FaClock, FaReply, FaTrash,
-  FaEye, FaTimes, FaSignOutAlt
+  FaEye, FaTimes, FaSignOutAlt, FaChevronRight
 } from "react-icons/fa";
 import { discussionApi } from "./auth/api";
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 const fmt = (dateStr) => {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = (now - d) / 1000;
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-};
 
-const fmtFull = (dateStr) => {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleString();
+  const utcDateStr =
+    dateStr.endsWith("Z") || dateStr.includes("+")
+      ? dateStr
+      : `${dateStr}Z`;
+
+  const d = new Date(utcDateStr);
+  const now = new Date();
+
+  const diff = Math.max(0, (now.getTime() - d.getTime()) / 1000);
+
+  if (diff < 60) {
+    return "just now";
+  }
+
+  if (diff < 3600) {
+    return `${Math.floor(diff / 60)}m ago`;
+  }
+
+  if (diff < 86400) {
+    return `${Math.floor(diff / 3600)}h ago`;
+  }
+
+  return d.toLocaleDateString("en-IN", {
+    month: "short",
+    day: "numeric",
+  });
 };
 
 const avatar = (name) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "U")}&background=4F46E5&color=fff&size=80`;
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "U")}&background=1D4ED8&color=fff&size=80`;
+
+
+const CHANNEL_PALETTE = [
+  { bg: "bg-[#043573]", soft: "bg-[#043573]/10", text: "text-[#043573]" },
+  { bg: "bg-[#043573]/80", soft: "bg-[#043573]/10", text: "text-[#043573]/80" },
+  { bg: "bg-[#043573]/60", soft: "bg-[#043573]/10", text: "text-[#043573]/60" },
+  { bg: "bg-[#043573]/40", soft: "bg-[#043573]/10", text: "text-[#043573]/40" },
+  { bg: "bg-blue-800", soft: "bg-blue-50", text: "text-blue-800" },
+  { bg: "bg-indigo-500", soft: "bg-indigo-50", text: "text-indigo-600" },
+];
+
+const channelStyle = (name = "") => {
+  const sum = [...name].reduce((s, c) => s + c.charCodeAt(0), 0);
+  return CHANNEL_PALETTE[sum % CHANNEL_PALETTE.length];
+};
+
+const initials = (name = "") => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+};
 
 /* ─── Role Badge ──────────────────────────────────────────── */
 const RoleBadge = ({ role }) => {
@@ -45,7 +82,7 @@ const SystemMessage = ({ content }) => (
 
 /* ─── Chat Message ────────────────────────────────────────── */
 const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
-  const isOwn = msg.senderId === currentUserId;
+  const isOwn = String(msg.senderId) === String(currentUserId);
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -54,35 +91,28 @@ const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Avatar */}
       <img
         src={msg.senderProfileImage || avatar(msg.senderName)}
         alt={msg.senderName}
         className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0 self-end"
       />
 
-      {/* Bubble */}
       <div className={`flex flex-col max-w-[72%] sm:max-w-[60%] ${isOwn ? "items-end" : "items-start"}`}>
-        {/* Name + role */}
-        {!isOwn && (
-          <div className="flex items-center gap-1.5 mb-1 ml-1">
-            <span className="text-xs font-semibold text-gray-700">{msg.senderName}</span>
-            <RoleBadge role={msg.senderRole} />
-          </div>
-        )}
+        <div className={`flex items-center gap-1.5 mb-1 ${isOwn ? "mr-1 flex-row-reverse" : "ml-1"}`}>
+          <span className="text-xs font-semibold text-gray-700">{isOwn ? "You" : msg.senderName}</span>
+          <RoleBadge role={msg.senderRole} />
+        </div>
 
-        {/* Reply preview */}
         {msg.replyToMessageId && (
-          <div className={`text-[11px] px-3 py-1.5 rounded-xl mb-1 border-l-2 ${isOwn ? "border-blue-400 bg-blue-50 text-blue-700" : "border-gray-300 bg-gray-100 text-gray-600"}`}>
+          <div className={`text-[11px] px-3 py-1.5 rounded-xl mb-1 border-l-2 ${isOwn ? "border-[#043573] bg-[#043573]/10 text-[#043573]" : "border-gray-300 bg-gray-100 text-gray-600"}`}>
             <span className="font-semibold block">{msg.replyToSenderName}</span>
             <span className="line-clamp-1">{msg.replyToMessageContent}</span>
           </div>
         )}
 
-        {/* Content bubble */}
         <div className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm
           ${isOwn
-            ? "bg-blue-600 text-white rounded-br-sm"
+            ? "bg-[#043573] text-white rounded-br-sm"
             : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm"
           }
           ${msg.deleted ? "opacity-60 italic" : ""}
@@ -91,24 +121,23 @@ const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
             <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
           )}
           {msg.edited && !msg.deleted && (
-            <span className={`text-[9px] ml-1 ${isOwn ? "text-blue-200" : "text-gray-400"}`}>(edited)</span>
+            <span className={`text-[9px] ml-1 ${isOwn ? "text-[#043573]" : "text-gray-400"}`}>(edited)</span>
           )}
         </div>
 
-        {/* Footer */}
         <div className={`flex items-center gap-2 mt-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
           <span className="text-[10px] text-gray-400">{fmt(msg.createdAt)}</span>
           {msg.seenCount > 0 && isOwn && (
-            <span className="flex items-center gap-0.5 text-[10px] text-blue-500">
+            <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
               <FaEye size={9} /> {msg.seenCount}
             </span>
           )}
         </div>
       </div>
 
-      {/* Action buttons */}
       {hovered && !msg.deleted && (
-        <div className={`flex items-center gap-1 self-center ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+        <div className={`flex items-center gap-1 self-center ${isOwn ? "flex-row-reverse" : "flex-row"
+          }`}>
           <button
             onClick={() => onReply(msg)}
             className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition"
@@ -116,15 +145,14 @@ const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
           >
             <FaReply size={10} />
           </button>
-          {isOwn && (
-            <button
-              onClick={() => onDelete(msg.messageId)}
-              className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-400 transition"
-              title="Delete"
-            >
-              <FaTrash size={10} />
-            </button>
-          )}
+
+          <button
+            onClick={() => onDelete(msg.messageId)}
+            className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-400 transition"
+            title="Delete"
+          >
+            <FaTrash size={10} />
+          </button>
         </div>
       )}
     </div>
@@ -139,6 +167,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const style = channelStyle(discussion.groupName || discussion.courseTitle || "");
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -146,10 +175,9 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
       if (res.data.success) {
         const sorted = [...res.data.data.content].reverse();
         setMessages(sorted);
-        // Mark all unseen messages as seen
         for (const msg of res.data.data.content) {
           if (msg.seenCount === 0 && msg.senderId !== currentUserId) {
-            discussionApi.markMessageAsSeen(msg.messageId).catch(() => {});
+            discussionApi.markMessageAsSeen(msg.messageId).catch(() => { });
           }
         }
       }
@@ -218,6 +246,9 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
             <FaArrowLeft size={12} /> Back
           </button>
           <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+          <div className={`w-8 h-8 rounded-lg ${style.bg} text-white flex items-center justify-center text-[11px] font-black flex-shrink-0`}>
+            {initials(discussion.groupName || discussion.courseTitle)}
+          </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-sm sm:text-base font-bold text-gray-800 truncate">
               {discussion.groupName || discussion.courseTitle}
@@ -254,12 +285,12 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
 
       {/* Reply preview */}
       {replyTo && (
-        <div className="bg-blue-50 border-t border-blue-200 px-4 py-2 flex items-center gap-2 max-w-4xl mx-auto w-full">
+        <div className="bg-[#043573]/10 border-t border-[#043573] px-4 py-2 flex items-center gap-2 max-w-4xl mx-auto w-full">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-blue-700">{replyTo.senderName}</p>
-            <p className="text-xs text-blue-600 truncate">{replyTo.content}</p>
+            <p className="text-xs font-semibold text-[#043573]">{replyTo.senderName}</p>
+            <p className="text-xs text-[#043573]/80 truncate">{replyTo.content}</p>
           </div>
-          <button onClick={() => setReplyTo(null)} className="text-blue-400 hover:text-blue-600 flex-shrink-0">
+          <button onClick={() => setReplyTo(null)} className="text-[#043573] hover:text-[#043573]/80 flex-shrink-0">
             <FaTimes size={14} />
           </button>
         </div>
@@ -276,7 +307,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
               onKeyDown={handleKeyDown}
               placeholder={replyTo ? `Replying to ${replyTo.senderName}...` : "Write a message... (Enter to send)"}
               rows={1}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none overflow-hidden"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#F39C12] outline-none text-sm resize-none overflow-hidden"
               style={{ minHeight: "42px", maxHeight: "120px" }}
               onInput={e => {
                 e.target.style.height = "auto";
@@ -288,7 +319,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
             onClick={sendMessage}
             disabled={!input.trim() || sending}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm flex-shrink-0
-              ${input.trim() && !sending ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+              ${input.trim() && !sending ? "bg-[#043573] hover:bg-[#043573]/80 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
           >
             {sending ? <FaSpinner className="animate-spin" size={13} /> : <FaPaperPlane size={13} />}
           </button>
@@ -303,77 +334,84 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
   );
 };
 
-/* ─── Discussion Card ─────────────────────────────────────── */
+/* ─── Discussion Card — channel row, replaces the gradient-strip card ── */
 const DiscussionCard = ({ discussion, onJoin, onOpen, onLeave }) => {
   const [joining, setJoining] = useState(false);
+  const style = channelStyle(discussion.groupName || discussion.courseTitle || "");
 
-  const handleJoin = async () => {
+  const handleJoin = async (e) => {
+    e.stopPropagation();
     setJoining(true);
     await onJoin(discussion.slug);
     setJoining(false);
   };
 
+  const handleLeaveClick = (e) => {
+    e.stopPropagation();
+    onLeave(discussion.slug);
+  };
+
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
-      <div className={`h-1 ${discussion.joined ? "bg-gradient-to-r from-emerald-500 to-emerald-600" : "bg-gradient-to-r from-blue-500 to-indigo-600"}`} />
-      <div className="p-4 sm:p-5">
-        <div className="mb-3">
-          <h3 className="text-sm sm:text-base font-bold text-gray-800 mb-1">
-            {discussion.groupName || discussion.courseTitle}
-          </h3>
-          {discussion.courseTitle && discussion.groupName !== discussion.courseTitle && (
-            <p className="text-[11px] text-gray-400 mb-1">{discussion.courseTitle}</p>
-          )}
-          {discussion.latestMessage ? (
-            <p className="text-xs text-gray-500 line-clamp-2">
-              <span className="font-medium text-gray-600">Latest: </span>{discussion.latestMessage}
-            </p>
-          ) : (
-            <p className="text-xs text-gray-400 italic">No messages yet — start the conversation!</p>
-          )}
-        </div>
+    <div
+      onClick={() => discussion.joined && onOpen(discussion)}
+      className={`w-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#043573] transition-all duration-200 p-4 sm:p-5 flex items-center gap-4
+        ${discussion.joined ? "cursor-pointer" : ""}`}
+    >
+      <div className={`w-12 h-12 rounded-xl ${style.bg} text-white flex items-center justify-center text-sm font-black flex-shrink-0 shadow-sm`}>
+        {initials(discussion.groupName || discussion.courseTitle)}
+      </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-3 text-[11px] text-gray-500">
-            <span className="flex items-center gap-1">
-              <FaUsers size={9} /> {discussion.totalMembers ?? 0} members
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm sm:text-base font-bold text-gray-800 truncate">
+          {discussion.groupName || discussion.courseTitle}
+        </h3>
+        {discussion.courseTitle && discussion.groupName !== discussion.courseTitle && (
+          <p className="text-[11px] text-gray-400">{discussion.courseTitle}</p>
+        )}
+        {discussion.latestMessage ? (
+          <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+            <span className="font-medium text-gray-600">
+              Latest:
             </span>
-            {discussion.latestMessageTime && (
-              <span className="flex items-center gap-1 hidden sm:flex">
-                <FaClock size={9} /> {fmt(discussion.latestMessageTime)}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {discussion.joined ? (
-              <>
-                <button
-                  onClick={() => onLeave(discussion.slug)}
-                  className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
-                  title="Leave group"
-                >
-                  <FaSignOutAlt size={12} />
-                </button>
-                <button
-                  onClick={() => onOpen(discussion)}
-                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
-                >
-                  <FaComments size={11} /> Open Chat
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={handleJoin}
-                disabled={joining}
-                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
-              >
-                {joining ? <FaSpinner className="animate-spin" size={11} /> : <FaCheck size={11} />}
-                {joining ? "Joining..." : "Join Group"}
-              </button>
-            )}
-          </div>
+            {discussion.latestMessage}
+          </p>
+        ) : (
+          <p className="text-xs text-gray-400 italic mt-0.5">
+            No messages yet — start the conversation!
+          </p>
+        )}
+        <div className="flex items-center gap-3 text-[11px] text-gray-400 mt-1.5">
+          <span className="flex items-center gap-1"><FaUsers size={9} /> {discussion.totalMembers ?? 0} members</span>
+          {discussion.latestMessageTime && (
+            <span className="hidden sm:flex items-center gap-1"><FaClock size={9} /> {fmt(discussion.latestMessageTime)}</span>
+          )}
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {discussion.joined ? (
+          <>
+            <button
+              onClick={handleLeaveClick}
+              className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+              title="Leave group"
+            >
+              <FaSignOutAlt size={12} />
+            </button>
+            <div className={`w-8 h-8 rounded-full ${style.soft} ${style.text} flex items-center justify-center`}>
+              <FaChevronRight size={11} />
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={handleJoin}
+            disabled={joining}
+            className="px-4 py-1.5 bg-[#043573] hover:bg-[#043573]/90 disabled:bg-blue-300 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
+          >
+            {joining ? <FaSpinner className="animate-spin" size={11} /> : <FaCheck size={11} />}
+            {joining ? "Joining..." : "Join Group"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -384,15 +422,59 @@ function Discussions() {
   const [groups, setGroups] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Get current user id from localStorage if available
   const currentUserId = localStorage.getItem("student_userId") || null;
 
   const fetchGroups = useCallback(async () => {
     setLoading(true);
+
     try {
       const res = await discussionApi.getGroups(0, 100);
+
       if (res.data.success) {
-        setGroups(res.data.data.content);
+        const groupList = res.data.data.content || [];
+
+        const groupsWithLatestMessage = await Promise.all(
+          groupList.map(async (group) => {
+
+            if (!group.joined) {
+              return group;
+            }
+
+            try {
+              const messageRes = await discussionApi.getMessages(
+                group.slug,
+                0,
+                1
+              );
+
+              if (messageRes.data.success) {
+                const messages = messageRes.data.data.content || [];
+
+                // API pagination normally returns newest message first
+                const latestMessage = messages[0];
+
+                if (latestMessage) {
+                  return {
+                    ...group,
+                    latestMessage: latestMessage.deleted
+                      ? "This message was deleted."
+                      : latestMessage.content,
+                    latestMessageTime: latestMessage.createdAt,
+                  };
+                }
+              }
+            } catch (error) {
+              console.error(
+                `Failed to fetch latest message for ${group.slug}:`,
+                error
+              );
+            }
+
+            return group;
+          })
+        );
+
+        setGroups(groupsWithLatestMessage);
       }
     } catch (err) {
       console.error("fetchGroups:", err);
@@ -407,12 +489,9 @@ function Discussions() {
     try {
       const res = await discussionApi.joinGroup(slug);
       if (res.data.success) {
-        // Update local state immediately using join response
-        const joined = res.data.data;
         setGroups(prev => prev.map(g =>
           g.slug === slug ? { ...g, joined: true, totalMembers: (g.totalMembers || 0) + 1 } : g
         ));
-        // Then open chat if joined
         const group = groups.find(g => g.slug === slug);
         if (group) setActiveChat({ ...group, joined: true });
       }
@@ -445,38 +524,59 @@ function Discussions() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative max-w-4xl mx-auto px-4 py-5 sm:py-7">
-          <p className="text-xs text-blue-200 mb-2">
-            <Link to="/student/dashboard" className="hover:text-white transition">Dashboard</Link>
-            <span className="mx-2">›</span>Discussions
-          </p>
-          <h1 className="text-xl sm:text-2xl font-bold mb-1">Course Discussions</h1>
-          <p className="text-xs sm:text-sm text-blue-100 opacity-90">
-            Connect with instructors and peers — ask questions and share insights.
-          </p>
-        </div>
-      </div>
+  const joinedCount = groups.filter(g => g.joined).length;
+  const totalMembersReached = groups.reduce((s, g) => s + (g.totalMembers || 0), 0);
+  const activeToday = groups.filter(g => {
+    if (!g.latestMessageTime) return false;
+    return (Date.now() - new Date(g.latestMessageTime).getTime()) / 3600000 < 24;
+  }).length;
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-5 sm:py-7">
+  const statCards = [
+    { label: "My Groups", value: joinedCount, icon: <FaComments />, iconBg: "bg-blue-50", iconColor: "text-blue-600" },
+    { label: "Total Groups", value: groups.length, icon: <FaUsers />, iconBg: "bg-indigo-50", iconColor: "text-indigo-600" },
+    { label: "Active Today", value: activeToday, icon: <FaClock />, iconBg: "bg-sky-50", iconColor: "text-sky-600" },
+  ];
+
+  return (
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* Header — plain, blue-accented, no gradient banner */}
+        <div className="text-sm text-gray-400">
+          <Link to="/student/dashboard" className="hover:text-[#043573] transition text-sm">Dashboard</Link>
+          <span className="mx-2 text-sm">&gt;</span>
+          <span className="text-gray-600 font-medium text-sm">Discussions</span>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Course Discussions</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Connect with instructors and peers — ask questions and share insights.</p>
+        </div>
+
+        {/* Stat strip */}
+        <div className="grid grid-cols-3 gap-3">
+          {statCards.map((s, i) => (
+            <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg ${s.iconBg} ${s.iconColor} flex-shrink-0`}>{s.icon}</div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{s.label}</p>
+                <p className="text-2xl font-black text-slate-900 leading-none mt-0.5">{s.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Channel list */}
         {loading ? (
           <div className="text-center py-16">
             <FaSpinner className="animate-spin text-blue-500 text-3xl mx-auto mb-3" />
             <p className="text-sm text-gray-500">Loading groups...</p>
           </div>
         ) : groups.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-dashed border-slate-300">
             <FaComments className="text-4xl text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-gray-600 mb-1">No discussion groups found</h3>
             <p className="text-sm text-gray-400">Your enrolled courses will appear here once they have discussion groups enabled.</p>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3">
             {groups.map(g => (
               <DiscussionCard
                 key={g.id}
@@ -491,7 +591,7 @@ function Discussions() {
       </div>
 
       <style>{`
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
     </div>
   );

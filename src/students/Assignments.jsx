@@ -382,7 +382,7 @@ const Assignments = () => {
 
   /* ── Main list view ── */
   return (
-    <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
       {detailLoading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-3 shadow-xl">

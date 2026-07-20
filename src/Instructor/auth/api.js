@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://98.93.255.158:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://200.97.164.120:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -333,7 +333,7 @@ export const instructorManagementApi = {
   // PUT /api/instructor/profile
   updateProfile: (data) =>
     api.put("/api/instructor/profile", data),
-
+ 
   // PUT /api/instructor/profile/image  (multipart — key: profileImage)
   updateProfileImage: (file) => {
     const formData = new FormData();
@@ -344,13 +344,59 @@ export const instructorManagementApi = {
       headers: { "Content-Type": undefined },
     });
   },
-
+ 
   // POST /api/instructor/request-email-change
   requestEmailChange: (newEmail) =>
     api.post("/api/instructor/request-email-change", { newEmail }),
-
+ 
   verifyEmailChange: (otp) =>
     api.post("/api/instructor/verify-email-change", { otp }),
+ 
+  // ── Proofs ──
+  getMyProofs: () =>
+    api.get("/api/instructor/profile/proofs"),
+ 
+  getProof: (proofId) =>
+    api.get(`/api/instructor/profile/proofs/${proofId}`),
+ 
+  // CONFIRMED via backend error response (seen twice now in the Network tab):
+  // {"success": false, "message": "proofFile is required"} — the multipart
+  // file field MUST be named "proofFile", not "file".
+  uploadProof: (proofName, proofType, file) => {
+    const formData = new FormData();
+    formData.append("proofName", proofName);
+    formData.append("proofType", proofType);
+    if (file) formData.append("proofFile", file);
+    return api.post("/api/instructor/profile/proofs", formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
+ 
+  updateProof: (proofId, proofName, proofType, file) => {
+    const formData = new FormData();
+    formData.append("proofName", proofName);
+    formData.append("proofType", proofType);
+    if (file) formData.append("proofFile", file);
+    return api.put(`/api/instructor/profile/proofs/${proofId}`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
+ 
+  deleteProof: (proofId) =>
+    api.delete(`/api/instructor/profile/proofs/${proofId}`),
+ 
+  // ── My Courses / My Students (profile-scoped) ──
+  getMyCourses: (page = 0, size = 10) =>
+    api.get(`/api/instructor/profile/courses?page=${page}&size=${size}`),
+ 
+  getMyStudents: (page = 0, size = 10) =>
+    api.get(`/api/instructor/profile/students?page=${page}&size=${size}`),
+};
+
+export const instructorStudentApi = {
+  // GET /api/instructor/profile/courses/{courseSlug}/students
+  getStudentsByCourse: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/instructor/profile/courses/${courseSlug}/students?page=${page}&size=${size}`),
 };
 
 export const discussionApi = {
@@ -385,4 +431,10 @@ export const discussionApi = {
     api.delete(`/api/discussions/messages/${messageId}`)
 };
 
-export default api;
+export const instructorCalendarApi = {
+  getCalendar: (startDate, endDate) =>
+    api.get(`/api/instructor/calendar?startDate=${startDate}&endDate=${endDate}`),
+};
+
+
+export default api;

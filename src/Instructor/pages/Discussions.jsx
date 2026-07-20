@@ -1,333 +1,32 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaComments, FaUsers, FaPaperPlane, FaArrowLeft,
-  FaSpinner, FaClock, FaReply, FaTrash,
-  FaEye, FaTimes
+  FaComments, FaUsers, FaClock,
+  FaSpinner, FaPlus, FaTimes, FaSearch,
 } from "react-icons/fa";
-import { discussionApi } from "../auth/api";
+import { discussionApi, instructorCourseApi } from "../auth/api";
+import DiscussionChat from "../components/Discussions/DiscussionChat";
+import DiscussionCard from "../components/Discussions/DiscussionCard";
 
-/* ─── Helpers ─────────────────────────────────────────────── */
-const fmt = (dateStr) => {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = (now - d) / 1000;
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-};
-
-const avatar = (name) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "U")}&background=059669&color=fff&size=80`;
-
-/* ─── Role Badge ──────────────────────────────────────────── */
-const RoleBadge = ({ role }) => {
-  if (role === "INSTRUCTOR")
-    return <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-semibold">Instructor</span>;
-  if (role === "ADMIN")
-    return <span className="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">Admin</span>;
-  return null;
-};
-
-/* ─── System Message ──────────────────────────────────────── */
-const SystemMessage = ({ content }) => (
-  <div className="flex justify-center my-1">
-    <span className="text-[11px] text-gray-400 bg-gray-100 rounded-full px-3 py-1 italic">{content}</span>
-  </div>
-);
-
-/* ─── Chat Message ────────────────────────────────────────── */
-const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
-  const isOwn = msg.senderId === currentUserId;
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className={`flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <img
-        src={msg.senderProfileImage || avatar(msg.senderName)}
-        alt={msg.senderName}
-        className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0 self-end"
-      />
-
-      <div className={`flex flex-col max-w-[72%] sm:max-w-[60%] ${isOwn ? "items-end" : "items-start"}`}>
-        {!isOwn && (
-          <div className="flex items-center gap-1.5 mb-1 ml-1">
-            <span className="text-xs font-semibold text-gray-700">{msg.senderName}</span>
-            <RoleBadge role={msg.senderRole} />
-          </div>
-        )}
-
-        {msg.replyToMessageId && (
-          <div className={`text-[11px] px-3 py-1.5 rounded-xl mb-1 border-l-2 ${isOwn ? "border-emerald-400 bg-emerald-50 text-emerald-700" : "border-gray-300 bg-gray-100 text-gray-600"}`}>
-            <span className="font-semibold block">{msg.replyToSenderName}</span>
-            <span className="line-clamp-1">{msg.replyToMessageContent}</span>
-          </div>
-        )}
-
-        <div className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm
-          ${isOwn ? "bg-emerald-600 text-white rounded-br-sm" : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm"}
-          ${msg.deleted ? "opacity-60 italic" : ""}
-        `}>
-          {msg.deleted ? "This message was deleted." : (
-            <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
-          )}
-          {msg.edited && !msg.deleted && (
-            <span className={`text-[9px] ml-1 ${isOwn ? "text-emerald-200" : "text-gray-400"}`}>(edited)</span>
-          )}
-        </div>
-
-        <div className={`flex items-center gap-2 mt-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-          <span className="text-[10px] text-gray-400">{fmt(msg.createdAt)}</span>
-          {msg.seenCount > 0 && isOwn && (
-            <span className="flex items-center gap-0.5 text-[10px] text-emerald-500">
-              <FaEye size={9} /> {msg.seenCount}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {hovered && !msg.deleted && (
-        <div className={`flex items-center gap-1 self-center ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-          <button onClick={() => onReply(msg)} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition" title="Reply">
-            <FaReply size={10} />
-          </button>
-          {isOwn && (
-            <button onClick={() => onDelete(msg.messageId)} className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-400 transition" title="Delete">
-              <FaTrash size={10} />
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ─── Discussion Chat ─────────────────────────────────────── */
-const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [replyTo, setReplyTo] = useState(null);
-  const [sending, setSending] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-
-  const fetchMessages = useCallback(async () => {
-    try {
-      const res = await discussionApi.getMessages(discussion.slug, 0, 100);
-      if (res.data.success) {
-        const sorted = [...res.data.data.content].reverse();
-        setMessages(sorted);
-        for (const msg of res.data.data.content) {
-          if (msg.seenCount === 0 && msg.senderId !== currentUserId) {
-            discussionApi.markMessageAsSeen(msg.messageId).catch(() => {});
-          }
-        }
-      }
-    } catch (err) {
-      console.error("fetchMessages:", err);
-    }
-  }, [discussion.slug, currentUserId]);
-
-  useEffect(() => { fetchMessages(); }, [fetchMessages]);
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-  const sendMessage = async () => {
-    if (!input.trim() || sending) return;
-    setSending(true);
-    try {
-      const payload = {
-        content: input.trim(),
-        type: "CHAT",
-        ...(replyTo ? { replyToMessageId: replyTo.messageId } : {})
-      };
-      const res = await discussionApi.sendMessage(discussion.slug, payload);
-      if (res.data.success) {
-        setMessages(prev => [...prev, res.data.data]);
-        setInput("");
-        setReplyTo(null);
-        inputRef.current?.focus();
-      }
-    } catch (err) {
-      console.error("sendMessage:", err);
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleDelete = async (messageId) => {
-    if (!window.confirm("Delete this message?")) return;
-    try {
-      const res = await discussionApi.deleteMessage(messageId);
-      if (res.data.success) {
-        setMessages(prev => prev.map(m =>
-          m.messageId === messageId ? { ...m, deleted: true, content: "" } : m
-        ));
-      }
-    } catch (err) {
-      console.error("deleteMessage:", err);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    if (e.key === "Escape" && replyTo) setReplyTo(null);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-50" style={{ animation: "slideUp 0.2s ease" }}>
-      <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="flex items-center gap-3 px-4 py-3 max-w-4xl mx-auto w-full">
-          <button onClick={onClose} className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition px-2 py-1 rounded-lg hover:bg-gray-100 flex-shrink-0">
-            <FaArrowLeft size={12} /> Back
-          </button>
-          <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <h2 className="text-sm sm:text-base font-bold text-gray-800 truncate">{discussion.groupName || discussion.courseTitle}</h2>
-          </div>
-          <span className="hidden sm:flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-            <FaUsers size={10} /> {discussion.totalMembers} members
-          </span>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-3 max-w-4xl mx-auto w-full">
-        {messages.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
-            <FaComments className="text-4xl mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No messages yet. Be the first to write!</p>
-          </div>
-        )}
-        {messages.map((msg) => {
-          if (msg.type === "SYSTEM") return <SystemMessage key={msg.messageId} content={msg.content} />;
-          return (
-            <ChatMessage
-              key={msg.messageId}
-              msg={msg}
-              currentUserId={currentUserId}
-              onDelete={handleDelete}
-              onReply={setReplyTo}
-            />
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
-
-      {replyTo && (
-        <div className="bg-emerald-50 border-t border-emerald-200 px-4 py-2 flex items-center gap-2 max-w-4xl mx-auto w-full">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-emerald-700">{replyTo.senderName}</p>
-            <p className="text-xs text-emerald-600 truncate">{replyTo.content}</p>
-          </div>
-          <button onClick={() => setReplyTo(null)} className="text-emerald-400 hover:text-emerald-600 flex-shrink-0">
-            <FaTimes size={14} />
-          </button>
-        </div>
-      )}
-
-      <div className="bg-white border-t border-gray-200 px-3 sm:px-6 py-3 flex-shrink-0">
-        <div className="flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={replyTo ? `Replying to ${replyTo.senderName}...` : "Write a message... (Enter to send)"}
-              rows={1}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none overflow-hidden"
-              style={{ minHeight: "42px", maxHeight: "120px" }}
-              onInput={e => {
-                e.target.style.height = "auto";
-                e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
-              }}
-            />
-          </div>
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || sending}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm flex-shrink-0
-              ${input.trim() && !sending ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
-          >
-            {sending ? <FaSpinner className="animate-spin" size={13} /> : <FaPaperPlane size={13} />}
-          </button>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-      `}</style>
-    </div>
-  );
-};
-
-/* ─── Discussion Card ─────────────────────────────────────── */
-const DiscussionCard = ({ discussion, onOpen }) => (
-  <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
-    <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
-    <div className="p-4 sm:p-5">
-      <div className="mb-3">
-        <h3 className="text-sm sm:text-base font-bold text-gray-800 mb-1">
-          {discussion.groupName || discussion.courseTitle}
-        </h3>
-        {discussion.courseTitle && discussion.groupName !== discussion.courseTitle && (
-          <p className="text-[11px] text-gray-400 mb-1">{discussion.courseTitle}</p>
-        )}
-        {discussion.latestMessage ? (
-          <p className="text-xs text-gray-500 line-clamp-2">
-            <span className="font-medium text-gray-600">Latest: </span>{discussion.latestMessage}
-          </p>
-        ) : (
-          <p className="text-xs text-gray-400 italic">No messages yet</p>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-3 text-[11px] text-gray-500">
-          <span className="flex items-center gap-1"><FaUsers size={9} /> {discussion.totalMembers ?? 0} members</span>
-          {discussion.latestMessageTime && (
-            <span className="hidden sm:flex items-center gap-1"><FaClock size={9} /> {fmt(discussion.latestMessageTime)}</span>
-          )}
-        </div>
-        <button
-          onClick={() => onOpen(discussion)}
-          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
-        >
-          <FaComments size={11} /> Open Chat
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-/* ─── Main Page ───────────────────────────────────────────── */
 function Discussions() {
   const [groups, setGroups] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [joiningId, setJoiningId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [courseSearch, setCourseSearch] = useState("");
+  const [creating, setCreating] = useState(null);
+  const [createError, setCreateError] = useState("");
   const currentUserId = localStorage.getItem("instructor_userId") || null;
 
   const fetchGroups = useCallback(async () => {
     setLoading(true);
     try {
-      // Instructors see groups they are members of via getMyGroups;
-      // fall back to getGroups if the endpoint returns empty
       const res = await discussionApi.getMyGroups(0, 100);
       if (res.data.success) {
-        const content = res.data.data.content;
-        if (content.length > 0) {
-          setGroups(content);
-        } else {
-          // Also try getGroups in case instructor hasn't joined yet
-          const res2 = await discussionApi.getGroups(0, 100);
-          if (res2.data.success) setGroups(res2.data.data.content);
-        }
+        setGroups(res.data.data.content);
       }
     } catch (err) {
       console.error("fetchGroups:", err);
@@ -337,6 +36,99 @@ function Discussions() {
   }, []);
 
   useEffect(() => { fetchGroups(); }, [fetchGroups]);
+
+  const fetchCourses = useCallback(async () => {
+    setCoursesLoading(true);
+    try {
+      const res = await instructorCourseApi.getInstructorCourses(0, 200);
+      if (res.data.success) {
+        setCourses(res.data.data.content || []);
+      }
+    } catch (err) {
+      console.error("fetchCourses:", err);
+    } finally {
+      setCoursesLoading(false);
+    }
+  }, []);
+
+  const openCreateModal = () => {
+    setShowCreateModal(true);
+    setCourseSearch("");
+    setCreateError("");
+    setCreating(null);
+    fetchCourses();
+  };
+
+  const handleCreateDiscussion = async (courseId) => {
+    setCreating(courseId);
+    setCreateError("");
+    try {
+      const alreadyJoinedGroup = groups.find(g => g.courseId === courseId);
+      if (alreadyJoinedGroup) {
+        setActiveChat(alreadyJoinedGroup);
+        setShowCreateModal(false);
+        return;
+      }
+
+      const allGroupsRes = await discussionApi.getGroups(0, 100);
+      if (allGroupsRes.data.success) {
+        const publicGroups = allGroupsRes.data.data.content;
+        const targetGroup = publicGroups.find(g => g.courseId === courseId);
+
+        if (targetGroup) {
+          await discussionApi.joinGroup(targetGroup.slug);
+          setGroups(prev => [{ ...targetGroup, joined: true }, ...prev]);
+          setShowCreateModal(false);
+        } else {
+          const courseObj = courses.find(c => (c.courseId || c.id) === courseId);
+          if (courseObj && courseObj.title) {
+            const guessedSlug = courseObj.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + "-discussion";
+            try {
+              const joinRes = await discussionApi.joinGroup(guessedSlug);
+              if (joinRes.data.success) {
+                setGroups(prev => [{ ...joinRes.data.data, joined: true }, ...prev]);
+                setShowCreateModal(false);
+                return;
+              }
+            } catch (fallbackErr) {
+              console.error("Fallback join failed:", fallbackErr);
+            }
+          }
+          setCreateError("This course doesn't have a discussion group yet. Please ask an Admin to create it.");
+        }
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to join discussion group.";
+      setCreateError(msg);
+      console.error("joinDiscussion:", err);
+    } finally {
+      setCreating(null);
+    }
+  };
+
+  const filteredCourses = courses.filter(c =>
+    (c.title || "").toLowerCase().includes(courseSearch.toLowerCase())
+  );
+
+  const handleOpen = async (discussion) => {
+    if (!discussion.joined) {
+      setJoiningId(discussion.id);
+      try {
+        await discussionApi.joinGroup(discussion.slug);
+        setGroups(prev => prev.map(g =>
+          g.id === discussion.id ? { ...g, joined: true, totalMembers: (g.totalMembers || 0) + 1 } : g
+        ));
+        setActiveChat({ ...discussion, joined: true });
+      } catch (err) {
+        console.error("joinGroup failed:", err);
+        setActiveChat(discussion);
+      } finally {
+        setJoiningId(null);
+      }
+    } else {
+      setActiveChat(discussion);
+    }
+  };
 
   if (activeChat) {
     return (
@@ -348,45 +140,165 @@ function Discussions() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
-      <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative max-w-4xl mx-auto px-4 py-5 sm:py-7">
-          <p className="text-xs text-emerald-200 mb-2">
-            <Link to="/instructor/dashboard" className="hover:text-white transition">Dashboard</Link>
-            <span className="mx-2">›</span>Discussions
-          </p>
-          <h1 className="text-xl sm:text-2xl font-bold mb-1">Course Discussions</h1>
-          <p className="text-xs sm:text-sm text-emerald-100 opacity-90">
-            Engage with your students, answer questions, and foster learning.
-          </p>
-        </div>
-      </div>
+  const totalMembersReached = groups.reduce((s, g) => s + (g.totalMembers || 0), 0);
+  const activeToday = groups.filter(g => {
+    if (!g.latestMessageTime) return false;
+    return (Date.now() - new Date(g.latestMessageTime).getTime()) / 3600000 < 24;
+  }).length;
 
-      <div className="max-w-4xl mx-auto px-4 py-5 sm:py-7">
+  const statCards = [
+    { label: "Discussion Groups", value: groups.length, icon: <FaComments />, iconBg: "bg-violet-50", iconColor: "text-violet-500" },
+    { label: "Members Reached", value: totalMembersReached, icon: <FaUsers />, iconBg: "bg-indigo-50", iconColor: "text-indigo-500" },
+    { label: "Active Today", value: activeToday, icon: <FaClock />, iconBg: "bg-teal-50", iconColor: "text-teal-500" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc]">
+      <div className="max-w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+        {/* Header — plain, on-brand with the rest of the instructor app */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="text-sm text-gray-400">
+            <Link to="/instructor/dashboard" className="hover:text-violet-600 transition text-sm">Dashboard</Link>
+            <span className="mx-2 text-sm">&gt;</span>
+            <span className="text-gray-600 font-medium text-sm">Discussions</span>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Course Discussions</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Engage with your students, answer questions, and foster learning.</p>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0"
+          >
+            <FaPlus size={12} /> Add Discussion
+          </button>
+        </div>
+
+        {/* Stat cards — same visual language as the rest of the app, not a banner */}
+        <div className="grid grid-cols-3 gap-3">
+          {statCards.map((s, i) => (
+            <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg ${s.iconBg} ${s.iconColor} flex-shrink-0`}>{s.icon}</div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{s.label}</p>
+                <p className="text-2xl font-black text-slate-900 leading-none mt-0.5">{s.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Channel list */}
         {loading ? (
           <div className="text-center py-16">
-            <FaSpinner className="animate-spin text-emerald-500 text-3xl mx-auto mb-3" />
+            <FaSpinner className="animate-spin text-violet-500 text-3xl mx-auto mb-3" />
             <p className="text-sm text-gray-500">Loading groups...</p>
           </div>
         ) : groups.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-dashed border-slate-300">
             <FaComments className="text-4xl text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-gray-600 mb-1">No discussion groups found</h3>
-            <p className="text-sm text-gray-400">Discussion groups for your courses will appear here once created.</p>
+            <h3 className="text-base font-semibold text-gray-600 mb-1">No discussion groups yet</h3>
+            <p className="text-sm text-gray-400 mb-5">Add a discussion group for one of your courses to get started.</p>
+            <button
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm"
+            >
+              <FaPlus size={11} /> Add Discussion
+            </button>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3">
             {groups.map(g => (
-              <DiscussionCard key={g.id} discussion={g} onOpen={setActiveChat} />
+              <DiscussionCard
+                key={g.id}
+                discussion={g}
+                onOpen={handleOpen}
+                loading={joiningId === g.id}
+              />
             ))}
           </div>
         )}
       </div>
 
+      {/* Create Discussion Modal — plain header, violet accent, matches app system */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} style={{ animation: "fadeIn 0.15s ease" }}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[95%] max-w-lg mx-auto overflow-hidden"
+            onClick={e => e.stopPropagation()}
+            style={{ animation: "scaleIn 0.2s ease" }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
+                  <FaComments size={14} />
+                </div>
+                <div>
+                  <h2 className="text-sm font-black text-slate-900">Create Discussion Group</h2>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Select a course to create a discussion group</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              >
+                <FaTimes size={14} />
+              </button>
+            </div>
+
+            <div className="px-5 pt-4 pb-2">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                <input
+                  type="text"
+                  value={courseSearch}
+                  onChange={e => setCourseSearch(e.target.value)}
+                  placeholder="Search courses..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 outline-none transition"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {createError && (
+              <div className="mx-5 mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+                {createError}
+              </div>
+            )}
+
+            <div className="px-5 pb-5 max-h-[340px] overflow-y-auto">
+              {coursesLoading ? (
+                <div className="text-center py-10">
+                  <FaSpinner className="animate-spin text-violet-500 text-xl mx-auto mb-2" />
+                  <p className="text-xs text-gray-400">Loading courses...</p>
+                </div>
+              ) : filteredCourses.length === 0 ? (
+                <p className="text-center py-6 text-sm text-gray-400">No courses found matching "{courseSearch}"</p>
+              ) : (
+                <div className="space-y-2 mt-2">
+                  {filteredCourses.map(c => (
+                    <div key={c.id || c.courseId} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:border-violet-200 hover:bg-violet-50/50 transition group">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <p className="text-sm font-bold text-gray-800 truncate">{c.title}</p>
+                        {c.category && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{c.category}</p>}
+                      </div>
+                      <button
+                        onClick={() => handleCreateDiscussion(c.id || c.courseId)}
+                        disabled={creating === (c.id || c.courseId)}
+                        className="px-3 py-1.5 text-xs font-semibold bg-violet-100 text-violet-700 hover:bg-violet-200 rounded-lg transition disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {creating === (c.id || c.courseId) ? "Joining..." : "Select"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
       `}</style>
     </div>
   );

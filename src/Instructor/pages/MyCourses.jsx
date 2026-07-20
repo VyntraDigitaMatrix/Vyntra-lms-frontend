@@ -9,12 +9,11 @@ import {
   MdCheckCircle, MdWarning, MdArchive, MdPublish,
 } from "react-icons/md";
 import { instructorCourseApi } from "../auth/api";
+import ArchiveCourseModal from "../components/ArchiveCourseModal";
+import DeleteCourseModal from "../components/DeleteCourseModal";
 
 const defaultImage = S1;
 
-/* ══════════════════════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════════════════════ */
 function Toast({ msg, type = "success", onClose }) {
   if (!msg) return null;
   return (
@@ -28,86 +27,8 @@ function Toast({ msg, type = "success", onClose }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════════
-   ARCHIVE CONFIRM MODAL
-══════════════════════════════════════════════════════════ */
-function ArchiveModal({ course, onClose, onConfirm, loading }) {
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={onClose}>
-      <div
-        onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-amber-200 border-t-4 border-t-amber-500"
-      >
-        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <FaArchive className="text-amber-600 text-base" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-gray-900">Archive Course</h2>
-              <p className="text-xs text-gray-500 mt-0.5">This will hide the course from learners</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition text-lg leading-none mt-0.5">
-            <FaTimes />
-          </button>
-        </div>
-
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-4">
-            <img
-              src={course.thumbnailUrl || defaultImage}
-              alt={course.title}
-              className="w-12 h-9 object-cover rounded-lg flex-shrink-0"
-            />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-800 truncate">{course.title}</p>
-              <p className="text-xs text-gray-500 mt-0.5">Status: <span className="font-semibold text-amber-600">{course.status}</span></p>
-            </div>
-          </div>
-
-          <div className="space-y-2 mb-5">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">What happens when archived:</p>
-            {[
-              { icon: "🙈", text: "Course is hidden from all learners and search" },
-              { icon: "✅", text: "Existing enrollments and data are preserved" },
-              { icon: "🔓", text: "You can restore or delete it later from settings" },
-              { icon: "🚫", text: "No new enrollments will be accepted" },
-            ].map(({ icon, text }) => (
-              <div key={text} className="flex items-center gap-2.5 text-xs text-gray-600">
-                <span className="text-sm">{icon}</span>
-                <span>{text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-2.5">
-          <button onClick={onClose}
-            className="flex-1 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-[2] py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition flex items-center justify-center gap-2"
-          >
-            {loading
-              ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Archiving…</>
-              : <><FaArchive className="text-xs" /> Archive Course</>
-            }
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
-   STATUS BADGE
-══════════════════════════════════════════════════════════ */
-function StatusBadge({ course }) {
+/* STATUS BADGE */
+const StatusBadge = ({ course }) => {
   if (course.status === "PUBLISHED")
     return <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full">● PUBLISHED</span>;
   if (course.status === "ARCHIVED")
@@ -117,10 +38,8 @@ function StatusBadge({ course }) {
   return <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2.5 py-1 rounded-full">✎ {course.status || "DRAFT"}</span>;
 }
 
-/* ══════════════════════════════════════════════════════════
-   STAT CARDS
-══════════════════════════════════════════════════════════ */
-function StatCards({ courses }) {
+/* STAT CARDS */
+const StatCards = ({ courses }) => {
   const total = courses.length;
   const published = courses.filter(c => c.status === "PUBLISHED").length;
   const draft = courses.filter(c => c.status === "DRAFT" || (!c.status)).length;
@@ -146,9 +65,7 @@ function StatCards({ courses }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════════
-   MAIN COMPONENT
-══════════════════════════════════════════════════════════ */
+/* MAIN COMPONENT */
 const InstructorCourses = () => {
   const navigate = useNavigate();
 
@@ -166,6 +83,10 @@ const InstructorCourses = () => {
   // Archive state
   const [archiveTarget, setArchiveTarget] = useState(null);
   const [archiving, setArchiving] = useState(false);
+
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -253,6 +174,8 @@ const InstructorCourses = () => {
     }
   };
 
+  // No delete action available for instructor
+
   /* ── Publish request ── */
   const handleRequestPublish = async (course) => {
     if (!window.confirm(`Request publication for "${course.title}"?`)) return;
@@ -284,11 +207,19 @@ const InstructorCourses = () => {
 
       {/* Archive modal */}
       {archiveTarget && (
-        <ArchiveModal
+        <ArchiveCourseModal
           course={archiveTarget}
           onClose={() => setArchiveTarget(null)}
           onConfirm={handleArchiveConfirm}
           loading={archiving}
+        />
+      )}
+
+      {/* Delete modal */}
+      {deleteTarget && (
+        <DeleteCourseModal
+          course={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
         />
       )}
 
@@ -507,7 +438,8 @@ const InstructorCourses = () => {
 
                       <button
                         type="button"
-                        onClick={() => alert("Course deletion is disabled. Please contact an administrator.")}
+                        onClick={() => setDeleteTarget(course)}
+                        title="Delete Course"
                         className="h-8 w-8 rounded-lg border border-red-200 text-red-400 text-xs hover:bg-red-50 hover:text-red-600 transition flex items-center justify-center"
                       >
                         <FaTrash className="text-[10px]" />

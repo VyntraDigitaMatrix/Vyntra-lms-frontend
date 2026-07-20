@@ -117,7 +117,7 @@ const Courses = () => {
     }), [courses, totalElements]);
 
     return (
-        <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
+        <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
 
                 {/* ── Header ── */}

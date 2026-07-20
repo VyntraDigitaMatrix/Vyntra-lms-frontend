@@ -32,7 +32,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="bg-[#f6f7fb] min-h-screen p-3 sm:p-4 md:p-5">
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-lg transition-all">

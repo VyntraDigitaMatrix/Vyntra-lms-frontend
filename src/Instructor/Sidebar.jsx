@@ -16,6 +16,7 @@ import {
   FaChalkboardTeacher,
   FaChartBar,
   FaCreditCard,
+  FaCertificate
 } from "react-icons/fa";
 import {MdQuiz} from "react-icons/md"
 
@@ -26,12 +27,14 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaHome />, label: "Dashboard", path: "/instructor/dashboard" },
     { icon: <FaChalkboardTeacher />, label: "My Courses", path: "/instructor/courses" },
     { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans"},
+    { icon: <FaUsers />, label: "Live Classes", path: "/instructor/live-classes" },
     { icon: <FaUsers />, label: "Students", path: "/instructor/students" },
     { icon: <FaClipboardList />, label: "Assignments", path: "/instructor/assignments" },
     { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz"},
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/instructor/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/instructor/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/instructor/discussions" },
+    { icon: <FaCertificate />, label: "Certificates", path: "/instructor/certificates" },
     { icon: <FaChartBar />, label: "Reports", path: "/instructor/reports" },
   ];
 

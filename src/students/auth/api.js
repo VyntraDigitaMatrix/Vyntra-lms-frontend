@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://98.93.255.158:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://200.97.164.120:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -94,88 +94,69 @@ export const studentPaymentApi = {
 };
 
 export const studentEnrolledCourseApi = {
-  // GET /api/v1/student/my-courses  (paginated)
   getMyEnrolledCourses: (page = 0, size = 10) =>
     api.get(`/api/v1/student/my-courses?page=${page}&size=${size}&sort=createdAt,desc`),
 
   getMyCourseById: (courseId) =>
     api.get(`/api/v1/student/my-courses/${courseId}`),
 
-  // GET /api/v1/student/my-courses/{courseId}/modules  (list with nested lessons)
   getCourseModules: (courseId) =>
     api.get(`/api/v1/student/my-courses/${courseId}/modules`),
 
-  // GET /api/v1/student/my-courses/{courseId}/modules/{moduleId}/lessons  (paginated)
   getModuleLessons: (courseId, moduleId, page = 0, size = 50) =>
     api.get(`/api/v1/student/my-courses/${courseId}/modules/${moduleId}/lessons?page=${page}&size=${size}&sort=sortOrder,asc`),
 
-  // GET /api/v1/student/my-courses/{courseId}/lessons/{lessonId}  (single lesson full content)
   getLessonById: (courseId, lessonId) =>
     api.get(`/api/v1/student/my-courses/${courseId}/lessons/${lessonId}`),
 };
 
 export const studentLearningApi = {
-  // GET /api/student/learning/my-courses (paginated)
   getMyEnrolledCourses: (page = 0, size = 10) =>
     api.get(`/api/student/learning/my-courses?page=${page}&size=${size}&sort=createdAt,desc`),
 
-  // GET /api/student/learning/courses
   getCourses: (page = 0, size = 10, sort = "id,desc") =>
     api.get(`/api/student/learning/courses?page=${page}&size=${size}&sort=${sort}`),
 
-  // GET /api/student/learning/courses/{courseSlug}
   getCourseBySlug: (courseSlug) =>
     api.get(`/api/student/learning/courses/${courseSlug}`),
 
-  // GET /api/student/learning/courses/{courseSlug}/modules
   getCourseModules: (courseSlug) =>
     api.get(`/api/student/learning/courses/${courseSlug}/modules`),
 
-  // GET /api/student/learning/courses/{courseSlug}/progress
   getCourseProgress: (courseSlug) =>
     api.get(`/api/student/learning/courses/${courseSlug}/progress`),
 
-  // GET /api/student/learning/modules/{moduleSlug}/lessons
   getModuleLessons: (moduleSlug) =>
     api.get(`/api/student/learning/modules/${moduleSlug}/lessons`),
 
-  // GET /api/student/learning/lessons/{lessonSlug}
   getLessonById: (lessonSlug) =>
     api.get(`/api/student/learning/lessons/${lessonSlug}`),
 
-  // POST /api/student/learning/lessons/{lessonSlug}/complete
   completeLesson: (lessonSlug) =>
     api.post(`/api/student/learning/lessons/${lessonSlug}/complete`, {}),
 
-  // GET /api/student/course-ratings/{courseSlug}
   getCourseReviews: (courseSlug, page = 0, size = 10) =>
     api.get(`/api/student/course-ratings/${courseSlug}?page=${page}&size=${size}`),
 
-  // POST /api/student/course-ratings/{courseSlug}
   submitCourseReview: (courseSlug, data) =>
     api.post(`/api/student/course-ratings/${courseSlug}`, data),
 
-  // PUT /api/student/course-ratings/{courseSlug}
   updateCourseReview: (courseSlug, data) =>
     api.put(`/api/student/course-ratings/${courseSlug}`, data),
 
-  // GET /api/student/course-ratings/{courseSlug}/my-rating
   getMyRating: (courseSlug) =>
     api.get(`/api/student/course-ratings/${courseSlug}/my-rating`),
 
-  // DELETE /api/student/course-ratings/{courseSlug}
   deleteCourseReview: (courseSlug) =>
     api.delete(`/api/student/course-ratings/${courseSlug}`),
 };
 
 export const studentNotesApi = {
-  getNotes: (courseId, page = 0, size = 10) => {
-    let url = `/api/v1/student/notes?page=${page}&size=${size}`;
-    if (courseId) {
-      url += `&courseId=${courseId}`;
-    }
-    return api.get(url);
-  },
+  getAllNotes: (page = 0, size = 100) =>
+    api.get(`/api/v1/student/notes/all?page=${page}&size=${size}`),
+
+  getNotesByCourse: (courseId, page = 0, size = 100) =>
+    api.get(`/api/v1/student/notes/Course?courseId=${courseId}&page=${page}&size=${size}`),
 
   createNote: (data) =>
     api.post("/api/v1/student/notes", data),
@@ -300,19 +281,15 @@ export const studentAssignmentApi = {
 };
 
 export const studentInstructorRatingApi = {
-  // GET /api/student/instructor-ratings/{courseSlug}/{instructorId}/my-rating
   getMyRating: (courseSlug, instructorId) =>
     api.get(`/api/student/instructor-ratings/${courseSlug}/${instructorId}/my-rating`),
 
-  // POST /api/student/instructor-ratings/{courseSlug}
   submitRating: (courseSlug, payload) =>
     api.post(`/api/student/instructor-ratings/${courseSlug}`, payload),
 
-  // PUT /api/student/instructor-ratings/{courseSlug}
   updateRating: (courseSlug, payload) =>
     api.put(`/api/student/instructor-ratings/${courseSlug}`, payload),
 
-  // GET /api/student/instructor-ratings/instructors
   getInstructors: () =>
     api.get(`/api/student/instructor-ratings/instructors`)
 };
@@ -336,6 +313,9 @@ export const studentManagementApi = {
 
   verifyEmailChange: (otp) =>
     api.post(`/api/student/email/verify-change`, { otp }),
+
+  applyReferralCode: (referralCode) =>
+    api.post(`/api/student/referral`, { referralCode }),
 };
 
 export const discussionApi = {
@@ -368,6 +348,39 @@ export const discussionApi = {
 
   deleteMessage: (messageId) =>
     api.delete(`/api/discussions/messages/${messageId}`)
+};
+
+export const studentCalendarApi = {
+  getCalendar: (startDate, endDate) =>
+    api.get(`/api/student/calendar?startDate=${startDate}&endDate=${endDate}`),
+};
+
+export const studentAttendanceApi = {
+  punchIn: () =>
+    api.post(`/api/student/attendance/punch-in`),
+
+  punchOut: () =>
+    api.patch(`/api/student/attendance/punch-out`),
+
+  getToday: () =>
+    api.get(`/api/student/attendance/today`),
+
+  getHistory: (page = 0, size = 10) =>
+    api.get(`/api/student/attendance/history?page=${page}&size=${size}`),
+};
+
+export const studentCertificateApi = {
+  // POST /api/student/certificates/{courseSlug}/request
+  requestCertificate: (courseSlug) =>
+    api.post(`/api/student/certificates/${courseSlug}/request`),
+
+  // GET /api/student/certificates
+  getMyCertificates: (page = 0, size = 20) =>
+    api.get(`/api/student/certificates?page=${page}&size=${size}`),
+
+  // GET /api/student/certificates/{certificateNumber}
+  getCertificate: (certificateNumber) =>
+    api.get(`/api/student/certificates/${certificateNumber}`),
 };
 
 export default api;

@@ -214,7 +214,7 @@ const Quizzes = () => {
     };
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] font-sans">
+        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
             <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
 
                 {/* Simple Header */}

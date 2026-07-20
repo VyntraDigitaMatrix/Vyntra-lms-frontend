@@ -658,7 +658,7 @@ const ViewCourse = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-6 pb-24 md:pb-6">
+        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumb */}
                 <div className="mb-4">

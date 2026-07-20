@@ -97,15 +97,6 @@ function normalizeFiles(sub) {
     return [];
 }
 
-/*
-  parseSubmittedDate — tries every field name the backend might use and
-  handles all common formats:
-    • ISO string  "2025-06-10T14:30:00Z"
-    • Date string "2025-06-10"
-    • Unix ms     1718023800000
-    • Unix sec    1718023800
-    • Array       [2025, 6, 10, 14, 30, 0]   (Java LocalDateTime serialized)
-*/
 function parseSubmittedDate(sub) {
     if (!sub) return null;
 

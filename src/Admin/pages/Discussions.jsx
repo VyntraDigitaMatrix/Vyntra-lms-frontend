@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import {
   FaComments, FaUsers, FaPaperPlane, FaArrowLeft,
   FaSpinner, FaClock, FaReply, FaTrash,
-  FaEye, FaTimes, FaSignOutAlt
+  FaEye, FaTimes, FaSignOutAlt, FaPlus, FaSearch
 } from "react-icons/fa";
-import { discussionApi } from "../auth/api";
+import { discussionApi, adminCourseApi } from "../auth/api";
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 const fmt = (dateStr) => {
@@ -56,12 +56,10 @@ const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
       />
 
       <div className={`flex flex-col max-w-[72%] sm:max-w-[60%] ${isOwn ? "items-end" : "items-start"}`}>
-        {!isOwn && (
-          <div className="flex items-center gap-1.5 mb-1 ml-1">
-            <span className="text-xs font-semibold text-gray-700">{msg.senderName}</span>
-            <RoleBadge role={msg.senderRole} />
-          </div>
-        )}
+        <div className={`flex items-center gap-1.5 mb-1 ${isOwn ? "mr-1 flex-row-reverse" : "ml-1"}`}>
+          <span className="text-xs font-semibold text-gray-700">{isOwn ? "You" : msg.senderName}</span>
+          <RoleBadge role={msg.senderRole} />
+        </div>
 
         {msg.replyToMessageId && (
           <div className={`text-[11px] px-3 py-1.5 rounded-xl mb-1 border-l-2 ${isOwn ? "border-purple-400 bg-purple-50 text-purple-700" : "border-gray-300 bg-gray-100 text-gray-600"}`}>
@@ -97,11 +95,11 @@ const ChatMessage = ({ msg, currentUserId, onDelete, onReply }) => {
           <button onClick={() => onReply(msg)} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition" title="Reply">
             <FaReply size={10} />
           </button>
-          {isOwn && (
+          
             <button onClick={() => onDelete(msg.messageId)} className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-400 transition" title="Delete">
               <FaTrash size={10} />
             </button>
-          )}
+        
         </div>
       )}
     </div>
@@ -125,7 +123,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
         setMessages(sorted);
         for (const msg of res.data.data.content) {
           if (msg.seenCount === 0 && msg.senderId !== currentUserId) {
-            discussionApi.markMessageAsSeen(msg.messageId).catch(() => {});
+            discussionApi.markMessageAsSeen(msg.messageId).catch(() => { });
           }
         }
       }
@@ -268,7 +266,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
 };
 
 /* ─── Discussion Card ─────────────────────────────────────── */
-const DiscussionCard = ({ discussion, onOpen, onLeave }) => (
+const DiscussionCard = ({ discussion, onOpen, onLeave, openLoading }) => (
   <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden">
     <div className="h-1 bg-gradient-to-r from-purple-500 to-indigo-600" />
     <div className="p-4 sm:p-5">
@@ -307,9 +305,11 @@ const DiscussionCard = ({ discussion, onOpen, onLeave }) => (
           )}
           <button
             onClick={() => onOpen(discussion)}
-            className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
+            disabled={openLoading}
+            className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white rounded-full text-xs font-semibold transition shadow-sm flex items-center gap-1.5"
           >
-            <FaComments size={11} /> Open Chat
+            {openLoading ? <FaSpinner className="animate-spin" size={11} /> : <FaComments size={11} />}
+            {openLoading ? "Joining..." : "Open Chat"}
           </button>
         </div>
       </div>
@@ -322,6 +322,13 @@ function Discussions() {
   const [groups, setGroups] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [joiningId, setJoiningId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [courseSearch, setCourseSearch] = useState("");
+  const [creating, setCreating] = useState(null);
+  const [createError, setCreateError] = useState("");
   const currentUserId = localStorage.getItem("admin_userId") || null;
 
   const fetchGroups = useCallback(async () => {
@@ -340,6 +347,72 @@ function Discussions() {
   }, []);
 
   useEffect(() => { fetchGroups(); }, [fetchGroups]);
+
+  // Fetch all courses when modal opens
+  const fetchCourses = useCallback(async () => {
+    setCoursesLoading(true);
+    try {
+      const res = await adminCourseApi.getAllCourses(0, 200);
+      if (res.data.success) {
+        setCourses(res.data.data.content || []);
+      }
+    } catch (err) {
+      console.error("fetchCourses:", err);
+    } finally {
+      setCoursesLoading(false);
+    }
+  }, []);
+
+  const openCreateModal = () => {
+    setShowCreateModal(true);
+    setCourseSearch("");
+    setCreateError("");
+    setCreating(null);
+    fetchCourses();
+  };
+
+  const handleCreateDiscussion = async (courseId) => {
+    setCreating(courseId);
+    setCreateError("");
+    try {
+      const res = await discussionApi.getCourseGroup(courseId);
+      if (res.data.success) {
+        setGroups(prev => [res.data.data, ...prev]);
+        setShowCreateModal(false);
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to create discussion group.";
+      setCreateError(msg);
+      console.error("createDiscussion:", err);
+    } finally {
+      setCreating(null);
+    }
+  };
+
+  const filteredCourses = courses.filter(c =>
+    (c.title || "").toLowerCase().includes(courseSearch.toLowerCase())
+  );
+
+  // Auto-join if not a member, then open chat
+  const handleOpen = async (discussion) => {
+    if (!discussion.joined) {
+      setJoiningId(discussion.id);
+      try {
+        await discussionApi.joinGroup(discussion.slug);
+        setGroups(prev => prev.map(g =>
+          g.id === discussion.id ? { ...g, joined: true, totalMembers: (g.totalMembers || 0) + 1 } : g
+        ));
+        setActiveChat({ ...discussion, joined: true });
+      } catch (err) {
+        console.error("joinGroup failed:", err);
+        setActiveChat(discussion);
+      } finally {
+        setJoiningId(null);
+      }
+    } else {
+      setActiveChat(discussion);
+    }
+  };
 
   const handleLeave = async (slug) => {
     if (!window.confirm("Leave this discussion group?")) return;
@@ -374,10 +447,22 @@ function Discussions() {
             <Link to="/admin/dashboard" className="hover:text-white transition">Dashboard</Link>
             <span className="mx-2">›</span>Discussions
           </p>
-          <h1 className="text-xl sm:text-2xl font-bold mb-1">Admin Discussions</h1>
-          <p className="text-xs sm:text-sm text-purple-100 opacity-90">
-            Monitor, moderate and participate in all course discussions across the platform.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold mb-1">Admin Discussions</h1>
+              <p className="text-xs sm:text-sm text-purple-100 opacity-90">
+                Monitor, moderate and participate in all course discussions across the platform.
+              </p>
+            </div>
+            <button
+              onClick={openCreateModal}
+              className="flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl text-sm font-semibold transition-all border border-white/20 shadow-sm hover:shadow-md"
+            >
+              <FaPlus size={11} />
+              <span className="hidden sm:inline">Add Discussion</span>
+              <span className="sm:hidden">Add</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -399,16 +484,119 @@ function Discussions() {
               <DiscussionCard
                 key={g.id}
                 discussion={g}
-                onOpen={setActiveChat}
+                onOpen={handleOpen}
                 onLeave={g.joined ? handleLeave : null}
+                openLoading={joiningId === g.id}
               />
             ))}
           </div>
         )}
       </div>
 
+      {/* Create Discussion Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} style={{ animation: "fadeIn 0.15s ease" }}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-[95%] max-w-lg mx-auto overflow-hidden"
+            onClick={e => e.stopPropagation()}
+            style={{ animation: "scaleIn 0.2s ease" }}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white">Create Discussion Group</h2>
+                <p className="text-[11px] text-purple-200 mt-0.5">Select a course to create a discussion group</p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition"
+              >
+                <FaTimes size={14} />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="px-5 pt-4 pb-2">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                <input
+                  type="text"
+                  value={courseSearch}
+                  onChange={e => setCourseSearch(e.target.value)}
+                  placeholder="Search courses..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none transition"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Error */}
+            {createError && (
+              <div className="mx-5 mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+                {createError}
+              </div>
+            )}
+
+            {/* Course List */}
+            <div className="px-5 pb-5 max-h-[340px] overflow-y-auto">
+              {coursesLoading ? (
+                <div className="text-center py-10">
+                  <FaSpinner className="animate-spin text-purple-500 text-xl mx-auto mb-2" />
+                  <p className="text-xs text-gray-400">Loading courses...</p>
+                </div>
+              ) : filteredCourses.length === 0 ? (
+                <div className="text-center py-10">
+                  <FaComments className="text-3xl text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">{courseSearch ? "No matching courses found" : "No courses available"}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredCourses.map(course => {
+                    const courseIdentifier = course.courseId || course.id;
+                    const alreadyExists = groups.some(g => g.courseId === courseIdentifier);
+                    return (
+                      <div
+                        key={courseIdentifier}
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all ${alreadyExists
+                            ? "bg-gray-50 border-gray-200 opacity-60"
+                            : "bg-white border-gray-100 hover:border-purple-200 hover:shadow-sm"
+                          }`}
+                      >
+                        <div className="flex-1 min-w-0 mr-3">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{course.title}</p>
+                          {course.instructorName && (
+                            <p className="text-[11px] text-gray-400 mt-0.5">by {course.instructorName}</p>
+                          )}
+                        </div>
+                        {alreadyExists ? (
+                          <span className="text-[10px] text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full font-medium flex-shrink-0">Already exists</span>
+                        ) : (
+                          <button
+                            onClick={() => handleCreateDiscussion(courseIdentifier)}
+                            disabled={creating === courseIdentifier}
+                            className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white rounded-lg text-xs font-semibold transition shadow-sm flex items-center gap-1.5 flex-shrink-0"
+                          >
+                            {creating === courseIdentifier ? (
+                              <><FaSpinner className="animate-spin" size={10} /> Creating...</>
+                            ) : (
+                              <><FaPlus size={9} /> Create</>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
     </div>
   );

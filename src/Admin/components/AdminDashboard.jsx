@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { 
-  Users, 
-  BookOpen, 
-  GraduationCap, 
-  BarChart3, 
-  Settings, 
+import {
+  Users,
+  BookOpen,
+  GraduationCap,
+  BarChart3,
+  Settings,
   Bell,
   Search,
   Filter,
@@ -63,67 +63,67 @@ const AdminDashboard = () => {
   ];
 
   const stats = [
-    { 
-      title: "Total Students", 
-      value: 156, 
-      change: "+12%", 
+    {
+      title: "Total Students",
+      value: 156,
+      change: "+12%",
       changeType: "increase",
-      icon: GraduationCap, 
+      icon: GraduationCap,
       color: "blue",
       bgColor: "bg-blue-50",
       iconColor: "text-blue-600",
       borderColor: "border-blue-200"
     },
-    { 
-      title: "Total Instructors", 
-      value: 24, 
-      change: "+5%", 
+    {
+      title: "Total Instructors",
+      value: 24,
+      change: "+5%",
       changeType: "increase",
-      icon: Users, 
+      icon: Users,
       color: "green",
       bgColor: "bg-green-50",
       iconColor: "text-green-600",
       borderColor: "border-green-200"
     },
-    { 
-      title: "Active Courses", 
-      value: 18, 
-      change: "+3", 
+    {
+      title: "Active Courses",
+      value: 18,
+      change: "+3",
       changeType: "increase",
-      icon: BookOpen, 
+      icon: BookOpen,
       color: "purple",
       bgColor: "bg-purple-50",
       iconColor: "text-purple-600",
       borderColor: "border-purple-200"
     },
-    { 
-      title: "Completion Rate", 
-      value: "78%", 
-      change: "+8%", 
+    {
+      title: "Completion Rate",
+      value: "78%",
+      change: "+8%",
       changeType: "increase",
-      icon: TrendingUp, 
+      icon: TrendingUp,
       color: "yellow",
       bgColor: "bg-yellow-50",
       iconColor: "text-yellow-600",
       borderColor: "border-yellow-200"
     },
-    { 
-      title: "Revenue", 
-      value: "$45,230", 
-      change: "+18%", 
+    {
+      title: "Revenue",
+      value: "$45,230",
+      change: "+18%",
       changeType: "increase",
-      icon: DollarSign, 
+      icon: DollarSign,
       color: "emerald",
       bgColor: "bg-emerald-50",
       iconColor: "text-emerald-600",
       borderColor: "border-emerald-200"
     },
-    { 
-      title: "Pending Payments", 
-      value: "$5,200", 
-      change: "+2%", 
+    {
+      title: "Pending Payments",
+      value: "$5,200",
+      change: "+2%",
       changeType: "decrease",
-      icon: Clock, 
+      icon: Clock,
       color: "red",
       bgColor: "bg-red-50",
       iconColor: "text-red-600",
@@ -131,12 +131,12 @@ const AdminDashboard = () => {
     }
   ];
 
-  const filteredStudents = students.filter(s => 
+  const filteredStudents = students.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredInstructors = instructors.filter(i => 
+  const filteredInstructors = instructors.filter(i =>
     i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     i.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -144,22 +144,22 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                Admin Dashboard
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">Manage students, instructors, and course activities</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-               
-              </div>
-              
-            </div>
+      <div className="px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">Manage students, instructors, and course activities</p>
           </div>
-       </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+
+            </div>
+
+          </div>
+        </div>
+      </div>
       <div className="p-5 -mt-3">
         {/* Overview Dashboard */}
         {activeTab === "overview" && (
@@ -169,8 +169,8 @@ const AdminDashboard = () => {
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-l-4 ${stat.borderColor} overflow-hidden group`}
                   >
                     <div className="p-5">
@@ -178,9 +178,8 @@ const AdminDashboard = () => {
                         <div className={`${stat.bgColor} p-2 rounded-lg group-hover:scale-110 transition-transform duration-200`}>
                           <Icon className={`w-5 h-5 ${stat.iconColor}`} />
                         </div>
-                        <div className={`flex items-center space-x-1 text-xs font-medium ${
-                          stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <div className={`flex items-center space-x-1 text-xs font-medium ${stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                          }`}>
                           {stat.changeType === 'increase' ? (
                             <TrendingUp className="w-3 h-3" />
                           ) : (
@@ -217,11 +216,10 @@ const AdminDashboard = () => {
                     {pendingApprovals.map((approval) => (
                       <div key={approval.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            approval.type === 'student' ? 'bg-blue-100' : 'bg-purple-100'
-                          }`}>
-                            {approval.type === 'student' ? 
-                              <GraduationCap className="w-5 h-5 text-blue-600" /> : 
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${approval.type === 'student' ? 'bg-blue-100' : 'bg-purple-100'
+                            }`}>
+                            {approval.type === 'student' ?
+                              <GraduationCap className="w-5 h-5 text-blue-600" /> :
                               <Users className="w-5 h-5 text-purple-600" />
                             }
                           </div>
@@ -256,11 +254,10 @@ const AdminDashboard = () => {
                   <div className="space-y-4">
                     {recentActivities.map((activity) => (
                       <div key={activity.id} className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
-                        }`}>
-                          {activity.type === 'student' ? 
-                            <GraduationCap className="w-4 h-4 text-blue-600" /> : 
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
+                          }`}>
+                          {activity.type === 'student' ?
+                            <GraduationCap className="w-4 h-4 text-blue-600" /> :
                             <Users className="w-4 h-4 text-green-600" />
                           }
                         </div>
@@ -371,11 +368,10 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          student.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`px-2 py-1 text-xs rounded-full ${student.status === 'active'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           <span className="inline-block w-1.5 h-1.5 rounded-full mr-1 ${
                             student.status === 'active' ? 'bg-green-500' : 'bg-red-500'
                           }"></span>
@@ -413,11 +409,10 @@ const AdminDashboard = () => {
               <div className="space-y-4">
                 {[...recentActivities, ...recentActivities].map((activity, idx) => (
                   <div key={idx} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
-                    }`}>
-                      {activity.type === 'student' ? 
-                        <GraduationCap className="w-5 h-5 text-blue-600" /> : 
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
+                      }`}>
+                      {activity.type === 'student' ?
+                        <GraduationCap className="w-5 h-5 text-blue-600" /> :
                         <Users className="w-5 h-5 text-green-600" />
                       }
                     </div>
@@ -461,8 +456,8 @@ const AdminDashboard = () => {
                       <span className="text-gray-600">{85 - idx * 7}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className="bg-[#2BB2A9] to-[#2BB2A9] h-2.5 rounded-full transition-all duration-500" 
+                      <div
+                        className="bg-[#2BB2A9] to-[#2BB2A9] h-2.5 rounded-full transition-all duration-500"
                         style={{ width: `${85 - idx * 7}%` }}
                       ></div>
                     </div>
@@ -492,10 +487,10 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Max Courses Per Student</label>
-                  <input 
-                    type="number" 
-                    defaultValue="5" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  <input
+                    type="number"
+                    defaultValue="5"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">Maximum number of courses a student can enroll in</p>
                 </div>

@@ -30,7 +30,7 @@ import Schedule from "./students/Schedule";
 import Recordings from "./students/Recordings";
 import Discussions from "./students/Discussions";
 import Resources from "./students/Resources";
-import Notes from "./students/Notes";
+import Notes from "./students/NotesComponent";
 import Downloads from "./students/Downloads";
 import Settings from "./students/Settings";
 import Profile from "./students/Profile";
@@ -39,7 +39,7 @@ import ViewCourse from "./students/ViewCourse";
 import ModuleView from "./students/ModuleView";
 import ModuleLesson from "./students/ModuleLesson";
 import ContinueLearning from "./students/ContinueLearning";
-import NoteEditor from "./students/Notes";
+import NoteEditor from "./students/NotesComponent";
 import Notifications from "./students/Notifications";
 import AllStudents from "./Admin/pages/AllStudents";
 import AllInstructors from "./Admin/pages/AllInstructors";
@@ -81,6 +81,7 @@ import SectionSettings from "./Instructor/pages/SectionSettings";
 import Plans from "./Instructor/pages/Plans";
 import BrandingPage from "./Instructor/pages/BrandingPage";
 import PendingDetail from "./students/components/PendingDetail";
+import Attendance from "./students/Attendance";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -169,6 +170,7 @@ function App() {
                   <Route path="notifications" element={<Notifications />} />
                   <Route path="continue-learning" element={<ContinueLearning />} />
                   <Route path="assignments/:assignmentSlug" element={<Assignments />} />
+                  <Route path="/student/attendance" element={<Attendance />} />
                   <Route
                     path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
                     element={<AssignmentDetail />}

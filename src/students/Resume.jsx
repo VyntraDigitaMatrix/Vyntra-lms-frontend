@@ -67,7 +67,7 @@ const ResumeBuilder = () => {
   const certificationLines = formData.certifications ? formData.certifications.split('\n').filter(c => c.trim()) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 md:p-5">
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">

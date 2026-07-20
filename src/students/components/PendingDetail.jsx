@@ -42,7 +42,7 @@ const PendingDetail = ({ assignment, onBack, onSubmit }) => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-5">
+        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
             {/* Breadcrumb */}
             <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400 mb-2 sm:mb-4">
                 <Link to="/student/dashboard" className="hover:text-blue-600">Dashboard</Link>
