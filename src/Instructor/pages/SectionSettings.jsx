@@ -559,7 +559,7 @@ function SettingDetailView({ group, activePage, courseSlug, onNavigate, onBack, 
 
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 overflow-y-auto flex flex-col">
-                    <div className="flex-1 px-10 py-8 max-w-3xl">
+                    <div className="flex-1 px-10 py-8 max-w-full">
                         {renderPage()}
                     </div>
                     {hasFooter && (

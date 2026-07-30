@@ -213,8 +213,8 @@ const QuizPlayer = ({ quiz, mode, onClose, onComplete }) => {
 
         let resultData = submitData;
 
-        // Try to fetch result explicitly only if submitData doesn't seem to contain result fields
-        if (!resultData || (resultData.questions === undefined && resultData.obtainedMarks === undefined && resultData.score === undefined)) {
+        // Try to fetch result explicitly only if submitData doesn't contain the questions array
+        if (!resultData || resultData.questions === undefined) {
             try {
                 const resRes = await studentQuizApi.getAttemptResult(attemptId);
                 resultData = unwrap(resRes);

@@ -117,6 +117,9 @@ export const instructorCourseApi = {
   updateCourseInstructors: (courseSlug, data) =>
     api.put(`/api/instructor/courses/${courseSlug}/instructors`, data),
 
+  deleteCourseInstructor: (courseSlug, instructorId) =>
+    api.delete(`/api/instructor/courses/${courseSlug}/instructors/${instructorId}`),
+
   publishCourse: (slug) =>
     api.post(`/api/instructor/courses/${slug}/publish`),
 
@@ -253,6 +256,8 @@ export const instructorQuizAnalyticsApi = {
     api.get(`/api/instructor/quizzes/${quizslug}/analytics`),
   getAttemptDetail: (attemptId) =>
     api.get(`/api/instructor/quizzes/attempts/${attemptId}`),
+  getCourseLeaderboard: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/instructor/quizzes/course/${courseSlug}/leaderboard?page=${page}&size=${size}`),
 };
 
 export const instructorAssignmentApi = {
@@ -436,6 +441,7 @@ export const instructorCalendarApi = {
     api.get(`/api/instructor/calendar?startDate=${startDate}&endDate=${endDate}`),
 };
 
+<<<<<<< Updated upstream
 export const instructorCertificateApi = {
   // GET /api/instructor/certificates/pending
   getPendingCertificates: (page = 0, size = 20) =>
@@ -456,6 +462,41 @@ export const instructorCertificateApi = {
   // PUT /api/instructor/certificates/{certificateId}/reject
   rejectCertificate: (certificateId) =>
     api.put(`/api/instructor/certificates/${certificateId}/reject`),
+=======
+export const instructorResourceApi = {
+  // GET /api/instructor/resources/{resourceId} — full detail (includes description, fileUrl, uploader info)
+  getResource: (resourceId) =>
+    api.get(`/api/instructor/resources/${resourceId}`),
+ 
+  // POST /api/instructor/resources/{courseSlug}  (multipart: title*, description, file)
+  uploadResource: (courseSlug, { title, description, file }) => {
+    const formData = new FormData();
+    formData.append("title", title);
+    if (description) formData.append("description", description);
+    if (file) formData.append("file", file);
+    return api.post(`/api/instructor/resources/${courseSlug}`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
+ 
+  // PUT /api/instructor/resources/{resourceId}  (multipart: title, description, file — all optional per Swagger)
+  updateResource: (resourceId, { title, description, file }) => {
+    const formData = new FormData();
+    if (title !== undefined) formData.append("title", title);
+    if (description !== undefined) formData.append("description", description);
+    if (file) formData.append("file", file);
+    return api.put(`/api/instructor/resources/${resourceId}`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
+ 
+  deleteResource: (resourceId) =>
+    api.delete(`/api/instructor/resources/${resourceId}`),
+ 
+  // GET /api/instructor/resources/course/{courseSlug} — paginated list (summary fields only)
+  getCourseResources: (courseSlug, page = 0, size = 50) =>
+    api.get(`/api/instructor/resources/course/${courseSlug}?page=${page}&size=${size}`),
+>>>>>>> Stashed changes
 };
 
 

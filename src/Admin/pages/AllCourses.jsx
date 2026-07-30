@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { adminCourseApi, adminManagement } from "../auth/api";
 import {
   BookOpen,
@@ -135,6 +135,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
 
 // Main AdminCourses Component
 const AdminCourses = () => {
+  const navigate = useNavigate();
   const editorRef = useRef(null);
   const videoInputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -229,29 +230,7 @@ const AdminCourses = () => {
   };
 
   const openAddModal = () => {
-    setEditCourse(null);
-    setFormData({
-      title: "",
-      slug: "",
-      description: "",
-      thumbnailUrl: "",
-      promoVideoUrl: "",
-      price: "",
-      discountPrice: "",
-      language: "English",
-      level: "BEGINNER",
-      status: "DRAFT",
-      instructorId: "",
-      lifetimeAccess: true,
-      validityInDays: ""
-    });
-    setEditorContent("");
-    setThumbnailPreview("");
-    setThumbnailFile(null);
-    setVideoPreview("");
-    setVideoFile(null);
-    setMediaType("image");
-    setShowModal(true);
+    navigate("/admin/create-course");
   };
 
   const openEditModal = (course) => {

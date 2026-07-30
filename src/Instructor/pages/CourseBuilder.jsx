@@ -262,9 +262,7 @@ const CourseBuilderView = ({ onBack }) => {
                                     className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">
                                     <MdSettings className="text-base" /> SETTINGS
                                 </button>
-                                <button className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">
-                                    <MdSwapVert className="text-base" /> REORDER
-                                </button>
+                                
                             </div>
                         </div>
 

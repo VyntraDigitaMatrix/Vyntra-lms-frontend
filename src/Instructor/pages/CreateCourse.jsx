@@ -138,25 +138,34 @@ const CreateCourse = () => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1.5">Pricing Plan</label>
-                    <select
-                        value={selectedPlan}
-                        onChange={(e) => {
-                            setSelectedPlan(e.target.value);
-                            const plan = plans.find(p => p.id === e.target.value);
-                            if (plan && (plan.pricingType || plan.type || "").toUpperCase() === "FREE") {
-                                setIsFree(true);
-                            }
-                        }}
-                        className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-violet-400 focus:bg-white transition"
-                        disabled={submitting}
-                    >
-                        <option value="">Select Pricing Plan</option>
-                        {plans.map(plan => (
-                            <option key={plan.id} value={plan.id}>{plan.planTitle || plan.title}</option>
-                        ))}
-                    </select>
-                </div>
+  <label className="block text-sm font-semibold text-gray-800 mb-1.5">
+    Pricing Plan <span className="text-red-500">*</span>
+  </label>
+
+  <select
+    value={selectedPlan}
+    required
+    onChange={(e) => {
+      setSelectedPlan(e.target.value);
+
+      const plan = plans.find((p) => p.id === e.target.value);
+      const type = (plan?.pricingType || plan?.type || "").toUpperCase();
+
+      setIsFree(type === "FREE");
+      setError("");
+    }}
+    className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-violet-400 focus:bg-white transition"
+    disabled={submitting}
+  >
+    <option value="">Select Pricing Plan</option>
+
+    {plans.map((plan) => (
+      <option key={plan.id} value={plan.id}>
+        {plan.planTitle || plan.title}
+      </option>
+    ))}
+  </select>
+</div>
 
                 {/* Price Display */}
                 <div>
@@ -289,7 +298,7 @@ const CreateCourse = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => navigate("/instructor/my-courses")}
+                        onClick={() => navigate("/instructor/courses")}
                         disabled={submitting}
                         className="h-10 px-6 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition"
                     >

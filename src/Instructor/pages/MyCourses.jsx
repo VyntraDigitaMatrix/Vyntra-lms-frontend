@@ -6,7 +6,7 @@ import {
   FaEye, FaPlus, FaArchive, FaTimes, FaExclamationTriangle,
 } from "react-icons/fa";
 import {
-  MdCheckCircle, MdWarning, MdArchive, MdPublish,
+  MdCheckCircle, MdWarning, MdArchive,
 } from "react-icons/md";
 import { instructorCourseApi } from "../auth/api";
 import ArchiveCourseModal from "../components/ArchiveCourseModal";
@@ -176,17 +176,6 @@ const InstructorCourses = () => {
 
   // No delete action available for instructor
 
-  /* ── Publish request ── */
-  const handleRequestPublish = async (course) => {
-    if (!window.confirm(`Request publication for "${course.title}"?`)) return;
-    try {
-      await instructorCourseApi.requestCoursePublish(course.slug);
-      showToast("Publish request submitted successfully!");
-      await fetchCourses();
-    } catch (err) {
-      showToast(err?.response?.data?.message || "Failed to submit publish request.", "error");
-    }
-  };
 
   /* ── Status filter tabs ── */
   const STATUS_TABS = [
@@ -369,9 +358,6 @@ const InstructorCourses = () => {
                           {course.language.toUpperCase()}
                         </span>
                       )}
-                      <span className="text-[10px] text-gray-500 font-medium">
-                        {course.totalModules || (course.modules || []).length || 0} Modules • {course.totalLessons || (course.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0) || 0} Lessons
-                      </span>
                     </div>
 
                     <p className="text-xs text-gray-500 leading-5 min-h-[36px] line-clamp-2 mb-3">
@@ -447,25 +433,10 @@ const InstructorCourses = () => {
                     </div>
 
                     {/* Publish request / archived notice */}
-                    {isArchived ? (
+                    {isArchived && (
                       <div className="w-full h-8 rounded-lg bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold flex items-center justify-center gap-1.5">
                         <FaArchive className="text-[10px]" /> Course is Archived
                       </div>
-                    ) : course.status !== "PUBLISHED" && (
-                      <button
-                        type="button"
-                        onClick={() => handleRequestPublish(course)}
-                        disabled={course.publishRequested}
-                        className={`w-full h-8 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5
-                          ${course.publishRequested
-                            ? "bg-blue-50 border border-blue-100 text-blue-500 cursor-not-allowed"
-                            : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm"}`}
-                      >
-                        {course.publishRequested
-                          ? "⏳ Sent for Approval"
-                          : <><MdPublish className="text-sm" /> Request Publish</>
-                        }
-                      </button>
                     )}
                   </div>
                 </div>

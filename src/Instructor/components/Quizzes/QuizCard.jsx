@@ -42,8 +42,6 @@ const QuizCard = ({ quiz, onEditDetails, onManageQuestions, onDelete, onViewResu
                                 <span className="flex items-center gap-1"><MdOutlineQuiz className="text-slate-400" />{qCount} Question{qCount !== 1 ? "s" : ""}</span>
                                 <span>•</span>
                                 <span className="flex items-center gap-1"><MdTimer className="text-slate-400" />{quiz.duration > 0 ? `${quiz.duration} mins` : "—"}</span>
-                                <span>•</span>
-                                <span className="flex items-center gap-1"><MdPeople className="text-slate-400" />{quiz.attempts} Attempt{quiz.attempts !== 1 ? "s" : ""}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
@@ -87,24 +85,14 @@ const QuizCard = ({ quiz, onEditDetails, onManageQuestions, onDelete, onViewResu
                 </div>
             </div>
             <div className="border-t border-slate-100 px-5 py-3 flex items-center gap-4 bg-slate-50/50 rounded-b-2xl">
-                <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${quiz.avgScore >= 60 ? "bg-emerald-50" : "bg-rose-50"}`}>
-                        <FaTrophy className={`text-xs ${quiz.avgScore >= 60 ? "text-emerald-500" : "text-rose-400"}`} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-slate-400 font-medium">Avg Score</p>
-                        <p className={`text-sm font-black ${quiz.avgScore >= 60 ? "text-emerald-600" : "text-rose-500"}`}>{Number(quiz.avgScore || 0).toFixed(1)}%</p>
-                    </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-slate-400 font-medium">Total Marks</p>
+                    <p className="text-sm font-black text-slate-700">{quiz.totalMarks}</p>
                 </div>
                 <div className="w-px h-8 bg-slate-200" />
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <MdPeople className="text-violet-400 text-sm" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-slate-400 font-medium">Attempt Rate</p>
-                        <p className="text-sm font-black text-violet-600">{attemptRate}%</p>
-                    </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-slate-400 font-medium">Passing Marks</p>
+                    <p className="text-sm font-black text-slate-700">{quiz.passingScore}</p>
                 </div>
                 <div className="w-px h-8 bg-slate-200" />
                 <div className="flex-1 min-w-0">

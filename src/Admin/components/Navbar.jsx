@@ -10,6 +10,7 @@ import {
   FaCog,
   FaQuestionCircle,
   FaSignOutAlt,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -31,6 +32,14 @@ const Navbar = () => {
     <nav className="relative w-full h-[70px] bg-white border-b border-gray-200 flex items-center justify-end px-6">
       {/* Right */}
       <div className="flex items-center gap-5">
+        <button
+          onClick={() => navigate("/admin/attendance")}
+          className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition"
+          title="Attendance"
+        >
+          <FaCalendarAlt className="text-gray-600 text-sm" />
+        </button>
+
         <button className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition">
           <FaBell className="text-gray-600 text-sm" />
         </button>
@@ -67,7 +76,7 @@ const Navbar = () => {
                     if (item.label === "Settings") {
                       navigate("/admin/settings");
                     } else if (item.label === "My Courses") {
-                      navigate("/admin/courses");
+                      navigate("/admin/all-courses");
                     } else if (item.label === "Profile") {
                       navigate("/admin/profile");
                     } else if (item.label === "Certificates") {
@@ -82,9 +91,9 @@ const Navbar = () => {
 
                     setShowProfileMenu(false);
                   }}
-                  className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-[#fff1ec] hover:text-[#ff5a1f] cursor-pointer transition text-[15px] font-medium"
+                  className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-[#2BB2A9]/10 hover:text-[#2BB2A9] cursor-pointer transition text-[15px] font-medium"
                 >
-                  <span className="text-[#ff5a1f]">{item.icon}</span>
+                  <span className="text-[#2BB2A9]">{item.icon}</span>
                   <span>{item.label}</span>
                 </div>
               ))}

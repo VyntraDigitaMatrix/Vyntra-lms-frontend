@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { adminCalendarApi } from "../auth/api";
 import {
   FaChalkboardTeacher,
   FaCalendarAlt,
@@ -6,25 +7,11 @@ import {
   FaDoorOpen,
   FaUserGraduate,
   FaBook,
-  FaSchool
+  FaSchool,
+  FaInfoCircle
 } from "react-icons/fa";
 
 // ── Data ────────────────────────────────────────────────────────────────────
-const CLASSES = [
-  { id: 1, title: "React Fundamentals", instructor: "Dr. Priya Sharma", subject: "Frontend Dev", day: 1, startHour: 9, duration: 1.5, color: "teal", room: "Lab A-101", students: 24 },
-  { id: 2, title: "Database Design", instructor: "Prof. Arjun Mehta", subject: "Backend Dev", day: 1, startHour: 11, duration: 1, color: "blue", room: "Hall B-202", students: 18 },
-  { id: 3, title: "UI/UX Workshop", instructor: "Ms. Sneha Kapoor", subject: "Design", day: 2, startHour: 10, duration: 2, color: "violet", room: "Studio C", students: 30 },
-  { id: 4, title: "Node.js & APIs", instructor: "Mr. Rahul Verma", subject: "Backend Dev", day: 2, startHour: 14, duration: 1.5, color: "blue", room: "Lab A-102", students: 20 },
-  { id: 5, title: "ML Foundations", instructor: "Dr. Kavya Nair", subject: "Data Science", day: 3, startHour: 9, duration: 2, color: "amber", room: "Hall B-301", students: 15 },
-  { id: 6, title: "Mobile App Dev", instructor: "Mr. Vikram Singh", subject: "Design", day: 3, startHour: 13, duration: 1, color: "violet", room: "Lab A-103", students: 22 },
-  { id: 7, title: "DevOps & CI/CD", instructor: "Ms. Ananya Iyer", subject: "DevOps", day: 4, startHour: 10, duration: 1.5, color: "rose", room: "Lab D-201", students: 12 },
-  { id: 8, title: "Cloud Architecture", instructor: "Mr. Rohan Das", subject: "DevOps", day: 4, startHour: 15, duration: 1, color: "rose", room: "Hall B-401", students: 10 },
-  { id: 9, title: "Data Visualization", instructor: "Dr. Kavya Nair", subject: "Data Science", day: 5, startHour: 9, duration: 1, color: "amber", room: "Lab A-201", students: 18 },
-  { id: 10, title: "System Design", instructor: "Prof. Arjun Mehta", subject: "Backend Dev", day: 5, startHour: 11, duration: 2, color: "blue", room: "Hall B-202", students: 16 },
-  { id: 11, title: "React Advanced Patterns", instructor: "Dr. Priya Sharma", subject: "Frontend Dev", day: 1, startHour: 14, duration: 1, color: "teal", room: "Lab A-101", students: 20 },
-  { id: 12, title: "Figma Prototyping", instructor: "Ms. Sneha Kapoor", subject: "Design", day: 3, startHour: 15, duration: 1.5, color: "violet", room: "Studio C", students: 28 },
-];
-
 const COLOR_MAP = {
   teal: { bg: "bg-teal-50", border: "border-teal-400", text: "text-teal-700", dot: "bg-teal-500", badge: "bg-teal-100 text-teal-700" },
   blue: { bg: "bg-blue-50", border: "border-blue-400", text: "text-blue-700", dot: "bg-blue-500", badge: "bg-blue-100 text-blue-700" },
@@ -37,9 +24,19 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const FULL_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
-const WEEK_DATES = (() => {
-  return [23, 24, 25, 26, 27];
-})();
+const getWeekDates = () => {
+  const curr = new Date();
+  const day = curr.getDay();
+  // If Sunday (0), we consider it the end of the previous week, or start of next. Let's make Monday=1.
+  const diff = curr.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(curr.setDate(diff));
+  
+  return Array.from({length: 5}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+};
 
 const fmtHour = (h) => {
   if (h === 12) return "12 PM";
@@ -47,12 +44,7 @@ const fmtHour = (h) => {
   return `${h} AM`;
 };
 
-const STATS = [
-  { label: "Classes this week", value: 12, icon: <FaBook className="text-teal-500 text-lg" />, color: "text-teal-600", bg: "bg-blue-50", border: "border-teal-200 border-t-2 border-t-teal-500" },
-  { label: "Instructors active", value: 6, icon: <FaChalkboardTeacher className="text-blue-500 text-lg" />, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200 border-t-2 border-t-blue-500" },
-  { label: "Total students", value: 233, icon: <FaUserGraduate className="text-violet-600 text-lg" />, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-200 border-t-2 border-t-violet-500" },
-  { label: "Rooms booked", value: 8, icon: <FaSchool className="text-amber-600 text-lg" />, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200 border-t-2 border-t-amber-500" },
-];
+
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function Schedule() {
@@ -60,13 +52,55 @@ export default function Schedule() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [view, setView] = useState("week"); // "week" | "list"
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const weekDates = getWeekDates();
+  const weekDatesDisplay = weekDates.map(d => d.getDate());
 
   const visibleDays = activeDay !== null ? [activeDay] : [1, 2, 3, 4, 5];
 
-  const getClassesForCell = (day, hour) =>
-    CLASSES.filter(c => c.day === day && c.startHour === hour);
+  const fetchCalendar = async () => {
+    try {
+      setLoading(true);
+      const startDate = weekDates[0].toISOString().split('T')[0];
+      const endDate = weekDates[4].toISOString().split('T')[0];
+      const res = await adminCalendarApi.getAdminCalendar(startDate, endDate);
+      if (res.data?.success && res.data.data) {
+        const mapped = res.data.data.map((evt, idx) => {
+          const d = new Date(evt.eventDateTime);
+          let day = d.getDay(); // 1=Mon, 2=Tue...
+          if (day === 0 || day === 6) day = 1; // Fallback to Monday if weekend
+          const startHour = d.getHours();
+          const colors = Object.keys(COLOR_MAP);
+          return {
+            id: evt.eventId,
+            title: evt.title,
+            subject: evt.eventType,
+            description: evt.description,
+            navigationSlug: evt.navigationSlug,
+            day: day,
+            startHour: startHour,
+            duration: 1, // Default 1 hour
+            color: colors[idx % colors.length]
+          };
+        });
+        setClasses(mapped);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const todayIdx = 3; // Thursday = index 3 (day 4, 0-indexed in WEEK_DATES as 3)
+  useEffect(() => {
+    fetchCalendar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getClassesForCell = (day, hour) =>
+    classes.filter(c => c.day === day && c.startHour === hour);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 font-sans">
@@ -86,10 +120,10 @@ export default function Schedule() {
             <div className="w-1.5 h-6 bg-teal-500 rounded-full" />
             <h1 className="text-xl font-bold text-slate-800 tracking-tight">Schedule</h1>
             <span className="bg-teal-50 text-teal-600 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-teal-100">
-              Week of Jun 23–27, 2026
+              Week of {weekDates[0]?.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – {weekDates[4]?.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </span>
           </div>
-          <p className="text-sm text-slate-400 ml-4">Manage and view all class sessions for this week</p>
+          <p className="text-sm text-slate-400 ml-4">Manage and view all events for this week</p>
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
@@ -107,22 +141,9 @@ export default function Schedule() {
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-colors"
           >
-            <span className="text-base leading-none">+</span> Add Class
+            <span className="text-base leading-none">+</span> Add Event
           </button>
         </div>
-      </div>
-
-      {/* ── Stat Cards ── */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        {STATS.map(({ label, value, icon, color, bg, border }) => (
-          <div key={label} className={`bg-white rounded-xl border ${border} p-4 flex-1 min-w-[130px] shadow-sm flex items-center gap-3`}>
-            <div className={`${bg} w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0`}>{icon}</div>
-            <div>
-              <div className={`text-2xl font-bold ${color} leading-none`}>{value}</div>
-              <div className="text-xs text-slate-500 mt-0.5 font-medium leading-tight">{label}</div>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* ── Day filter tabs ── */}
@@ -134,7 +155,7 @@ export default function Schedule() {
         >All Week</button>
         {DAYS.map((d, i) => {
           const dayNum = i + 1;
-          const isToday = WEEK_DATES[i] === 26; // June 26 = today
+          const isToday = weekDatesDisplay[i] === new Date().getDate(); // Check actual today
           return (
             <button
               key={d}
@@ -146,7 +167,7 @@ export default function Schedule() {
             >
               {d}
               <span className={`text-[11px] font-normal ${activeDay === dayNum ? "text-teal-100" : "text-slate-400"}`}>
-                {WEEK_DATES[i]}
+                {weekDatesDisplay[i]}
               </span>
               {isToday && <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />}
             </button>
@@ -162,11 +183,11 @@ export default function Schedule() {
             <div className="px-3 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-r border-slate-100" />
             {visibleDays.map(d => {
               const idx = d - 1;
-              const isToday = WEEK_DATES[idx] === 26;
+              const isToday = weekDatesDisplay[idx] === new Date().getDate();
               return (
                 <div key={d} className={`px-3 py-3 text-center border-r border-slate-100 last:border-r-0 ${isToday ? "bg-teal-50" : ""}`}>
                   <div className={`text-xs font-semibold uppercase tracking-wider ${isToday ? "text-teal-600" : "text-slate-400"}`}>{DAYS[idx]}</div>
-                  <div className={`text-lg font-bold mt-0.5 ${isToday ? "text-teal-600" : "text-slate-700"}`}>{WEEK_DATES[idx]}</div>
+                  <div className={`text-lg font-bold mt-0.5 ${isToday ? "text-teal-600" : "text-slate-700"}`}>{weekDatesDisplay[idx]}</div>
                   {isToday && <div className="text-[10px] text-teal-500 font-semibold">Today</div>}
                 </div>
               );
@@ -190,7 +211,7 @@ export default function Schedule() {
                 {visibleDays.map(d => {
                   const classes = getClassesForCell(d, hour);
                   const idx = d - 1;
-                  const isToday = WEEK_DATES[idx] === 26;
+                  const isToday = weekDatesDisplay[idx] === new Date().getDate();
                   return (
                     <div
                       key={d}
@@ -207,13 +228,13 @@ export default function Schedule() {
                             style={{ minHeight: `${cls.duration * 60}px` }}
                           >
                             <div className={`text-[11px] font-bold ${c.text} leading-snug`}>{cls.title}</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">{cls.instructor.split(" ").slice(-1)[0]}</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5 leading-tight truncate">{cls.description || "No description"}</div>
                             <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
                               <span><FaClock /></span>
                               {fmtHour(cls.startHour)}–{fmtHour(cls.startHour + cls.duration)}
                             </div>
                             <div className={`text-[10px] ${c.badge} rounded px-1 py-0.5 mt-1 inline-block font-medium`}>
-                              {cls.room}
+                              {cls.subject}
                             </div>
                           </div>
                         );
@@ -233,13 +254,15 @@ export default function Schedule() {
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                {["Class", "Instructor", "Subject", "Day & Time", "Room", "Students", "Actions"].map(h => (
+                {["Event", "Type", "Description", "Day & Time", "Actions"].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {[...CLASSES]
+              {loading ? (
+                <tr><td colSpan="5" className="px-4 py-8 text-center text-sm text-slate-500">Loading schedule...</td></tr>
+              ) : [...classes]
                 .filter(c => activeDay === null || c.day === activeDay)
                 .sort((a, b) => a.day - b.day || a.startHour - b.startHour)
                 .map(cls => {
@@ -252,20 +275,13 @@ export default function Schedule() {
                           <span className="text-sm font-semibold text-slate-800">{cls.title}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">{cls.instructor}</td>
                       <td className="px-4 py-3.5">
                         <span className={`${c.badge} text-[11px] font-semibold px-2 py-0.5 rounded-full`}>{cls.subject}</span>
                       </td>
+                      <td className="px-4 py-3.5 text-sm text-slate-600 truncate max-w-[200px]">{cls.description || "-"}</td>
                       <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">
                         <span className="font-medium">{FULL_DAYS[cls.day - 1]}</span>
                         <span className="text-slate-400 ml-1">{fmtHour(cls.startHour)}–{fmtHour(cls.startHour + cls.duration)}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap">{cls.room}</span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-sm text-slate-700 font-semibold">{cls.students}</span>
-                        <span className="text-xs text-slate-400 ml-1">students</span>
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex gap-1.5">
@@ -308,11 +324,9 @@ export default function Schedule() {
               {/* Drawer body */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                 {[
-                  { icon: <FaChalkboardTeacher className="text-blue-500 text-lg" />, label: "Instructor", value: cls.instructor },
                   { icon: <FaCalendarAlt className="text-green-500 text-lg" />, label: "Day", value: FULL_DAYS[cls.day - 1] },
                   { icon: <FaClock className="text-orange-500 text-lg" />, label: "Time", value: `${fmtHour(cls.startHour)} – ${fmtHour(cls.startHour + cls.duration)} (${cls.duration}h)` },
-                  { icon: <FaDoorOpen className="text-purple-500 text-lg" />, label: "Room", value: cls.room },
-                  { icon: <FaUserGraduate className="text-pink-500 text-lg" />, label: "Students", value: `${cls.students} enrolled` },
+                  { icon: <FaInfoCircle className="text-blue-500 text-lg" />, label: "Description", value: cls.description || "No description provided." },
                 ].map(({ icon, label, value }) => (
                   <div key={label} className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 text-sm">{icon}</div>
@@ -341,7 +355,7 @@ export default function Schedule() {
               {/* Drawer footer */}
               <div className="px-6 py-4 border-t border-slate-100 flex gap-2">
                 <button className="flex-1 bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 text-sm py-2.5 rounded-lg font-medium transition-colors">Edit</button>
-                <button className="flex-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 text-sm py-2.5 rounded-lg font-medium transition-colors">Cancel Class</button>
+                <button className="flex-1 bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 text-sm py-2.5 rounded-lg font-medium transition-colors">Cancel Event</button>
               </div>
             </div>
           </div>
@@ -352,14 +366,14 @@ export default function Schedule() {
       {showModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
           <div onClick={e => e.stopPropagation()} className="fade-in bg-white rounded-2xl shadow-xl border border-slate-200 p-7 w-full max-w-md border-t-4 border-t-teal-500">
-            <h2 className="text-base font-bold text-slate-800 mb-5">Add New Class</h2>
+            <h2 className="text-base font-bold text-slate-800 mb-5">Add New Event</h2>
             {[
-              { label: "Class Title", placeholder: "e.g. React Advanced Patterns", type: "text" },
-              { label: "Instructor", placeholder: "e.g. Dr. Priya Sharma", type: "text" },
-              { label: "Subject", placeholder: "e.g. Frontend Dev", type: "text" },
-              { label: "Room", placeholder: "e.g. Lab A-101", type: "text" },
+              { label: "Event Title", placeholder: "e.g. Annual Tech Conference", type: "text" },
+              { label: "Event Type", placeholder: "e.g. ASSIGNMENT", type: "text" },
+              { label: "Description", placeholder: "e.g. Discussing the upcoming project...", type: "text" },
+              { label: "Navigation Slug", placeholder: "e.g. /assignments/123", type: "text" },
               { label: "Date", placeholder: "", type: "date" },
-              { label: "Start Time", placeholder: "", type: "time" },
+              { label: "Time", placeholder: "", type: "time" },
             ].map(({ label, placeholder, type }) => (
               <div key={label} className="mb-3.5">
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">{label}</label>
@@ -372,7 +386,7 @@ export default function Schedule() {
             ))}
             <div className="flex gap-2.5 mt-5">
               <button onClick={() => setShowModal(false)} className="flex-1 bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 text-sm py-2.5 rounded-lg font-medium transition-colors">Cancel</button>
-              <button className="flex-[2] bg-teal-500 hover:bg-teal-600 text-white text-sm py-2.5 rounded-lg font-semibold transition-colors shadow-sm">Add Class</button>
+              <button className="flex-[2] bg-teal-500 hover:bg-teal-600 text-white text-sm py-2.5 rounded-lg font-semibold transition-colors shadow-sm">Add Event</button>
             </div>
           </div>
         </div>

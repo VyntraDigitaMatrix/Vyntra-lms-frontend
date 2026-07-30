@@ -39,12 +39,12 @@ const AttemptDetailModal = ({ attemptId, onClose }) => {
     }, [attemptId]);
 
     const studentName = attempt?.studentName ?? attempt?.student?.name ?? "Student";
-    const score = attempt?.score ?? attempt?.totalScore ?? 0;
+    const score = attempt?.obtainedMarks ?? attempt?.score ?? attempt?.totalScore ?? 0;
     const totalMarks = attempt?.totalMarks ?? attempt?.maxScore ?? 0;
     const pct = totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
     const timeTaken = attempt?.timeTakenMinutes ?? attempt?.durationTaken ?? null;
     const submittedAt = attempt?.submittedAt ?? attempt?.completedAt ?? null;
-    const answers = attempt?.answers ?? attempt?.responses ?? [];
+    const answers = attempt?.questions ?? attempt?.answers ?? attempt?.responses ?? [];
     const isPassed = pct >= 60;
 
     return (
@@ -252,7 +252,7 @@ const StudentsTab = ({ quizId, onOpenAttempt }) => {
             .then(res => {
                 const data = extractList(res);
                 setStudents(data.map(s => {
-                    const score = s.score ?? s.bestScore ?? 0;
+                    const score = s.obtainedMarks ?? s.score ?? s.bestScore ?? 0;
                     const totalMarks = s.totalMarks ?? s.maxScore ?? 0;
                     const pct = s.percentage ?? (totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0);
                     return {
@@ -260,7 +260,7 @@ const StudentsTab = ({ quizId, onOpenAttempt }) => {
                         studentName: s.studentName ?? s.name ?? "—",
                         email: s.email ?? "",
                         score, totalMarks,
-                        attemptsUsed: s.attemptsUsed ?? s.attemptCount ?? 0,
+                        attemptsUsed: s.attemptNumber ?? s.attemptsUsed ?? s.attemptCount ?? 0,
                         passed: s.passed ?? pct >= 60,
                         percentage: pct,
                         attemptId: s.attemptId ?? s.latestAttemptId ?? s.id,
@@ -446,7 +446,7 @@ const QuestionAnalyticsTab = ({ quizId }) => {
     );
 
     // Sort by difficulty (lowest correct % first = hardest)
-    const sorted = [...questions].sort((a, b) => (a.correctPercentage ?? a.percentCorrect ?? 0) - (b.correctPercentage ?? b.percentCorrect ?? 0));
+    const sorted = [...questions].sort((a, b) => (a.accuracyPercentage ?? a.correctPercentage ?? a.percentCorrect ?? 0) - (b.accuracyPercentage ?? b.correctPercentage ?? b.percentCorrect ?? 0));
 
     return (
         <div className="space-y-3">
@@ -456,19 +456,19 @@ const QuestionAnalyticsTab = ({ quizId }) => {
                     <div className="bg-rose-50 border border-rose-100 rounded-xl p-3">
                         <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wide mb-1">Hardest Question</p>
                         <p className="text-xs font-semibold text-rose-700 line-clamp-2">{sorted[0].questionText ?? sorted[0].question ?? "—"}</p>
-                        <p className="text-[10px] text-rose-500 mt-1 font-bold">{sorted[0].correctPercentage ?? sorted[0].percentCorrect ?? 0}% correct</p>
+                        <p className="text-[10px] text-rose-500 mt-1 font-bold">{sorted[0].accuracyPercentage ?? sorted[0].correctPercentage ?? sorted[0].percentCorrect ?? 0}% correct</p>
                     </div>
                     <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
                         <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wide mb-1">Easiest Question</p>
                         <p className="text-xs font-semibold text-emerald-700 line-clamp-2">{sorted[sorted.length - 1].questionText ?? sorted[sorted.length - 1].question ?? "—"}</p>
-                        <p className="text-[10px] text-emerald-600 mt-1 font-bold">{sorted[sorted.length - 1].correctPercentage ?? sorted[sorted.length - 1].percentCorrect ?? 0}% correct</p>
+                        <p className="text-[10px] text-emerald-600 mt-1 font-bold">{sorted[sorted.length - 1].accuracyPercentage ?? sorted[sorted.length - 1].correctPercentage ?? sorted[sorted.length - 1].percentCorrect ?? 0}% correct</p>
                     </div>
                 </div>
             )}
 
             {questions.map((q, idx) => {
-                const correctPct = q.correctPercentage ?? q.percentCorrect ?? 0;
-                const totalAnswered = q.totalAnswered ?? q.responseCount ?? 0;
+                const correctPct = q.accuracyPercentage ?? q.correctPercentage ?? q.percentCorrect ?? 0;
+                const totalAnswered = q.totalAttempts ?? q.totalAnswered ?? q.responseCount ?? 0;
                 const isWeak = correctPct < 50;
                 return (
                     <div key={q.questionId ?? idx} className="bg-white border border-slate-200 rounded-2xl p-4 hover:border-indigo-200 transition">

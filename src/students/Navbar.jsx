@@ -10,10 +10,12 @@ import {
   FaCog,
   FaQuestionCircle,
   FaSignOutAlt,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 const Navbar = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showCalendarMenu, setShowCalendarMenu] = useState(false);
   const { student, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -31,6 +33,42 @@ const Navbar = () => {
     <nav className="relative w-full h-[70px] bg-white border-b border-gray-200 flex items-center justify-end px-6">
       {/* Right */}
       <div className="flex items-center gap-5">
+        {/* Calendar Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowCalendarMenu(!showCalendarMenu);
+              setShowProfileMenu(false);
+            }}
+            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition"
+          >
+            <FaCalendarAlt className="text-gray-600 text-sm" />
+          </button>
+          
+          {showCalendarMenu && (
+            <div className="absolute right-0 top-12 w-[180px] bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
+              <div
+                onClick={() => {
+                  navigate("/student/schedule");
+                  setShowCalendarMenu(false);
+                }}
+                className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-blue-100 hover:text-blue-600 cursor-pointer transition text-[15px] font-medium"
+              >
+                <span>Schedule</span>
+              </div>
+              <div
+                onClick={() => {
+                  navigate("/student/attendance");
+                  setShowCalendarMenu(false);
+                }}
+                className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-blue-100 hover:text-blue-600 cursor-pointer transition text-[15px] font-medium"
+              >
+                <span>Attendance</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <button className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition">
           <FaBell className="text-gray-600 text-sm" />
         </button>
@@ -38,7 +76,10 @@ const Navbar = () => {
         {/* Profile Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            onClick={() => {
+              setShowProfileMenu(!showProfileMenu);
+              setShowCalendarMenu(false);
+            }}
             className="flex items-center gap-2 cursor-pointer focus:outline-none"
           >
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">

@@ -16,7 +16,7 @@ const FEATURES = [
 ];
 
 /* ── Reusable input ──────────────────────────────────── */
-function Field({ icon: Icon, type = "text", placeholder, value, onChange, right }) {
+function Field({ icon: Icon, type = "text", placeholder, value, onChange, right, maxLength }) {
   return (
     <div className="relative w-full">
       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">
@@ -27,7 +27,12 @@ function Field({ icon: Icon, type = "text", placeholder, value, onChange, right 
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+<<<<<<< Updated upstream
         className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-[#043573] focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
+=======
+        maxLength={maxLength}
+        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
+>>>>>>> Stashed changes
       />
       {right && (
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center">{right}</span>
@@ -183,7 +188,22 @@ const UserLogin = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    if (!loginEmail || !loginPassword) { setError("Please enter email and password"); return; }
+    if (!loginEmail) { setError("Please enter your email"); return; }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(loginEmail)) {
+      setError("Invalid email");
+      return;
+    }
+
+    if (!loginPassword) { setError("Please enter your password"); return; }
+
+    const specialCharRegex = /[@$!%*?&]/;
+    if (!specialCharRegex.test(loginPassword)) {
+      setError("Invalid password");
+      return;
+    }
+
     setError(""); setLoading(true);
     const result = await login(loginEmail, loginPassword);
     setLoading(false);
@@ -193,16 +213,35 @@ const UserLogin = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (!regName || !regEmail || !regPhone || !regPassword) { setError("Please fill in all required fields"); return; }
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(regPhone)) {
+      setError("Invalid mobile number. It must be 10 digits.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(regEmail)) {
+      setError("Invalid email");
+      return;
+    }
+
+    const specialCharRegex = /[@$!%*?&]/;
+    if (!specialCharRegex.test(regPassword)) {
+      setError("Invalid password");
+      return;
+    }
+
     if (regPassword !== regConfirm) { setError("Passwords do not match"); return; }
     if (!agreeTerms) { setError("Please agree to the Terms of Service"); return; }
+
     setError(""); setLoading(true);
     const username = regEmail.split('@')[0];
-    const result = await register({ 
-      fullName: regName, 
-      email: regEmail, 
+    const result = await register({
+      fullName: regName,
+      email: regEmail,
       username: username,
-      password: regPassword, 
-      mobileNumber: regPhone 
+      password: regPassword,
+      mobileNumber: regPhone
     });
     setLoading(false);
     if (result.success) {
@@ -214,12 +253,12 @@ const UserLogin = () => {
 
   const EyeToggle = ({ show, onToggle }) => (
     <button type="button" onClick={onToggle} className="text-gray-400 hover:text-gray-600 transition flex items-center justify-center p-1 focus:outline-none focus:ring-2 focus:ring-blue-100 rounded">
-      {show ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+      {show ? <FaEye size={16} /> : <FaEyeSlash size={16} />}
     </button>
   );
 
   return (
-    <div className="w-screen min-h-screen bg-[#F7F9FC] font-sans overflow-y-auto lg:overflow-hidden">
+    <div className="w-full min-h-screen bg-[#F7F9FC] font-sans overflow-y-auto lg:overflow-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
@@ -312,7 +351,7 @@ const UserLogin = () => {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-gray-600 block mb-1">Phone Number</label>
-                    <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value)} />
+                    <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value.replace(/\D/g, ''))} maxLength={10} />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-gray-600 block mb-1">Password</label>
@@ -365,7 +404,7 @@ const UserLogin = () => {
         {/* Mobile Header with Logo */}
         <div className="px-5 pt-5 pb-3 border-b border-gray-100 flex items-center justify-between">
           <img src={logo} alt="VYNTRA ONE" className="h-8 object-contain" />
-          <span className="text-[10px] text-gray-400">© 2024</span>
+
         </div>
 
         {/* Mobile Tabs */}
@@ -434,6 +473,10 @@ const UserLogin = () => {
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1.5">Email Address</label>
                 <Field icon={MdEmail} type="email" placeholder="Enter your email" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 block mb-1.5">Phone Number</label>
+                <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value.replace(/\D/g, ''))} maxLength={10} />
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1.5">Password</label>

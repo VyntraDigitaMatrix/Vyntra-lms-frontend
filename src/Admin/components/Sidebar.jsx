@@ -14,6 +14,9 @@ import {
   FaBook,
   FaChevronDown,
   FaUserSecret,
+  FaCertificate,
+  FaTags,
+  FaBriefcase,
 } from "react-icons/fa";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
@@ -40,6 +43,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaComments />, label: "Discussions", path: "/admin/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/admin/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/admin/notes" },
+    { icon: <FaCertificate />, label: "Certificates", path: "/admin/certificates" },
+    { icon: <FaTags />, label: "Pricing Plans", path: "/admin/plans" },
+    { icon: <FaBriefcase />, label: "Job Notification", path: "/admin/jobs" },
   ];
 
   return (

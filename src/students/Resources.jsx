@@ -1,282 +1,204 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { studentResourceApi, studentLearningApi } from "./auth/api";
 import {
   FaSearch,
-  FaPlus,
   FaFilePdf,
   FaFilePowerpoint,
   FaFileWord,
   FaVideo,
+  FaFile,
   FaDownload,
   FaEye,
-  FaStar,
-  FaCloudUploadAlt,
   FaTimes,
-  FaBookOpen,
-  FaArrowDown,
-  FaBookmark,
   FaGraduationCap,
   FaFilter,
-  FaSortAmountDown,
-  FaEllipsisV,
-  FaShare,
-  FaTrash,
   FaUserGraduate,
   FaCalendarAlt,
   FaChevronDown,
+  FaSpinner,
+  FaExclamationCircle,
 } from "react-icons/fa";
-import { MdQuiz, MdAssignment, MdFolder } from "react-icons/md";
+import { MdFolder } from "react-icons/md";
+
+const TYPE_ICON = {
+  PDF: { icon: FaFilePdf, color: "text-red-500", bg: "bg-red-50" },
+  PPT: { icon: FaFilePowerpoint, color: "text-orange-500", bg: "bg-orange-50" },
+  DOC: { icon: FaFileWord, color: "text-blue-500", bg: "bg-blue-50" },
+  DOCX: { icon: FaFileWord, color: "text-blue-500", bg: "bg-blue-50" },
+  VIDEO: { icon: FaVideo, color: "text-purple-500", bg: "bg-purple-50" },
+};
+const iconFor = (type) => TYPE_ICON[type?.toUpperCase()] || { icon: FaFile, color: "text-gray-500", bg: "bg-gray-50" };
+
+function formatBytes(bytes) {
+  if (!bytes || bytes <= 0) return "—";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0, val = bytes;
+  while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+  return `${val.toFixed(val >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function formatDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
 
 function Resources() {
   const [search, setSearch] = useState("");
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const [filterType, setFilterType] = useState("All");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const [messageModal, setMessageModal] = useState({
-    show: false,
-    type: "",
-    message: "",
-  });
 
-  const [resources, setResources] = useState([
-    {
-      id: 1,
-      title: "React Hooks Complete Guide",
-      course: "React JS",
-      type: "PDF",
-      size: "2.4 MB",
-      downloads: 120,
-      saved: true,
-      uploadedBy: "Dr. Sarah Johnson",
-      date: "May 20, 2026",
-      status: "Public",
-      iconType: "PDF",
-      description: "Comprehensive guide to React Hooks with practical examples",
-    },
-    {
-      id: 2,
-      title: "JavaScript ES6+ Mastery",
-      course: "JavaScript",
-      type: "PPT",
-      size: "5.1 MB",
-      downloads: 95,
-      saved: false,
-      uploadedBy: "Prof. Michael Chen",
-      date: "May 18, 2026",
-      status: "Public",
-      iconType: "PPT",
-      description: "Advanced JavaScript concepts and modern features",
-    },
-    {
-      id: 3,
-      title: "CSS Grid & Flexbox Workshop",
-      course: "Frontend Design",
-      type: "DOC",
-      size: "1.8 MB",
-      downloads: 60,
-      saved: true,
-      uploadedBy: "Emily Rodriguez",
-      date: "May 15, 2026",
-      status: "Private",
-      iconType: "DOC",
-      description: "Practical guide to modern CSS layouts",
-    },
-    {
-      id: 4,
-      title: "React Router v6 Tutorial",
-      course: "React JS",
-      type: "Video",
-      size: "120 MB",
-      downloads: 45,
-      saved: false,
-      uploadedBy: "Instructor Team",
-      date: "May 12, 2026",
-      status: "Public",
-      iconType: "Video",
-      description: "Step-by-step video tutorial on React Router",
-    },
-  ]);
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
-  const [formData, setFormData] = useState({
-    title: "",
-    course: "",
-    type: "",
-    size: "",
-    uploadedBy: "",
-    status: "Public",
-    description: "",
-  });
+  const [previewResource, setPreviewResource] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [actioningId, setActioningId] = useState(null);
 
-  const filterOptions = ["All", "PDF", "PPT", "DOC", "Video"];
+  const fetchResources = useCallback(async () => {
+    setLoading(true);
+    setFetchError("");
+    try {
+      const coursesRes = await studentLearningApi.getMyEnrolledCourses(0, 100);
+      const courseBody = coursesRes.data?.data ?? coursesRes.data;
+      const courses = courseBody?.content ?? [];
 
-  const getIcon = (type) => {
-    switch(type) {
-      case "PDF": return <FaFilePdf className="text-red-500 text-lg sm:text-xl" />;
-      case "PPT": return <FaFilePowerpoint className="text-orange-500 text-lg sm:text-xl" />;
-      case "DOC": return <FaFileWord className="text-blue-500 text-lg sm:text-xl" />;
-      case "Video": return <FaVideo className="text-purple-500 text-lg sm:text-xl" />;
-      default: return <FaFilePdf className="text-red-500 text-lg sm:text-xl" />;
+      const perCourse = await Promise.all(
+        courses.map(async (course) => {
+          const slug = course.courseSlug || course.slug;
+          if (!slug) return [];
+          try {
+            const res = await studentResourceApi.getCourseResources(slug, 0, 100);
+            const body = res.data?.data ?? res.data;
+            const list = body?.content ?? [];
+            return list.map((r) => ({
+              ...r,
+              courseTitle: course.title || course.courseTitle || "Untitled Course",
+              courseSlug: slug,
+            }));
+          } catch (err) {
+            console.error(`Failed to load resources for ${slug}:`, err?.response?.data || err);
+            return [];
+          }
+        })
+      );
+
+      setResources(perCourse.flat());
+    } catch (err) {
+      console.error("Failed to load resources:", err?.response?.data || err);
+      setFetchError("Couldn't load your resources. Please try again.");
+      setResources([]);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const getIconBg = (type) => {
-    switch(type) {
-      case "PDF": return "bg-red-50";
-      case "PPT": return "bg-orange-50";
-      case "DOC": return "bg-blue-50";
-      case "Video": return "bg-purple-50";
-      default: return "bg-gray-50";
-    }
-  };
+  useEffect(() => { fetchResources(); }, [fetchResources]);
 
-  const stats = useMemo(() => {
-    return {
-      totalResources: resources.length,
-      downloads: resources.reduce((sum, item) => sum + item.downloads, 0),
-      saved: resources.filter((item) => item.saved).length,
-      courses: new Set(resources.map((item) => item.course)).size,
-    };
+  const filterOptions = useMemo(() => {
+    const types = new Set(resources.map((r) => (r.resourceType || "").toUpperCase()).filter(Boolean));
+    return ["All", ...Array.from(types)];
+  }, [resources]);
+
+  const stats = useMemo(() => ({
+    totalResources: resources.length,
+    courses: new Set(resources.map((r) => r.courseSlug)).size,
+  }), [resources]);
+
+  const typeCounts = useMemo(() => {
+    const counts = {};
+    resources.forEach((r) => {
+      const t = (r.resourceType || "OTHER").toUpperCase();
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    return counts;
   }, [resources]);
 
   const filteredResources = resources.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) ||
-                         item.description.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === "All" || item.type === filterType;
+    const matchesSearch =
+      (item.title || "").toLowerCase().includes(search.toLowerCase()) ||
+      (item.courseTitle || "").toLowerCase().includes(search.toLowerCase());
+    const matchesType = filterType === "All" || (item.resourceType || "").toUpperCase() === filterType;
     return matchesSearch && matchesType;
   });
 
-  const handleUploadSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.title || !formData.course || !formData.type) {
-      setMessageModal({
-        show: true,
-        type: "error",
-        message: "Please fill all required fields.",
-      });
-      return;
-    }
-
-    const newResource = {
-      id: Date.now(),
-      title: formData.title,
-      course: formData.course,
-      type: formData.type,
-      size: formData.size || "1.0 MB",
-      downloads: 0,
-      saved: false,
-      uploadedBy: formData.uploadedBy || "Current User",
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: formData.status,
-      iconType: formData.type,
-      description: formData.description || "No description provided",
-    };
-
-    setResources((prev) => [newResource, ...prev]);
-
-    setFormData({
-      title: "",
-      course: "",
-      type: "",
-      size: "",
-      uploadedBy: "",
-      status: "Public",
-      description: "",
-    });
-
-    setShowUploadModal(false);
-
-    setTimeout(() => {
-      setMessageModal({
-        show: true,
-        type: "success",
-        message: "Resource Successfully Added!",
-      });
-    }, 200);
+  // Fetch full resource (with fileUrl) on demand, since list items don't include it
+  const loadFullResource = async (resourceId) => {
+    const res = await studentResourceApi.getResource(resourceId);
+    return res.data?.data ?? res.data;
   };
 
-  const handleSaveResource = (id) => {
-    setResources(prev => prev.map(resource =>
-      resource.id === id ? { ...resource, saved: !resource.saved } : resource
-    ));
-    setMessageModal({
-      show: true,
-      type: "success",
-      message: "Resource saved to your library!",
-    });
-    setTimeout(() => {
-      setMessageModal({ show: false, type: "", message: "" });
-    }, 2000);
+  const handlePreview = async (item) => {
+    setPreviewLoading(true);
+    setPreviewResource(null);
+    try {
+      const full = await loadFullResource(item.resourceId);
+      setPreviewResource(full);
+    } catch (err) {
+      console.error("Failed to load resource details:", err?.response?.data || err);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleDownload = async (item) => {
+    setActioningId(item.resourceId);
+    try {
+      const full = await loadFullResource(item.resourceId);
+      if (full?.fileUrl) {
+        const a = document.createElement("a");
+        a.href = full.fileUrl;
+        a.download = full.fileName || full.title || "resource";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    } catch (err) {
+      console.error("Failed to download resource:", err?.response?.data || err);
+    } finally {
+      setActioningId(null);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Breadcrumb - Responsive */}
+      {/* Breadcrumb */}
       <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
-        <div className="flex items-center justify-between">
-          <p className="text-xs sm:text-sm text-gray-400">
-            <Link to="/student/dashboard" className="hover:text-blue-600 transition">
-              Dashboard
-            </Link>
-            <span className="mx-1 sm:mx-2">&gt;</span>
-            <span className="text-gray-600 font-medium">Resources</span>
-          </p>
-        </div>
+        <p className="text-xs sm:text-sm text-gray-400">
+          <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+          <span className="mx-1 sm:mx-2">&gt;</span>
+          <span className="text-gray-600 font-medium">Resources</span>
+        </p>
       </div>
 
-      {/* Header Section - Responsive */}
+      {/* Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Learning Resources</h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Access study materials, notes, and educational content</p>
-          </div>
-
-          <button
-            onClick={() => setShowUploadModal(true)}
-            className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold flex items-center gap-1.5 sm:gap-2 hover:from-blue-700 hover:to-blue-800 transition-all shadow-md text-sm sm:text-base"
-          >
-            <FaPlus className="text-xs sm:text-sm" />
-            Upload Resource
-          </button>
-        </div>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Learning Resources</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Access study materials, notes, and educational content from your courses</p>
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 pb-6 sm:pb-8">
-        {/* Stats Cards - Responsive Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+
+        {fetchError && (
+          <div className="mb-5 flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold">
+            <span className="flex items-center gap-2"><FaExclamationCircle className="flex-shrink-0" /> {fetchError}</span>
+            <button onClick={fetchResources} className="px-3 py-1.5 bg-white border border-red-200 rounded-lg hover:bg-red-100 transition flex-shrink-0">Retry</button>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-blue-50 flex items-center justify-center">
-                <MdQuiz className="text-blue-600 text-lg sm:text-2xl" />
+              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-[#043573]/10 flex items-center justify-center">
+                <FaFile className="text-[#043573] text-lg sm:text-2xl" />
               </div>
               <div>
                 <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Total Resources</p>
                 <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.totalResources}</h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-green-50 flex items-center justify-center">
-                <FaArrowDown className="text-green-600 text-base sm:text-[22px]" />
-              </div>
-              <div>
-                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Total Downloads</p>
-                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.downloads}</h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-yellow-50 flex items-center justify-center">
-                <FaBookmark className="text-yellow-600 text-base sm:text-[22px]" />
-              </div>
-              <div>
-                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Saved Items</p>
-                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.saved}</h2>
               </div>
             </div>
           </div>
@@ -294,7 +216,7 @@ function Resources() {
           </div>
         </div>
 
-        {/* Search and Filter Bar - Responsive */}
+        {/* Search and Filter Bar */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 mb-5 sm:mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
@@ -304,10 +226,10 @@ function Resources() {
                 placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-xs sm:text-sm"
+                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#043573] focus:border-transparent outline-none transition text-xs sm:text-sm"
               />
             </div>
-            
+
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
@@ -323,14 +245,9 @@ function Resources() {
                   {filterOptions.map((type) => (
                     <button
                       key={type}
-                      onClick={() => {
-                        setFilterType(type);
-                        setShowFilterDropdown(false);
-                      }}
+                      onClick={() => { setFilterType(type); setShowFilterDropdown(false); }}
                       className={`w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm transition-all duration-200 ${
-                        filterType === type
-                          ? "bg-blue-50 text-blue-600 font-medium"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        filterType === type ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
                       {type}
@@ -342,375 +259,185 @@ function Resources() {
           </div>
         </div>
 
-        {/* Upload Area & Categories - Responsive */}
-        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 mb-5 sm:mb-6">
-          {/* Upload Area */}
-          <div
-            onClick={() => setShowUploadModal(true)}
-            className="lg:col-span-3 bg-white rounded-xl border-2 border-dashed border-blue-300 p-6 sm:p-8 flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all"
-          >
-            <div className="text-center">
-              <FaCloudUploadAlt className="text-blue-500 text-3xl sm:text-5xl mx-auto mb-2 sm:mb-3" />
-              <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-1">
-                Drag & Drop Resources
-              </h3>
-              <p className="text-gray-500 text-xs sm:text-sm">
-                PDF, PPT, DOC, Video up to 100MB
-              </p>
-              <button className="mt-3 sm:mt-4 px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition shadow-sm">
-                Browse Files
-              </button>
-            </div>
-          </div>
-
-          {/* Categories Card */}
-          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm">
+        {/* Categories */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-5 sm:mb-6">
+          <div className="lg:col-span-4 bg-white rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <MdFolder className="text-blue-600" />
+              <MdFolder className="text-[#043573]" />
               Categories
             </h3>
-
-            {filterOptions.filter(f => f !== "All").map((type) => (
-              <button
-                key={type}
-                onClick={() => setFilterType(type)}
-                className={`w-full flex items-center justify-between py-2 px-2.5 sm:px-3 rounded-lg transition-all duration-200 ${
-                  filterType === type
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  {getIcon(type)}
-                  <span className="text-xs sm:text-sm font-medium">{type}</span>
-                </div>
-                <span className={`text-xs sm:text-sm font-semibold ${
-                  filterType === type ? "text-blue-600" : "text-gray-500"
-                }`}>
-                  {resources.filter((item) => item.type === type).length}
-                </span>
-              </button>
-            ))}
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(typeCounts).map(([type, count]) => {
+                const { icon: Icon, color } = iconFor(type);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
+                      filterType === type ? "bg-[#043573] border-[#043573] text-white" : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className={color} />
+                    <span className="text-xs sm:text-sm font-medium">{type}</span>
+                    <span className="text-[10px] sm:text-xs font-bold bg-white px-1.5 py-0.5 rounded-full border border-gray-100">{count}</span>
+                  </button>
+                );
+              })}
+              {Object.keys(typeCounts).length === 0 && !loading && (
+                <p className="text-xs text-gray-400 py-2">No resource types yet.</p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Resources Grid - Responsive */}
-        {filteredResources.length > 0 ? (
+        {/* Resources Grid */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <FaSpinner className="animate-spin text-3xl text-[#043573]" />
+            <p className="text-sm text-gray-400">Loading resources…</p>
+          </div>
+        ) : filteredResources.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-            {filteredResources.map((item) => (
-              <div
-                key={item.id}
-                className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                
-                <div className="p-3 sm:p-4">
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    {/* Icon */}
-                    <div className={`w-12 h-12 sm:w-[54px] sm:h-[54px] rounded-xl ${getIconBg(item.iconType)} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
-                      {getIcon(item.iconType)}
-                    </div>
+            {filteredResources.map((item) => {
+              const { icon: Icon, color, bg } = iconFor(item.resourceType);
+              return (
+                <div
+                  key={item.resourceId}
+                  className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="h-1 bg-gradient-to-r from-[#043573] to-[#043573]" />
 
-                    <div className="flex-1 min-w-0">
-                      {/* Header */}
-                      <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h2 className="text-sm sm:text-lg font-bold text-gray-800 truncate hover:text-blue-600 transition">
-                            {item.title}
-                          </h2>
-                          <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5">
-                            {item.course} • {item.type} • {item.size}
-                          </p>
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className={`w-12 h-12 sm:w-[54px] sm:h-[54px] rounded-xl ${bg} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
+                        <Icon className={color} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-sm sm:text-lg font-bold text-gray-800 truncate hover:text-[#043573] transition">
+                              {item.title}
+                            </h2>
+                            <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5">
+                              {item.courseTitle} • {(item.resourceType || "").toUpperCase()} • {formatBytes(item.fileSize)}
+                            </p>
+                          </div>
                         </div>
 
-                        <span
-                          className={`shrink-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-medium ${
-                            item.status === "Public"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </div>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
+                          <span className="flex items-center gap-0.5 sm:gap-1">
+                            <FaCalendarAlt className="text-gray-400 text-[9px] sm:text-xs" />
+                            {formatDate(item.createdAt)}
+                          </span>
+                        </div>
 
-                      {/* Description */}
-                      <p className="text-gray-600 text-[11px] sm:text-sm mb-2 line-clamp-2">
-                        {item.description}
-                      </p>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                          <button
+                            onClick={() => handlePreview(item)}
+                            className="h-7 sm:h-[34px] px-2 sm:px-3 bg-[#043573]/10 text-[#043573] rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-[#043573]/20 transition"
+                          >
+                            <FaEye size={10} className="sm:text-xs" />
+                            Preview
+                          </button>
 
-                      {/* Meta Info */}
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
-                        <span className="flex items-center gap-0.5 sm:gap-1">
-                          <FaUserGraduate className="text-blue-500 text-[9px] sm:text-xs" />
-                          <span className="truncate max-w-[80px] sm:max-w-none">{item.uploadedBy.split(' ')[0]}</span>
-                        </span>
-                        <span className="flex items-center gap-0.5 sm:gap-1">
-                          <FaCalendarAlt className="text-gray-400 text-[9px] sm:text-xs" />
-                          {item.date}
-                        </span>
-                        <span className="flex items-center gap-0.5 sm:gap-1">
-                          <FaDownload className="text-green-500 text-[9px] sm:text-xs" />
-                          {item.downloads}
-                        </span>
-                      </div>
-
-                      {/* Action Buttons - Wrap on mobile */}
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 bg-blue-50 text-blue-600 rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-blue-100 transition">
-                          <FaEye size={10} className="sm:text-xs" />
-                          Preview
-                        </button>
-
-                        <button 
-                          onClick={() => handleSaveResource(item.id)}
-                          className={`h-7 sm:h-[34px] px-2 sm:px-3 rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 transition ${
-                            item.saved
-                              ? "bg-yellow-50 text-yellow-600 hover:bg-yellow-100"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          }`}
-                        >
-                          <FaStar size={10} className="sm:text-xs" />
-                          {item.saved ? "Saved" : "Save"}
-                        </button>
-
-                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 bg-blue-600 text-white rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-blue-700 transition shadow-sm">
-                          <FaDownload size={10} className="sm:text-xs" />
-                          Download
-                        </button>
-
-                        <button className="h-7 sm:h-[34px] px-2 sm:px-3 text-gray-500 hover:text-blue-600 rounded-lg text-[10px] sm:text-sm flex items-center gap-1 transition">
-                          <FaShare size={10} className="sm:text-xs" />
-                          Share
-                        </button>
+                          <button
+                            onClick={() => handleDownload(item)}
+                            disabled={actioningId === item.resourceId}
+                            className="h-7 sm:h-[34px] px-2 sm:px-3 bg-[#043573] text-white rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1 hover:bg-[#043573]/80 transition shadow-sm disabled:opacity-60"
+                          >
+                            {actioningId === item.resourceId
+                              ? <FaSpinner size={10} className="animate-spin sm:text-xs" />
+                              : <FaDownload size={10} className="sm:text-xs" />}
+                            Download
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="bg-white rounded-xl p-8 sm:p-12 text-center shadow-sm border border-gray-200">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <FaFilePdf className="text-2xl sm:text-4xl text-gray-400" />
+              <FaFile className="text-2xl sm:text-4xl text-gray-400" />
             </div>
             <h3 className="text-base sm:text-xl font-semibold text-gray-600 mb-1 sm:mb-2">No resources found</h3>
-            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Try adjusting your search or filter criteria</p>
-            <button
-              onClick={() => {
-                setSearch("");
-                setFilterType("All");
-              }}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-xs sm:text-sm"
-            >
-              Clear all filters
-            </button>
+            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
+              {search || filterType !== "All" ? "Try adjusting your search or filter criteria." : "Your instructors haven't uploaded any resources yet."}
+            </p>
+            {(search || filterType !== "All") && (
+              <button
+                onClick={() => { setSearch(""); setFilterType("All"); }}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 text-[#043573] hover:bg-[#043573]/10 rounded-lg transition text-xs sm:text-sm"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         )}
       </div>
 
-      {/* Upload Modal - Responsive */}
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-              <div>
-                <h2 className="text-lg sm:text-2xl font-bold text-gray-800">Upload New Resource</h2>
-                <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Share learning materials with the community</p>
+      {/* Preview Modal */}
+      {(previewLoading || previewResource) && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4" onClick={() => setPreviewResource(null)}>
+          <div className="bg-white rounded-xl sm:rounded-2xl max-w-lg w-full shadow-2xl animate-fadeIn" onClick={(e) => e.stopPropagation()}>
+            {previewLoading ? (
+              <div className="p-10 flex flex-col items-center gap-3">
+                <FaSpinner className="animate-spin text-2xl text-[#043573]" />
+                <p className="text-sm text-gray-400">Loading resource…</p>
               </div>
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition"
-              >
-                <FaTimes className="text-gray-500 text-sm sm:text-base" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUploadSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                  Resource Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter resource title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                  Course <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={formData.course}
-                    onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
-                    required
-                  >
-                    <option value="">Select Course</option>
-                    <option value="React JS">React JS</option>
-                    <option value="JavaScript">JavaScript</option>
-                    <option value="Frontend Design">Frontend Design</option>
-                    <option value="Node.js">Node.js</option>
-                    <option value="Python">Python</option>
-                  </select>
-                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
+            ) : previewResource && (
+              <>
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 truncate">{previewResource.title}</h2>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{previewResource.courseTitle}</p>
+                  </div>
+                  <button onClick={() => setPreviewResource(null)} className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition flex-shrink-0">
+                    <FaTimes className="text-gray-500 text-sm sm:text-base" />
+                  </button>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                  File Type <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
-                    required
-                  >
-                    <option value="">Select File Type</option>
-                    <option value="PDF">PDF Document</option>
-                    <option value="PPT">PowerPoint Presentation</option>
-                    <option value="DOC">Word Document</option>
-                    <option value="Video">Video File</option>
-                  </select>
-                  <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                  Description
-                </label>
-                <textarea
-                  placeholder="Brief description of the resource"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows="3"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                    File Size
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g., 2.5 MB"
-                    value={formData.size}
-                    onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                    Status
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer bg-white text-sm"
-                    >
-                      <option value="Public">Public</option>
-                      <option value="Private">Private</option>
-                    </select>
-                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-[10px] sm:text-xs" />
+                <div className="p-4 sm:p-6 space-y-3 text-sm">
+                  {previewResource.description && (
+                    <p className="text-gray-600 leading-relaxed">{previewResource.description}</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+                    <div><span className="text-gray-400">Type:</span> <span className="font-semibold text-gray-700">{(previewResource.resourceType || "").toUpperCase()}</span></div>
+                    <div><span className="text-gray-400">Size:</span> <span className="font-semibold text-gray-700">{formatBytes(previewResource.fileSize)}</span></div>
+                    <div><span className="text-gray-400">Uploaded by:</span> <span className="font-semibold text-gray-700">{previewResource.uploadedByInstructorName || "—"}</span></div>
+                    <div><span className="text-gray-400">Date:</span> <span className="font-semibold text-gray-700">{formatDate(previewResource.createdAt)}</span></div>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition shadow-md text-sm"
-                >
-                  Upload Resource
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Message Modal - Responsive */}
-      {messageModal.show && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-3">
-          <div className="w-80 sm:w-96 bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-xl text-center animate-fadeIn">
-            <div
-              className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-3 sm:mb-4 ${
-                messageModal.type === "success"
-                  ? "bg-green-100 text-green-600"
-                  : "bg-red-100 text-red-600"
-              }`}
-            >
-              {messageModal.type === "success" ? "✓" : "!"}
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">
-              {messageModal.type === "success" ? "Success!" : "Error!"}
-            </h2>
-
-            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">{messageModal.message}</p>
-
-            <button
-              type="button"
-              onClick={() =>
-                setMessageModal({
-                  show: false,
-                  type: "",
-                  message: "",
-                })
-              }
-              className={`w-full py-2 sm:py-2.5 rounded-lg text-white font-semibold text-sm ${
-                messageModal.type === "success"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-red-600 hover:bg-red-700"
-              } transition`}
-            >
-              OK
-            </button>
+                <div className="flex justify-end gap-2 p-4 sm:p-6 border-t border-gray-100">
+                  <button onClick={() => setPreviewResource(null)} className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition text-sm">
+                    Close
+                  </button>
+                  {previewResource.fileUrl && (
+                    <a
+                      href={previewResource.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-[#043573] text-white rounded-lg font-semibold hover:bg-[#043573]/80 transition text-sm"
+                    >
+                      Open File
+                    </a>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
       <style jsx>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
       `}</style>
     </div>
   );

@@ -34,9 +34,8 @@ const Assignments = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState("All");
   const [selectedModule, setSelectedModule] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
   const [courses, setCourses] = useState([]);
-  const [modules, setModules] = useState([]);
-  const [isModulesLoading, setIsModulesLoading] = useState(false);
   const [fetchProgress, setFetchProgress] = useState({ current: 0, total: 0 });
 
   const assignmentsRef = useRef([]);
@@ -46,6 +45,17 @@ const Assignments = () => {
 
   const tabs = ["All", "Pending", "Submitted", "Graded"];
 
+  const derivedModules = useMemo(() => {
+    if (selectedCourse === "All") return [];
+    const mods = new Map();
+    assignments.forEach(a => {
+      if (String(a.courseId) === String(selectedCourse) && a.moduleId) {
+        mods.set(String(a.moduleId), a.moduleName || `Module ${a.moduleId}`);
+      }
+    });
+    return Array.from(mods.entries()).map(([id, name]) => ({ id, name }));
+  }, [assignments, selectedCourse]);
+
   const filtered = useMemo(() => {
     return assignments.filter((a) => {
       const statusMatch = activeTab === "All" || a.status === activeTab;
@@ -53,9 +63,11 @@ const Assignments = () => {
         selectedCourse === "All" || String(a.courseId) === String(selectedCourse);
       const moduleMatch =
         selectedModule === "All" || String(a.moduleId) === String(selectedModule);
-      return statusMatch && courseMatch && moduleMatch;
+      const typeMatch = 
+        selectedType === "All" || a.assignmentType === selectedType;
+      return statusMatch && courseMatch && moduleMatch && typeMatch;
     });
-  }, [assignments, activeTab, selectedCourse, selectedModule]);
+  }, [assignments, activeTab, selectedCourse, selectedModule, selectedType]);
 
   const overview = [
     { label: "Total Assignments", value: assignments.length, color: "bg-[#043573]/10 text-[#043573]" },
@@ -161,18 +173,11 @@ const Assignments = () => {
       const rawItems = extractArray(assignRes.data);
 
       const transformed = rawItems.map((item) => {
-        let status = "Pending";
-        if (item.graded) status = "Graded";
-        else if (item.submitted) status = "Submitted";
-
+        // We use the shared transformAssignment function to ensure ALL 
+        // fields like submittedDate, submittedFiles, etc are mapped correctly.
+        const merged = transformAssignment(item, subMap);
         return {
-          id: item.assignmentId || item.id || item._id,
-          assignmentSlug: item.assignmentSlug,
-          title: item.title,
-          description: item.description,
-          dueDate: item.dueDate,
-          maxMarks: item.maxMarks,
-          status,
+          ...merged,
           courseId: item.courseId,
           moduleId: item.moduleId,
           lessonId: item.lessonId,
@@ -183,11 +188,6 @@ const Assignments = () => {
           submitted: item.submitted,
           graded: item.graded,
           assignmentStatus: item.assignmentStatus,
-          scoredMarks: subMap[item.assignmentId || item.id || item._id]?.obtainedMarks
-            ?? subMap[item.assignmentSlug]?.obtainedMarks
-            ?? subMap[item.assignmentId || item.id || item._id]?.score
-            ?? subMap[item.assignmentSlug]?.score
-            ?? item.scoredMarks ?? item.obtainedMarks ?? item.marksObtained ?? item.score ?? item.submission?.obtainedMarks ?? item.submission?.score ?? null,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt
         };
@@ -204,25 +204,6 @@ const Assignments = () => {
     }
   };
 
-  const fetchModules = async (courseId) => {
-    try {
-      setIsModulesLoading(true);
-      const response = await studentEnrolledCourseApi.getCourseModules(courseId);
-      const data =
-        response.data?.data?.content ||
-        response.data?.content ||
-        response.data?.data?.modules ||
-        response.data?.modules ||
-        response.data?.data ||
-        (Array.isArray(response.data) ? response.data : []);
-      setModules(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Module fetch error:", err);
-      setModules([]);
-    } finally {
-      setIsModulesLoading(false);
-    }
-  };
 
   const loadAll = async () => {
     await Promise.all([
@@ -332,8 +313,6 @@ const Assignments = () => {
 
   useEffect(() => {
     setSelectedModule("All");
-    if (selectedCourse === "All" || !selectedCourse) { setModules([]); return; }
-    fetchModules(selectedCourse);
   }, [selectedCourse]);
 
   /* ── Render states ── */
@@ -475,24 +454,30 @@ const Assignments = () => {
               value={selectedModule}
               onChange={(e) => setSelectedModule(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={selectedCourse === "All" || isModulesLoading}
+              disabled={selectedCourse === "All" || derivedModules.length === 0}
             >
               <option value="All">
                 {selectedCourse === "All"
                   ? "Select a course first"
-                  : isModulesLoading
-                    ? "Loading modules..."
+                  : derivedModules.length === 0
+                    ? "No modules available"
                     : "All Modules"}
               </option>
-              {modules.map((module) => {
-                const modId = module.id ?? module.moduleId;
-                const modName = module.title ?? module.name ?? module.moduleName ?? module.moduleTitle ?? `Module ${modId ?? ""}`;
-                return (
-                  <option key={modId} value={modId}>
-                    {modName}
-                  </option>
-                );
-              })}
+              {derivedModules.map((module) => (
+                <option key={module.id} value={module.id}>
+                  {module.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="All">All Types</option>
+              <option value="IN_CLASS_ASSIGNMENT">In Class Assignment</option>
+              <option value="HOMEWORK_ASSIGNMENT">Home Assignment</option>
             </select>
           </div>
 

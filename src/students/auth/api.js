@@ -425,4 +425,14 @@ export const studentCertificateApi = {
 
 >>>>>>> Stashed changes
 
+export const studentResourceApi = {
+  // GET /api/student/resources/{resourceId}
+  getResource: (resourceId) =>
+    api.get(`/api/student/resources/${resourceId}`),
+
+  // GET /api/student/resources/course/{courseSlug}
+  getCourseResources: (courseSlug, page = 0, size = 100) =>
+    api.get(`/api/student/resources/course/${courseSlug}?page=${page}&size=${size}`),
+};
+
 export default api;

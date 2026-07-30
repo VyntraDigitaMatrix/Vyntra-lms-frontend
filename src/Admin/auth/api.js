@@ -121,14 +121,19 @@ export const adminManagement = {
 };
 
 export const adminCourseApi = {
-  createCourse: (formData) => api.post("/api/admin/courses", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
+  createCourse: (data) => {
+    if (data instanceof FormData) {
+      return api.post("/api/admin/courses", data, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+    }
+    return api.post("/api/admin/courses", data);
+  },
   updateCourse: (courseId, formData) => api.put(`/api/admin/courses/${courseId}`, formData, {
     headers: { "Content-Type": "multipart/form-data" }
   }),
-  publishCourse: (courseId) => api.patch(`/api/admin/courses/${courseId}/publish`),
-  archiveCourse: (courseId) => api.patch(`/api/admin/courses/${courseId}/archive`),
+  publishCourse: (courseSlug) => api.post(`/api/admin/courses/${courseSlug}/publish`),
+  archiveCourse: (courseSlug) => api.post(`/api/admin/courses/${courseSlug}/archive`),
   getPendingPublishRequests: (page = 0, size = 10) => {
     return api.get(`/api/admin/courses/pending-publish?page=${page}&size=${size}`);
   },
@@ -137,6 +142,12 @@ export const adminCourseApi = {
     return api.get(`/api/admin/courses?page=${page}&size=${size}`);
   },
   getCourseById: (courseId) => api.get(`/api/admin/courses/${courseId}`),
+  getCourseBySlug: (courseSlug) => api.get(`/api/admin/courses/${courseSlug}`),
+  updateBasicInfo: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/basic-info`, data),
+  updatePricing: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/pricing`, data),
+  updateFeatures: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/features`, data),
+  updateFaqs: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/faqs`, data),
+  updateTags: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/tags`, data),
   getCourseModules: (courseId) => api.get(`/api/admin/modules/courses/${courseId}?page=0&size=100`),
   getModuleLessons: (moduleId) => api.get(`/api/admin/lessons/modules/${moduleId}?page=0&size=100`),
 };
@@ -171,6 +182,144 @@ export const discussionApi = {
 
   deleteMessage: (messageId) =>
     api.delete(`/api/discussions/messages/${messageId}`)
+};
+
+export const adminAttendanceApi = {
+  getStudentAttendance: (studentCode, page = 0, size = 10) =>
+    api.get(`/api/admin/attendance/students/${studentCode}?page=${page}&size=${size}`),
+
+  getCourseAttendance: (courseSlug, attendanceDate, status, page = 0, size = 10) => {
+    const params = new URLSearchParams();
+    if (attendanceDate) params.append("attendanceDate", attendanceDate);
+    if (status && status !== "ALL") params.append("status", status);
+    params.append("page", page);
+    params.append("size", size);
+    return api.get(`/api/admin/attendance/courses/${courseSlug}?${params.toString()}`);
+  },
+
+  getCourseAttendanceSummary: (courseSlug) =>
+    api.get(`/api/admin/attendance/courses/${courseSlug}/summary`)
+};
+
+export const adminCalendarApi = {
+  getAdminCalendar: (startDate, endDate) =>
+    api.get(`/api/admin/calendar?startDate=${startDate}&endDate=${endDate}`)
+};
+
+export const adminCertificateApi = {
+  getAllCertificates: (page = 0, size = 10) =>
+    api.get(`/api/admin/certificates?page=${page}&size=${size}`),
+
+  getCertificateDetails: (certificateNumber) =>
+    api.get(`/api/admin/certificates/${certificateNumber}`),
+
+  getCertificatesByStatus: (status, page = 0, size = 10) =>
+    api.get(`/api/admin/certificates/status/${status}?page=${page}&size=${size}`),
+
+  getCertificatesByCourse: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/admin/certificates/course/${courseSlug}?page=${page}&size=${size}`)
+};
+
+export const adminResourceApi = {
+  getAllResources: (page = 0, size = 10) =>
+    api.get(`/api/admin/resources?page=${page}&size=${size}`),
+
+  deleteResource: (resourceId) =>
+    api.delete(`/api/admin/resources/${resourceId}`)
+};
+
+export const adminPricingApi = {
+  getPricingPlans: (page = 0, size = 100) =>
+    api.get(`/api/course-pricing-plans?page=${page}&size=${size}`),
+  getPricingPlan: (id) =>
+    api.get(`/api/course-pricing-plans/${id}`),
+  createPricingPlan: (data) =>
+    api.post("/api/course-pricing-plans", data),
+  updatePricingPlan: (id, data) =>
+    api.put(`/api/course-pricing-plans/${id}`, data),
+  deletePricingPlan: (id) =>
+    api.delete(`/api/course-pricing-plans/${id}`),
+  getDefaultPricingPlan: () =>
+    api.get("/api/course-pricing-plans/default"),
+  getActivePricingPlans: () =>
+    api.get("/api/course-pricing-plans/active"),
+};
+
+export const adminJobsApi = {
+  getAllJobs: (page = 0, size = 10) =>
+    api.get(`/api/admin/jobs?page=${page}&size=${size}`),
+  getJobBySlug: (jobSlug) =>
+    api.get(`/api/admin/jobs/${jobSlug}`),
+  createJob: (formData) =>
+    api.post("/api/admin/jobs", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    }),
+  updateJob: (jobSlug, formData) =>
+    api.put(`/api/admin/jobs/${jobSlug}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    }),
+  deleteJob: (jobSlug) =>
+    api.delete(`/api/admin/jobs/${jobSlug}`),
+  getJobApplications: (jobSlug, page = 0, size = 10) =>
+    api.get(`/api/admin/jobs/${jobSlug}/applications?page=${page}&size=${size}`),
+  updateApplicationStatus: (applicationId, data) =>
+    api.put(`/api/admin/jobs/applications/${applicationId}/status`, data),
+};
+
+export const adminManagementApi = {
+  // ── Students ──
+  getAllStudents: (page = 0, size = 10) =>
+    api.get(`/api/admin/management/students?page=${page}&size=${size}`),
+
+  searchStudents: (query, page = 0, size = 10) =>
+    api.get(`/api/admin/management/students/search?query=${encodeURIComponent(query)}&page=${page}&size=${size}`),
+
+  getStudentByCode: (studentCode) =>
+    api.get(`/api/admin/management/students/${studentCode}`),
+
+  updateStudent: (studentCode, data) =>
+    api.put(`/api/admin/management/students/${studentCode}`, data),
+
+  toggleStudentStatus: (studentCode) =>
+    api.patch(`/api/admin/management/students/${studentCode}/toggle-status`),
+
+  // ── Instructors ──
+  getAllInstructors: (page = 0, size = 10) =>
+    api.get(`/api/admin/management/instructors?page=${page}&size=${size}`),
+
+  searchInstructors: (query, page = 0, size = 10) =>
+    api.get(`/api/admin/management/instructors/search?query=${encodeURIComponent(query)}&page=${page}&size=${size}`),
+
+  getInstructorByCode: (instructorCode) =>
+    api.get(`/api/admin/management/instructors/${instructorCode}`),
+
+  updateInstructor: (instructorCode, data) =>
+    api.put(`/api/admin/management/instructors/${instructorCode}`, data),
+
+  toggleInstructorStatus: (instructorCode) =>
+    api.patch(`/api/admin/management/instructors/${instructorCode}/toggle-status`),
+
+  createInstructor: (data) =>
+    api.post(`/api/admin/management/create-instructor`, data),
+
+  // ── Instructor Proofs ──
+  getInstructorProofs: (instructorCode) =>
+    api.get(`/api/admin/management/instructors/${instructorCode}/proofs`),
+
+  getAllInstructorProofs: (page = 0, size = 10) =>
+    api.get(`/api/admin/management/instructor-proofs?page=${page}&size=${size}`),
+
+  getInstructorProof: (proofId) =>
+    api.get(`/api/admin/management/instructor-proofs/${proofId}`),
+
+  // ── Admin's own profile image ──
+  updateProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+    return api.put(`/api/admin/management/profile/image`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+  },
 };
 
 export default api;

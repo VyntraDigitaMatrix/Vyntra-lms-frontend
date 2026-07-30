@@ -68,6 +68,38 @@ const ResumeBuilder = () => {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .resume-preview-wrapper, .resume-preview-wrapper * {
+            visibility: visible;
+          }
+          .resume-preview-wrapper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          /* Remove shadows and rounded corners for print */
+          .resume-preview-wrapper .shadow-lg {
+            box-shadow: none !important;
+          }
+          .resume-preview-wrapper .rounded-xl, .resume-preview-wrapper .rounded-2xl {
+            border-radius: 0 !important;
+          }
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -401,7 +433,7 @@ const ResumeBuilder = () => {
                       </div>
 
                       {/* Resume Body */}
-                      <div className="flex flex-col md:grid md:grid-cols-3 gap-0">
+                      <div className="flex flex-col md:grid md:grid-cols-3 gap-0 print:grid print:grid-cols-3">
                         {/* Sidebar */}
                         <div className="bg-gray-50 p-4 sm:p-6 border-r border-gray-200">
                           {skillsList.length > 0 && (

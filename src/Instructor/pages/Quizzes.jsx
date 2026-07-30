@@ -262,11 +262,12 @@ const Quizzes = () => {
         { id: "MODULE", label: "Module", icon: <MdViewModule /> },
         { id: "LESSON", label: "Lesson", icon: <MdPlayCircleOutline /> },
     ];
+    const totalQuestions = useMemo(() => quizzes.reduce((s, q) => s + (q.questions || 0), 0), [quizzes]);
     const statCards = [
         { label: "Total Quizzes", value: totalQuizzes, icon: <MdQuiz />, iconBg: "bg-violet-50", iconColor: "text-violet-500" },
         { label: "Published", value: publishedCount, icon: <MdCheckCircle />, iconBg: "bg-emerald-50", iconColor: "text-emerald-500" },
-        { label: "Total Attempts", value: totalAttempts, icon: <MdPeople />, iconBg: "bg-purple-50", iconColor: "text-purple-500" },
-        { label: "Avg Score", value: avgScore.toFixed(1) + "%", icon: <FaTrophy />, iconBg: "bg-amber-50", iconColor: "text-amber-500" },
+        { label: "Drafts", value: draftCount, icon: <MdPeople />, iconBg: "bg-amber-50", iconColor: "text-amber-500" },
+        { label: "Total Questions", value: totalQuestions, icon: <MdOutlineQuiz />, iconBg: "bg-blue-50", iconColor: "text-blue-500" },
     ];
     const isFiltering = typeFilter !== "ALL" || courseFilter !== "ALL";
 

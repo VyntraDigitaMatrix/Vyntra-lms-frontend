@@ -44,7 +44,11 @@ import Notifications from "./students/Notifications";
 import AllStudents from "./Admin/pages/AllStudents";
 import AllInstructors from "./Admin/pages/AllInstructors";
 import AllCourses from "./Admin/pages/AllCourses";
+import AdminCreateCourse from "./Admin/pages/CreateCourse";
+import AdminCourseSettings from "./Admin/pages/CourseSettings";
+import AdminPlans from "./Admin/pages/Plans";
 import AllClasses from "./Admin/pages/AllClasses";
+import AdminCertificates from "./Admin/pages/Certificates";
 import AllAssignments from "./Admin/pages/AllAssignments";
 import Schedule1 from "./Admin/pages/Schedule";
 import Recordings1 from "./Admin/pages/Recordings";
@@ -53,6 +57,9 @@ import Quizzes from "./students/Quiz";
 import Resources1 from "./Admin/pages/Resources";
 import Notes1 from "./Admin/pages/Notes";
 import Downloads1 from "./Admin/pages/Downloads";
+import AdminJobsList from "./Admin/pages/JobsList";
+import AdminJobCreateEdit from "./Admin/pages/JobCreateEdit";
+import AdminJobApplications from "./Admin/pages/JobApplications";
 import MyCourses from "./Instructor/pages/MyCourses";
 import InstructorStudents from "./Instructor/pages/Students";
 import InstructorSchedules from "./Instructor/pages/Schedules";
@@ -67,6 +74,7 @@ import InstructorProfile from "./Instructor/pages/InstructorProfile";
 import StudentAllCourses from "./students/AllCourses";
 import AdminCourseViewDetails from "./Admin/pages/CourseViewDetails";
 import AdminLessonView from "./Admin/pages/LessonView";
+import AdminAttendance from "./Admin/pages/Attendance";
 import LessonView from "./Instructor/pages/LessonView";
 import Resume from "./students/Resume";
 import JobNotifications from "./students/JobNotification";
@@ -82,6 +90,7 @@ import Plans from "./Instructor/pages/Plans";
 import BrandingPage from "./Instructor/pages/BrandingPage";
 import PendingDetail from "./students/components/PendingDetail";
 import Attendance from "./students/Attendance";
+import AdminProfile from "./Admin/pages/Profile";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -193,6 +202,9 @@ function App() {
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="all-students" element={<AllStudents />} />
                   <Route path="all-instructors" element={<AllInstructors />} />
+                  <Route path="create-course" element={<AdminCreateCourse />} />
+                  <Route path="course-settings/:courseSlug" element={<AdminCourseSettings />} />
+                  <Route path="plans" element={<AdminPlans />} />
                   <Route path="all-courses" element={<AllCourses />} />
                   <Route path="course-preview/:id" element={<AdminCourseViewDetails />} />
                   <Route path="all-classes" element={<AllClasses />} />
@@ -203,6 +215,13 @@ function App() {
                   <Route path="resources" element={<Resources1 />} />
                   <Route path="notes" element={<Notes1 />} />
                   <Route path="downloads" element={<Downloads1 />} />
+                  <Route path="jobs" element={<AdminJobsList />} />
+                  <Route path="jobs/create" element={<AdminJobCreateEdit />} />
+                  <Route path="jobs/edit/:jobSlug" element={<AdminJobCreateEdit />} />
+                  <Route path="jobs/:jobSlug/applications" element={<AdminJobApplications />} />
+                  <Route path="attendance" element={<AdminAttendance />} />
+                  <Route path="certificates" element={<AdminCertificates />} />
+                  <Route path="profile" element={<AdminProfile />} />
                 </Route>
                 <Route path="/admin/course/:courseId/lesson/:lessonId" element={<AdminLessonView />} />
               </Route>

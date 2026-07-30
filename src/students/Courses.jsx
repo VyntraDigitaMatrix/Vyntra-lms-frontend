@@ -52,7 +52,7 @@ const Courses = () => {
             if (res.data?.data) {
                 const pageData = res.data.data;
                 const rawCourses = pageData.content || [];
-                
+
                 // Fetch progress for each course in parallel
                 const enriched = await Promise.all(
                     rawCourses.map(async (course) => {
@@ -74,7 +74,7 @@ const Courses = () => {
                         }
                     })
                 );
-                
+
                 setCourses(enriched);
                 setTotalPages(pageData.totalPages || 0);
                 setTotalElements(pageData.totalElements || 0);
@@ -275,8 +275,13 @@ const Courses = () => {
                                     <div className="relative">
                                         <img
                                             src={thumbnail}
+<<<<<<< Updated upstream
                                           alt={course.title}
                                             className="w-full h-[130px] object-cover"
+=======
+                                            alt={course.courseTitle}
+                                            className="w-full h-[180px] object-cover"
+>>>>>>> Stashed changes
                                             onError={(e) => { e.target.src = S1; }}
                                         />
                                         {/* Progress badge */}

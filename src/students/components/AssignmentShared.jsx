@@ -14,7 +14,7 @@ export function extractArray(responseData) {
         if (Array.isArray(c) && c.length > 0) return c;
     }
     for (const c of candidates) {
-        if (c && typeof c === "object" && !Array.isArray(c) && c.id) return [c];
+        if (c && typeof c === "object" && !Array.isArray(c) && (c.id || c.submissionId || c.assignmentId)) return [c];
     }
     return [];
 }
@@ -89,7 +89,7 @@ function normalizeFiles(sub) {
     }
 
     // Plain string URL fields
-    const strCandidates = [sub.fileUrl, sub.attachmentUrl, sub.downloadUrl];
+    const strCandidates = [sub.fileUrl, sub.attachmentUrl, sub.downloadUrl, sub.file, sub.attachment, sub.document, sub.submissionFile, sub.filePath];
     for (const c of strCandidates) {
         if (typeof c === "string" && c) return [shape(c)];
     }
@@ -108,6 +108,8 @@ function parseSubmittedDate(sub) {
         sub.submissionAt ??
         sub.submitted_at ??
         sub.submission_date ??
+        sub.submittedOn ??
+        sub.submissionTime ??
         sub.uploadedAt ??
         sub.createdAt ??
         sub.created_at ??
@@ -154,6 +156,7 @@ export function transformAssignment(item, submissionMap = {}) {
 
     const sub =
         (itemId !== null && submissionMap[itemId]) ||
+        (itemSlug !== null && submissionMap[itemSlug]) ||
         submissionMap[item.id] ||
         submissionMap[item.assignmentId] ||
         submissionMap[item._id] ||
@@ -219,6 +222,9 @@ export function buildSubmissionMap(submissionsData) {
             sub.assignment?.id,
             sub.assignment_id,
             sub.id,
+            sub.submissionId,
+            sub.assignmentSlug,
+            sub.assignment?.slug,
         ];
         candidates.forEach((aId) => {
             if (aId !== undefined && aId !== null) {

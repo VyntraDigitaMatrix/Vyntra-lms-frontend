@@ -28,8 +28,6 @@ const AllCourses = () => {
       let sortParam = "id,desc";
       if (sortBy === "Popular") sortParam = "averageRating,desc";
       else if (sortBy === "Latest") sortParam = "id,desc";
-      else if (sortBy === "Price Low") sortParam = "price,asc";
-      else if (sortBy === "Price High") sortParam = "price,desc";
 
       const res = await studentLearningApi.getCourses(currentPage - 1, coursesPerPage, sortParam);
       if (res.data && res.data.data) {
@@ -111,8 +109,6 @@ const AllCourses = () => {
           >
             <option value="Popular">Sort by: Popular</option>
             <option value="Latest">Sort by: Latest</option>
-            <option value="Price Low">Sort by: Price Low</option>
-            <option value="Price High">Sort by: Price High</option>
           </select>
         </div>
 
@@ -136,7 +132,7 @@ const AllCourses = () => {
                   <img
                     src={course.image}
                     alt={course.title}
-                    className="w-full h-[120px] sm:h-[130px] object-cover"
+                    className="w-full h-[120px] sm:h-[150px] object-cover"
                   />
                   {course.badge && (
                     <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#043573] text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">

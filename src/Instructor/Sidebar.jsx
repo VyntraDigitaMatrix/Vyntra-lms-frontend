@@ -38,8 +38,13 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 >>>>>>> Stashed changes
     { icon: <FaUsers />, label: "Students", path: "/instructor/students" },
     { icon: <FaClipboardList />, label: "Assignments", path: "/instructor/assignments" },
+<<<<<<< Updated upstream
     { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz" },
     { icon: <FaCertificate />, label: "Certificates", path: "/instructor/certificates" },
+=======
+    { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz"},
+    { icon: <FaFolder />, label: "Resources", path: "/instructor/resources" },
+>>>>>>> Stashed changes
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/instructor/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/instructor/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/instructor/discussions" },

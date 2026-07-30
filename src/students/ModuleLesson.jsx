@@ -8,7 +8,7 @@ import {
     FaCheck, FaTimes, FaRedo, FaHourglassHalf, FaStickyNote,
     FaTrash, FaPlus, FaPen, FaHighlighter, FaBold, FaItalic,
     FaUnderline, FaListOl, FaSave, FaExpand, FaCompress,
-    FaThumbtack, FaEdit
+    FaThumbtack, FaEdit, FaFileAlt
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { MdOutlineQuiz, MdAssignment, MdInfoOutline, MdCloudUpload } from "react-icons/md";
@@ -546,6 +546,27 @@ const stripHtml = (html) => {
     return div.textContent || div.innerText || "";
 };
 
+// ─── helper: convert a YouTube / Vimeo watch URL into an embeddable src ───────
+const getEmbedUrl = (url) => {
+    if (!url) return null;
+
+    // YouTube
+    const ytMatch = url.match(
+        /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+    );
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+    // Loom
+    const loomMatch = url.match(/loom\.com\/share\/([a-f0-9]+)/);
+    if (loomMatch) return `https://www.loom.com/embed/${loomMatch[1]}`;
+
+    return null; // direct file URL — use <video> tag
+};
+
 /* ══════════════════════════════════════════════════════════════
    MAIN MODULE LESSON COMPONENT
 ══════════════════════════════════════════════════════════════ */
@@ -623,6 +644,7 @@ const [courseProgressPct, setCourseProgressPct] = useState(null);
     const [markCompleteLoading, setMarkCompleteLoading] = useState(false);
     const [markCompleteError, setMarkCompleteError] = useState("");
     const [courseProgress, setCourseProgress] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     /* ══════════════════════════════════════════
        FETCH MODULES (sidebar)
@@ -879,6 +901,8 @@ if (assignmentRes.status === "rejected") {
         setLessonLoading(true);
         setLessonError("");
         setQuizData(null);
+        setQuizLoading(false);
+        setIsPlaying(false);
         try {
 <<<<<<< Updated upstream
             // Updated to use studentLearningApi with lessonId (slug or UUID)
@@ -890,7 +914,7 @@ if (assignmentRes.status === "rejected") {
             if (allModules && allModules.length > 0) {
                 for (const mod of allModules) {
                     const lessons = mod.lessons || [];
-                    const found = lessons.find(l => String(l.slug || l.lessonId || l.id) === String(lessonId));
+                    const found = lessons.find(l => String(l.lessonSlug || l.slug || l.lessonId || l.id) === String(lessonId));
                     if (found) {
                         // Merge found data, preferring the API response data where it exists
                         enrichedData = { ...found, ...data };
@@ -925,7 +949,31 @@ const lessonMeta = mod?.lessons?.find(l => String(l.slug) === String(lessonId));
             }
         } catch (err) {
             console.error("fetchLesson error:", err);
-            setLessonError("Could not load lesson content. Please try again.");
+            
+            // Fallback: If API fails, try to find the lesson in the allModules cache
+            let foundInCache = null;
+            if (allModules && allModules.length > 0) {
+                for (const mod of allModules) {
+                    const lessons = mod.lessons || [];
+                    const found = lessons.find(l => String(l.lessonSlug || l.slug || l.lessonId || l.id) === String(lessonId));
+                    if (found) {
+                        foundInCache = found;
+                        break;
+                    }
+                }
+            }
+
+            if (foundInCache) {
+                console.log("Using cached lesson data as fallback.");
+                setLessonData(foundInCache);
+                setLessonError("");
+                const lType = getLessonIcon(foundInCache.lessonType || foundInCache.type);
+                if (lType === "quiz") {
+                    fetchQuizForLesson(foundInCache).catch(e => console.error("Quiz fetch failed", e));
+                }
+            } else {
+                setLessonError("Could not load lesson content. Please try again.");
+            }
         } finally {
             setLessonLoading(false);
         }
@@ -1088,6 +1136,7 @@ const lessonMeta = mod?.lessons?.find(l => String(l.slug) === String(lessonId));
         description: lessonData?.longDescription || lessonData?.description || "",
         body: lessonData?.content || null,
         videoUrl: lessonData?.videoUrl || lessonData?.video_url || null,
+        thumbnailUrl: lessonData?.thumbnailUrl || null,
         resourceUrl: lessonData?.resourceUrl || null,
         duration: lessonData?.durationInMinutes ? `${lessonData.durationInMinutes} min` : (lessonData?.duration || ""),
     };
@@ -1100,7 +1149,7 @@ const lessonMeta = mod?.lessons?.find(l => String(l.slug) === String(lessonId));
         const lessons = moduleLessonsCache[mSlug] || moduleLessonsCache[mId] || m.lessons || [];
         return lessons.map(l => ({
             moduleId: mSlug,
-            lessonId: String(l.slug ?? l.lessonId ?? l.id),
+            lessonId: String(l.lessonSlug ?? l.slug ?? l.lessonId ?? l.id),
             lesson: l
 =======
     const flatLessons = useMemo(() => {
@@ -1396,6 +1445,7 @@ const moduleName = currentModuleData?.title || `Module ${moduleId}`;
                                     )
                               ) : isAssignment ? (
                                     <AssignmentView lessonData={lessonData} moduleColor={moduleColor} onSubmit={markComplete} isSubmitted={isDone} />
+<<<<<<< Updated upstream
                                 ) : isVideo && content.videoUrl ? (
                                     <video className="w-full h-full object-cover" controls key={content.videoUrl} poster={lessonData?.thumbnailUrl || lessonData?.thumbnail || undefined}>
                                         <source src={content.videoUrl} />
@@ -1405,8 +1455,54 @@ const moduleName = currentModuleData?.title || `Module ${moduleId}`;
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
                                         <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
                                             <FaPlay className="text-blue-400 text-2xl" />
+=======
+                                ) : content.videoUrl ? (
+                                    (content.thumbnailUrl && !isPlaying) ? (
+                                        <div className="relative w-full aspect-video cursor-pointer bg-black" onClick={() => setIsPlaying(true)}>
+                                            <img src={content.thumbnailUrl} alt="Lesson thumbnail" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-all hover:bg-black/40">
+                                                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm shadow-lg hover:scale-110 transition-transform">
+                                                    <FaPlay className="text-white text-2xl ml-1" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p className="text-white/60 text-xs font-semibold">No video available for this lesson</p>
+                                    ) : getEmbedUrl(content.videoUrl) ? (
+                                        <iframe
+                                            src={content.thumbnailUrl && isPlaying ? `${getEmbedUrl(content.videoUrl)}${getEmbedUrl(content.videoUrl).includes('?') ? '&' : '?'}autoplay=1` : getEmbedUrl(content.videoUrl)}
+                                            title={content.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            className="w-full h-full aspect-video border-0"
+                                        />
+                                    ) : (
+                                        <video 
+                                            className="w-full h-full object-cover" 
+                                            controls 
+                                            autoPlay={isPlaying}
+                                            key={content.videoUrl}
+                                            poster={content.thumbnailUrl || undefined}
+                                        >
+                                            <source src={content.videoUrl} />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    )
+                                ) : isText && content.body ? (
+                                    <div className="w-full h-full bg-white p-6 overflow-y-auto text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                        {content.body}
+                                    </div>
+                                ) : content.resourceUrl ? (
+                                    <iframe 
+                                        src={content.resourceUrl} 
+                                        title={content.title}
+                                        className="w-full h-full border-0 bg-white"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-600/20 flex items-center justify-center">
+                                            <FaFileAlt className="text-blue-400 text-2xl" />
+>>>>>>> Stashed changes
+                                        </div>
+                                        <p className="text-white/60 text-xs font-semibold">No content available for this lesson</p>
                                     </div>
                                 ) : isText ? (
                                     content.body ? (
@@ -1616,6 +1712,7 @@ const moduleName = currentModuleData?.title || `Module ${moduleId}`;
                                     const lessons = moduleLessonsCache[mSlug] || moduleLessonsCache[mId] || mod.lessons || [];
                                     const assignments = moduleAssignmentsCache[mSlug] || moduleAssignmentsCache[mId] || [];
                                     const quizzes = moduleQuizzesCache[mSlug] || moduleQuizzesCache[mId] || [];
+<<<<<<< Updated upstream
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.id}-${l.id}`)).length;
 =======
                               allModules.map(mod => {
@@ -1626,6 +1723,18 @@ const moduleName = currentModuleData?.title || `Module ${moduleId}`;
                                     const assignments = moduleAssignmentsCache[key] || [];
                                     const quizzes = moduleQuizzesCache[key] || []; // ← NEW
                                     const modCompleted = lessons.filter(l => completedLessons.has(`${mod.moduleId}-${l.lessonId}`)).length;
+>>>>>>> Stashed changes
+=======
+                                    const modCompleted = lessons.filter(lesson => {
+                                        const lSlug = String(lesson.lessonSlug ?? lesson.slug ?? lesson.lessonId ?? lesson.id);
+                                        return completedLessons.has(`${mSlug}-${lSlug}`) ||
+                                               completedLessons.has(String(lesson.id)) ||
+                                               completedLessons.has(String(lesson.lessonSlug)) ||
+                                               completedLessons.has(String(lesson.slug)) ||
+                                               lesson.completed ||
+                                               lesson.isCompleted ||
+                                               isCourseFullyComplete;
+                                    }).length;
 >>>>>>> Stashed changes
 
                                     return (
@@ -1665,7 +1774,7 @@ const moduleName = currentModuleData?.title || `Module ${moduleId}`;
                                                             {/* ── Lessons List ── */}
 <<<<<<< Updated upstream
                                                             {lessons.map((lesson) => {
-                                                                const lSlug = String(lesson.slug ?? lesson.lessonId ?? lesson.id);
+                                                                const lSlug = String(lesson.lessonSlug ?? lesson.slug ?? lesson.lessonId ?? lesson.id);
                                                                 const isActive =
                                                                     isActiveMod &&
                                                                     lSlug === String(lessonId);

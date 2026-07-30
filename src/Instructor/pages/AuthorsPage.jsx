@@ -47,7 +47,10 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
       console.log("courseSlug =", courseSlug);
       console.log("POST payload:", JSON.stringify(payload));
       await instructorCourseApi.updateCourseInstructors(courseSlug, payload);
-      const added = instructors.filter(i => selected.includes(i.id));
+      const added = instructors.filter(i => {
+        const instId = i.instructorCode || i.id || i.instructorId || i.userId;
+        return selected.includes(instId);
+      });
       onAdded(added);
       onClose();
     } catch (err) {
@@ -124,8 +127,9 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
           ) : (
             <div className="space-y-2">
               {filtered.map(instructor => {
-                const isAlreadyAdded = existingIds.includes(instructor.id);
-                const isSelected = selected.includes(instructor.id) || isAlreadyAdded;
+                const instId = instructor.instructorCode || instructor.id || instructor.instructorId || instructor.userId;
+                const isAlreadyAdded = existingIds.includes(instId);
+                const isSelected = selected.includes(instId) || isAlreadyAdded;
                 const name = instructor.fullName || instructor.name || "Unknown";
                 const email = instructor.gmail || instructor.email || "";
                 const avatar = instructor.profilePic || instructor.avatarUrl || null;
@@ -133,9 +137,9 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
 
                 return (
                   <button
-                    key={instructor.id}
+                    key={instId}
                     type="button"
-                    onClick={isAlreadyAdded ? undefined : () => toggle(instructor.id)}
+                    onClick={isAlreadyAdded ? undefined : () => toggle(instId)}
                     className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition text-left ${
                       isAlreadyAdded 
                         ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
@@ -222,7 +226,7 @@ const AddAuthorsDrawer = ({ courseSlug, existingIds, onClose, onAdded }) => {
 const AuthorsPage = ({ courseSlug, course, data, setData }) => {
   const [authors, setAuthors] = useState(
     (course?.instructors || course?.authors || []).map(i => ({
-      id: i.id,
+      id: i.instructorCode || i.id, // Prefer instructorCode as the primary identifier
       name: i.fullName || i.name || "Unknown",
       email: i.gmail || i.email || "",
       role: "Instructor",
@@ -241,7 +245,7 @@ const AuthorsPage = ({ courseSlug, course, data, setData }) => {
     const updated = [
       ...authors,
       ...newAuthors.map(i => ({
-        id: i.id,
+        id: i.instructorCode || i.id, // Prefer instructorCode
         name: i.fullName || i.name || "Unknown",
         email: i.gmail || i.email || "",
         role: "Instructor",
@@ -267,12 +271,8 @@ const AuthorsPage = ({ courseSlug, course, data, setData }) => {
   const handleRemove = async (authorId, idx) => {
     setRemoving(idx);
     try {
+      await instructorCourseApi.deleteCourseInstructor(courseSlug, authorId);
       const remaining = authors.filter((_, i) => i !== idx);
-      const payload = {
-        instructorIds: remaining.filter(a => a.id).map(a => a.id),
-      };
-      console.log("handleRemove payload:", JSON.stringify(payload));
-      await instructorCourseApi.updateCourseInstructors(courseSlug, payload);
       setAuthors(remaining);
 
       // Keep parent courseData synced

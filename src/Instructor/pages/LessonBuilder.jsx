@@ -1,4 +1,3 @@
-// LessonBuilder.jsx
 import React, { useState, useEffect } from "react";
 import { instructorLessonApi } from "../auth/api";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -59,6 +58,18 @@ const getThumbnailSrc = (lessonData) => {
     return null;
 };
 
+// ─── helper: extract filename from url ──────────────────────────────────────────
+const getFilenameFromUrl = (url) => {
+    if (!url) return "Resource Link";
+    try {
+        const decodedUrl = decodeURIComponent(url);
+        const filename = decodedUrl.split('/').pop();
+        return filename.split('?')[0] || "Resource Link";
+    } catch (e) {
+        return url.split('/').pop().split('?')[0] || "Resource Link";
+    }
+};
+
 const LessonBuilder = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -76,12 +87,42 @@ const LessonBuilder = () => {
     const [lessonTitle, setLessonTitle] = useState(lesson?.title || "Untitled Lesson");
     const [lessonDescription, setLessonDescription] = useState(lesson?.description || "");
     const [lessonData, setLessonData] = useState(lesson || {});
-    const [attachments, setAttachments] = useState([
-        { id: 1, name: "Lesson Notes.pdf", type: "pdf", size: "2.4 MB" },
-        { id: 2, name: "Exercise Sheet.docx", type: "doc", size: "1.1 MB" },
-    ]);
+    const [attachments, setAttachments] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // Sync attachments with lesson resources
+    useEffect(() => {
+        const newAttachments = [];
+        let fileUrl = null;
+
+        if (lessonData?.resourceFile) {
+            fileUrl = URL.createObjectURL(lessonData.resourceFile);
+            newAttachments.push({
+                id: "res-file",
+                name: lessonData.resourceFile.name,
+                type: "file",
+                size: (lessonData.resourceFile.size / (1024 * 1024)).toFixed(2) + " MB",
+                url: fileUrl
+            });
+        } else if (lessonData?.resourceUrl) {
+            newAttachments.push({
+                id: "res-url",
+                name: getFilenameFromUrl(lessonData.resourceUrl),
+                type: "link",
+                size: "Link",
+                url: lessonData.resourceUrl
+            });
+        }
+        setAttachments(newAttachments);
+
+        return () => {
+            if (fileUrl) {
+                URL.revokeObjectURL(fileUrl);
+            }
+        };
+    }, [lessonData]);
 
     // Re-sync local state when navigating back from Settings with updated lesson data
     useEffect(() => {
@@ -132,18 +173,18 @@ const LessonBuilder = () => {
             formData.append("title", lessonTitle || "");
             formData.append("lessonTitle", lessonTitle || ""); // Fallback for backend
             formData.append("name", lessonTitle || ""); // Additional fallback
-            
+
             if (lessonDescription) {
                 formData.append("description", lessonDescription);
             }
-            
+
             const type = lessonData.lessonType || lesson?.lessonType || "VIDEO";
             formData.append("lessonType", type);
-            
+
             if (lessonData.content || lesson?.content) {
                 formData.append("content", lessonData.content || lesson?.content);
             }
-            
+
             if (type === "VIDEO" || lessonData.videoInputType || lesson?.videoInputType) {
                 formData.append("videoInputType", lessonData.videoInputType || lesson?.videoInputType || "URL");
                 if (videoFile) {
@@ -152,14 +193,14 @@ const LessonBuilder = () => {
                     formData.append("videoUrl", lessonData.videoUrl || lesson?.videoUrl);
                 }
             }
-            
+
             if (lessonData.resourceInputType || lesson?.resourceInputType) {
                 formData.append("resourceInputType", lessonData.resourceInputType || lesson?.resourceInputType);
             }
             if (lessonData.resourceUrl || lesson?.resourceUrl) {
                 formData.append("resourceUrl", lessonData.resourceUrl || lesson?.resourceUrl);
             }
-            
+
             formData.append("durationInMinutes", lessonData.durationInMinutes || lesson?.durationInMinutes || 15);
             formData.append("sortOrder", lessonData.sortOrder || lesson?.sortOrder || 1);
             formData.append("previewAllowed", lessonData.previewAllowed ?? lesson?.previewAllowed ?? true);
@@ -349,11 +390,10 @@ const LessonBuilder = () => {
                                             <button
                                                 key={src}
                                                 onClick={() => setVideoSource(src)}
-                                                className={`px-3 py-1 text-xs rounded-lg capitalize transition-colors ${
-                                                    videoSource === src
-                                                        ? "bg-violet-100 text-violet-700"
-                                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                                }`}
+                                                className={`px-3 py-1 text-xs rounded-lg capitalize transition-colors ${videoSource === src
+                                                    ? "bg-violet-100 text-violet-700"
+                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                    }`}
                                             >
                                                 {src}
                                             </button>
@@ -381,46 +421,40 @@ const LessonBuilder = () => {
                                 )}
                             </div>
 
-                            {/* ── Thumbnail Preview Strip ── */}
-                            {thumbnailSrc && (
-                                <div className="mb-4 rounded-xl overflow-hidden border border-gray-200 relative group">
-                                    <img
-                                        src={thumbnailSrc}
-                                        alt="Lesson thumbnail"
-                                        className="w-full h-36 object-cover"
-                                        onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
-                                    />
-                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                        <span className="text-white text-xs font-medium flex items-center gap-1">
-                                            <FaImage /> Thumbnail
-                                        </span>
-                                        <button
-                                            onClick={() =>
-                                                navigate(`/instructor/lesson-settings/${courseSlug}/${lessonSlug}`, {
-                                                    state: {
-                                                        lesson: { ...lesson, ...lessonData, title: lessonTitle, description: lessonDescription },
-                                                        section,
-                                                        course,
-                                                    },
-                                                })
-                                            }
-                                            className="text-white text-xs bg-white/20 hover:bg-white/40 px-2 py-1 rounded transition-colors"
-                                        >
-                                            Change
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* ── VIDEO / AUDIO area ── */}
                             {isVideoOrAudio && (
                                 <>
                                     {/* ── Case 1: Video URL configured in settings (iframe embed or direct) ── */}
                                     {hasConfiguredVideoUrl && (
-                                        <div className="rounded-xl overflow-hidden border border-gray-200 bg-black">
-                                            {embedSrc ? (
+                                        <div className="rounded-xl overflow-hidden border border-gray-200 bg-black relative group">
+                                            {thumbnailSrc && !isPlaying ? (
+                                                <div className="relative w-full aspect-video cursor-pointer" onClick={() => setIsPlaying(true)}>
+                                                    <img src={thumbnailSrc} alt="Lesson thumbnail" className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-all hover:bg-black/40">
+                                                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm shadow-lg hover:scale-110 transition-transform">
+                                                            <FaPlay className="text-white text-2xl ml-1" />
+                                                        </div>
+                                                    </div>
+                                                    {/* Change Thumbnail button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/instructor/lesson-settings/${courseSlug}/${lessonSlug}`, {
+                                                                state: {
+                                                                    lesson: { ...lesson, ...lessonData, title: lessonTitle, description: lessonDescription },
+                                                                    section,
+                                                                    course,
+                                                                },
+                                                            });
+                                                        }}
+                                                        className="absolute top-4 right-4 text-white text-xs bg-black/50 hover:bg-black/70 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                                                    >
+                                                        <FaImage /> Change Thumbnail
+                                                    </button>
+                                                </div>
+                                            ) : embedSrc ? (
                                                 <iframe
-                                                    src={embedSrc}
+                                                    src={thumbnailSrc && isPlaying ? `${embedSrc}${embedSrc.includes('?') ? '&' : '?'}autoplay=1` : embedSrc}
                                                     title="Lesson video"
                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                     allowFullScreen
@@ -430,8 +464,10 @@ const LessonBuilder = () => {
                                                 /* Direct URL — use <video> */
                                                 <video
                                                     controls
+                                                    autoPlay={isPlaying}
                                                     className="w-full aspect-video"
                                                     src={settingsVideoUrl}
+                                                    poster={thumbnailSrc}
                                                 >
                                                     Your browser does not support the video tag.
                                                 </video>
@@ -454,12 +490,41 @@ const LessonBuilder = () => {
 
                                     {/* ── Case 2: Video FILE configured in settings ── */}
                                     {hasConfiguredVideoFile && !hasConfiguredVideoUrl && (
-                                        <div className="rounded-xl overflow-hidden border border-gray-200">
-                                            <video
-                                                controls
-                                                className="w-full aspect-video bg-black"
-                                                src={URL.createObjectURL(settingsVideoFile)}
-                                            />
+                                        <div className="rounded-xl overflow-hidden border border-gray-200 relative">
+                                            {thumbnailSrc && !isPlaying ? (
+                                                <div className="relative w-full aspect-video cursor-pointer" onClick={() => setIsPlaying(true)}>
+                                                    <img src={thumbnailSrc} alt="Lesson thumbnail" className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-all hover:bg-black/40">
+                                                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm shadow-lg hover:scale-110 transition-transform">
+                                                            <FaPlay className="text-white text-2xl ml-1" />
+                                                        </div>
+                                                    </div>
+                                                    {/* Change Thumbnail button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/instructor/lesson-settings/${courseSlug}/${lessonSlug}`, {
+                                                                state: {
+                                                                    lesson: { ...lesson, ...lessonData, title: lessonTitle, description: lessonDescription },
+                                                                    section,
+                                                                    course,
+                                                                },
+                                                            });
+                                                        }}
+                                                        className="absolute top-4 right-4 text-white text-xs bg-black/50 hover:bg-black/70 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                                                    >
+                                                        <FaImage /> Change Thumbnail
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <video
+                                                    controls
+                                                    autoPlay={isPlaying}
+                                                    className="w-full aspect-video bg-black"
+                                                    src={URL.createObjectURL(settingsVideoFile)}
+                                                    poster={thumbnailSrc}
+                                                />
+                                            )}
                                             <div className="bg-gray-50 border-t border-gray-200 px-4 py-2 flex items-center gap-2">
                                                 <FaVideo className="text-violet-400 text-xs" />
                                                 <span className="text-xs text-gray-700 font-medium truncate">
@@ -472,11 +537,10 @@ const LessonBuilder = () => {
                                     {/* ── Case 3: No configured video — show the upload/embed/cloud UI ── */}
                                     {!hasConfiguredVideo && (
                                         <div
-                                            className={`h-[400px] border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 ${
-                                                isDragging
-                                                    ? "border-violet-500 bg-violet-50"
-                                                    : "border-gray-300 hover:border-violet-400 hover:bg-gray-50"
-                                            }`}
+                                            className={`h-[400px] border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 ${isDragging
+                                                ? "border-violet-500 bg-violet-50"
+                                                : "border-gray-300 hover:border-violet-400 hover:bg-gray-50"
+                                                }`}
                                             onDragOver={handleDragOver}
                                             onDragLeave={handleDragLeave}
                                             onDrop={handleDrop}
@@ -585,63 +649,74 @@ const LessonBuilder = () => {
                                 </>
                             )}
 
-                            {/* ── PDF / ARTICLE ── */}
-                            {(lessonType === "PDF" || lessonType === "ARTICLE") && (
-                                <div className="h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl">
-                                    {lessonType === "PDF" ? (
-                                        <FaFilePdf className="text-6xl text-red-300 mb-4" />
+                            {/* ── NON-VIDEO RESOURCE AREA ── */}
+                            {lessonType !== "VIDEO" && (
+                                <>
+                                    {/* Configured Resource */}
+                                    {(lessonData?.resourceUrl || lessonData?.resourceFile) ? (
+                                        <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 p-6 flex flex-col items-center justify-center min-h-[220px]">
+                                            <FaPaperclip className="text-4xl text-violet-400 mb-4" />
+                                            <p className="text-gray-700 font-medium mb-1">Resource Attached</p>
+                                            <p className="text-sm text-gray-500 mb-4 text-center max-w-md truncate">
+                                                <a
+                                                    href={attachments[0]?.url || "#"}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-violet-600 hover:underline"
+                                                >
+                                                    {lessonData.resourceInputType === "FILE_UPLOAD"
+                                                        ? lessonData.resourceFile?.name || "Uploaded resource"
+                                                        : getFilenameFromUrl(lessonData.resourceUrl)}
+                                                </a>
+                                            </p>
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/instructor/lesson-settings/${courseSlug}/${lessonSlug}`, {
+                                                        state: {
+                                                            lesson: { ...lesson, ...lessonData, title: lessonTitle, description: lessonDescription },
+                                                            section,
+                                                            course,
+                                                        },
+                                                    })
+                                                }
+                                                className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                                            >
+                                                Change Resource
+                                            </button>
+                                        </div>
                                     ) : (
-                                        <MdArticle className="text-6xl text-blue-300 mb-4" />
+                                        /* Unconfigured Resource Placeholder */
+                                        <div className="h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 hover:border-violet-300 transition-colors">
+                                            {lessonType === "PDF" ? (
+                                                <FaFilePdf className="text-5xl text-red-300 mb-3" />
+                                            ) : lessonType === "ARTICLE" || lessonType === "TEXT" ? (
+                                                <MdArticle className="text-5xl text-blue-300 mb-3" />
+                                            ) : lessonType === "QUIZ" ? (
+                                                <MdQuiz className="text-5xl text-purple-300 mb-3" />
+                                            ) : lessonType === "ASSIGNMENT" ? (
+                                                <MdAssignment className="text-5xl text-teal-300 mb-3" />
+                                            ) : (
+                                                <FaPaperclip className="text-5xl text-gray-300 mb-3" />
+                                            )}
+                                            <p className="text-gray-600 font-medium">Resource Required</p>
+                                            <p className="text-gray-400 text-sm mt-1 mb-4">Please attach a resource for this lesson type</p>
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/instructor/lesson-settings/${courseSlug}/${lessonSlug}`, {
+                                                        state: {
+                                                            lesson: { ...lesson, ...lessonData, title: lessonTitle, description: lessonDescription },
+                                                            section,
+                                                            course,
+                                                        },
+                                                    })
+                                                }
+                                                className="px-5 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm shadow-sm"
+                                            >
+                                                Add Resource in Settings
+                                            </button>
+                                        </div>
                                     )}
-                                    <p className="text-gray-500 font-medium">
-                                        {lessonType === "PDF" ? "PDF Document" : "Article"}
-                                    </p>
-                                    <p className="text-gray-400 text-sm mt-1">Drop your content here or browse</p>
-                                    <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                        Upload Content
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* ── QUIZ ── */}
-                            {lessonType === "QUIZ" && (
-                                <div className="h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl">
-                                    <MdQuiz className="text-6xl text-purple-300 mb-4" />
-                                    <p className="text-gray-500 font-medium">Quiz Configuration</p>
-                                    <p className="text-gray-400 text-sm mt-1">Add questions and set quiz options</p>
-                                    <button className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                                        Configure Quiz
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* ── ASSIGNMENT ── */}
-                            {lessonType === "ASSIGNMENT" && (
-                                <div className="h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl">
-                                    <MdAssignment className="text-6xl text-teal-300 mb-4" />
-                                    <p className="text-gray-500 font-medium">Assignment Settings</p>
-                                    <p className="text-gray-400 text-sm mt-1">Set assignment instructions and requirements</p>
-                                    <button className="mt-4 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm">
-                                        Configure Assignment
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* ── Resource (set from Settings) ── */}
-                            {(lessonData?.resourceUrl || lessonData?.resourceFile) && (
-                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                        Resource
-                                    </p>
-                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                        <FaPaperclip className="text-gray-400" />
-                                        <span className="text-sm text-gray-700 truncate">
-                                            {lessonData.resourceInputType === "FILE_UPLOAD"
-                                                ? lessonData.resourceFile?.name || "Uploaded resource"
-                                                : lessonData.resourceUrl}
-                                        </span>
-                                    </div>
-                                </div>
+                                </>
                             )}
                         </div>
 
@@ -817,7 +892,14 @@ const LessonBuilder = () => {
                                                     {getFileIcon(file.type)}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="font-medium text-xs truncate">{file.name}</p>
+                                                    <a
+                                                        href={file.url || "#"}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="font-medium text-xs truncate text-gray-700 hover:text-violet-600 hover:underline block"
+                                                    >
+                                                        {file.name}
+                                                    </a>
                                                     <p className="text-xs text-gray-500">{file.size}</p>
                                                 </div>
                                             </div>
@@ -828,33 +910,8 @@ const LessonBuilder = () => {
                                     ))}
                                 </div>
 
-                                <div className="border-t border-gray-200 pt-4">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button className="flex items-center justify-center gap-2 px-3 py-2 bg-violet-50 text-violet-600 rounded-lg hover:bg-violet-100 transition-colors text-sm">
-                                            <FaCloudUploadAlt />
-                                            Upload
-                                        </button>
-                                        <button className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm">
-                                            <FaLink />
-                                            Link
-                                        </button>
-                                    </div>
 
-                                    <div className="mt-3 space-y-1.5">
-                                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                                            <FaFilePdf className="text-red-400" />
-                                            Add PDF File
-                                        </button>
-                                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                                            <FaFileWord className="text-blue-400" />
-                                            Add Document
-                                        </button>
-                                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                                            <FaFileImage className="text-green-400" />
-                                            Add Image
-                                        </button>
-                                    </div>
-                                </div>
+
                             </div>
 
                             {/* ── Lesson Stats ── */}
