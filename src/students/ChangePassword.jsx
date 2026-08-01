@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import CP from "../assets/cp.jpg";
+import CP from "../assets/CP.jpg";
 import { studentAuth } from "./auth/api";
 import {
   FaRegEyeSlash,

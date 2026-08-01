@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import S1 from "../assets/s1.jpg";
-import S2 from "../assets/s2.jpg";
-import S3 from "../assets/s3.jpg";
-import S4 from "../assets/s4.jpg";
-import S5 from "../assets/s5.jpg";
+import S1 from "../assets/S1.jpg";
+import S2 from "../assets/S2.jpg";
+import S3 from "../assets/S3.jpg";
+import S4 from "../assets/S4.jpg";
+import S5 from "../assets/S5.jpg";
 import {
   FaBookOpen, FaPlayCircle, FaTrophy, FaClock, FaArrowRight,
   FaEllipsisV, FaMedal, FaChevronDown, FaTv, FaCheckCircle,
