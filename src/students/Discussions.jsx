@@ -532,32 +532,34 @@ function Discussions() {
   }).length;
 
   const statCards = [
-    { label: "My Groups", value: joinedCount, icon: <FaComments />, iconBg: "bg-blue-50", iconColor: "text-blue-600" },
-    { label: "Total Groups", value: groups.length, icon: <FaUsers />, iconBg: "bg-indigo-50", iconColor: "text-indigo-600" },
-    { label: "Active Today", value: activeToday, icon: <FaClock />, iconBg: "bg-sky-50", iconColor: "text-sky-600" },
+    { label: "My Groups", value: joinedCount, icon: <FaComments />, iconBg: "bg-blue-50 text-[#043573]" },
+    { label: "Total Groups", value: groups.length, icon: <FaUsers />, iconBg: "bg-purple-50 text-purple-600" },
+    { label: "Active Today", value: activeToday, icon: <FaClock />, iconBg: "bg-emerald-50 text-emerald-600" },
   ];
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Header — plain, blue-accented, no gradient banner */}
-        <div className="text-sm text-gray-400">
-          <Link to="/student/dashboard" className="hover:text-[#043573] transition text-sm">Dashboard</Link>
-          <span className="mx-2 text-sm">&gt;</span>
-          <span className="text-gray-600 font-medium text-sm">Discussions</span>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Course Discussions</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Connect with instructors and peers — ask questions and share insights.</p>
+        {/* Header */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
+          <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1.5">
+            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+            <span>&gt;</span>
+            <span className="text-slate-700 font-semibold">Discussions</span>
+          </p>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Course Discussions</h1>
+          <p className="text-xs text-slate-500 mt-1">Connect with instructors and peers — ask questions and share insights.</p>
         </div>
 
         {/* Stat strip */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {statCards.map((s, i) => (
-            <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg ${s.iconBg} ${s.iconColor} flex-shrink-0`}>{s.icon}</div>
+            <div key={i} className="bg-white border border-slate-200/70 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 shadow-xs hover:shadow-md transition-all">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg ${s.iconBg} shrink-0 font-bold`}>{s.icon}</div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{s.label}</p>
-                <p className="text-2xl font-black text-slate-900 leading-none mt-0.5">{s.value}</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase">{s.label}</p>
+                <p className="text-xl sm:text-2xl font-black text-slate-900 leading-none mt-1">{s.value}</p>
               </div>
             </div>
           ))}
@@ -566,17 +568,17 @@ function Discussions() {
         {/* Channel list */}
         {loading ? (
           <div className="text-center py-16">
-            <FaSpinner className="animate-spin text-blue-500 text-3xl mx-auto mb-3" />
-            <p className="text-sm text-gray-500">Loading groups...</p>
+            <FaSpinner className="animate-spin text-[#043573] text-3xl mx-auto mb-3" />
+            <p className="text-xs text-slate-500 font-medium">Loading discussion groups...</p>
           </div>
         ) : groups.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-dashed border-slate-300">
-            <FaComments className="text-4xl text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-gray-600 mb-1">No discussion groups found</h3>
-            <p className="text-sm text-gray-400">Your enrolled courses will appear here once they have discussion groups enabled.</p>
+          <div className="bg-white rounded-2xl p-12 text-center shadow-xs border border-slate-200/70">
+            <FaComments className="text-4xl text-slate-300 mx-auto mb-3" />
+            <h3 className="text-sm font-bold text-slate-800 mb-1">No discussion groups found</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">Your enrolled courses will appear here once they have discussion groups enabled.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {groups.map(g => (
               <DiscussionCard
                 key={g.id}

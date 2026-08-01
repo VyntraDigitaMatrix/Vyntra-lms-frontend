@@ -214,78 +214,78 @@ const Quizzes = () => {
     };
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
-            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-6">
 
-                {/* Simple Header */}
-                <div className="flex items-center justify-between">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
                     <div>
-                        <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold mb-2">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mb-1">
                             <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
                             <span>&gt;</span>
-                            <span className="text-gray-900">Quizzes</span>
+                            <span className="text-slate-700 font-semibold">Quizzes</span>
                         </div>
-                        <h1 className="text-xl font-bold text-gray-900">My Quizzes</h1>
-                        <p className="text-sm text-gray-500 mt-1">Review your past attempts and track your learning progress.</p>
+                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">My Quizzes</h1>
+                        <p className="text-xs text-slate-500 mt-1">Review your past attempts and track your learning progress.</p>
                     </div>
-                    <button onClick={fetchQuizzes} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-semibold flex items-center gap-2 transition">
+                    <button onClick={fetchQuizzes} className="px-4 py-2 bg-slate-100/80 text-slate-700 hover:bg-slate-100 hover:text-[#043573] rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer self-start sm:self-auto">
                         <FaRedo className={loading ? "animate-spin" : ""} /> Refresh
                     </button>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200/70 flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-[#043573] flex items-center justify-center text-lg font-bold">
                             <FaLayerGroup />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">Total Quizzes</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                            <p className="text-xs font-semibold text-slate-500">Total Quizzes</p>
+                            <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{stats.total}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200/70 flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold">
                             <FaCheckCircle />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">Completed</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.completed.length}</p>
+                            <p className="text-xs font-semibold text-slate-500">Completed</p>
+                            <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{stats.completed.length}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
-                        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200/70 flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                        <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold">
                             <FaHourglassHalf />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">Pending</p>
-                            <p className="text-2xl font-bold text-gray-900">{tabCounts.Pending}</p>
+                            <p className="text-xs font-semibold text-slate-500">Pending</p>
+                            <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{tabCounts.Pending}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
-                        <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200/70 flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                        <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold">
                             <FaStar />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500">Avg Score</p>
-                            <p className="text-2xl font-bold text-gray-900">{avgScore}%</p>
+                            <p className="text-xs font-semibold text-slate-500">Avg Score</p>
+                            <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{avgScore}%</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Sleek Tabs */}
-                <div className="flex items-center gap-2 bg-white rounded-xl p-1.5 w-fit overflow-x-auto shadow-sm border border-gray-100">
+                <div className="flex items-center gap-2 bg-white rounded-2xl p-1.5 w-fit overflow-x-auto shadow-xs border border-slate-200/70 scrollbar-hide">
                     {["All", "Pending", "Completed", "Course"].map(tab => {
                         const count = tabCounts[tab];
                         const isActive = activeTab === tab;
                         return (
                             <button key={tab} onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
-                                    ? "bg-[#043573] text-white shadow-md"
-                                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${isActive
+                                    ? "bg-[#043573] text-white shadow-md shadow-[#043573]/20"
+                                    : "text-slate-600 hover:text-[#043573] hover:bg-slate-100/70"
                                     }`}>
-                                {tab}
-                                <span className={`text-xs font-extrabold px-2 py-0.5 rounded-full leading-tight ${isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                                <span>{tab}</span>
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md leading-tight ${isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
                                     }`}>
                                     {count}
                                 </span>
@@ -297,16 +297,16 @@ const Quizzes = () => {
                 {/* Loading */}
                 {loading && (
                     <div className="flex items-center justify-center py-20">
-                        <FaSpinner className="animate-spin text-3xl text-blue-400" />
+                        <FaSpinner className="animate-spin text-3xl text-[#043573]" />
                     </div>
                 )}
 
                 {/* Error */}
                 {!loading && error && (
-                    <div className="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
-                        <p className="text-sm font-semibold text-red-600 mb-3">{error}</p>
+                    <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-center">
+                        <p className="text-xs font-semibold text-rose-600 mb-3">{error}</p>
                         <button onClick={fetchQuizzes}
-                            className="px-4 py-2 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition">
+                            className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition cursor-pointer">
                             Retry
                         </button>
                     </div>
@@ -315,12 +315,12 @@ const Quizzes = () => {
                 {/* Quiz list */}
                 {!loading && !error && (
                     <div id="quiz-list">
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {currentItems.length === 0 && (
-                                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
-                                    <MdQuiz className="text-4xl text-gray-200 mx-auto mb-3" />
-                                    <p className="text-sm font-semibold text-gray-400">No quizzes found</p>
-                                    <p className="text-xs text-gray-400 mt-1">Try a different tab.</p>
+                                <div className="bg-white rounded-2xl border border-slate-200/70 p-12 text-center shadow-xs">
+                                    <MdQuiz className="text-4xl text-slate-300 mx-auto mb-3" />
+                                    <h3 className="text-sm font-bold text-slate-800">No quizzes found</h3>
+                                    <p className="text-xs text-slate-500 mt-1">Try selecting a different filter tab.</p>
                                 </div>
                             )}
                             {currentItems.map(quiz => {
@@ -334,18 +334,18 @@ const Quizzes = () => {
 
                                 return (
                                     <div key={quiz.quizId || quiz.id}
-                                        className="group bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 relative overflow-hidden">
+                                        className="group bg-white border border-slate-200/70 rounded-2xl p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-xs hover:shadow-md transition-all duration-300 relative overflow-hidden">
 
                                         {/* Subtle side accent */}
                                         <div className={`absolute top-0 bottom-0 left-0 w-1 ${c.bg} opacity-0 group-hover:opacity-100 transition-opacity`} />
 
                                         {/* Left Side: Info */}
                                         <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-5 flex-1">
-                                            <div className={`w-14 h-14 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${c.bg} shadow-inner`}>
-                                                <MdQuiz className={`text-lg sm:text-xl ${c.text}`} />
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${c.bg} font-bold`}>
+                                                <MdQuiz className={`text-xl ${c.text}`} />
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <div className="flex flex-wrap items-center gap-2 mb-1.5">
                                                     <StatusBadge status={quiz.status} />
                                                     {quiz.status === "Completed" && (
                                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold tracking-wide uppercase">

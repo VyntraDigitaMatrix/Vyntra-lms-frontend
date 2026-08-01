@@ -164,90 +164,86 @@ function Resources() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Breadcrumb */}
-      <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
-        <p className="text-xs sm:text-sm text-gray-400">
-          <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
-          <span className="mx-1 sm:mx-2">&gt;</span>
-          <span className="text-gray-600 font-medium">Resources</span>
-        </p>
-      </div>
-
+    <div className="min-h-screen bg-slate-50/60 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 py-3 sm:py-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Learning Resources</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Access study materials, notes, and educational content from your courses</p>
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
+        <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1.5">
+          <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+          <span>&gt;</span>
+          <span className="text-slate-700 font-semibold">Resources</span>
+        </p>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Learning Resources</h1>
+        <p className="text-xs text-slate-500 mt-1">Access study materials, notes, and educational content from your courses</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-5 pb-6 sm:pb-8">
+      <div className="space-y-6">
 
         {fetchError && (
-          <div className="mb-5 flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold">
-            <span className="flex items-center gap-2"><FaExclamationCircle className="flex-shrink-0" /> {fetchError}</span>
-            <button onClick={fetchResources} className="px-3 py-1.5 bg-white border border-red-200 rounded-lg hover:bg-red-100 transition flex-shrink-0">Retry</button>
+          <div className="flex items-center justify-between gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl p-4 text-xs font-semibold">
+            <span className="flex items-center gap-2"><FaExclamationCircle className="shrink-0" /> {fetchError}</span>
+            <button onClick={fetchResources} className="px-3 py-1.5 bg-white border border-rose-200 rounded-xl hover:bg-rose-100 transition shrink-0 cursor-pointer">Retry</button>
           </div>
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-[#043573]/10 flex items-center justify-center">
-                <FaFile className="text-[#043573] text-lg sm:text-2xl" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl border border-slate-200/70 p-4 sm:p-5 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-blue-50 text-[#043573] flex items-center justify-center text-lg font-bold">
+                <FaFile />
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Total Resources</p>
-                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.totalResources}</h2>
+                <p className="text-xs font-semibold text-slate-500">Total Resources</p>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{stats.totalResources}</h2>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl bg-purple-50 flex items-center justify-center">
-                <FaGraduationCap className="text-purple-600 text-base sm:text-[22px]" />
+          <div className="bg-white rounded-2xl border border-slate-200/70 p-4 sm:p-5 shadow-xs hover:shadow-md transition">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold">
+                <FaGraduationCap />
               </div>
               <div>
-                <p className="text-[10px] sm:text-sm text-gray-500 font-medium">Courses Covered</p>
-                <h2 className="text-base sm:text-2xl font-bold text-gray-800">{stats.courses}</h2>
+                <p className="text-xs font-semibold text-slate-500">Courses Covered</p>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{stats.courses}</h2>
               </div>
             </div>
           </div>
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 mb-5 sm:mb-6">
+        <div className="bg-white rounded-2xl shadow-xs border border-slate-200/70 p-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm" />
+              <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
               <input
                 type="text"
                 placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#043573] focus:border-transparent outline-none transition text-xs sm:text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:border-[#043573] outline-none transition text-xs font-medium bg-slate-50/50"
               />
             </div>
 
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className="w-full sm:w-auto h-9 sm:h-11 px-3 sm:px-5 border border-gray-200 rounded-lg flex items-center justify-center sm:justify-between gap-2 text-gray-700 hover:bg-gray-50 transition text-xs sm:text-sm"
+                className="w-full sm:w-auto h-10 px-4 border border-slate-200 rounded-xl flex items-center justify-between gap-2 text-slate-700 hover:bg-slate-50 transition text-xs font-bold cursor-pointer"
               >
-                <FaFilter className="text-xs sm:text-sm" />
-                <span className="font-medium">Filter: {filterType}</span>
-                <FaChevronDown className={`text-[10px] sm:text-xs transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
+                <FaFilter className="text-xs text-[#043573]" />
+                <span>Filter: {filterType}</span>
+                <FaChevronDown className={`text-[10px] transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute top-10 sm:top-12 right-0 w-40 sm:w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-2 animate-fadeIn">
+                <div className="absolute top-12 right-0 w-44 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                   {filterOptions.map((type) => (
                     <button
                       key={type}
                       onClick={() => { setFilterType(type); setShowFilterDropdown(false); }}
-                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm transition-all duration-200 ${
-                        filterType === type ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      className={`w-full text-left px-4 py-2 text-xs font-medium transition-all ${
+                        filterType === type ? "bg-blue-50 text-[#043573] font-bold" : "text-slate-600 hover:bg-slate-50"
                       }`}
                     >
                       {type}
@@ -260,33 +256,33 @@ function Resources() {
         </div>
 
         {/* Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-5 sm:mb-6">
-          <div className="lg:col-span-4 bg-white rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm">
-            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <MdFolder className="text-[#043573]" />
-              Categories
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(typeCounts).map(([type, count]) => {
-                const { icon: Icon, color } = iconFor(type);
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setFilterType(type)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
-                      filterType === type ? "bg-[#043573] border-[#043573] text-white" : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    <Icon className={color} />
-                    <span className="text-xs sm:text-sm font-medium">{type}</span>
-                    <span className="text-[10px] sm:text-xs font-bold bg-white px-1.5 py-0.5 rounded-full border border-gray-100">{count}</span>
-                  </button>
-                );
-              })}
-              {Object.keys(typeCounts).length === 0 && !loading && (
-                <p className="text-xs text-gray-400 py-2">No resource types yet.</p>
-              )}
-            </div>
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/70 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <MdFolder className="text-[#043573]" />
+            Categories
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(typeCounts).map(([type, count]) => {
+              const { icon: Icon, color } = iconFor(type);
+              return (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    filterType === type ? "bg-[#043573] border-[#043573] text-white shadow-xs" : "border-slate-200/80 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <Icon className={filterType === type ? "text-white" : color} />
+                  <span>{type}</span>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                    filterType === type ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                  }`}>{count}</span>
+                </button>
+              );
+            })}
+            {Object.keys(typeCounts).length === 0 && !loading && (
+              <p className="text-xs text-slate-400 py-1">No resource types yet.</p>
+            )}
           </div>
         </div>
 
@@ -294,10 +290,10 @@ function Resources() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <FaSpinner className="animate-spin text-3xl text-[#043573]" />
-            <p className="text-sm text-gray-400">Loading resources…</p>
+            <p className="text-xs text-slate-400 font-medium">Loading resources...</p>
           </div>
         ) : filteredResources.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredResources.map((item) => {
               const { icon: Icon, color, bg } = iconFor(item.resourceType);
               return (

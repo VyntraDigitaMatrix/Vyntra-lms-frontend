@@ -27,12 +27,8 @@ function Field({ icon: Icon, type = "text", placeholder, value, onChange, right,
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-<<<<<<< Updated upstream
-        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-[#043573] focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
-=======
         maxLength={maxLength}
         className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
->>>>>>> Stashed changes
       />
       {right && (
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center">{right}</span>

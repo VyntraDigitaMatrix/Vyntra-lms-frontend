@@ -919,24 +919,24 @@ const Settings = () => {
   const activeItem = NAV_ITEMS.find(n => n.key === activeSection);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* ── Page header ── */}
-        <div className="pt-6 pb-5">
-          <p className="text-xs text-gray-400 mb-3">
-            <span className="hover:text-blue-500 cursor-pointer transition">Dashboard</span>
-            <span className="mx-1.5 text-gray-300">/</span>
-            <span className="text-gray-600 font-medium">Settings</span>
+        {/* ── Page Header ── */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs mb-6">
+          <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1.5">
+            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+            <span>&gt;</span>
+            <span className="text-slate-700 font-semibold">Settings</span>
           </p>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your account, preferences and privacy.</p>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Settings</h1>
+          <p className="text-xs text-slate-500 mt-1">Manage your account, preferences, and privacy.</p>
         </div>
 
         {/* ── Tab nav (desktop) ── */}
         <div className="hidden sm:block mb-6">
-          <div className="bg-white border border-gray-100 rounded-xl p-1.5 shadow-sm overflow-x-auto scrollbar-hide">
-            <div className="flex gap-2 min-w-max">
+          <div className="bg-white border border-slate-200/70 rounded-2xl p-1.5 shadow-xs overflow-x-auto scrollbar-hide">
+            <div className="flex gap-1.5 min-w-max">
               {NAV_ITEMS.map(item => {
                 const isActive = activeSection === item.key;
                 const isDanger = item.key === "danger";
@@ -944,18 +944,19 @@ const Settings = () => {
                   <button
                     key={item.key}
                     onClick={() => setActiveSection(item.key)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${isActive
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
                         ? isDanger
-                          ? "bg-red-50 text-red-600"
-                          : "bg-blue-50 text-blue-700"
+                          ? "bg-rose-500 text-white shadow-xs"
+                          : "bg-[#043573] text-white shadow-md shadow-[#043573]/20"
                         : isDanger
-                          ? "text-red-400 hover:text-red-500 hover:bg-red-50/50"
-                          : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
-                      }`}
+                          ? "text-rose-500 hover:bg-rose-50"
+                          : "text-slate-600 hover:text-[#043573] hover:bg-slate-100/70"
+                    }`}
                   >
                     <item.icon style={{
                       fontSize: 12,
-                      color: isActive ? item.color : isDanger ? "#fca5a5" : undefined
+                      color: isActive ? "#ffffff" : isDanger ? "#f43f5e" : item.color
                     }} />
                     {item.label}
                   </button>

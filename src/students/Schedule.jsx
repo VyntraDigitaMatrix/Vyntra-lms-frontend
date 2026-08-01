@@ -198,81 +198,81 @@ const Schedules = () => {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <p className="text-sm text-gray-400 mb-2">
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
+        <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1.5">
           <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
-          <span className="mx-2">&gt;</span>
-          <span className="text-gray-600 font-medium">Schedule</span>
+          <span>&gt;</span>
+          <span className="text-slate-700 font-semibold">Schedule</span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">My Schedule</h1>
-        <p className="text-sm text-gray-500">Assignment due dates</p>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">My Schedule</h1>
+        <p className="text-xs text-slate-500 mt-1">Assignment due dates and upcoming milestones</p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-3">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
         {/* Main Calendar */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xs border border-slate-200/70 overflow-hidden">
           {/* Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-gray-100 bg-white/50">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-slate-100 bg-white">
             <div className="flex items-center gap-2">
-              <FaCalendarAlt className="text-[#043573] w-5 h-5" />
-              <h2 className="text-lg font-semibold text-gray-800">
+              <FaCalendarAlt className="text-[#043573] w-4 h-4" />
+              <h2 className="text-base font-bold text-slate-900">
                 {view === "weekly" ? "Weekly Schedule" : "Monthly Schedule"}
               </h2>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex p-1 bg-gray-100 rounded-lg">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex p-1 bg-slate-100 rounded-xl">
                 <button onClick={() => setView("monthly")}
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "monthly" ? "bg-white shadow-sm text-[#043573]" : "text-gray-600"}`}>
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${view === "monthly" ? "bg-white shadow-xs text-[#043573]" : "text-slate-500 hover:text-slate-800"}`}>
                   Monthly
                 </button>
                 <button onClick={() => setView("weekly")}
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "weekly" ? "bg-white shadow-sm text-[#043573]" : "text-gray-600"}`}>
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${view === "weekly" ? "bg-white shadow-xs text-[#043573]" : "text-slate-500 hover:text-slate-800"}`}>
                   Weekly
                 </button>
               </div>
 
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search assignments..."
-                  className="w-56 h-10 pl-9 pr-4 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#043573]/20 focus:border-[#043573]/90 transition-all"
+                  className="w-48 sm:w-56 h-9 pl-9 pr-4 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium focus:outline-none focus:border-[#043573] transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Date Navigation */}
-          <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 bg-white">
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-4 px-6 py-3.5 border-b border-slate-100 bg-white">
+            <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
               <button onClick={() => (view === "weekly" ? navigateWeek("prev") : navigateMonth("prev"))}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-                <FaChevronLeft className="text-sm" />
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-xs transition-all cursor-pointer">
+                <FaChevronLeft className="text-xs" />
               </button>
               <button onClick={() => (view === "weekly" ? navigateWeek("next") : navigateMonth("next"))}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-                <FaChevronRight className="text-sm" />
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-xs transition-all cursor-pointer">
+                <FaChevronRight className="text-xs" />
               </button>
             </div>
-            <div className="h-6 w-px bg-gray-200" />
-            <h3 className="font-semibold text-base text-gray-700">
+            <div className="h-5 w-px bg-slate-200" />
+            <h3 className="font-bold text-sm text-slate-800">
               {view === "weekly" ? currentWeekString : currentDate.toLocaleString("default", { month: "long", year: "numeric" })}
             </h3>
-            <div className="h-6 w-px bg-gray-200" />
-            <button onClick={goToToday} className="text-sm text-[#043573] font-medium hover:text-[#043573]/90 transition-colors">
+            <div className="h-5 w-px bg-slate-200" />
+            <button onClick={goToToday} className="text-xs text-[#043573] font-bold hover:underline cursor-pointer">
               Today
             </button>
           </div>
 
           {/* Loading / error states */}
           {loading && (
-            <div className="py-16 text-center text-gray-400">
-              <FaSpinner className="animate-spin text-2xl mx-auto mb-2" />
-              <p className="text-sm">Loading schedule...</p>
+            <div className="py-16 text-center text-slate-400">
+              <FaSpinner className="animate-spin text-2xl text-[#043573] mx-auto mb-2" />
+              <p className="text-xs font-medium">Loading schedule...</p>
             </div>
           )}
           {!loading && error && (

@@ -286,37 +286,35 @@ const Notifications = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
-
-                {/* Breadcrumb */}
-                <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">
-                    <Link to="/student/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
-                    <span className="mx-1.5">&gt;</span>
-                    <span className="text-gray-600 font-medium">Notifications</span>
-                </p>
+        <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
+            <div className="max-w-7xl mx-auto space-y-6">
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
                     <div>
-                        <h1 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <FaBell className="text-blue-500" />
+                        <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1.5">
+                            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+                            <span>&gt;</span>
+                            <span className="text-slate-700 font-semibold">Notifications</span>
+                        </p>
+                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+                            <FaBell className="text-[#043573]" />
                             Notifications
                             {unreadCount > 0 && (
-                                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-black">
+                                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#043573] text-white text-[10px] font-black">
                                     {unreadCount}
                                 </span>
                             )}
                         </h1>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                            Stay updated with your course activity and announcements
+                        <p className="text-xs text-slate-500 mt-1">
+                            Stay updated with your course activity, deadlines, and announcements
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllRead}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition"
+                                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#043573] bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-100/70 transition cursor-pointer"
                             >
                                 <FaCheckDouble className="text-[10px]" /> Mark all read
                             </button>
@@ -324,7 +322,7 @@ const Notifications = () => {
                         {notifications.length > 0 && (
                             <button
                                 onClick={() => setShowClearConfirm(true)}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition"
+                                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100/70 transition cursor-pointer"
                             >
                                 <FaTrash className="text-[10px]" /> Clear all
                             </button>
@@ -333,17 +331,17 @@ const Notifications = () => {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {stats.map(s => {
                         const c = statColors[s.color];
                         return (
-                            <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 flex items-center gap-3 shadow-sm">
-                                <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl ${c.bg} ${c.text} flex items-center justify-center text-sm sm:text-base flex-shrink-0`}>
+                            <div key={s.label} className="bg-white border border-slate-200/70 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 shadow-xs hover:shadow-md transition-all">
+                                <div className={`w-11 h-11 rounded-2xl ${c.bg} ${c.text} flex items-center justify-center text-base shrink-0 font-bold`}>
                                     {s.icon}
                                 </div>
                                 <div>
-                                    <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{s.label}</p>
-                                    <p className="text-base sm:text-xl font-bold text-gray-900 leading-none mt-0.5">{s.value}</p>
+                                    <p className="text-xs font-semibold text-slate-500">{s.label}</p>
+                                    <p className="text-xl sm:text-2xl font-black text-slate-900 leading-none mt-1">{s.value}</p>
                                 </div>
                             </div>
                         );

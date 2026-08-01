@@ -112,19 +112,19 @@ const StudentProfile = () => {
   const initials = student.fullName?.split(" ").map(n => n?.[0]).join("").toUpperCase().slice(0, 2) || "?";
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc] font-sans">
-      <div className="max-w-6xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 font-sans">
+      <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* ── Page Title ── */}
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-gray-900">My Profile</h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Manage your personal information and account settings</p>
+        {/* ── Page Title Banner ── */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">My Profile</h1>
+          <p className="text-xs text-slate-500 mt-1">Manage your personal information and account settings</p>
         </div>
 
         {/* ── Toast ── */}
         {toast.text && (
-          <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold ${
-            toast.type === "error" ? "bg-red-600 text-white" : "bg-emerald-600 text-white"
+          <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-2xl shadow-2xl text-xs font-bold ${
+            toast.type === "error" ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
           }`}>
             {toast.type === "error" ? <FaExclamationCircle /> : <FaCheckCircle />}
             {toast.text}
@@ -132,13 +132,13 @@ const StudentProfile = () => {
         )}
 
         {/* ── Two-column layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* LEFT: Profile card */}
-          <div className="lg:col-span-1 space-y-5">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-xs overflow-hidden">
               {/* Top accent */}
-              <div className="h-1 w-full bg-[#043573]" />
+              <div className="h-1.5 w-full bg-[#043573]" />
 
               <div className="p-6 flex flex-col items-center text-center">
                 {/* Avatar */}
@@ -147,46 +147,45 @@ const StudentProfile = () => {
                     <img
                       src={student.profileImage}
                       alt="Profile"
-                      className="w-24 h-24 rounded-2xl object-cover shadow ring-4 ring-white"
+                      className="w-24 h-24 rounded-2xl object-cover shadow-md ring-4 ring-slate-100"
                     />
                   ) : (
                     <div
-                      className="w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow ring-4 ring-white"
-                      style={{ background: "linear-gradient(135deg,#043573 0%,#1e57c4 100%)" }}
+                      className="w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-md ring-4 ring-slate-100 bg-gradient-to-tr from-[#043573] to-blue-600"
                     >
                       {initials}
                     </div>
                   )}
                   <label
                     htmlFor="photo-upload"
-                    className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#043573] text-white rounded-xl flex items-center justify-center shadow-md cursor-pointer hover:bg-[#032551] transition"
+                    className="absolute -bottom-2 -right-2 w-9 h-9 bg-[#043573] text-white rounded-xl flex items-center justify-center shadow-md cursor-pointer hover:bg-blue-900 transition-all hover:scale-105"
                   >
                     {loading ? (
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : <FaCamera size={11} />}
+                    ) : <FaCamera size={12} />}
                   </label>
                   <input id="photo-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
 
-                <h2 className="text-lg font-black text-gray-900">{student.fullName}</h2>
-                <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                  <FaAt size={9} className="text-gray-300" />{student.username}
+                <h2 className="text-lg font-bold text-slate-900">{student.fullName}</h2>
+                <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-0.5">
+                  <FaAt size={9} className="text-slate-400" />{student.username}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-3 justify-center">
                   {student.isActive && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Active
                     </span>
                   )}
                   {student.emailVerified && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#043573] text-[10px] font-bold border border-blue-100">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-[#043573] text-[10px] font-bold border border-blue-100">
                       <FaCheckCircle size={9} /> Verified
                     </span>
                   )}
                 </div>
 
-                <div className="w-full mt-5 pt-5 border-t border-gray-50 space-y-3 text-left">
+                <div className="w-full mt-5 pt-5 border-t border-slate-100 space-y-3 text-left">
                   <SideInfoItem icon={<FaIdCard size={12} />} label="Student Code" value={student.studentCode} mono />
                   {student.referralCode && (
                     <SideInfoItem icon={<FaGift size={12} />} label="Your Referral Code" value={student.referralCode} mono />
@@ -196,14 +195,14 @@ const StudentProfile = () => {
             </div>
 
             {/* Apply Referral Code */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-xs p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-[#043573] text-sm flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#043573] flex items-center justify-center text-sm shrink-0 font-bold">
                   <FaTicketAlt />
                 </div>
                 <div>
-                  <h2 className="text-sm font-black text-gray-900">Apply Referral Code</h2>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Have a friend's code? Apply it here.</p>
+                  <h3 className="text-xs font-bold text-slate-900">Apply Referral Code</h3>
+                  <p className="text-[11px] text-slate-400 font-medium">Have a friend's code? Apply it here.</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -213,12 +212,12 @@ const StudentProfile = () => {
                   onChange={e => setReferralInput(e.target.value.toUpperCase())}
                   placeholder="REF-ABC123"
                   disabled={referralApplied}
-                  className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 focus:bg-white outline-none focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 transition font-mono tracking-wide disabled:opacity-60"
+                  className="flex-1 min-w-0 border border-slate-200 rounded-xl px-3.5 py-2 text-xs bg-slate-50/50 outline-none focus:border-[#043573] transition font-mono tracking-wide disabled:opacity-60"
                 />
                 <button
                   onClick={handleApplyReferral}
                   disabled={!referralInput.trim() || applyingReferral || referralApplied}
-                  className="px-4 py-2.5 rounded-xl bg-[#043573] hover:bg-[#032551] disabled:opacity-50 text-white text-xs font-bold shadow-sm transition flex-shrink-0"
+                  className="px-4 py-2 rounded-xl bg-[#043573] hover:bg-blue-900 disabled:opacity-50 text-white text-xs font-bold shadow-2xs transition shrink-0 cursor-pointer"
                 >
                   {applyingReferral ? "Applying..." : referralApplied ? "Applied ✓" : "Apply"}
                 </button>

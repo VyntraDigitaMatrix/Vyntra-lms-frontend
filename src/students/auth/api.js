@@ -138,7 +138,6 @@ export const studentLearningApi = {
   getCourseReviews: (courseSlug, page = 0, size = 10) =>
     api.get(`/api/student/course-ratings/${courseSlug}?page=${page}&size=${size}`),
 
-<<<<<<< Updated upstream
   submitCourseReview: (courseSlug, data) =>
     api.post(`/api/student/course-ratings/${courseSlug}`, data),
 
@@ -150,9 +149,8 @@ export const studentLearningApi = {
 
   deleteCourseReview: (courseSlug) =>
     api.delete(`/api/student/course-ratings/${courseSlug}`),
-=======
 
- // POST /api/student/learning/courses/{courseSlug}/reviews
+  // POST /api/student/learning/courses/{courseSlug}/reviews
   submitCourseReview: (courseSlug, data) =>
     api.post(`/api/student/learning/courses/${courseSlug}/reviews`, data),
 
@@ -173,7 +171,6 @@ export const studentLearningApi = {
   // PUT Rating
   updateCourseRating: (courseSlug, data) =>
     api.put(`/api/student/course-ratings/${courseSlug}`, data),
->>>>>>> Stashed changes
 };
 
 export const studentNotesApi = {
@@ -255,7 +252,7 @@ export const studentJobApi = {
 
   getMyApplications: () =>
     api.get(`/api/student/jobs/Myapplications`),
-    
+
   getApplicationDetails: (applicationId) =>
     api.get(`/api/student/jobs/applications/${applicationId}`)
 };
@@ -305,7 +302,6 @@ export const studentAssignmentApi = {
     api.get(`/api/student/assignments/submissions/${submissionId}`),
 };
 
-<<<<<<< Updated upstream
 export const studentInstructorRatingApi = {
   getMyRating: (courseSlug, instructorId) =>
     api.get(`/api/student/instructor-ratings/${courseSlug}/${instructorId}/my-rating`),
@@ -408,22 +404,8 @@ export const studentCertificateApi = {
   getCertificate: (certificateNumber) =>
     api.get(`/api/student/certificates/${certificateNumber}`),
 };
-=======
-export const studentCertificateApi = {
-  // GET /api/student/certificates
-  getMyCertificates: (page = 0, size = 10) =>
-    api.get(`/api/student/certificates?page=${page}&size=${size}`),
- 
-  // POST /api/student/certificates/{courseSlug}/request
-  requestCertificate: (courseSlug) =>
-    api.post(`/api/student/certificates/${courseSlug}/request`),
- 
-  // GET /api/student/certificates/{certificateNumber}
-  getCertificateByNumber: (certificateNumber) =>
-    api.get(`/api/student/certificates/${certificateNumber}`),
-};
 
->>>>>>> Stashed changes
+
 
 export const studentResourceApi = {
   // GET /api/student/resources/{resourceId}

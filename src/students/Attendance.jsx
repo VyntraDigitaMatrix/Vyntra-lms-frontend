@@ -210,73 +210,73 @@ export default function Attendance() {
             )}
 
             {/* ══ PAGE HEADER ══ */}
-            <div className="bg-[#f7f8fc] p-3 sm:p-4 md:p-6 min-h-screen max-w-7xl mx-auto">
-                <div className="flex items-center text-xs text-slate-400 mb-2">
-                    <Link to="/student/dashboard" className="hover:text-[#043573] transition text-sm">Dashboard</Link>
-                    <span className="mx-2 text-sm">&gt;</span>
-                    <span className="text-gray-600 font-medium text-sm">Attendance</span>
+            <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-slate-50/60 max-w-7xl mx-auto space-y-6">
+                <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
+                    <div className="flex items-center text-xs text-slate-400 font-medium mb-1 gap-1.5">
+                        <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+                        <span>&gt;</span>
+                        <span className="text-slate-700 font-semibold">Attendance</span>
+                    </div>
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Attendance & Time Tracker</h1>
+                    <p className="text-xs text-slate-500 mt-1">Punch in and out to track your daily learning sessions</p>
                 </div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Attendance</h1>
-                <p className="text-sm text-slate-500 mt-0.5 mb-4 sm:mb-5">Punch in and out to track your study sessions</p>
-            
-
 
                 {/* ══ STAT CARDS ══ */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {stats.map(s => (
-                        <div key={s.label} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="text-2xl font-black text-slate-900 tracking-tight truncate">{s.value}</div>
-                            <div className="text-sm font-semibold text-slate-700 mt-1">{s.label}</div>
-                            <div className="text-xs text-slate-400 mt-0.5">{s.sub}</div>
+                        <div key={s.label} className="bg-white border border-slate-200/70 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all">
+                            <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight truncate">{s.value}</div>
+                            <div className="text-xs font-bold text-slate-700 mt-1">{s.label}</div>
+                            <div className="text-[10px] text-slate-400 font-medium mt-0.5">{s.sub}</div>
                         </div>
                     ))}
                 </div>
 
-                <div className="grid gap-5" style={{ gridTemplateColumns: "360px 1fr" }}>
+                <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
 
                     {/* ══ PUNCH CLOCK ══ */}
-                    <div className="flex flex-col gap-4">
+                    <div className="w-full lg:col-span-5 xl:col-span-4 flex flex-col gap-5">
                         {loadingToday ? (
-                            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-8 text-center text-slate-400 text-sm">
-                                Loading today's status…
+                            <div className="bg-white border border-slate-200/70 rounded-2xl shadow-xs p-8 text-center text-slate-400 text-xs font-medium">
+                                Loading today's status...
                             </div>
                         ) : (
                             <PunchClock today={today} onPunchIn={handlePunchIn} onPunchOut={handlePunchOut} punching={punching} />
                         )}
 
                         {today && (
-                            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+                            <div className="bg-white border border-slate-200/70 rounded-2xl shadow-xs p-5">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-1 h-5 bg-[#043573] rounded-full" />
-                                    <span className="text-sm font-bold text-slate-800">Today's Session</span>
+                                    <div className="w-1 h-4 bg-[#043573] rounded-full" />
+                                    <span className="text-xs font-bold text-slate-800">Today's Session Details</span>
                                 </div>
-                                <div className="space-y-2 text-sm">
+                                <div className="space-y-2 text-xs">
                                     <div className="flex justify-between">
-                                        <span className="text-slate-400">Date</span>
+                                        <span className="text-slate-400 font-medium">Date</span>
                                         <span className="font-semibold text-slate-700">{formatDate(today.attendanceDate)}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-slate-400">Punch In</span>
+                                        <span className="text-slate-400 font-medium">Punch In</span>
                                         <span className="font-semibold text-slate-700 font-mono">{formatClock(today.punchInTime)}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-slate-400">Punch Out</span>
+                                        <span className="text-slate-400 font-medium">Punch Out</span>
                                         <span className="font-semibold text-slate-700 font-mono">{formatClock(today.punchOutTime)}</span>
                                     </div>
                                     {today.totalDuration && (
                                         <div className="flex justify-between">
-                                            <span className="text-slate-400">Total Duration</span>
-                                            <span className="font-semibold text-slate-700 font-mono">{today.totalDuration}</span>
+                                            <span className="text-slate-400 font-medium">Total Duration</span>
+                                            <span className="font-bold text-[#043573] font-mono">{today.totalDuration}</span>
                                         </div>
                                     )}
                                     <div className="flex justify-between items-center pt-1">
-                                        <span className="text-slate-400">Status</span>
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusStyle(today.status).bg} ${statusStyle(today.status).text} ${statusStyle(today.status).border}`}>
+                                        <span className="text-slate-400 font-medium">Status</span>
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${statusStyle(today.status).bg} ${statusStyle(today.status).text} ${statusStyle(today.status).border}`}>
                                             {statusStyle(today.status).label}
                                         </span>
                                     </div>
                                     {today.autoPunchOut && (
-                                        <p className="text-[10px] text-amber-600 pt-1">⚠ Auto punched-out — session ended automatically.</p>
+                                        <p className="text-[10px] text-amber-600 font-semibold pt-1">⚠ Auto punched-out — session ended automatically.</p>
                                     )}
                                     {today.remarks && (
                                         <p className="text-xs text-slate-500 pt-1 border-t border-slate-50 mt-2">{today.remarks}</p>

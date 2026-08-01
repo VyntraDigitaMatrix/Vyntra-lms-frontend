@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://200.97.164.120:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -331,14 +331,26 @@ export const instructorPricingApi = {
 
 export const instructorApi = {
   getAllInstructors: () =>
-    api.get("/api/instructor/instructors"),
+    api.get("/api/instructor/instructors"), // Replace with your actual API
 };
+
+export const instructorZoomApi = {
+  createMeeting: (data) =>
+    api.post("/api/instructor/zoom/meetings", data),
+
+  getMeetingsForCourse: (courseSlug) =>
+    api.get(`/api/instructor/zoom/courses/${courseSlug}/meetings`),
+
+  getMeetingsForLesson: (lessonSlug) =>
+    api.get(`/api/instructor/zoom/lessons/${lessonSlug}/meetings`),
+};
+
 
 export const instructorManagementApi = {
   // PUT /api/instructor/profile
   updateProfile: (data) =>
     api.put("/api/instructor/profile", data),
- 
+
   // PUT /api/instructor/profile/image  (multipart — key: profileImage)
   updateProfileImage: (file) => {
     const formData = new FormData();
@@ -349,21 +361,21 @@ export const instructorManagementApi = {
       headers: { "Content-Type": undefined },
     });
   },
- 
+
   // POST /api/instructor/request-email-change
   requestEmailChange: (newEmail) =>
     api.post("/api/instructor/request-email-change", { newEmail }),
- 
+
   verifyEmailChange: (otp) =>
     api.post("/api/instructor/verify-email-change", { otp }),
- 
+
   // ── Proofs ──
   getMyProofs: () =>
     api.get("/api/instructor/profile/proofs"),
- 
+
   getProof: (proofId) =>
     api.get(`/api/instructor/profile/proofs/${proofId}`),
- 
+
   // CONFIRMED via backend error response (seen twice now in the Network tab):
   // {"success": false, "message": "proofFile is required"} — the multipart
   // file field MUST be named "proofFile", not "file".
@@ -376,7 +388,7 @@ export const instructorManagementApi = {
       headers: { "Content-Type": undefined },
     });
   },
- 
+
   updateProof: (proofId, proofName, proofType, file) => {
     const formData = new FormData();
     formData.append("proofName", proofName);
@@ -386,14 +398,14 @@ export const instructorManagementApi = {
       headers: { "Content-Type": undefined },
     });
   },
- 
+
   deleteProof: (proofId) =>
     api.delete(`/api/instructor/profile/proofs/${proofId}`),
- 
+
   // ── My Courses / My Students (profile-scoped) ──
   getMyCourses: (page = 0, size = 10) =>
     api.get(`/api/instructor/profile/courses?page=${page}&size=${size}`),
- 
+
   getMyStudents: (page = 0, size = 10) =>
     api.get(`/api/instructor/profile/students?page=${page}&size=${size}`),
 };
@@ -441,33 +453,34 @@ export const instructorCalendarApi = {
     api.get(`/api/instructor/calendar?startDate=${startDate}&endDate=${endDate}`),
 };
 
-<<<<<<< Updated upstream
 export const instructorCertificateApi = {
   // GET /api/instructor/certificates/pending
   getPendingCertificates: (page = 0, size = 20) =>
     api.get(`/api/instructor/certificates/pending?page=${page}&size=${size}`),
- 
+
   // GET /api/instructor/certificates/course/{courseSlug}
   getCertificatesByCourse: (courseSlug, page = 0, size = 20) =>
     api.get(`/api/instructor/certificates/course/${courseSlug}?page=${page}&size=${size}`),
- 
+
   // GET /api/instructor/certificates/{certificateNumber}
   getCertificateByNumber: (certificateNumber) =>
     api.get(`/api/instructor/certificates/${certificateNumber}`),
- 
+
   // PUT /api/instructor/certificates/{certificateId}/approve
   approveCertificate: (certificateId) =>
     api.put(`/api/instructor/certificates/${certificateId}/approve`),
- 
+
   // PUT /api/instructor/certificates/{certificateId}/reject
   rejectCertificate: (certificateId) =>
     api.put(`/api/instructor/certificates/${certificateId}/reject`),
-=======
+
+}
+
 export const instructorResourceApi = {
   // GET /api/instructor/resources/{resourceId} — full detail (includes description, fileUrl, uploader info)
   getResource: (resourceId) =>
     api.get(`/api/instructor/resources/${resourceId}`),
- 
+
   // POST /api/instructor/resources/{courseSlug}  (multipart: title*, description, file)
   uploadResource: (courseSlug, { title, description, file }) => {
     const formData = new FormData();
@@ -478,7 +491,7 @@ export const instructorResourceApi = {
       headers: { "Content-Type": undefined },
     });
   },
- 
+
   // PUT /api/instructor/resources/{resourceId}  (multipart: title, description, file — all optional per Swagger)
   updateResource: (resourceId, { title, description, file }) => {
     const formData = new FormData();
@@ -489,14 +502,13 @@ export const instructorResourceApi = {
       headers: { "Content-Type": undefined },
     });
   },
- 
+
   deleteResource: (resourceId) =>
     api.delete(`/api/instructor/resources/${resourceId}`),
- 
+
   // GET /api/instructor/resources/course/{courseSlug} — paginated list (summary fields only)
   getCourseResources: (courseSlug, page = 0, size = 50) =>
     api.get(`/api/instructor/resources/course/${courseSlug}?page=${page}&size=${size}`),
->>>>>>> Stashed changes
 };
 
 

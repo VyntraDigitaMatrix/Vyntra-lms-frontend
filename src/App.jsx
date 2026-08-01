@@ -88,6 +88,7 @@ import LessonSettings from "./Instructor/pages/LessonSettings";
 import SectionSettings from "./Instructor/pages/SectionSettings";
 import Plans from "./Instructor/pages/Plans";
 import BrandingPage from "./Instructor/pages/BrandingPage";
+import ZoomMeetings from "./Instructor/pages/ZoomMeetings";
 import PendingDetail from "./students/components/PendingDetail";
 import Attendance from "./students/Attendance";
 import AdminProfile from "./Admin/pages/Profile";
@@ -178,13 +179,11 @@ function App() {
                   <Route path="job-notifications" element={<JobNotifications />} />
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
-<<<<<<< Updated upstream
-                  <Route path="continue-learning" element={<ContinueLearning />} />
                   <Route path="assignments/:assignmentSlug" element={<Assignments />} />
                   <Route path="/student/attendance" element={<Attendance />} />
-=======
+
                   <Route path="/student/continue-learning/:courseSlug" element={<ContinueLearning />} />
->>>>>>> Stashed changes
+
                   <Route
                     path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
                     element={<AssignmentDetail />}
@@ -193,7 +192,7 @@ function App() {
 
 
                 <Route path="/student/module/:moduleSlug/lesson/:lessonSlug" element={<ModuleView />} />
-<Route path="/student/course/:courseId/module/:moduleSlug/lesson/:lessonSlug" element={<ModuleLesson />} />
+                <Route path="/student/course/:courseId/module/:moduleSlug/lesson/:lessonSlug" element={<ModuleLesson />} />
               </Route>
 
               {/* Protected Admin Routes */}
@@ -233,6 +232,7 @@ function App() {
                   <Route path="courses" element={<MyCourses />} />
                   <Route path="students" element={<InstructorStudents />} />
                   <Route path="schedule" element={<InstructorSchedules />} />
+                  <Route path="zoom-meetings" element={<ZoomMeetings />} />
                   <Route path="recordings" element={<InstructorRecordings />} />
                   <Route path="discussions" element={<InstructorDiscussions />} />
                   <Route path="resources" element={<InstructorResources />} />
