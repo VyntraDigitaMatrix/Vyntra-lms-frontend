@@ -12,7 +12,7 @@ export const fmt = (dateStr) => {
 };
 
 export const avatar = (name) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "U")}&background=7C3AED&color=fff&size=80`;
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "U")}&background=043573&color=fff&size=80`;
 
 /* Deterministic "channel" color per group */
 export const CHANNEL_PALETTE = [
@@ -39,7 +39,7 @@ export const initials = (name = "") => {
 
 export const RoleBadge = ({ role }) => {
   if (role === "INSTRUCTOR")
-    return <span className="text-[9px] bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded-full font-semibold">Instructor</span>;
+    return <span className="text-[9px] bg-blue-100 text-[#043573] px-1.5 py-0.5 rounded-full font-semibold">Instructor</span>;
   if (role === "ADMIN")
     return <span className="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">Admin</span>;
   return null;
@@ -47,6 +47,6 @@ export const RoleBadge = ({ role }) => {
 
 export const SystemMessage = ({ content }) => (
   <div className="flex justify-center my-1">
-    <span className="text-[11px] text-gray-400 bg-gray-100 rounded-full px-3 py-1 italic">{content}</span>
+    <span className="text-[11px] text-slate-400 bg-slate-100 rounded-full px-3 py-1 italic">{content}</span>
   </div>
 );

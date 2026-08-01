@@ -310,9 +310,9 @@ const StudentsTab = ({ quizId, onOpenAttempt }) => {
         <div className="space-y-4">
             {/* Summary bar */}
             <div className="grid grid-cols-3 gap-3">
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
-                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wide">Total Students</p>
-                    <p className="text-2xl font-black text-blue-700">{students.length}</p>
+                <div className="bg-violet-50 border border-violet-100 rounded-xl p-3 text-center">
+                    <p className="text-[10px] font-bold text-violet-500 uppercase tracking-wide">Total Students</p>
+                    <p className="text-2xl font-black text-violet-700">{students.length}</p>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
                     <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wide">Passed</p>

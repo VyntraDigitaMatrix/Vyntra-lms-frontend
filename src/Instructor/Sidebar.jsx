@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import LogoPlain from "../assets/Vyntra One Plain BG Image.png";
 import {
   FaHome,
-  FaBook,
   FaUsers,
   FaClipboardList,
   FaCalendarAlt,
   FaVideo,
   FaComments,
   FaFolder,
-  FaStickyNote,
   FaCog,
   FaChevronDown,
   FaKey,
@@ -23,117 +22,222 @@ import { MdQuiz } from "react-icons/md";
 
 function Sidebar({ isCollapsed, toggleSidebar }) {
   const [openSettings, setOpenSettings] = useState(false);
+  const [openLive, setOpenLive] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const menuItems = [
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const topMenuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/instructor/dashboard" },
     { icon: <FaChalkboardTeacher />, label: "My Courses", path: "/instructor/courses" },
-    { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans" },
-    { icon: <FaUsers />, label: "Live Classes", path: "/instructor/live-classes" },
-    { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans" },
     { icon: <FaUsers />, label: "Students", path: "/instructor/students" },
+  ];
+
+  const menuItems = [
     { icon: <FaClipboardList />, label: "Assignments", path: "/instructor/assignments" },
     { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz" },
     { icon: <FaCertificate />, label: "Certificates", path: "/instructor/certificates" },
-    { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz" },
-    { icon: <FaFolder />, label: "Resources", path: "/instructor/resources" },
-    { icon: <FaCalendarAlt />, label: "Schedule", path: "/instructor/schedule" },
-    { icon: <FaLaptop />, label: "Zoom Meetings", path: "/instructor/zoom-meetings" },
-    { icon: <FaVideo />, label: "Recordings", path: "/instructor/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/instructor/discussions" },
-    { icon: <FaCertificate />, label: "Certificates", path: "/instructor/certificates" },
+    { icon: <FaFolder />, label: "Resources", path: "/instructor/resources" },
+    { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans" },
     { icon: <FaChartBar />, label: "Reports", path: "/instructor/reports" },
   ];
 
-  return (
-    <aside
-      className={`h-screen bg-white border-r border-gray-200 transition-all duration-300 relative flex flex-col ${isCollapsed ? "w-[80px]" : "w-[250px]"
-        }`}
+  const collapsed = isMobile ? false : isCollapsed;
+
+  const linkClass = ({ isActive }) =>
+    `group relative flex items-center ${
+      collapsed ? "justify-center py-3 px-2" : "gap-3.5 px-3.5 py-2.5"
+    } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium ${
+      isActive
+        ? "bg-[#7c3aed] text-white shadow-md shadow-[#7c3aed]/25 font-semibold"
+        : "text-slate-600 hover:bg-slate-100/80 hover:text-[#7c3aed]"
+    }`;
+
+  const subLinkClass = ({ isActive }) =>
+    `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+      isActive
+        ? "bg-[#7c3aed] text-white font-semibold"
+        : "text-slate-500 hover:bg-slate-100 hover:text-[#7c3aed]"
+    }`;
+
+  const SidebarContent = () => (
+    <nav
+      className="flex-1 flex flex-col gap-1 mt-3 px-2 overflow-y-auto overflow-x-hidden pb-6 scrollbar-hide"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
+      {topMenuItems.map((item, index) => (
+        <NavLink
+          key={index}
+          to={item.path}
+          onClick={() => isMobile && setMobileOpen(false)}
+          className={linkClass}
+        >
+          <span className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110">
+            {item.icon}
+          </span>
+          {!collapsed && <span className="truncate">{item.label}</span>}
+        </NavLink>
+      ))}
+
+      {/* Live Sessions dropdown */}
       <button
-        onClick={toggleSidebar}
-        className="absolute top-6 -right-4 w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-center text-gray-400 hover:text-[#7c3aed] hover:border-[#7c3aed] transition z-50"
+        type="button"
+        onClick={() => setOpenLive(!openLive)}
+        className={`group flex items-center ${
+          collapsed ? "justify-center py-3 px-2" : "justify-between px-3.5 py-2.5"
+        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 hover:bg-slate-100/80 hover:text-[#7c3aed]`}
       >
-        {isCollapsed ? "›" : "‹"}
+        <div className={`flex items-center ${collapsed ? "" : "gap-3.5"}`}>
+          <FaVideo className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110" />
+          {!collapsed && <span className="truncate">Live Sessions</span>}
+        </div>
+        {!collapsed && (
+          <FaChevronDown
+            size={11}
+            className={`transition-transform duration-300 ${openLive ? "rotate-180" : ""}`}
+          />
+        )}
       </button>
 
-      <div
-        className={`flex items-center mt-7 mb-6 ${isCollapsed ? "justify-center" : "justify-center gap-2"
-          }`}
-      >
-        <div className="w-5 h-5 border-4 border-[#7c3aed] rounded-md"></div>
-        {!isCollapsed && (
-          <h1 className="text-[20px] font-bold tracking-[4px] text-[#111]">
-            VYNTRA
-          </h1>
-        )}
-      </div>
-
-      {!isCollapsed && (
-        <div className="mx-4 mb-4 px-3 py-1 bg-purple-50 rounded-lg text-center">
-          <span className="text-xs font-semibold text-[#7c3aed] uppercase tracking-widest">Instructor</span>
+      {openLive && !collapsed && (
+        <div className="ml-5 pl-3 border-l-2 border-slate-200 my-1 flex flex-col gap-1">
+          <NavLink to="/instructor/zoom-meetings" onClick={() => isMobile && setMobileOpen(false)} className={subLinkClass}>
+            <FaLaptop size={12} />
+            <span>Zoom Meetings</span>
+          </NavLink>
+          <NavLink to="/instructor/recordings" onClick={() => isMobile && setMobileOpen(false)} className={subLinkClass}>
+            <FaVideo size={12} />
+            <span>Recordings</span>
+          </NavLink>
+          <NavLink to="/instructor/schedule" onClick={() => isMobile && setMobileOpen(false)} className={subLinkClass}>
+            <FaCalendarAlt size={12} />
+            <span>Schedule</span>
+          </NavLink>
         </div>
       )}
 
-      <nav className="flex-1 flex flex-col gap-1 mt-2 overflow-y-auto overflow-x-hidden scrollbar-hide pb-6">
-        {menuItems.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center ${isCollapsed
-                ? "justify-center py-4 mx-2"
-                : "gap-3 px-5 py-4 mx-2"
-              } rounded-xl cursor-pointer transition text-sm font-medium ${isActive
-                ? "bg-[#7c3aed] text-white"
-                : "text-gray-600 hover:bg-purple-50 hover:text-[#7c3aed]"
-              }`
-            }
-          >
-            <span className="text-[14px]">{item.icon}</span>
-            {!isCollapsed && <span>{item.label}</span>}
-          </NavLink>
-        ))}
-
-        {/* Settings Parent */}
-        <button
-          type="button"
-          onClick={() => setOpenSettings(!openSettings)}
-          className={`flex items-center ${isCollapsed ? "justify-center py-4" : "justify-between px-5 py-4 mx-2"
-            } rounded-xl cursor-pointer transition text-sm font-medium text-gray-600 hover:bg-purple-50 hover:text-[#7c3aed]`}
+      {menuItems.map((item, index) => (
+        <NavLink
+          key={index}
+          to={item.path}
+          onClick={() => isMobile && setMobileOpen(false)}
+          className={linkClass}
         >
-          <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
-            <span className="text-[14px]">
-              <FaCog />
-            </span>
-            {!isCollapsed && <span>Settings</span>}
-          </div>
-          {!isCollapsed && (
-            <FaChevronDown
-              size={12}
-              className={`transition-transform duration-300 ${openSettings ? "rotate-180" : ""
-                }`}
-            />
-          )}
+          <span className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110">
+            {item.icon}
+          </span>
+          {!collapsed && <span className="truncate">{item.label}</span>}
+        </NavLink>
+      ))}
+
+      {/* Settings dropdown */}
+      <button
+        type="button"
+        onClick={() => setOpenSettings(!openSettings)}
+        className={`group flex items-center ${
+          collapsed ? "justify-center py-3 px-2" : "justify-between px-3.5 py-2.5"
+        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 hover:bg-slate-100/80 hover:text-[#7c3aed]`}
+      >
+        <div className={`flex items-center ${collapsed ? "" : "gap-3.5"}`}>
+          <FaCog className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110" />
+          {!collapsed && <span className="truncate">Settings</span>}
+        </div>
+        {!collapsed && (
+          <FaChevronDown
+            size={11}
+            className={`transition-transform duration-300 ${openSettings ? "rotate-180" : ""}`}
+          />
+        )}
+      </button>
+
+      {openSettings && !collapsed && (
+        <div className="ml-5 pl-3 border-l-2 border-slate-200 my-1 flex flex-col gap-1">
+          <NavLink to="/instructor/change-password" onClick={() => isMobile && setMobileOpen(false)} className={subLinkClass}>
+            <FaKey size={12} />
+            <span>Change Password</span>
+          </NavLink>
+        </div>
+      )}
+    </nav>
+  );
+
+  /* ── MOBILE ── */
+  if (isMobile) {
+    return (
+      <>
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="fixed top-4 left-4 z-[100] w-9 h-9 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-slate-600 hover:text-[#7c3aed] hover:border-[#7c3aed] transition-all"
+          aria-label="Toggle sidebar"
+        >
+          {mobileOpen ? "‹" : "›"}
         </button>
 
-        {/* Settings Child */}
-        {openSettings && !isCollapsed && (
-          <div className="ml-8 mr-4 flex flex-col gap-1">
-            <NavLink
-              to="/instructor/change-password"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${isActive
-                  ? "bg-[#7c3aed] text-white"
-                  : "text-gray-500 hover:bg-purple-50 hover:text-[#7c3aed]"
-                }`
-              }
-            >
-              <FaKey size={13} />
-              <span>Change Password</span>
-            </NavLink>
-          </div>
+        {mobileOpen && (
+          <div
+            className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
         )}
-      </nav>
+
+        <aside
+          className={`fixed top-0 left-0 h-full z-[70] bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 w-[220px] shadow-2xl ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col items-center mt-6 mb-3 gap-2 px-4 pb-3 border-b border-slate-100">
+            <img src={LogoPlain} alt="Vyntra" className="h-10 w-auto object-contain" />
+            <span className="text-[10px] font-bold text-[#7c3aed] uppercase tracking-widest bg-violet-50 px-2.5 py-1 rounded-full">
+              Instructor
+            </span>
+          </div>
+
+          <SidebarContent />
+        </aside>
+      </>
+    );
+  }
+
+  /* ── DESKTOP ── */
+  return (
+    <aside
+      className={`h-screen bg-white border-r border-slate-200/80 transition-all duration-300 relative flex flex-col shrink-0 z-20 ${
+        isCollapsed ? "w-[76px]" : "w-[220px]"
+      }`}
+    >
+      <button
+        onClick={toggleSidebar}
+        className="absolute top-5 -right-3.5 w-7 h-7 bg-white border border-slate-200 rounded-full shadow-md flex items-center justify-center text-slate-500 hover:text-[#7c3aed] hover:border-[#7c3aed] hover:scale-110 transition-all z-50 cursor-pointer"
+        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+      >
+        <span className="text-sm font-bold leading-none">{isCollapsed ? "›" : "‹"}</span>
+      </button>
+
+      <div
+        className={`flex flex-col items-center justify-center border-b border-slate-100 transition-all gap-1.5 ${
+          isCollapsed ? "py-4 px-2" : "py-3 px-4"
+        }`}
+      >
+        <img
+          src={LogoPlain}
+          alt="Vyntra Icon"
+          className={`h-11 w-auto object-contain transition-all ${isCollapsed ? "scale-90" : ""}`}
+        />
+        {!collapsed && (
+          <span className="text-[10px] font-bold text-[#7c3aed] uppercase tracking-widest bg-violet-50 px-2.5 py-1 rounded-full">
+            Instructor
+          </span>
+        )}
+      </div>
+
+      <SidebarContent />
     </aside>
   );
 }

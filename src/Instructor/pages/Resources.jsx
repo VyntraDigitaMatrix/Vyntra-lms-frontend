@@ -20,7 +20,7 @@ const TYPE_ICONS = {
   IMAGE: { Icon: FaFileImage, color: "text-emerald-500", bg: "bg-emerald-50" },
   ZIP: { Icon: FaFileArchive, color: "text-amber-600", bg: "bg-amber-50" },
 };
-const DEFAULT_TYPE_ICON = { Icon: FaFileAlt, color: "text-gray-500", bg: "bg-gray-100" };
+const DEFAULT_TYPE_ICON = { Icon: FaFileAlt, color: "text-slate-500", bg: "bg-slate-100" };
 
 const formatFileSize = (bytes) => {
   if (!bytes || bytes <= 0) return "—";
@@ -203,23 +203,23 @@ const Resources = () => {
 
         {/* Breadcrumbs */}
         <div className="mb-3">
-          <Link to="/instructor/dashboard" className="text-sm text-gray-400 hover:text-violet-600 transition">
+          <Link to="/instructor/dashboard" className="text-sm text-slate-400 hover:text-[#7c3aed] transition">
             Dashboard
           </Link>
-          <span className="mx-2 text-gray-400">&gt;</span>
-          <span className="text-sm font-semibold text-gray-800">Resources</span>
+          <span className="mx-2 text-slate-400">&gt;</span>
+          <span className="text-sm font-semibold text-slate-800">Resources</span>
         </div>
 
         {/* Page title */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900">Resources</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Upload and manage downloadable materials for your courses</p>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900">Resources</h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Upload and manage downloadable materials for your courses</p>
           </div>
           {selectedCourseSlug && (
             <button
               onClick={openUpload}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold shadow-sm transition"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#7c3aed] hover:bg-violet-750 text-white text-sm font-bold shadow-sm transition"
             >
               <FaUpload size={12} /> Upload Resource
             </button>
@@ -237,12 +237,12 @@ const Resources = () => {
         )}
 
         {/* Course selector */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
-          <label className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5">
+          <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
             <FaBookOpen size={10} /> Course
           </label>
           {coursesLoading ? (
-            <div className="h-[42px] rounded-xl bg-gray-100 animate-pulse" />
+            <div className="h-[42px] rounded-xl bg-slate-100 animate-pulse" />
           ) : (
             <select
               value={selectedCourseSlug}
@@ -258,7 +258,7 @@ const Resources = () => {
         </div>
 
         {/* Resources list */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">
           <SectionHeader icon={<FaFolderOpen />} title="Course Resources" subtitle="Files available to students in this course" />
 
           {!selectedCourseSlug ? (
@@ -273,14 +273,14 @@ const Resources = () => {
                 const { Icon, color, bg } = TYPE_ICONS[resource.resourceType] || DEFAULT_TYPE_ICON;
                 const busy = busyId === resource.resourceId;
                 return (
-                  <div key={resource.resourceId} className="flex items-center gap-3.5 p-3.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div key={resource.resourceId} className="flex items-center gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                     <div className={`w-11 h-11 rounded-xl ${bg} ${color} flex items-center justify-center text-lg flex-shrink-0`}>
                       <Icon />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{resource.title}</p>
-                      <div className="flex items-center gap-3 mt-0.5 flex-wrap text-[11px] text-gray-500">
-                        <span className="font-bold text-gray-400 uppercase">{resource.resourceType || "FILE"}</span>
+                      <p className="text-sm font-semibold text-slate-800 truncate">{resource.title}</p>
+                      <div className="flex items-center gap-3 mt-0.5 flex-wrap text-[11px] text-slate-500">
+                        <span className="font-bold text-slate-400 uppercase">{resource.resourceType || "FILE"}</span>
                         <span>{formatFileSize(resource.fileSize)}</span>
                         <span>{formatDate(resource.createdAt)}</span>
                       </div>
@@ -290,14 +290,14 @@ const Resources = () => {
                         onClick={() => handleOpenFile(resource)}
                         disabled={busy}
                         title="View / Download"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-violet-100 hover:text-violet-600 transition disabled:opacity-40"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-violet-100 hover:text-[#7c3aed] transition disabled:opacity-40"
                       >
                         {busy ? <FaSpinner className="animate-spin" size={12} /> : <FaDownload size={12} />}
                       </button>
                       <button
                         onClick={() => openEdit(resource)}
                         title="Edit"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-violet-100 hover:text-violet-600 transition"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-violet-100 hover:text-[#7c3aed] transition"
                       >
                         <FaEdit size={12} />
                       </button>
@@ -305,7 +305,7 @@ const Resources = () => {
                         onClick={() => handleDelete(resource)}
                         disabled={busy}
                         title="Delete"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-violet-100 hover:text-violet-600 transition disabled:opacity-40"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-violet-100 hover:text-[#7c3aed] transition disabled:opacity-40"
                       >
                         <FaTrash size={11} />
                       </button>
@@ -327,11 +327,11 @@ const Resources = () => {
             onClick={e => e.stopPropagation()}
             className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
           >
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-base font-black text-gray-900">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-base font-black text-slate-900">
                 {isEditing ? "Edit Resource" : "Upload Resource"}
               </h2>
-              <button onClick={closeForm} className="text-gray-400 hover:text-gray-600 transition text-lg leading-none">
+              <button onClick={closeForm} className="text-slate-400 hover:text-slate-600 transition text-lg leading-none">
                 <FaTimes />
               </button>
             </div>
@@ -376,15 +376,15 @@ const Resources = () => {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+            <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
               <button
                 onClick={handleSaveForm}
                 disabled={formLoading}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-bold shadow-sm transition"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#7c3aed] hover:bg-violet-750 disabled:opacity-50 text-white text-sm font-bold shadow-sm transition"
               >
                 <FaSave size={12} />{formLoading ? "Saving..." : "Save"}
               </button>
-              <button onClick={closeForm} className="px-5 py-2.5 rounded-xl text-gray-500 text-sm font-bold border border-gray-200 hover:bg-gray-50 transition">
+              <button onClick={closeForm} className="px-5 py-2.5 rounded-xl text-slate-500 text-sm font-bold border border-slate-200 hover:bg-slate-50 transition">
                 Cancel
               </button>
             </div>
@@ -402,34 +402,34 @@ const Resources = () => {
 
 /* ══════════════════════════════════════════
    Sub-components
-══════════════════════════════════════════ */
+ ══════════════════════════════════════════ */
 const SectionHeader = ({ icon, title, subtitle }) => (
   <div className="flex items-center gap-3">
-    <div className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-violet-600 text-sm flex-shrink-0">{icon}</div>
+    <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#7c3aed] text-sm flex-shrink-0">{icon}</div>
     <div>
-      <h2 className="text-sm font-black text-gray-900">{title}</h2>
-      {subtitle && <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>}
+      <h2 className="text-sm font-black text-slate-900">{title}</h2>
+      {subtitle && <p className="text-[11px] text-slate-400 mt-0.5">{subtitle}</p>}
     </div>
   </div>
 );
 
 const Field = ({ label, children }) => (
   <div>
-    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">{label}</label>
+    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{label}</label>
     {children}
   </div>
 );
 
 const LoadingBlock = () => (
   <div className="py-10 text-center">
-    <div className="w-7 h-7 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto" />
+    <div className="w-7 h-7 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin mx-auto" />
   </div>
 );
 
 const EmptyState = ({ icon, text }) => (
   <div className="py-10 text-center">
-    <div className="text-3xl text-gray-200 mx-auto mb-2 flex justify-center">{icon}</div>
-    <p className="text-sm text-gray-400">{text}</p>
+    <div className="text-3xl text-slate-200 mx-auto mb-2 flex justify-center">{icon}</div>
+    <p className="text-sm text-slate-400">{text}</p>
   </div>
 );
 
@@ -440,19 +440,19 @@ const Pagination = ({ page, totalPages, onChange }) => {
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 0}
-        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition"
+        className="w-8 h-8 rounded-lg bg-white border border-slate-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-200 transition"
       >
-        <FaChevronLeft className="text-[10px] text-gray-600" />
+        <FaChevronLeft className="text-[10px] text-slate-600" />
       </button>
-      <span className="text-xs font-semibold text-gray-500 px-2">
+      <span className="text-xs font-semibold text-slate-500 px-2">
         Page {page + 1} of {totalPages}
       </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages - 1}
-        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition"
+        className="w-8 h-8 rounded-lg bg-white border border-slate-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-200 transition"
       >
-        <FaChevronRight className="text-[10px] text-gray-600" />
+        <FaChevronRight className="text-[10px] text-slate-600" />
       </button>
     </div>
   );

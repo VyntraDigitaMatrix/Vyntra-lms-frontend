@@ -113,7 +113,7 @@ const QuizFormModal = ({ mode = "create", courses, initialData, onClose, onSaved
         }
     };
 
-    const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition bg-white placeholder-slate-400";
+    const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#043573]/30 focus:border-blue-400 transition bg-white placeholder-slate-400";
     const labelCls = "block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide";
 
     return (
@@ -122,13 +122,13 @@ const QuizFormModal = ({ mode = "create", courses, initialData, onClose, onSaved
             <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-[#043573] to-blue-900 rounded-t-2xl flex-shrink-0">
                     <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
                         <MdOutlineAddCircle className="text-white text-lg" />
                     </div>
                     <div className="flex-1">
                         <h2 className="text-sm font-black text-white">{isEditMode ? "Edit Quiz Details" : "Create New Quiz"}</h2>
-                        <p className="text-[11px] text-violet-200 mt-0.5">
+                        <p className="text-[11px] text-blue-200 mt-0.5">
                             {isEditMode ? "Update quiz settings — questions are managed separately" : "Set up the quiz — you'll add questions next"}
                         </p>
                     </div>
@@ -266,7 +266,7 @@ const QuizFormModal = ({ mode = "create", courses, initialData, onClose, onSaved
                             Cancel
                         </button>
                         <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.courseId}
-                            className="flex items-center gap-2 px-5 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                            className="flex items-center gap-2 px-5 py-2 bg-[#043573] hover:bg-blue-900 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-sm">
                             {saving ? <AiOutlineLoading3Quarters className="animate-spin" /> : <MdCheckCircle />}
                             {saving ? "Saving…" : isEditMode ? "Save Changes" : "Create Quiz"}
                         </button>

@@ -76,17 +76,17 @@ export default function AssignmentModal({ editData, onClose, onSaved }) {
     } finally { setSaving(false); }
   };
 
-  const inp = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition bg-white";
-  const lbl = "text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block";
+  const inp = "w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition bg-white";
+  const lbl = "text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
 
-      <div className="flex items-center gap-4 px-6 py-5 border-b border-gray-100 bg-white">
-        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition"><MdArrowBack size={20} /></button>
+      <div className="flex items-center gap-4 px-6 py-5 border-b border-slate-100 bg-white">
+        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition"><MdArrowBack size={20} /></button>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{isEdit ? "Edit Assignment" : "Create Assignment"}</h2>
-          <p className="text-sm text-gray-500">{isEdit ? (editData.title || "Update assignment details") : "Set up a new assignment for your students"}</p>
+          <h2 className="text-xl font-bold text-slate-900">{isEdit ? "Edit Assignment" : "Create Assignment"}</h2>
+          <p className="text-sm text-slate-500">{isEdit ? (editData.title || "Update assignment details") : "Set up a new assignment for your students"}</p>
         </div>
       </div>
       <div className="bg-white p-6 md:p-8 space-y-6">
@@ -119,7 +119,7 @@ export default function AssignmentModal({ editData, onClose, onSaved }) {
           </div>
         )}
         {isEdit && (
-          <div className="px-3 py-2 bg-violet-50 rounded-xl border border-violet-100 text-sm text-violet-700">
+          <div className="px-3 py-2 bg-blue-50 rounded-xl border border-blue-100 text-sm text-blue-900">
             <span className="font-semibold">Lesson:</span> {editData.lessonName || editData.lessonSlug}
           </div>
         )}
@@ -150,23 +150,23 @@ export default function AssignmentModal({ editData, onClose, onSaved }) {
             { key: "allowLateSubmission", label: "Allow Late Submission", desc: "Students can submit after due date" },
             { key: "allowResubmission", label: "Allow Resubmission", desc: "Students can re-submit their work" },
           ].map(({ key, label, desc }) => (
-            <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div key={key} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
               <div>
-                <p className="text-sm font-semibold text-gray-700">{label}</p>
-                <p className="text-xs text-gray-400">{desc}</p>
+                <p className="text-sm font-semibold text-slate-700">{label}</p>
+                <p className="text-xs text-slate-400">{desc}</p>
               </div>
               <button onClick={() => up(key, !form[key])}
-                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${form[key] ? "bg-violet-600" : "bg-gray-300"}`}>
+                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${form[key] ? "bg-[#043573]" : "bg-slate-300"}`}>
                 <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${form[key] ? "left-7" : "left-1"}`} />
               </button>
             </div>
           ))}
         </div>
       </div>
-      <div className="px-6 py-5 bg-gray-50 border-t border-gray-100 flex gap-3 justify-end rounded-b-2xl">
-        <button onClick={onClose} className="px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+      <div className="px-6 py-5 bg-slate-50 border-t border-slate-100 flex gap-3 justify-end rounded-b-2xl">
+        <button onClick={onClose} className="px-5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Cancel</button>
         <button onClick={handleSave} disabled={saving}
-          className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition flex items-center gap-2">
+          className="px-5 py-2.5 bg-[#043573] hover:bg-blue-900 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition flex items-center gap-2">
           {saving && <AiOutlineLoading3Quarters className="animate-spin" />}
           {isEdit ? "Save Changes" : "Create Assignment"}
         </button>

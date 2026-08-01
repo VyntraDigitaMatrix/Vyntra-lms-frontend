@@ -44,14 +44,14 @@ const DetailModal = ({ item, onClose, onApprove, onReject, actionLoading }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h2 className="text-base font-bold text-gray-900">Certificate Detail</h2>
-                    <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition text-gray-500">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                    <h2 className="text-base font-bold text-slate-900">Certificate Detail</h2>
+                    <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 transition text-slate-500">
                         <FaTimes />
                     </button>
                 </div>
                 <div className="p-5 space-y-3">
-                    <div className="flex items-center justify-center py-3 bg-purple-50 rounded-xl mb-1 overflow-hidden">
+                    <div className="flex items-center justify-center py-3 bg-blue-50 rounded-xl mb-1 overflow-hidden">
                         {item.imageUrl ? (
                             <img
                                 src={item.imageUrl}
@@ -59,7 +59,7 @@ const DetailModal = ({ item, onClose, onApprove, onReject, actionLoading }) => {
                                 className="w-full h-44 object-cover rounded-lg"
                             />
                         ) : (
-                            <FaCertificate className="text-purple-400 text-5xl py-3" />
+                            <FaCertificate className="text-blue-400 text-5xl py-3" />
                         )}
                     </div>
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${meta.badgeClass}`}>
@@ -67,33 +67,33 @@ const DetailModal = ({ item, onClose, onApprove, onReject, actionLoading }) => {
                     </span>
                     <div className="space-y-2 text-sm">
                         <div>
-                            <p className="text-[11px] text-gray-400">Student</p>
-                            <p className="font-semibold text-gray-800">{item.studentName}</p>
+                            <p className="text-[11px] text-slate-400">Student</p>
+                            <p className="font-semibold text-slate-800">{item.studentName}</p>
                         </div>
                         <div>
-                            <p className="text-[11px] text-gray-400">Course</p>
-                            <p className="font-medium text-gray-700">{item.courseTitle}</p>
+                            <p className="text-[11px] text-slate-400">Course</p>
+                            <p className="font-medium text-slate-700">{item.courseTitle}</p>
                         </div>
                         <div>
-                            <p className="text-[11px] text-gray-400">Certificate Number</p>
-                            <p className="font-mono text-xs text-gray-600 break-all">{item.certificateNumber}</p>
+                            <p className="text-[11px] text-slate-400">Certificate Number</p>
+                            <p className="font-mono text-xs text-slate-600 break-all">{item.certificateNumber}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <p className="text-[11px] text-gray-400">Requested</p>
-                                <p className="text-gray-600">{formatDate(item.createdAt)}</p>
+                                <p className="text-[11px] text-slate-400">Requested</p>
+                                <p className="text-slate-600">{formatDate(item.createdAt)}</p>
                             </div>
                             {item.approvedAt && (
                                 <div>
-                                    <p className="text-[11px] text-gray-400">Decided</p>
-                                    <p className="text-gray-600">{formatDate(item.approvedAt)}</p>
+                                    <p className="text-[11px] text-slate-400">Decided</p>
+                                    <p className="text-slate-600">{formatDate(item.approvedAt)}</p>
                                 </div>
                             )}
                         </div>
                         {item.approvedByInstructorName && (
                             <div>
-                                <p className="text-[11px] text-gray-400">Decided By</p>
-                                <p className="text-gray-600">{item.approvedByInstructorName}</p>
+                                <p className="text-[11px] text-slate-400">Decided By</p>
+                                <p className="text-slate-600">{item.approvedByInstructorName}</p>
                             </div>
                         )}
                     </div>
@@ -122,7 +122,7 @@ const DetailModal = ({ item, onClose, onApprove, onReject, actionLoading }) => {
                     <div className="px-5 pb-5">
                         <button
                             onClick={() => downloadCertificate(item)}
-                            className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-semibold transition"
+                            className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition"
                         >
                             <FaDownload className="text-xs" /> Download
                         </button>
@@ -134,7 +134,7 @@ const DetailModal = ({ item, onClose, onApprove, onReject, actionLoading }) => {
                         <button
                             onClick={() => onApprove(item)}
                             disabled={actionLoading}
-                            className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-purple-200 text-purple-600 hover:bg-purple-50 disabled:opacity-50 text-sm font-semibold transition"
+                            className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-blue-200 text-[#043573] hover:bg-blue-50 disabled:opacity-50 text-sm font-semibold transition"
                             title="No dedicated 'reissue' endpoint exists — this re-runs the approve call."
                         >
                             <FaRedo className="text-xs" /> Reissue (Approve Again)
@@ -290,8 +290,8 @@ const InstructorCertificates = () => {
 
                 {/* Header */}
                 <div className="mb-6">
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Certificates</h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Certificates</h1>
+                    <p className="text-sm text-slate-500 mt-1">
                         Review and manage student certificate requests.
                     </p>
                 </div>
@@ -299,19 +299,19 @@ const InstructorCertificates = () => {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     {[
-                        { label: "Loaded", value: stats.total, icon: <FaCertificate className="text-purple-600 text-xl sm:text-2xl" />, bg: "bg-purple-50" },
+                        { label: "Loaded", value: stats.total, icon: <FaCertificate className="text-[#043573] text-xl sm:text-2xl" />, bg: "bg-blue-50" },
                         { label: "Pending", value: stats.pending, icon: <FaHourglassHalf className="text-amber-600 text-xl sm:text-2xl" />, bg: "bg-amber-50" },
                         { label: "Approved", value: stats.approved, icon: <FaCheckCircle className="text-green-600 text-xl sm:text-2xl" />, bg: "bg-green-50" },
                         { label: "Rejected", value: stats.rejected, icon: <FaTimesCircle className="text-red-500 text-xl sm:text-2xl" />, bg: "bg-red-50" },
                     ].map((s) => (
-                        <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+                        <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
                             <div className={`w-12 h-12 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
                                 {s.icon}
                             </div>
                             <div>
-                                <p className="text-xs font-semibold text-gray-700">{s.label}</p>
-                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-none mt-1">
-                                    {loading ? <span className="block w-6 h-6 bg-gray-200 rounded animate-pulse" /> : s.value}
+                                <p className="text-xs font-semibold text-slate-700">{s.label}</p>
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-none mt-1">
+                                    {loading ? <span className="block w-6 h-6 bg-slate-200 rounded animate-pulse" /> : s.value}
                                 </h2>
                             </div>
                         </div>
@@ -319,15 +319,15 @@ const InstructorCertificates = () => {
                 </div>
 
                 {/* View mode + search */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-sm space-y-3">
+                <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <button
                             onClick={handleShowPending}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${viewMode === "pending" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${viewMode === "pending" ? "bg-[#043573] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                         >
                             Pending Requests (global)
                         </button>
-                        <span className="text-xs text-gray-400">or look up a specific course:</span>
+                        <span className="text-xs text-slate-400">or look up a specific course:</span>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
                         <input
@@ -336,27 +336,27 @@ const InstructorCertificates = () => {
                             onChange={(e) => setCourseSlug(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleCourseSearch()}
                             placeholder="Enter course slug (e.g. seo-and-digital-marketing-essentials)"
-                            className="flex-1 h-10 px-3 rounded-lg border border-gray-200 text-sm outline-none focus:border-purple-500"
+                            className="flex-1 h-10 px-3 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#043573]"
                         />
                         <button
                             onClick={handleCourseSearch}
                             disabled={!courseSlug.trim()}
-                            className="h-10 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-semibold transition flex items-center justify-center gap-2"
+                            className="h-10 px-4 rounded-lg bg-[#043573] hover:bg-blue-900 disabled:opacity-50 text-white text-sm font-semibold transition flex items-center justify-center gap-2"
                         >
                             <FaSearch className="text-xs" /> View Course Certificates
                         </button>
                     </div>
 
                     {/* Text filter + status tabs, applied to whatever's loaded */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t border-slate-100">
                         <div className="relative flex-1">
-                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Filter by student, course, or certificate #..."
-                                className="w-full h-9 pl-8 pr-3 rounded-lg border border-gray-200 text-xs outline-none focus:border-purple-500"
+                                className="w-full h-9 pl-8 pr-3 rounded-lg border border-slate-200 text-xs outline-none focus:border-[#043573]"
                             />
                         </div>
                         <div className="flex gap-1.5 overflow-x-auto">
@@ -364,7 +364,7 @@ const InstructorCertificates = () => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveStatus(tab)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${activeStatus === tab ? "bg-gray-800 text-white" : "text-gray-500 hover:bg-gray-100"}`}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${activeStatus === tab ? "bg-slate-800 text-white" : "text-slate-500 hover:bg-slate-100"}`}
                                 >
                                     {STATUS_LABELS[tab]}
                                 </button>
@@ -386,10 +386,10 @@ const InstructorCertificates = () => {
                 )}
 
                 {/* Table — desktop */}
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hidden md:block">
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden hidden md:block">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                                 <th className="px-4 py-3">Student</th>
                                 <th className="px-4 py-3">Course</th>
                                 <th className="px-4 py-3">Certificate #</th>
@@ -401,29 +401,29 @@ const InstructorCertificates = () => {
                         <tbody>
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
-                                    <tr key={i} className="border-b border-gray-100">
+                                    <tr key={i} className="border-b border-slate-100">
                                         <td colSpan={6} className="px-4 py-4">
-                                            <div className="h-4 bg-gray-100 rounded animate-pulse w-full" />
+                                            <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
                                         </td>
                                     </tr>
                                 ))
                             ) : filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-4 py-12 text-center">
-                                        <FaCertificate className="mx-auto text-4xl text-gray-300 mb-3" />
-                                        <p className="text-sm font-semibold text-gray-600">No certificates found</p>
-                                        <p className="text-xs text-gray-400 mt-1">Try a different course slug or filter.</p>
+                                        <FaCertificate className="mx-auto text-4xl text-slate-300 mb-3" />
+                                        <p className="text-sm font-semibold text-slate-600">No certificates found</p>
+                                        <p className="text-xs text-slate-400 mt-1">Try a different course slug or filter.</p>
                                     </td>
                                 </tr>
                             ) : (
                                 filtered.map((item) => {
                                     const meta = STATUS_META[item.status] || STATUS_META.PENDING;
                                     return (
-                                        <tr key={item.certificateId} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                                            <td className="px-4 py-3 font-semibold text-gray-800">{item.studentName}</td>
-                                            <td className="px-4 py-3 text-gray-600">{item.courseTitle}</td>
-                                            <td className="px-4 py-3 font-mono text-xs text-gray-500">{item.certificateNumber}</td>
-                                            <td className="px-4 py-3 text-gray-500">{formatDate(item.createdAt)}</td>
+                                        <tr key={item.certificateId} className="border-b border-slate-100 hover:bg-slate-50 transition">
+                                            <td className="px-4 py-3 font-semibold text-slate-800">{item.studentName}</td>
+                                            <td className="px-4 py-3 text-slate-600">{item.courseTitle}</td>
+                                            <td className="px-4 py-3 font-mono text-xs text-slate-500">{item.certificateNumber}</td>
+                                            <td className="px-4 py-3 text-slate-500">{formatDate(item.createdAt)}</td>
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${meta.badgeClass}`}>
                                                     {meta.icon} {meta.label}
@@ -433,7 +433,7 @@ const InstructorCertificates = () => {
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     <button
                                                         onClick={() => openDetail(item)}
-                                                        className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition flex items-center justify-center"
+                                                        className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 transition flex items-center justify-center"
                                                         title="View"
                                                     >
                                                         <FaEye className="text-xs" />
@@ -441,7 +441,7 @@ const InstructorCertificates = () => {
                                                     <button
                                                         onClick={() => downloadCertificate(item)}
                                                         disabled={!item.imageUrl}
-                                                        className={`w-8 h-8 rounded-lg border flex items-center justify-center transition ${item.imageUrl ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300 cursor-not-allowed"}`}
+                                                        className={`w-8 h-8 rounded-lg border flex items-center justify-center transition ${item.imageUrl ? "border-slate-200 text-slate-500 hover:bg-slate-100" : "border-slate-100 text-slate-300 cursor-not-allowed"}`}
                                                         title={item.imageUrl ? "Download" : "No certificate file available"}
                                                     >
                                                         <FaDownload className="text-xs" />
@@ -449,7 +449,7 @@ const InstructorCertificates = () => {
                                                     {item.status === "REJECTED" && (
                                                         <button
                                                             onClick={() => handleApprove(item)}
-                                                            className="w-8 h-8 rounded-lg border border-purple-200 text-purple-600 hover:bg-purple-50 transition flex items-center justify-center"
+                                                            className="w-8 h-8 rounded-lg border border-blue-200 text-[#043573] hover:bg-blue-50 transition flex items-center justify-center"
                                                             title="Reissue (approve again)"
                                                         >
                                                             <FaRedo className="text-xs" />
@@ -469,38 +469,38 @@ const InstructorCertificates = () => {
                 <div className="space-y-3 md:hidden">
                     {loading ? (
                         Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm animate-pulse h-24" />
+                            <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm animate-pulse h-24" />
                         ))
                     ) : filtered.length === 0 ? (
-                        <div className="bg-white border border-dashed border-gray-300 rounded-xl p-8 text-center">
-                            <FaCertificate className="mx-auto text-3xl text-gray-300 mb-3" />
-                            <p className="text-sm font-semibold text-gray-600">No certificates found</p>
+                        <div className="bg-white border border-dashed border-slate-300 rounded-xl p-8 text-center">
+                            <FaCertificate className="mx-auto text-3xl text-slate-300 mb-3" />
+                            <p className="text-sm font-semibold text-slate-600">No certificates found</p>
                         </div>
                     ) : (
                         filtered.map((item) => {
                             const meta = STATUS_META[item.status] || STATUS_META.PENDING;
                             return (
-                                <div key={item.certificateId} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                                <div key={item.certificateId} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-sm font-bold text-gray-900">{item.studentName}</h3>
+                                        <h3 className="text-sm font-bold text-slate-900">{item.studentName}</h3>
                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold ${meta.badgeClass}`}>
                                             {meta.icon} {meta.label}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-gray-600 mb-1">{item.courseTitle}</p>
-                                    <p className="text-[11px] font-mono text-gray-400 mb-1 break-all">{item.certificateNumber}</p>
-                                    <p className="text-[11px] text-gray-400 mb-3">Requested {formatDate(item.createdAt)}</p>
+                                    <p className="text-xs text-slate-600 mb-1">{item.courseTitle}</p>
+                                    <p className="text-[11px] font-mono text-slate-400 mb-1 break-all">{item.certificateNumber}</p>
+                                    <p className="text-[11px] text-slate-400 mb-3">Requested {formatDate(item.createdAt)}</p>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => openDetail(item)}
-                                            className="flex-1 h-9 rounded-lg border border-gray-200 text-gray-600 text-xs font-semibold flex items-center justify-center gap-1.5"
+                                            className="flex-1 h-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold flex items-center justify-center gap-1.5"
                                         >
                                             <FaEye className="text-[10px]" /> View
                                         </button>
                                         {item.imageUrl && (
                                             <button
                                                 onClick={() => downloadCertificate(item)}
-                                                className="flex-1 h-9 rounded-lg border border-gray-200 text-gray-600 text-xs font-semibold flex items-center justify-center gap-1.5"
+                                                className="flex-1 h-9 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold flex items-center justify-center gap-1.5"
                                             >
                                                 <FaDownload className="text-[10px]" /> Download
                                             </button>
@@ -508,7 +508,7 @@ const InstructorCertificates = () => {
                                         {item.status === "REJECTED" && (
                                             <button
                                                 onClick={() => handleApprove(item)}
-                                                className="flex-1 h-9 rounded-lg border border-purple-200 text-purple-600 text-xs font-semibold flex items-center justify-center gap-1.5"
+                                                className="flex-1 h-9 rounded-lg border border-blue-200 text-[#043573] text-xs font-semibold flex items-center justify-center gap-1.5"
                                             >
                                                 <FaRedo className="text-[10px]" /> Reissue
                                             </button>
@@ -526,17 +526,17 @@ const InstructorCertificates = () => {
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                             disabled={currentPage === 0}
-                            className="h-9 px-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
                             Prev
                         </button>
-                        <span className="text-xs text-gray-500 font-semibold">
+                        <span className="text-xs text-slate-500 font-semibold">
                             Page {currentPage + 1} of {totalPages}
                         </span>
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
                             disabled={currentPage === totalPages - 1}
-                            className="h-9 px-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
                             Next
                         </button>

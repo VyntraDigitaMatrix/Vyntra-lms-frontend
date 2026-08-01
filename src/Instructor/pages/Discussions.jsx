@@ -147,8 +147,8 @@ function Discussions() {
   }).length;
 
   const statCards = [
-    { label: "Discussion Groups", value: groups.length, icon: <FaComments />, iconBg: "bg-violet-50", iconColor: "text-violet-500" },
-    { label: "Members Reached", value: totalMembersReached, icon: <FaUsers />, iconBg: "bg-indigo-50", iconColor: "text-indigo-500" },
+    { label: "Discussion Groups", value: groups.length, icon: <FaComments />, iconBg: "bg-violet-50", iconColor: "text-[#7c3aed]" },
+    { label: "Members Reached", value: totalMembersReached, icon: <FaUsers />, iconBg: "bg-violet-50", iconColor: "text-[#7c3aed]" },
     { label: "Active Today", value: activeToday, icon: <FaClock />, iconBg: "bg-teal-50", iconColor: "text-teal-500" },
   ];
 
@@ -158,16 +158,16 @@ function Discussions() {
 
         {/* Header — plain, on-brand with the rest of the instructor app */}
         <div className="flex items-start justify-between gap-4">
-          <div className="text-sm text-gray-400">
-            <Link to="/instructor/dashboard" className="hover:text-violet-600 transition text-sm">Dashboard</Link>
+          <div className="text-sm text-slate-400">
+            <Link to="/instructor/dashboard" className="hover:text-[#7c3aed] transition text-sm">Dashboard</Link>
             <span className="mx-2 text-sm">&gt;</span>
-            <span className="text-gray-600 font-medium text-sm">Discussions</span>
+            <span className="text-slate-600 font-medium text-sm">Discussions</span>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Course Discussions</h1>
             <p className="text-sm text-slate-500 mt-0.5">Engage with your students, answer questions, and foster learning.</p>
           </div>
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#7c3aed] hover:bg-violet-750 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0"
           >
             <FaPlus size={12} /> Add Discussion
           </button>
@@ -189,17 +189,17 @@ function Discussions() {
         {/* Channel list */}
         {loading ? (
           <div className="text-center py-16">
-            <FaSpinner className="animate-spin text-violet-500 text-3xl mx-auto mb-3" />
-            <p className="text-sm text-gray-500">Loading groups...</p>
+            <FaSpinner className="animate-spin text-[#7c3aed] text-3xl mx-auto mb-3" />
+            <p className="text-sm text-slate-500">Loading groups...</p>
           </div>
         ) : groups.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-dashed border-slate-300">
-            <FaComments className="text-4xl text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-gray-600 mb-1">No discussion groups yet</h3>
-            <p className="text-sm text-gray-400 mb-5">Add a discussion group for one of your courses to get started.</p>
+            <FaComments className="text-4xl text-slate-300 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-slate-600 mb-1">No discussion groups yet</h3>
+            <p className="text-sm text-slate-400 mb-5">Add a discussion group for one of your courses to get started.</p>
             <button
               onClick={openCreateModal}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#7c3aed] hover:bg-violet-750 text-white text-xs font-bold rounded-xl transition shadow-sm"
             >
               <FaPlus size={11} /> Add Discussion
             </button>
@@ -228,7 +228,7 @@ function Discussions() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-violet-50 text-[#7c3aed] flex items-center justify-center flex-shrink-0">
                   <FaComments size={14} />
                 </div>
                 <div>
@@ -246,13 +246,13 @@ function Discussions() {
 
             <div className="px-5 pt-4 pb-2">
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
                 <input
                   type="text"
                   value={courseSearch}
                   onChange={e => setCourseSearch(e.target.value)}
                   placeholder="Search courses..."
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 outline-none transition"
+                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-violet-400 outline-none transition"
                   autoFocus
                 />
               </div>
@@ -267,23 +267,23 @@ function Discussions() {
             <div className="px-5 pb-5 max-h-[340px] overflow-y-auto">
               {coursesLoading ? (
                 <div className="text-center py-10">
-                  <FaSpinner className="animate-spin text-violet-500 text-xl mx-auto mb-2" />
-                  <p className="text-xs text-gray-400">Loading courses...</p>
+                  <FaSpinner className="animate-spin text-[#7c3aed] text-xl mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">Loading courses...</p>
                 </div>
               ) : filteredCourses.length === 0 ? (
-                <p className="text-center py-6 text-sm text-gray-400">No courses found matching "{courseSearch}"</p>
+                <p className="text-center py-6 text-sm text-slate-400">No courses found matching "{courseSearch}"</p>
               ) : (
                 <div className="space-y-2 mt-2">
                   {filteredCourses.map(c => (
-                    <div key={c.id || c.courseId} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:border-violet-200 hover:bg-violet-50/50 transition group">
+                    <div key={c.id || c.courseId} className="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:border-violet-200 hover:bg-violet-50/55 transition group">
                       <div className="flex-1 min-w-0 pr-3">
-                        <p className="text-sm font-bold text-gray-800 truncate">{c.title}</p>
-                        {c.category && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{c.category}</p>}
+                        <p className="text-sm font-bold text-slate-800 truncate">{c.title}</p>
+                        {c.category && <p className="text-[10px] text-slate-400 mt-0.5 truncate">{c.category}</p>}
                       </div>
                       <button
                         onClick={() => handleCreateDiscussion(c.id || c.courseId)}
                         disabled={creating === (c.id || c.courseId)}
-                        className="px-3 py-1.5 text-xs font-semibold bg-violet-100 text-violet-700 hover:bg-violet-200 rounded-lg transition disabled:opacity-50 whitespace-nowrap"
+                        className="px-3 py-1.5 text-xs font-semibold bg-violet-100 text-violet-900 hover:bg-violet-200 rounded-lg transition disabled:opacity-50 whitespace-nowrap"
                       >
                         {creating === (c.id || c.courseId) ? "Joining..." : "Select"}
                       </button>

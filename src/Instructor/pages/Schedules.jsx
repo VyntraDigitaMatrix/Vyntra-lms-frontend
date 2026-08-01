@@ -12,17 +12,17 @@ const EVENT_STYLES = {
   ASSIGNMENT: {
     label: "Assignment",
     Icon: FaClipboardList,
-    badge: "bg-indigo-50 text-indigo-600 border-indigo-200",
-    card: "bg-indigo-50/70 border-indigo-400 hover:bg-indigo-100",
-    dot: "bg-indigo-500",
+    badge: "bg-violet-50 text-[#7c3aed] border-violet-200",
+    card: "bg-violet-50/70 border-violet-400 hover:bg-violet-100",
+    dot: "bg-[#7c3aed]",
   },
 };
 const DEFAULT_STYLE = {
   label: "Event",
   Icon: FaCalendarAlt,
-  badge: "bg-gray-50 text-gray-600 border-gray-200",
-  card: "bg-gray-50 border-gray-300 hover:bg-gray-100",
-  dot: "bg-gray-400",
+  badge: "bg-slate-50 text-slate-600 border-slate-200",
+  card: "bg-slate-50 border-slate-300 hover:bg-slate-100",
+  dot: "bg-slate-400",
 };
 
 const styleFor = (eventType) => EVENT_STYLES[eventType] || DEFAULT_STYLE;
@@ -209,79 +209,79 @@ const InstructorSchedule = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-5">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 p-5">
       {/* Header */}
       <div className="mb-6">
-        <p className="text-sm text-gray-400 mb-2">
-          <Link to="/instructor/dashboard" className="hover:text-emerald-600 transition">Dashboard</Link>
+        <p className="text-sm text-slate-400 mb-2">
+          <Link to="/instructor/dashboard" className="hover:text-[#7c3aed] transition">Dashboard</Link>
           <span className="mx-2">&gt;</span>
-          <span className="text-gray-600 font-medium">Schedule</span>
+          <span className="text-slate-600 font-medium">Schedule</span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">My Assignment Schedule</h1>
-        <p className="text-sm text-gray-500">Assignments across your courses</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-800">My Assignment Schedule</h1>
+        <p className="text-sm text-slate-500">Assignments across your courses</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-3">
         {/* Main Calendar */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           {/* Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-gray-100 bg-white/50">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-slate-100 bg-white/50">
             <div className="flex items-center gap-2">
               <FaCalendarAlt className="text-[#7c3aed] w-5 h-5" />
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg font-semibold text-slate-800">
                 {view === "weekly" ? "Weekly Schedule" : "Monthly Schedule"}
               </h2>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex p-1 bg-gray-100 rounded-lg">
+              <div className="flex p-1 bg-slate-100 rounded-lg">
                 <button onClick={() => setView("weekly")}
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "weekly" ? "bg-white shadow-sm text-[#7c3aed]" : "text-gray-600"}`}>
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "weekly" ? "bg-white shadow-sm text-[#7c3aed]" : "text-slate-600"}`}>
                   Weekly
                 </button>
                 <button onClick={() => setView("monthly")}
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "monthly" ? "bg-white shadow-sm text-[#7c3aed]" : "text-gray-600"}`}>
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${view === "monthly" ? "bg-white shadow-sm text-[#7c3aed]" : "text-slate-600"}`}>
                   Monthly
                 </button>
               </div>
 
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search assignments..."
-                  className="w-56 h-10 pl-9 pr-4 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] transition-all"
+                  className="w-56 h-10 pl-9 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Date Navigation */}
-          <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 bg-white">
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-4 px-6 py-4 border-b border-slate-100 bg-white">
+            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
               <button onClick={() => (view === "weekly" ? navigateWeek("prev") : navigateMonth("prev"))}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all">
+                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm transition-all">
                 <FaChevronLeft className="text-sm" />
               </button>
               <button onClick={() => (view === "weekly" ? navigateWeek("next") : navigateMonth("next"))}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all">
+                className="w-8 h-8 rounded-md flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm transition-all">
                 <FaChevronRight className="text-sm" />
               </button>
             </div>
-            <div className="h-6 w-px bg-gray-200" />
-            <h3 className="font-semibold text-base text-gray-700">
+            <div className="h-6 w-px bg-slate-200" />
+            <h3 className="font-semibold text-base text-slate-700">
               {view === "weekly" ? currentWeekString : currentDate.toLocaleString("default", { month: "long", year: "numeric" })}
             </h3>
-            <div className="h-6 w-px bg-gray-200" />
-            <button onClick={goToToday} className="text-sm text-[#7c3aed] font-medium hover:text-[#5a2a9d] transition-colors">
+            <div className="h-6 w-px bg-slate-200" />
+            <button onClick={goToToday} className="text-sm text-[#7c3aed] font-medium hover:text-violet-800 transition-colors">
               Today
             </button>
           </div>
 
           {/* Loading / error states */}
           {loading && (
-            <div className="py-16 text-center text-gray-400">
+            <div className="py-16 text-center text-slate-400">
               <FaSpinner className="animate-spin text-2xl mx-auto mb-2" />
               <p className="text-sm">Loading schedule...</p>
             </div>
@@ -295,21 +295,21 @@ const InstructorSchedule = () => {
 
           {/* Weekly view */}
           {!loading && !error && view === "weekly" && (
-            <div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-7 divide-x divide-slate-100">
               {weekDays.map((day, idx) => {
                 const dayEvents = eventsByDate.get(day.fullDate.toDateString()) || [];
                 return (
                   <div key={idx} className="min-h-[320px]">
                     <div
-                      onClick={() => handleDateClick(day.fullDate)}
-                      className={`text-center py-3 cursor-pointer border-b border-gray-100 ${day.active ? "bg-[#7c3aed]/50" : "hover:bg-gray-50/50"}`}
+                       onClick={() => handleDateClick(day.fullDate)}
+                       className={`text-center py-3 cursor-pointer border-b border-slate-100 ${day.active ? "bg-violet-50" : "hover:bg-slate-50/50"}`}
                     >
-                      <p className="text-[11px] font-semibold text-gray-400 tracking-wide uppercase">{day.day}</p>
-                      <h3 className={`text-lg font-bold mt-0.5 ${day.active ? "text-[#7c3aed]" : "text-gray-700"}`}>{day.date}</h3>
+                      <p className="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">{day.day}</p>
+                      <h3 className={`text-lg font-bold mt-0.5 ${day.active ? "text-[#7c3aed]" : "text-slate-700"}`}>{day.date}</h3>
                     </div>
                     <div className="p-2 space-y-2">
                       {dayEvents.length === 0 ? (
-                        <p className="text-[11px] text-gray-300 text-center pt-4">No assignments</p>
+                        <p className="text-[11px] text-slate-300 text-center pt-4">No assignments</p>
                       ) : (
                         dayEvents.map((event) => {
                           const { Icon, card, badge, label } = styleFor(event.eventType);
@@ -322,7 +322,7 @@ const InstructorSchedule = () => {
                               <div className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border mb-1 ${badge}`}>
                                 <Icon size={8} /> {label}
                               </div>
-                              <p className="text-xs font-bold text-gray-800 truncate">{event.title}</p>
+                              <p className="text-xs font-bold text-slate-800 truncate">{event.title}</p>
                             </div>
                           );
                         })
@@ -339,7 +339,7 @@ const InstructorSchedule = () => {
             <div className="p-4">
               <div className="grid grid-cols-7 gap-1">
                 {weekDaysNames.map((d) => (
-                  <div key={d} className="text-center py-3 text-xs font-semibold text-gray-500">{d}</div>
+                  <div key={d} className="text-center py-3 text-xs font-semibold text-slate-500">{d}</div>
                 ))}
                 {monthDays.map((day, idx) => {
                   const dayEvents = eventsByDate.get(day.fullDate.toDateString()) || [];
@@ -348,9 +348,9 @@ const InstructorSchedule = () => {
                     <div
                       key={idx}
                       onClick={() => handleDateClick(day.fullDate)}
-                      className={`min-h-[100px] border rounded-lg p-1 cursor-pointer transition-all ${day.isCurrentMonth ? "bg-white" : "bg-gray-50"} ${isSelected ? "border-[#7c3aed] ring-2 ring-[#7c3aed]/20" : "border-gray-100 hover:border-gray-300 hover:shadow-sm"}`}
+                      className={`min-h-[100px] border rounded-lg p-1 cursor-pointer transition-all ${day.isCurrentMonth ? "bg-white" : "bg-slate-50"} ${isSelected ? "border-[#7c3aed] ring-2 ring-[#7c3aed]/20" : "border-slate-100 hover:border-slate-300 hover:shadow-sm"}`}
                     >
-                      <div className={`text-right px-1 py-0.5 text-sm font-medium rounded-full w-7 ${isSelected ? "bg-[#7c3aed] text-white" : day.isCurrentMonth ? "text-gray-700" : "text-gray-400"}`}>
+                      <div className={`text-right px-1 py-0.5 text-sm font-medium rounded-full w-7 ${isSelected ? "bg-[#7c3aed] text-white" : day.isCurrentMonth ? "text-slate-700" : "text-slate-400"}`}>
                         {day.date}
                       </div>
                       <div className="mt-1 space-y-1 max-h-[80px] overflow-y-auto">
@@ -360,7 +360,7 @@ const InstructorSchedule = () => {
                             <div
                               key={event.eventId}
                               onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); }}
-                              className="flex items-center gap-1 text-[10px] px-1 py-0.5 rounded truncate hover:bg-gray-100"
+                              className="flex items-center gap-1 text-[10px] px-1 py-0.5 rounded truncate hover:bg-slate-100"
                             >
                               <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
                               <span className="truncate">{event.title}</span>
@@ -368,7 +368,7 @@ const InstructorSchedule = () => {
                           );
                         })}
                         {dayEvents.length > 3 && (
-                          <div className="text-[9px] text-gray-400 text-center">+{dayEvents.length - 3} more</div>
+                          <div className="text-[9px] text-slate-400 text-center">+{dayEvents.length - 3} more</div>
                         )}
                       </div>
                     </div>
@@ -392,20 +392,20 @@ const InstructorSchedule = () => {
                         </span>
                       );
                     })()}
-                    <h3 className="font-bold text-lg text-gray-900">{selectedEvent.title}</h3>
+                    <h3 className="font-bold text-lg text-slate-900">{selectedEvent.title}</h3>
                   </div>
-                  <button onClick={() => setSelectedEvent(null)} className="text-gray-400 hover:text-red-500">
+                  <button onClick={() => setSelectedEvent(null)} className="text-slate-400 hover:text-red-500">
                     <FaTimes />
                   </button>
                 </div>
-                <p className="text-xs text-gray-400">{formatDate(selectedEvent.eventDateTime)}</p>
+                <p className="text-xs text-slate-400">{formatDate(selectedEvent.eventDateTime)}</p>
                 {selectedEvent.description && (
-                  <p className="text-sm text-gray-600 mt-3 leading-relaxed">{selectedEvent.description}</p>
+                  <p className="text-sm text-slate-600 mt-3 leading-relaxed">{selectedEvent.description}</p>
                 )}
                 {buildEventLink(selectedEvent) && (
                   <button
                     onClick={() => handleGoToEvent(selectedEvent)}
-                    className="mt-4 w-full bg-[#7c3aed] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#5a2a9d] transition-colors font-semibold"
+                    className="mt-4 w-full bg-[#7c3aed] text-white text-sm px-4 py-2 rounded-lg hover:bg-violet-850 transition-colors font-semibold"
                   >
                     View details
                   </button>
@@ -418,49 +418,49 @@ const InstructorSchedule = () => {
         {/* Right Sidebar */}
         <div className="space-y-3">
           {/* Daily Agenda */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2 bg-white/50">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2 bg-white/50">
               <div className="w-1.5 h-5 bg-[#7c3aed] rounded-full" />
-              <h2 className="font-semibold text-gray-800">Daily Agenda</h2>
+              <h2 className="font-semibold text-slate-800">Daily Agenda</h2>
             </div>
             <div className="p-4">
-              <div className="rounded-xl border border-gray-100 overflow-hidden bg-white">
-                <div className="h-14 flex items-center justify-between px-4 bg-gray-50/50 border-b border-gray-100">
+              <div className="rounded-xl border border-slate-100 overflow-hidden bg-white">
+                <div className="h-14 flex items-center justify-between px-4 bg-slate-50/50 border-b border-slate-100">
                   <button
                     onClick={() => { const d = new Date(selectedDate); d.setDate(selectedDate.getDate() - 1); handleDateClick(d); }}
-                    className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all"
+                    className="w-8 h-8 rounded-md flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm transition-all"
                   >
                     <FaChevronLeft className="text-sm" />
                   </button>
                   <div className="text-center">
-                    <h3 className="font-semibold text-gray-800">{selectedDate.toLocaleString("default", { weekday: "long" })}</h3>
-                    <p className="text-xs text-gray-400">{selectedDate.toLocaleString("default", { month: "long", day: "numeric", year: "numeric" })}</p>
+                    <h3 className="font-semibold text-slate-800">{selectedDate.toLocaleString("default", { weekday: "long" })}</h3>
+                    <p className="text-xs text-slate-400">{selectedDate.toLocaleString("default", { month: "long", day: "numeric", year: "numeric" })}</p>
                   </div>
                   <button
                     onClick={() => { const d = new Date(selectedDate); d.setDate(selectedDate.getDate() + 1); handleDateClick(d); }}
-                    className="w-8 h-8 rounded-md flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm transition-all"
+                    className="w-8 h-8 rounded-md flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm transition-all"
                   >
                     <FaChevronRight className="text-sm" />
                   </button>
                 </div>
-                <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
                   {selectedDateEvents.length > 0 ? (
                     selectedDateEvents.map((event) => {
                       const { Icon, card, badge, label } = styleFor(event.eventType);
                       return (
                         <div key={event.eventId} onClick={() => setSelectedEvent(event)}
-                          className="p-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
+                          className="p-3 hover:bg-slate-50/50 transition-colors cursor-pointer">
                           <div className={`rounded-lg border-l-4 p-2.5 ${card}`}>
                             <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border mb-1 ${badge}`}>
                               <Icon size={8} /> {label}
                             </span>
-                            <h4 className="font-bold text-gray-800 truncate text-xs">{event.title}</h4>
+                            <h4 className="font-bold text-slate-800 truncate text-xs">{event.title}</h4>
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="p-8 text-center text-gray-400 text-sm">No assignments scheduled for this day</div>
+                    <div className="p-8 text-center text-slate-400 text-sm">No assignments scheduled for this day</div>
                   )}
                 </div>
               </div>
@@ -468,32 +468,32 @@ const InstructorSchedule = () => {
           </div>
 
           {/* Upcoming Assignments */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2 bg-white/50">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2 bg-white/50">
               <div className="w-1.5 h-5 bg-[#7c3aed] rounded-full" />
-              <h2 className="font-semibold text-gray-800">Upcoming Assignments</h2>
+              <h2 className="font-semibold text-slate-800">Upcoming Assignments</h2>
             </div>
             <div className="p-4 space-y-3">
               {upcomingEvents.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-4">Nothing coming up</p>
+                <p className="text-sm text-slate-400 text-center py-4">Nothing coming up</p>
               )}
               {upcomingEvents.map((event) => {
                 const { dot, badge, label, Icon } = styleFor(event.eventType);
                 return (
                   <div key={event.eventId} onClick={() => setSelectedEvent(event)}
-                    className="rounded-xl border border-gray-100 p-4 hover:bg-gray-50/50 transition-all cursor-pointer">
+                    className="rounded-xl border border-slate-100 p-4 hover:bg-slate-50/50 transition-all cursor-pointer">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${dot}`} />
                       <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${badge}`}>
                         <Icon size={8} /> {label}
                       </span>
-                      <span className="text-xs text-gray-400 ml-auto">{formatDate(event.eventDateTime)}</span>
+                      <span className="text-xs text-slate-400 ml-auto">{formatDate(event.eventDateTime)}</span>
                     </div>
-                    <p className="text-sm font-semibold text-gray-800 mt-2">{event.title}</p>
+                    <p className="text-sm font-semibold text-slate-800 mt-2">{event.title}</p>
                   </div>
                 );
               })}
-              <Link to="/instructor/schedule/all" className="block w-full mt-2 py-2 text-center text-sm font-medium text-[#7c3aed] hover:text-[#5a2a9d] transition-colors">
+              <Link to="/instructor/schedule/all" className="block w-full mt-2 py-2 text-center text-sm font-medium text-[#7c3aed] hover:text-violet-800 transition-colors">
                 View all upcoming assignments →
               </Link>
             </div>

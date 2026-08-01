@@ -36,7 +36,7 @@ const InstructorChangePassword = () => {
   const getBorderClass = (status) => {
     if (status === "success") return "border-emerald-500 ring-2 ring-emerald-500/20";
     if (status === "error") return "border-rose-500 ring-2 ring-rose-500/20";
-    return "border-gray-200 focus:ring-2 focus:ring-indigo-500/20";
+    return "border-slate-200 focus:ring-2 focus:ring-[#043573]/20";
   };
 
   const validatePassword = (password) => {
@@ -128,21 +128,21 @@ const InstructorChangePassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <main className="max-w-7xl mx-auto px-5 py-8">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center justify-between mb-5">
-          <p className="text-sm text-gray-400">
-            <Link to="/instructor/dashboard" className="hover:text-indigo-600 transition">
+          <p className="text-sm text-slate-400">
+            <Link to="/instructor/dashboard" className="hover:text-[#043573] transition">
               Dashboard
             </Link>
             <span className="mx-2">&gt;</span>
-            <span className="text-gray-600 font-medium">Change Password</span>
+            <span className="text-slate-600 font-medium">Change Password</span>
           </p>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 rounded-full">
-              <FaChalkboardTeacher className="text-indigo-600 text-sm" />
-              <span className="text-xs font-medium text-indigo-700">Instructor Portal</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
+              <FaChalkboardTeacher className="text-[#043573] text-sm" />
+              <span className="text-xs font-medium text-blue-900">Instructor Portal</span>
             </div>
           </div>
         </div>
@@ -150,17 +150,17 @@ const InstructorChangePassword = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-              <FaShieldAlt className="text-indigo-600 text-xl" />
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <FaShieldAlt className="text-[#043573] text-xl" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">Change Password</h1>
-              <p className="text-gray-500 mt-0.5 text-sm">Update your instructor account password to keep it secure</p>
+              <h1 className="text-xl font-bold text-slate-800">Change Password</h1>
+              <p className="text-slate-500 mt-0.5 text-sm">Update your instructor account password to keep it secure</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
           <div className="flex flex-col lg:flex-row">
             {/* Left Form Section */}
             <div className="flex-1 p-8 lg:p-10">
@@ -178,8 +178,8 @@ const InstructorChangePassword = () => {
 
                 {/* Old Password Field */}
                 <div className="mb-6">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <FaKey className="text-gray-500 text-xs" />
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                    <FaKey className="text-slate-500 text-xs" />
                     Current Password
                     {oldStatus === "success" && (
                       <FaCheckCircle className="text-emerald-500 text-sm" />
@@ -201,13 +201,13 @@ const InstructorChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Enter your current password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-sm bg-transparent text-slate-800 placeholder:text-slate-400"
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowOld(!showOld)}
-                      className="text-gray-400 hover:text-gray-600 transition"
+                      className="text-slate-400 hover:text-slate-600 transition"
                     >
                       {showOld ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
                     </button>
@@ -216,8 +216,8 @@ const InstructorChangePassword = () => {
 
                 {/* New Password Field */}
                 <div className="mb-6">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <FaShieldAlt className="text-gray-500 text-xs" />
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                    <FaShieldAlt className="text-slate-500 text-xs" />
                     New Password
                     {newStatus === "success" && (
                       <FaCheckCircle className="text-emerald-500 text-sm" />
@@ -239,13 +239,13 @@ const InstructorChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Create a strong password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-sm bg-transparent text-slate-800 placeholder:text-slate-400"
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowNew(!showNew)}
-                      className="text-gray-400 hover:text-gray-600 transition"
+                      className="text-slate-400 hover:text-slate-600 transition"
                     >
                       {showNew ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
                     </button>
@@ -255,7 +255,7 @@ const InstructorChangePassword = () => {
                   {newPassword && (
                     <div className="mt-3">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-gray-500">Password Strength</span>
+                        <span className="text-xs text-slate-500">Password Strength</span>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           passwordStrength <= 2 ? "bg-rose-100 text-rose-600" :
                           passwordStrength <= 4 ? "bg-amber-100 text-amber-600" :
@@ -264,7 +264,7 @@ const InstructorChangePassword = () => {
                           {getPasswordStrengthText()}
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${getPasswordStrengthColor()} rounded-full transition-all duration-300`}
                           style={{ width: `${(passwordStrength / 5) * 100}%` }}
@@ -275,8 +275,8 @@ const InstructorChangePassword = () => {
 
                   {/* Password Rules */}
                   {newPassword && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                      <p className="text-xs font-semibold text-gray-700 mb-3">Password Requirements:</p>
+                    <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <p className="text-xs font-semibold text-slate-700 mb-3">Password Requirements:</p>
                       <ul className="space-y-2">
                         {[
                           { key: "minLength", text: "Minimum 12 characters" },
@@ -292,9 +292,9 @@ const InstructorChangePassword = () => {
                             {rules[rule.key] ? (
                               <FaCheck className="text-emerald-500 text-xs" />
                             ) : (
-                              <FaTimes className="text-gray-300 text-xs" />
+                              <FaTimes className="text-slate-300 text-xs" />
                             )}
-                            <span className={rules[rule.key] ? "text-gray-700" : "text-gray-400"}>
+                            <span className={rules[rule.key] ? "text-slate-700" : "text-slate-400"}>
                               {rule.text}
                             </span>
                           </li>
@@ -306,8 +306,8 @@ const InstructorChangePassword = () => {
 
                 {/* Confirm Password Field */}
                 <div className="mb-8">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                    <MdVerified className="text-gray-500 text-sm" />
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                    <MdVerified className="text-slate-500 text-sm" />
                     Confirm New Password
                     {confirmStatus === "success" && (
                       <FaCheckCircle className="text-emerald-500 text-sm" />
@@ -329,13 +329,13 @@ const InstructorChangePassword = () => {
                         setSuccessMessage("");
                       }}
                       placeholder="Confirm your new password"
-                      className="flex-1 outline-none text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
+                      className="flex-1 outline-none text-sm bg-transparent text-slate-800 placeholder:text-slate-400"
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="text-gray-400 hover:text-gray-600 transition"
+                      className="text-slate-400 hover:text-slate-600 transition"
                     >
                       {showConfirm ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
                     </button>
@@ -358,7 +358,7 @@ const InstructorChangePassword = () => {
                     type="button"
                     onClick={handleChangePassword}
                     disabled={isLoading}
-                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-gradient-to-r from-[#043573] to-blue-900 text-white rounded-xl font-semibold hover:from-blue-900 hover:to-blue-900 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <>
@@ -375,7 +375,7 @@ const InstructorChangePassword = () => {
 
                   <Link
                     to="/instructor/forgot-password"
-                    className="w-full text-indigo-600 text-sm font-semibold hover:text-indigo-700 transition flex items-center justify-center gap-2"
+                    className="w-full text-[#043573] text-sm font-semibold hover:text-blue-900 transition flex items-center justify-center gap-2"
                   >
                     <FaArrowLeft size={12} />
                     Forgot Password?
@@ -383,22 +383,22 @@ const InstructorChangePassword = () => {
                 </div>
 
                 {/* Security Tips */}
-                <div className="mt-8 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
-                  <p className="text-xs font-semibold text-indigo-800 flex items-center gap-2 mb-2">
-                    <MdSecurity className="text-indigo-600" />
+                <div className="mt-8 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                  <p className="text-xs font-semibold text-blue-900 flex items-center gap-2 mb-2">
+                    <MdSecurity className="text-[#043573]" />
                     Security Tips for Instructors
                   </p>
-                  <ul className="text-xs text-gray-600 space-y-1.5">
+                  <ul className="text-xs text-slate-600 space-y-1.5">
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-400">•</span>
+                      <span className="text-blue-400">•</span>
                       Never share your password with anyone, including co-instructors
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-400">•</span>
+                      <span className="text-blue-400">•</span>
                       Use different passwords for your teaching and personal accounts
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-400">•</span>
+                      <span className="text-blue-400">•</span>
                       Enable two-factor authentication for extra security
                     </li>
                   </ul>
@@ -407,7 +407,7 @@ const InstructorChangePassword = () => {
             </div>
 
             {/* Right Illustration Section */}
-            <div className="lg:w-[45%] bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-8 flex flex-col items-center justify-center">
+            <div className="lg:w-[45%] bg-gradient-to-br from-blue-50 to-blue-100/50 p-8 flex flex-col items-center justify-center">
               <img 
                 src={CP}
                 alt="Instructor Security"
@@ -416,29 +416,29 @@ const InstructorChangePassword = () => {
               
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4">
-                  <MdSecurity className="text-indigo-600 text-lg" />
-                  <span className="text-sm font-semibold text-gray-700">Instructor Account Security</span>
+                  <MdSecurity className="text-[#043573] text-lg" />
+                  <span className="text-sm font-semibold text-slate-700">Instructor Account Security</span>
                 </div>
                 
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                <h3 className="text-2xl font-bold text-slate-800 mb-3">
                   Protect Your Courses
                 </h3>
                 
-                <p className="text-gray-600 text-sm leading-relaxed max-w-md">
+                <p className="text-slate-600 text-sm leading-relaxed max-w-md">
                   As an instructor, your account contains valuable course content and student data. Keep it secure with a strong password.
                 </p>
                 
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
+                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full" />
                     <span>Strong</span>
                   </div>
-                  <div className="w-px h-3 bg-gray-300" />
+                  <div className="w-px h-3 bg-slate-300" />
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-amber-500 rounded-full" />
                     <span>Medium</span>
                   </div>
-                  <div className="w-px h-3 bg-gray-300" />
+                  <div className="w-px h-3 bg-slate-300" />
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-rose-500 rounded-full" />
                     <span>Weak</span>

@@ -17,12 +17,12 @@ const defaultImage = S1;
 function Toast({ msg, type = "success", onClose }) {
   if (!msg) return null;
   return (
-    <div className="fixed top-5 right-5 z-[9999] bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl min-w-[280px] animate-fade-in">
+    <div className="fixed top-5 right-5 z-[9999] bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl min-w-[280px] animate-fade-in">
       {type === "success"
         ? <MdCheckCircle className="text-emerald-500 text-xl flex-shrink-0" />
         : <MdWarning className="text-amber-500 text-xl flex-shrink-0" />}
-      <span className="text-sm font-medium text-gray-800 flex-1">{msg}</span>
-      <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+      <span className="text-sm font-medium text-slate-800 flex-1">{msg}</span>
+      <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
     </div>
   );
 }
@@ -48,16 +48,16 @@ const StatCards = ({ courses }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
       {[
-        { label: "Total Courses", value: total, color: "text-violet-600", border: "border-t-violet-500", bg: "bg-violet-50", icon: "📚" },
+        { label: "Total Courses", value: total, color: "text-[#7c3aed]", border: "border-t-[#7c3aed]", bg: "bg-violet-50", icon: "📚" },
         { label: "Published", value: published, color: "text-emerald-600", border: "border-t-emerald-500", bg: "bg-emerald-50", icon: "✅" },
         { label: "Draft", value: draft, color: "text-amber-600", border: "border-t-amber-500", bg: "bg-amber-50", icon: "✎" },
         { label: "Archived", value: archived, color: "text-orange-600", border: "border-t-orange-500", bg: "bg-orange-50", icon: "🗄" },
       ].map(({ label, value, color, border, bg, icon }) => (
-        <div key={label} className={`bg-white rounded-xl border border-gray-200 ${border} border-t-2 p-4 shadow-sm flex items-center gap-3`}>
+        <div key={label} className={`bg-white rounded-xl border border-slate-200 ${border} border-t-2 p-4 shadow-sm flex items-center gap-3`}>
           <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>{icon}</div>
           <div>
             <div className={`text-2xl font-black ${color} leading-none`}>{value}</div>
-            <div className="text-xs text-gray-500 mt-0.5 font-medium">{label}</div>
+            <div className="text-xs text-slate-500 mt-0.5 font-medium">{label}</div>
           </div>
         </div>
       ))}
@@ -186,7 +186,7 @@ const InstructorCourses = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-5 font-sans">
+    <div className="min-h-screen bg-slate-50 p-5 font-sans">
       <style>{`
         @keyframes fadeIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
         .animate-fade-in { animation: fadeIn 0.18s ease; }
@@ -217,18 +217,18 @@ const InstructorCourses = () => {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4">
           <div>
-            <p className="text-xs text-gray-400 mb-1">
-              <Link to="/instructor/dashboard" className="hover:text-violet-600 transition">Dashboard</Link>
+            <p className="text-xs text-slate-400 mb-1">
+              <Link to="/instructor/dashboard" className="hover:text-[#7c3aed] transition">Dashboard</Link>
               <span className="mx-1.5">&gt;</span>
-              <span className="text-gray-600 font-medium">My Courses</span>
+              <span className="text-slate-600 font-medium">My Courses</span>
             </p>
-            <h1 className="text-xl font-bold text-gray-900 mt-2">My Courses</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage and track all your created courses.</p>
+            <h1 className="text-xl font-bold text-slate-900 mt-2">My Courses</h1>
+            <p className="text-sm text-slate-500 mt-1">Manage and track all your created courses.</p>
           </div>
           <button
             type="button"
             onClick={() => navigate("/instructor/create-course")}
-            className="flex items-center gap-2 h-10 px-5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition shadow-sm"
+            className="flex items-center gap-2 h-10 px-5 rounded-xl bg-[#7c3aed] text-white text-sm font-semibold hover:bg-violet-750 transition shadow-sm"
           >
             <FaPlus className="text-xs" /> Create New Course
           </button>
@@ -248,7 +248,7 @@ const InstructorCourses = () => {
         {/* ── Filter tabs + Sort ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
           {/* Status tabs */}
-          <div className="flex bg-white border border-gray-200 rounded-xl p-1 gap-1 overflow-x-auto w-full sm:w-auto">
+          <div className="flex bg-white border border-slate-200 rounded-xl p-1 gap-1 overflow-x-auto w-full sm:w-auto">
             {STATUS_TABS.map(({ key, label, count }) => (
               <button
                 key={key}
@@ -258,11 +258,11 @@ const InstructorCourses = () => {
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap
                   ${statusFilter === key
-                    ? "bg-violet-600 text-white shadow-sm"
-                    : "text-gray-500 hover:text-violet-600 hover:bg-violet-50"}`}
+                    ? "bg-[#7c3aed] text-white shadow-sm"
+                    : "text-slate-500 hover:text-[#7c3aed] hover:bg-violet-50"}`}
               >
                 {label}
-                <span className={`text-[10px] font-bold ${statusFilter === key ? "text-violet-200" : "text-gray-400"}`}>
+                <span className={`text-[10px] font-bold ${statusFilter === key ? "text-violet-250" : "text-slate-400"}`}>
                   {count}
                 </span>
               </button>
@@ -270,7 +270,7 @@ const InstructorCourses = () => {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <p className="text-xs text-gray-500 whitespace-nowrap">
+            <p className="text-xs text-slate-500 whitespace-nowrap">
               {loading ? "Loading..." : `${totalElements} courses`}
             </p>
             <select
@@ -279,7 +279,7 @@ const InstructorCourses = () => {
                 setSortBy(e.target.value);
                 setCurrentPage(0);
               }}
-              className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-xs font-medium outline-none focus:border-violet-400 transition"
+              className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium outline-none focus:border-blue-400 transition"
             >
               <option value="Popular">Sort: Popular</option>
               <option value="Latest">Sort: Latest</option>
@@ -291,21 +291,21 @@ const InstructorCourses = () => {
 
         {/* ── Course Grid ── */}
         {loading ? (
-          <div className="py-20 text-center text-gray-500">
-            <div className="w-10 h-10 border-4 border-t-violet-600 border-gray-200 rounded-full animate-spin mx-auto mb-4" />
+          <div className="py-20 text-center text-slate-500">
+            <div className="w-10 h-10 border-4 border-t-[#7c3aed] border-slate-200 rounded-full animate-spin mx-auto mb-4" />
             <p className="text-sm">Fetching courses…</p>
           </div>
         ) : courses.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border border-gray-200">
+          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200">
             <div className="text-5xl mb-3">📚</div>
-            <p className="text-sm font-semibold text-gray-500">
+            <p className="text-sm font-semibold text-slate-500">
               {statusFilter !== "ALL"
                 ? `No ${statusFilter.toLowerCase()} courses found`
                 : "No courses found"}
             </p>
             {statusFilter === "ALL" && (
               <button onClick={() => navigate("/instructor/create-course")}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition">
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#7c3aed] text-white text-sm font-bold rounded-xl hover:bg-violet-750 transition">
                 <FaPlus className="text-xs" /> Create your first course
               </button>
             )}
@@ -320,7 +320,7 @@ const InstructorCourses = () => {
                 <div
                   key={course.id}
                   className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200
-                    ${isArchived ? "border-orange-200 opacity-80" : "border-gray-200"}`}
+                    ${isArchived ? "border-orange-200 opacity-80" : "border-slate-200"}`}
                 >
                   {/* Thumbnail */}
                   <div className="relative">
@@ -341,42 +341,42 @@ const InstructorCourses = () => {
 
                   {/* Body */}
                   <div className="p-4">
-                    <h2 className="font-bold text-gray-900 text-sm leading-5 min-h-[38px] line-clamp-2 mb-2">
+                    <h2 className="font-bold text-slate-900 text-sm leading-5 min-h-[38px] line-clamp-2 mb-2">
                       {course.title}
                     </h2>
 
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-2 flex-wrap">
                       <span className="text-yellow-400">★</span>
                       <span>{course.averageRating || "0.0"} ({course.totalRatings || 0})</span>
                       {course.level && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] uppercase font-semibold">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] uppercase font-semibold">
                           {course.level}
                         </span>
                       )}
                       {course.language && (
-                        <span className="px-2 py-0.5 bg-violet-50 text-violet-600 rounded text-[10px] font-semibold">
+                        <span className="px-2 py-0.5 bg-violet-50 text-[#7c3aed] rounded text-[10px] font-semibold">
                           {course.language.toUpperCase()}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-gray-500 leading-5 min-h-[36px] line-clamp-2 mb-3">
+                    <p className="text-xs text-slate-500 leading-5 min-h-[36px] line-clamp-2 mb-3">
                       {course.shortDescription || "No description provided."}
                     </p>
 
                     {/* Price row */}
-                    <div className="flex items-center justify-between py-2.5 border-t border-b border-gray-100 mb-3">
+                    <div className="flex items-center justify-between py-2.5 border-t border-b border-slate-100 mb-3">
                       <div className="text-center">
-                        <p className="text-[10px] text-gray-400 mb-0.5">Price</p>
+                        <p className="text-[10px] text-slate-400 mb-0.5">Price</p>
                         {course.free ? (
                           <p className="text-sm font-bold text-emerald-600">Free</p>
                         ) : course.actualPrice && course.discountPrice ? (
                           <div className="flex flex-col items-center gap-0.5">
                             <div className="flex items-baseline gap-1">
-                              <span className="text-sm font-bold text-gray-900">
+                              <span className="text-sm font-bold text-slate-900">
                                 ₹{(Number(course.actualPrice) - Number(course.discountPrice)).toLocaleString()}
                               </span>
-                              <span className="text-[10px] text-gray-400 line-through">
+                              <span className="text-[10px] text-slate-400 line-through">
                                 ₹{Number(course.actualPrice).toLocaleString()}
                               </span>
                             </div>
@@ -385,14 +385,14 @@ const InstructorCourses = () => {
                             </span>
                           </div>
                         ) : (
-                          <p className="text-sm font-bold text-gray-800">
+                          <p className="text-sm font-bold text-slate-800">
                             {course.actualPrice ? `₹${Number(course.actualPrice).toLocaleString()}` : "—"}
                           </p>
                         )}
                       </div>
                       <div className="text-center">
-                        <p className="text-[10px] text-gray-400">Students</p>
-                        <p className="text-xs font-bold text-gray-800">{course.totalEnrollments || 0}</p>
+                        <p className="text-[10px] text-slate-400">Students</p>
+                        <p className="text-xs font-bold text-slate-800">{course.totalEnrollments || 0}</p>
                       </div>
                     </div>
 
@@ -400,13 +400,13 @@ const InstructorCourses = () => {
                     <div className="flex gap-2 mb-2">
                       <Link
                         to={`/instructor/course-builder/${course.slug}`}
-                        className="flex-1 h-8 rounded-lg border border-violet-300 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
+                        className="flex-1 h-8 rounded-lg border border-violet-300 text-[#7c3aed] text-xs font-semibold hover:bg-[#7c3aed] hover:text-white transition flex items-center justify-center gap-1"
                       >
                         <FaEye className="text-[10px]" /> View
                       </Link>
                       <Link
                         to={`/instructor/section-settings/${course.slug}`}
-                        className="flex-1 h-8 rounded-lg border border-violet-300 text-violet-600 text-xs font-semibold hover:bg-violet-600 hover:text-white transition flex items-center justify-center gap-1"
+                        className="flex-1 h-8 rounded-lg border border-violet-300 text-[#7c3aed] text-xs font-semibold hover:bg-[#7c3aed] hover:text-white transition flex items-center justify-center gap-1"
                       >
                         <FaEdit className="text-[10px]" /> Edit
                       </Link>
@@ -452,9 +452,9 @@ const InstructorCourses = () => {
               type="button"
               onClick={() => changePage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="w-9 h-9 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
+              className="w-9 h-9 rounded-lg bg-white border border-slate-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
             >
-              <FaChevronLeft className="text-xs text-gray-600" />
+              <FaChevronLeft className="text-xs text-slate-600" />
             </button>
 
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -475,8 +475,8 @@ const InstructorCourses = () => {
                   onClick={() => changePage(pageNum - 1)}
                   className={`w-9 h-9 rounded-lg text-sm font-semibold transition
                     ${currentPage === pageNum - 1
-                      ? "bg-violet-600 text-white shadow-sm"
-                      : "bg-white border border-gray-200 text-gray-600 hover:bg-violet-50 hover:border-violet-300"}`}
+                      ? "bg-[#7c3aed] text-white shadow-sm"
+                      : "bg-white border border-slate-200 text-slate-600 hover:bg-violet-50 hover:border-violet-300"}`}
                 >
                   {pageNum}
                 </button>
@@ -487,9 +487,9 @@ const InstructorCourses = () => {
               type="button"
               onClick={() => changePage(currentPage + 1)}
               disabled={currentPage === totalPages - 1}
-              className="w-9 h-9 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
+              className="w-9 h-9 rounded-lg bg-white border border-slate-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-300 transition"
             >
-              <FaChevronRight className="text-xs text-gray-600" />
+              <FaChevronRight className="text-xs text-slate-600" />
             </button>
           </div>
         )}

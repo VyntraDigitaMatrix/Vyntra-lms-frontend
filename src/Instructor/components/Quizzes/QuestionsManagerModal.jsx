@@ -160,13 +160,13 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
             <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-[#043573] to-blue-900 rounded-t-2xl flex-shrink-0">
                     <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
                         <MdListAlt className="text-white text-lg" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <h2 className="text-sm font-black text-white truncate">Manage Questions</h2>
-                        <p className="text-[11px] text-violet-200 mt-0.5 truncate">{quiz?.title} · {questions.length} question{questions.length !== 1 ? "s" : ""}</p>
+                        <p className="text-[11px] text-blue-200 mt-0.5 truncate">{quiz?.title} · {questions.length} question{questions.length !== 1 ? "s" : ""}</p>
                     </div>
                     <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30 transition flex-shrink-0">
                         <MdClose />
@@ -203,7 +203,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                                     />
                                 ) : (
                                     <div className="flex items-start gap-3">
-                                        <span className="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 bg-violet-100 text-violet-600">
+                                        <span className="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 bg-blue-100 text-[#043573]">
                                             {idx + 1}
                                         </span>
                                         <div className="flex-1 min-w-0">
@@ -213,7 +213,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                                         </div>
                                         <div className="flex items-center gap-1 flex-shrink-0">
                                             <button onClick={() => startEditQuestion(q)}
-                                                className="w-6 h-6 rounded-lg bg-violet-50 text-violet-500 hover:bg-violet-100 flex items-center justify-center transition">
+                                                className="w-6 h-6 rounded-lg bg-blue-50 text-[#043573] hover:bg-blue-100 flex items-center justify-center transition">
                                                 <MdEdit className="text-xs" />
                                             </button>
                                             <button onClick={() => handleDeleteQuestion(q)}
@@ -252,7 +252,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                                         />
                                     ) : (
                                         <button onClick={() => setAddingOptionForQuestionId(q.id)}
-                                            className="flex items-center gap-1.5 text-[11px] font-bold text-violet-600 hover:text-violet-700 transition">
+                                            className="flex items-center gap-1.5 text-[11px] font-bold text-[#043573] hover:text-blue-900 transition">
                                             <FaPlus className="text-[8px]" /> Add Option
                                         </button>
                                     )}
@@ -271,7 +271,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                             <QuestionEditor question={newQ} onChange={setNewQ} />
                             <button type="button" onClick={handleAddQuestion}
                                 disabled={addingQuestion || !newQ.question.trim()}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#043573] hover:bg-blue-900 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition">
                                 {addingQuestion
                                     ? <><AiOutlineLoading3Quarters className="animate-spin text-xs" /> Adding question…</>
                                     : <><FaPlus className="text-[9px]" /> Add Question</>}
@@ -289,7 +289,7 @@ const QuestionsManagerModal = ({ quiz, onClose }) => {
                         </div>
                     )}
                     <div className="flex justify-end">
-                        <button onClick={onClose} className="px-5 py-2 text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-xl transition">
+                        <button onClick={onClose} className="px-5 py-2 text-xs font-bold text-white bg-[#043573] hover:bg-blue-900 rounded-xl transition">
                             Done
                         </button>
                     </div>

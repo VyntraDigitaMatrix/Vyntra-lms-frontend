@@ -183,21 +183,21 @@ export default function Assignments() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-8 py-5">
+      <div className="bg-white border-b border-slate-100 px-8 py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#7c3aed] flex items-center justify-center">
               <MdOutlineAssignment className="text-white text-xl" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Assignments</h1>
-              <p className="text-sm text-gray-400">Manage lesson assignments and submissions</p>
+              <h1 className="text-xl font-bold text-slate-900">Assignments</h1>
+              <p className="text-sm text-slate-400">Manage lesson assignments and submissions</p>
             </div>
           </div>
           <button onClick={() => { setEditData(null); setModalOpen(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold rounded-xl transition shadow-sm">
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#7c3aed] hover:bg-violet-750 text-white text-sm font-bold rounded-xl transition shadow-sm">
             <MdAdd size={18} /> New Assignment
           </button>
         </div>
@@ -205,13 +205,13 @@ export default function Assignments() {
 
       <div className="px-8 py-6 space-y-6">
         {/* Lesson Picker */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
-            <MdFilterList className="text-violet-500" /> Browse Assignments by Lesson
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <p className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5">
+            <MdFilterList className="text-[#7c3aed]" /> Browse Assignments by Lesson
           </p>
           <LessonPicker onSelect={handleLessonSelect} />
           {selectedLesson && (
-            <p className="mt-3 text-xs text-violet-600 font-semibold">
+            <p className="mt-3 text-xs text-[#7c3aed] font-semibold">
               Showing: <span className="font-bold">{selectedLesson.title}</span>
             </p>
           )}
@@ -229,44 +229,44 @@ export default function Assignments() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Total", val: stats.total, color: "text-gray-900", bg: "bg-white" },
+            { label: "Total", val: stats.total, color: "text-slate-900", bg: "bg-white" },
             { label: "Published", val: stats.published, color: "text-emerald-700", bg: "bg-emerald-50" },
             { label: "Draft", val: stats.draft, color: "text-amber-700", bg: "bg-amber-50" },
           ].map(s => (
-            <div key={s.label} className={`${s.bg} rounded-2xl border border-gray-100 p-5 text-center shadow-sm`}>
+            <div key={s.label} className={`${s.bg} rounded-2xl border border-slate-100 p-5 text-center shadow-sm`}>
               <p className={`text-3xl font-black ${s.color}`}>{s.val}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+              <p className="text-sm text-slate-500 mt-1">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
-          <div className="flex-1 min-w-[200px] flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-100 transition">
-            <MdSearch className="text-gray-400 text-lg flex-shrink-0" />
+          <div className="flex-1 min-w-[200px] flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-100 transition">
+            <MdSearch className="text-slate-400 text-lg flex-shrink-0" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search assignments..."
-              className="flex-1 text-sm text-gray-800 outline-none bg-transparent" />
+              className="flex-1 text-sm text-slate-800 outline-none bg-transparent" />
           </div>
           <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition">
+            className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition">
             <option value="">All Types</option>
             {ASSIGNMENT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
           <button onClick={() => loadAssignments(selectedLesson?.slug)}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 bg-white rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition">
+            className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 bg-white rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition">
             <MdRefresh size={16} /> Refresh
           </button>
         </div>
 
         {/* Content */}
         {loading ? (
-          <div className="flex justify-center py-20"><AiOutlineLoading3Quarters className="animate-spin text-violet-500 text-3xl" /></div>
+          <div className="flex justify-center py-20"><AiOutlineLoading3Quarters className="animate-spin text-[#7c3aed] text-3xl" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <MdOutlineAssignment className="text-gray-200 text-6xl mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">No assignments found</p>
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <MdOutlineAssignment className="text-slate-200 text-6xl mx-auto mb-3" />
+            <p className="text-slate-500 font-medium">No assignments found</p>
             <button onClick={() => { setEditData(null); setModalOpen(true); }}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition">
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#7c3aed] text-white text-sm font-semibold rounded-xl hover:bg-violet-750 transition">
               <MdAdd /> Create First Assignment
             </button>
           </div>

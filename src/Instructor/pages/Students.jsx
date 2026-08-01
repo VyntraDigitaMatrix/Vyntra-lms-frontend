@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import { instructorCourseApi, instructorStudentApi } from "../auth/api";
 
-const BRAND = "#7c3aed"; // violet, matching original accent
+const BRAND = "#7c3aed"; // violet, matching new accent
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
@@ -18,15 +18,15 @@ const getProgressColor = (progress) => {
 };
 
 const statusBadge = (status) => {
-  if (!status) return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-500">Not enrolled</span>;
+  if (!status) return <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-500">Not enrolled</span>;
   const s = status.toUpperCase();
   if (s === 'ACTIVE' || s === 'ENROLLED') {
     return <span className="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1 w-fit"><FaCheckCircle className="text-xs" /> {status}</span>;
   }
   if (s === 'COMPLETED') {
-    return <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700 flex items-center gap-1 w-fit"><FaGraduationCap className="text-xs" /> {status}</span>;
+    return <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 flex items-center gap-1 w-fit"><FaGraduationCap className="text-xs" /> {status}</span>;
   }
-  return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">{status}</span>;
+  return <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-600">{status}</span>;
 };
 
 const initials = (name = '') => {
@@ -112,55 +112,55 @@ function Students() {
   const enrolledCount = students.filter((s) => s.enrollmentStatus).length;
 
   const stats = [
-    { title: "Students on this page", value: students.length, icon: <FaUserGraduate />, color: "text-violet-600", bg: "bg-violet-50", accent: "border-l-violet-500", sub: `${totalElements} total across all pages` },
+    { title: "Students on this page", value: students.length, icon: <FaUserGraduate />, color: "text-[#7c3aed]", bg: "bg-violet-50", accent: "border-l-[#7c3aed]", sub: `${totalElements} total across all pages` },
     { title: "Enrolled", value: enrolledCount, icon: <FaCheckCircle />, color: "text-emerald-600", bg: "bg-emerald-50", accent: "border-l-emerald-500", sub: "with an active enrollment record" },
     { title: "Avg. Progress", value: `${avgProgress}%`, icon: <FaGraduationCap />, color: "text-amber-600", bg: "bg-amber-50", accent: "border-l-amber-500", sub: "across students on this page" },
-    { title: "Completed", value: completedCount, icon: <FaGraduationCap />, color: "text-blue-600", bg: "bg-blue-50", accent: "border-l-blue-500", sub: "reached 100% or marked complete" },
+    { title: "Completed", value: completedCount, icon: <FaGraduationCap />, color: "text-indigo-600", bg: "bg-indigo-50", accent: "border-l-indigo-500", sub: "reached 100% or marked complete" },
   ];
 
   return (
-    <div className="p-3 sm:p-5 md:p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="p-3 sm:p-5 md:p-6 min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <div className="mb-3">
-          <Link to="/instructor/dashboard" className="text-sm text-gray-400 hover:text-violet-600 transition">
+          <Link to="/instructor/dashboard" className="text-sm text-slate-400 hover:text-[#7c3aed] transition">
             Dashboard
           </Link>
-          <span className="mx-2 text-gray-400">&gt;</span>
-          <span className="text-sm font-semibold text-gray-800">Students</span>
+          <span className="mx-2 text-slate-400">&gt;</span>
+          <span className="text-sm font-semibold text-slate-800">Students</span>
         </div>
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Student Management</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-xl font-bold text-slate-800">Student Management</h1>
+            <p className="text-sm text-slate-500 mt-1">
               View enrolled students and their progress, course by course
             </p>
           </div>
         </div>
 
         {/* Course Selector */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-4 mb-6">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Select a course</label>
+        <div className="bg-white rounded-xl shadow-md border border-slate-100 p-4 mb-6">
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Select a course</label>
           {coursesLoading ? (
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
               <FaSpinner className="animate-spin" /> Loading your courses...
             </div>
           ) : courses.length === 0 ? (
-            <p className="text-sm text-gray-400">No courses found for your account.</p>
+            <p className="text-sm text-slate-400">No courses found for your account.</p>
           ) : (
             <div className="relative max-w-md">
               <select
                 value={selectedCourse?.id || ''}
                 onChange={(e) => setSelectedCourse(courses.find((c) => c.id === e.target.value))}
-                className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-sm appearance-none bg-white cursor-pointer font-medium text-gray-700"
+                className="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] text-sm appearance-none bg-white cursor-pointer font-medium text-slate-700"
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>{c.title}</option>
                 ))}
               </select>
-              <FaChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none" />
+              <FaChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
             </div>
           )}
         </div>
@@ -170,37 +170,37 @@ function Students() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {stats.map((stat, idx) => (
-                <div key={idx} className={`bg-white rounded-xl border border-gray-100 border-l-4 ${stat.accent} p-4 hover:shadow-md transition`}>
+                <div key={idx} className={`bg-white rounded-xl border border-slate-100 border-l-4 ${stat.accent} p-4 hover:shadow-md transition`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className={`w-9 h-9 ${stat.bg} rounded-lg flex items-center justify-center ${stat.color}`}>
                       {stat.icon}
                     </div>
                   </div>
-                  <p className="text-xl font-semibold text-gray-800 leading-none mb-1">{stat.value}</p>
-                  <p className="text-xs text-gray-500 mb-2">{stat.title}</p>
-                  <p className="text-xs text-gray-400 border-t border-gray-100 pt-2 mt-1">{stat.sub}</p>
+                  <p className="text-xl font-semibold text-slate-800 leading-none mb-1">{stat.value}</p>
+                  <p className="text-xs text-slate-500 mb-2">{stat.title}</p>
+                  <p className="text-xs text-slate-400 border-t border-slate-100 pt-2 mt-1">{stat.sub}</p>
                 </div>
               ))}
             </div>
 
             {/* Search Bar */}
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 p-4 mb-6">
+            <div className="bg-white rounded-xl shadow-md border border-slate-100 p-4 mb-6">
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                 <input
                   type="text"
                   placeholder="Search by name, email, or student code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] text-sm"
                 />
               </div>
             </div>
 
             {/* Students Table */}
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
               {studentsLoading ? (
-                <div className="py-16 text-center text-gray-400">
+                <div className="py-16 text-center text-slate-400">
                   <FaSpinner className="animate-spin text-2xl mx-auto mb-2" />
                   <p className="text-sm">Loading students...</p>
                 </div>
@@ -211,56 +211,56 @@ function Students() {
                 </div>
               ) : filteredStudents.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaUserGraduate className="text-gray-400 text-2xl" />
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FaUserGraduate className="text-slate-400 text-2xl" />
                   </div>
-                  <p className="text-gray-500">No students found</p>
-                  <p className="text-sm text-gray-400 mt-1">Try adjusting your search, or check another course</p>
+                  <p className="text-slate-500">No students found</p>
+                  <p className="text-sm text-slate-400 mt-1">Try adjusting your search, or check another course</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-100">
+                    <thead className="bg-slate-50 border-b border-slate-100">
                       <tr>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</th>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Progress</th>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Enrolled</th>
-                        <th className="px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Completed</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Student</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Progress</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Enrolled</th>
+                        <th className="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Completed</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-slate-100">
                       {filteredStudents.map((student) => (
-                        <tr key={student.studentId} className="hover:bg-gray-50/50 transition">
+                        <tr key={student.studentId} className="hover:bg-slate-50/50 transition">
                           <td className="px-4 py-4 align-middle min-w-[200px]">
                             <div className="flex items-center gap-3">
                               {student.profileImage ? (
                                 <img
                                   src={student.profileImage}
                                   alt={student.fullName}
-                                  className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shrink-0"
+                                  className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 shrink-0"
                                 />
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-900 flex items-center justify-center font-bold text-xs shrink-0">
                                   {initials(student.fullName)}
                                 </div>
                               )}
                               <div>
-                                <p className="text-sm font-semibold text-gray-800">{student.fullName}</p>
-                                <p className="text-xs text-gray-400">{student.studentCode}</p>
+                                <p className="text-sm font-semibold text-slate-800">{student.fullName}</p>
+                                <p className="text-xs text-slate-400">{student.studentCode}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
                             <div className="space-y-1">
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <FaEnvelope className="text-gray-300 text-xs flex-shrink-0" />
+                              <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                                <FaEnvelope className="text-slate-300 text-xs flex-shrink-0" />
                                 <span className="truncate max-w-[180px]">{student.email}</span>
                               </div>
                               {student.mobileNumber && (
-                                <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                  <FaPhone className="text-gray-300 text-[10px] flex-shrink-0" />
+                                <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                  <FaPhone className="text-slate-300 text-[10px] flex-shrink-0" />
                                   {student.mobileNumber}
                                 </div>
                               )}
@@ -268,10 +268,10 @@ function Students() {
                           </td>
                           <td className="px-4 py-4">
                             <div className="w-32">
-                              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                              <div className="flex justify-between text-xs text-slate-500 mb-1">
                                 <span>{student.progressPercentage ?? 0}%</span>
                               </div>
-                              <div className="w-full bg-gray-100 rounded-full h-2">
+                              <div className="w-full bg-slate-100 rounded-full h-2">
                                 <div
                                   className={`${getProgressColor(student.progressPercentage || 0)} h-2 rounded-full transition-all duration-500`}
                                   style={{ width: `${student.progressPercentage || 0}%` }}
@@ -283,13 +283,13 @@ function Students() {
                             {statusBadge(student.enrollmentStatus)}
                           </td>
                           <td className="px-4 py-4">
-                            <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                              <FaClock className="text-gray-300 text-xs" />
+                            <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                              <FaClock className="text-slate-300 text-xs" />
                               {formatDate(student.enrolledAt)}
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <span className="text-sm text-gray-500">{formatDate(student.completedAt)}</span>
+                            <span className="text-sm text-slate-500">{formatDate(student.completedAt)}</span>
                           </td>
                         </tr>
                       ))}
@@ -300,22 +300,22 @@ function Students() {
 
               {/* Pagination — driven by real API page data */}
               {!studentsLoading && !error && totalElements > 0 && (
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <p className="text-sm text-gray-500">
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <p className="text-sm text-slate-500">
                     Page {currentPage + 1} of {totalPages} · {totalElements} students total
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
                       disabled={currentPage === 0}
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
                     >
                       <FaChevronLeft className="text-xs" /> Previous
                     </button>
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
                       disabled={currentPage >= totalPages - 1}
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
                     >
                       Next <FaChevronRight className="text-xs" />
                     </button>

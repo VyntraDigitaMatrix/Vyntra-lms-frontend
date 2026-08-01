@@ -28,16 +28,16 @@ const DashboardLayout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen bg-white overflow-hidden">
+    <div className="h-screen bg-slate-50 overflow-hidden font-sans antialiased">
       <div className="flex h-full">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           toggleSidebar={toggleSidebar}
         />
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <Navbar />
-          <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
+          <main className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/60">
             {children}
           </main>
         </div>

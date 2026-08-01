@@ -93,19 +93,19 @@ const STATUS = {
   Published: { pill: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500' },
   Draft:     { pill: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-400'  },
   Processing:{ pill: 'bg-blue-50 text-blue-700 border border-blue-200',          dot: 'bg-blue-500 animate-pulse' },
-  Archived:  { pill: 'bg-gray-100 text-gray-500 border border-gray-200',         dot: 'bg-gray-400'   },
+  Archived:  { pill: 'bg-slate-100 text-slate-500 border border-slate-200',         dot: 'bg-slate-400'   },
 };
 
 /* ─── STAT CARD ─────────────────────────────────────────── */
 function StatCard({ label, value, Icon, color }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
       <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
         <Icon size={20} />
       </div>
       <div>
-        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>
-        <p className="text-2xl font-bold text-gray-800 mt-0.5 leading-none">{value}</p>
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</p>
+        <p className="text-2xl font-bold text-slate-800 mt-0.5 leading-none">{value}</p>
       </div>
     </div>
   );
@@ -117,13 +117,13 @@ function RecordingCard({ rec, selected, onSelect, onPlay, onDelete }) {
   const s = STATUS[rec.status] || STATUS.Archived;
 
   return (
-    <div className={`group bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${selected ? 'border-violet-400 ring-2 ring-violet-100' : 'border-gray-100 hover:border-gray-200'}`}>
+    <div className={`group bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${selected ? 'border-violet-400 ring-2 ring-violet-100' : 'border-slate-100 hover:border-slate-200'}`}>
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-gray-100 overflow-hidden cursor-pointer" onClick={() => onPlay(rec)}>
+      <div className="relative aspect-video bg-slate-100 overflow-hidden cursor-pointer" onClick={() => onPlay(rec)}>
         <img src={rec.thumbnail} alt={rec.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
           <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-            <Play size={18} className="text-violet-600 ml-0.5" />
+            <Play size={18} className="text-[#7c3aed] ml-0.5" />
           </div>
         </div>
         {/* Duration badge */}
@@ -134,7 +134,7 @@ function RecordingCard({ rec, selected, onSelect, onPlay, onDelete }) {
         <div className="absolute top-2 left-2">
           <div
             onClick={e => { e.stopPropagation(); onSelect(rec.id); }}
-            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected ? 'bg-violet-500 border-violet-500' : 'bg-white/80 border-gray-300 opacity-0 group-hover:opacity-100'}`}
+            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected ? 'bg-[#7c3aed] border-[#7c3aed]' : 'bg-white/80 border-slate-300 opacity-0 group-hover:opacity-100'}`}
           >
             {selected && <Check size={11} className="text-white" />}
           </div>
@@ -148,28 +148,28 @@ function RecordingCard({ rec, selected, onSelect, onPlay, onDelete }) {
 
       {/* Info */}
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 text-sm leading-snug mb-1 line-clamp-2">{rec.title}</h3>
-        <p className="text-xs text-violet-600 font-medium mb-3 truncate">{rec.course}</p>
+        <h3 className="font-semibold text-slate-800 text-sm leading-snug mb-1 line-clamp-2">{rec.title}</h3>
+        <p className="text-xs text-[#7c3aed] font-medium mb-3 truncate">{rec.course}</p>
 
-        <div className="flex items-center gap-3 text-xs text-gray-400 mb-4 flex-wrap">
+        <div className="flex items-center gap-3 text-xs text-slate-400 mb-4 flex-wrap">
           <span className="flex items-center gap-1"><Calendar size={12} />{rec.date}</span>
           <span className="flex items-center gap-1"><Users size={12} />{rec.students}</span>
           <span className="flex items-center gap-1"><Eye size={12} />{rec.views} views</span>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <span className="text-xs text-gray-400">{rec.size}</span>
+        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+          <span className="text-xs text-slate-400">{rec.size}</span>
           <div className="flex items-center gap-1">
-            <button onClick={() => onPlay(rec)} className="p-1.5 rounded-lg hover:bg-violet-50 text-gray-400 hover:text-violet-600 transition-colors" title="Play">
+            <button onClick={() => onPlay(rec)} className="p-1.5 rounded-lg hover:bg-violet-50 text-slate-400 hover:text-[#7c3aed] transition-colors" title="Play">
               <Play size={14} />
             </button>
-            <button className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors" title="Download">
+            <button className="p-1.5 rounded-lg hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-colors" title="Download">
               <Download size={14} />
             </button>
-            <button className="p-1.5 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600 transition-colors" title="Edit">
+            <button className="p-1.5 rounded-lg hover:bg-green-50 text-slate-400 hover:text-green-600 transition-colors" title="Edit">
               <Edit size={14} />
             </button>
-            <button onClick={() => onDelete(rec.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+            <button onClick={() => onDelete(rec.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Delete">
               <Trash2 size={14} />
             </button>
           </div>
@@ -185,49 +185,49 @@ function RecordingRow({ rec, selected, onSelect, onPlay, onDelete }) {
   const s = STATUS[rec.status] || STATUS.Archived;
 
   return (
-    <tr className={`border-b border-gray-100 hover:bg-gray-50/60 transition-colors ${selected ? 'bg-violet-50/50' : ''}`}>
+    <tr className={`border-b border-slate-100 hover:bg-slate-50/60 transition-colors ${selected ? 'bg-violet-50/50' : ''}`}>
       <td className="pl-4 pr-2 py-3">
         <div
           onClick={() => onSelect(rec.id)}
-          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected ? 'bg-violet-500 border-violet-500' : 'border-gray-300 hover:border-violet-400'}`}
+          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected ? 'bg-[#7c3aed] border-[#7c3aed]' : 'border-slate-300 hover:border-violet-400'}`}
         >
           {selected && <Check size={11} className="text-white" />}
         </div>
       </td>
       <td className="px-3 py-3">
         <div className="flex items-center gap-3">
-          <div className="relative w-[72px] h-[40px] rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 cursor-pointer" onClick={() => onPlay(rec)}>
+          <div className="relative w-[72px] h-[40px] rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 cursor-pointer" onClick={() => onPlay(rec)}>
             <img src={rec.thumbnail} alt={rec.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/0 hover:bg-black/40 flex items-center justify-center transition-colors">
               <Play size={12} className="text-white opacity-0 hover:opacity-100" />
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-800 truncate max-w-[180px]">{rec.title}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{rec.size}</p>
+            <p className="text-sm font-semibold text-slate-800 truncate max-w-[180px]">{rec.title}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{rec.size}</p>
           </div>
         </div>
       </td>
       <td className="px-3 py-3 hidden md:table-cell">
-        <p className="text-sm text-violet-600 font-medium truncate max-w-[140px]">{rec.course}</p>
+        <p className="text-sm text-[#7c3aed] font-medium truncate max-w-[140px]">{rec.course}</p>
       </td>
       <td className="px-3 py-3 hidden lg:table-cell">
-        <p className="text-sm text-gray-700">{rec.date}</p>
-        <p className="text-xs text-gray-400">{rec.time}</p>
+        <p className="text-sm text-slate-700">{rec.date}</p>
+        <p className="text-xs text-slate-400">{rec.time}</p>
       </td>
       <td className="px-3 py-3 hidden sm:table-cell">
-        <span className="flex items-center gap-1.5 text-sm text-gray-600">
-          <Clock size={13} className="text-gray-400" />{rec.duration}
+        <span className="flex items-center gap-1.5 text-sm text-slate-600">
+          <Clock size={13} className="text-slate-400" />{rec.duration}
         </span>
       </td>
       <td className="px-3 py-3 hidden md:table-cell">
-        <span className="flex items-center gap-1.5 text-sm text-gray-600">
-          <Users size={13} className="text-gray-400" />{rec.students}
+        <span className="flex items-center gap-1.5 text-sm text-slate-600">
+          <Users size={13} className="text-slate-400" />{rec.students}
         </span>
       </td>
       <td className="px-3 py-3 hidden lg:table-cell">
-        <span className="flex items-center gap-1.5 text-sm text-gray-600">
-          <Eye size={13} className="text-gray-400" />{rec.views}
+        <span className="flex items-center gap-1.5 text-sm text-slate-600">
+          <Eye size={13} className="text-slate-400" />{rec.views}
         </span>
       </td>
       <td className="px-3 py-3">
@@ -238,10 +238,10 @@ function RecordingRow({ rec, selected, onSelect, onPlay, onDelete }) {
       </td>
       <td className="pl-3 pr-4 py-3 text-right">
         <div className="flex items-center justify-end gap-1">
-          <button onClick={() => onPlay(rec)} className="p-1.5 rounded-lg hover:bg-violet-50 text-gray-400 hover:text-violet-600 transition-colors" title="Play"><Play size={14} /></button>
-          <button className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors" title="Download"><Download size={14} /></button>
-          <button className="p-1.5 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600 transition-colors" title="Edit"><Edit size={14} /></button>
-          <button onClick={() => onDelete(rec.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 size={14} /></button>
+          <button onClick={() => onPlay(rec)} className="p-1.5 rounded-lg hover:bg-violet-50 text-slate-400 hover:text-[#7c3aed] transition-colors" title="Play"><Play size={14} /></button>
+          <button className="p-1.5 rounded-lg hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-colors" title="Download"><Download size={14} /></button>
+          <button className="p-1.5 rounded-lg hover:bg-green-50 text-slate-400 hover:text-green-600 transition-colors" title="Edit"><Edit size={14} /></button>
+          <button onClick={() => onDelete(rec.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 size={14} /></button>
         </div>
       </td>
     </tr>
@@ -255,17 +255,17 @@ function VideoModal({ rec, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-3xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-800 text-sm truncate">{rec.title}</h3>
-            <p className="text-xs text-violet-600 mt-0.5">{rec.course}</p>
+            <h3 className="font-semibold text-slate-800 text-sm truncate">{rec.title}</h3>
+            <p className="text-xs text-[#7c3aed] mt-0.5">{rec.course}</p>
           </div>
-          <button onClick={onClose} className="ml-4 p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+          <button onClick={onClose} className="ml-4 p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0">
             <X size={18} />
           </button>
         </div>
         {/* Thumbnail placeholder (no real video src) */}
-        <div className="relative bg-gray-900 aspect-video flex items-center justify-center">
+        <div className="relative bg-slate-900 aspect-video flex items-center justify-center">
           <img src={rec.thumbnail} alt={rec.title} className="w-full h-full object-cover opacity-40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/50 flex items-center justify-center backdrop-blur-sm">
@@ -278,10 +278,10 @@ function VideoModal({ rec, onClose }) {
         </div>
         {/* Meta */}
         <div className="px-5 py-4 flex items-center gap-6 flex-wrap">
-          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Calendar size={14} className="text-gray-400" />{rec.date}</span>
-          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Clock size={14} className="text-gray-400" />{rec.duration}</span>
-          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Users size={14} className="text-gray-400" />{rec.students} students</span>
-          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Eye size={14} className="text-gray-400" />{rec.views} views</span>
+          <span className="flex items-center gap-1.5 text-sm text-slate-500"><Calendar size={14} className="text-slate-400" />{rec.date}</span>
+          <span className="flex items-center gap-1.5 text-sm text-slate-500"><Clock size={14} className="text-slate-400" />{rec.duration}</span>
+          <span className="flex items-center gap-1.5 text-sm text-slate-500"><Users size={14} className="text-slate-400" />{rec.students} students</span>
+          <span className="flex items-center gap-1.5 text-sm text-slate-500"><Eye size={14} className="text-slate-400" />{rec.views} views</span>
           <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${STATUS[rec.status]?.pill}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${STATUS[rec.status]?.dot}`} />
             {rec.status}
@@ -289,13 +289,13 @@ function VideoModal({ rec, onClose }) {
         </div>
         {/* Actions */}
         <div className="px-5 pb-5 flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#7c3aed] text-white rounded-xl text-sm font-medium hover:bg-violet-750 transition-colors">
             <Download size={15} /> Download
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition-colors">
             <Share2 size={15} /> Share
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition-colors">
             <Edit size={15} /> Edit
           </button>
         </div>
@@ -332,7 +332,7 @@ export default function Recordings() {
   const published    = data.filter(r => r.status === 'Published').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-5 font-sans">
+    <div className="min-h-screen bg-slate-50 p-5 font-sans">
       <VideoModal rec={playing} onClose={() => setPlaying(null)} />
 
       <div className="max-w-7xl mx-auto space-y-5">
@@ -340,14 +340,14 @@ export default function Recordings() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Recordings</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Manage and share your course session recordings</p>
+            <h1 className="text-2xl font-bold text-slate-900">Recordings</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Manage and share your course session recordings</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
               <Download size={15} /> Export
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors shadow-sm shadow-violet-200">
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#7c3aed] text-white rounded-xl text-sm font-medium hover:bg-violet-750 transition-colors shadow-sm shadow-violet-200">
               <Plus size={16} /> New Recording
             </button>
           </div>
@@ -355,23 +355,23 @@ export default function Recordings() {
 
         {/* ── Stats ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard label="Total Recordings" value={data.length}      Icon={Video}      color="bg-violet-50 text-violet-600" />
+          <StatCard label="Total Recordings" value={data.length}      Icon={Video}      color="bg-violet-50 text-[#7c3aed]" />
           <StatCard label="Published"         value={published}        Icon={BookOpen}    color="bg-emerald-50 text-emerald-600" />
-          <StatCard label="Total Views"       value={totalViews.toLocaleString()} Icon={TrendingUp} color="bg-blue-50 text-blue-600" />
+          <StatCard label="Total Views"       value={totalViews.toLocaleString()} Icon={TrendingUp} color="bg-violet-50 text-violet-600" />
           <StatCard label="Students Enrolled" value={totalStudents}    Icon={Users}       color="bg-amber-50 text-amber-600" />
         </div>
 
         {/* ── Toolbar ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {/* Search */}
           <div className="relative flex-1 w-full sm:w-auto">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search recordings or courses…"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition"
             />
           </div>
 
@@ -380,19 +380,19 @@ export default function Recordings() {
             <div className="relative">
               <button
                 onClick={() => setFilterOpen(o => !o)}
-                className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
               >
                 <Filter size={14} />
                 {statusFilter === 'All' ? 'Filter' : statusFilter}
                 <ChevronDown size={13} />
               </button>
               {filterOpen && (
-                <div className="absolute right-0 top-10 bg-white border border-gray-100 rounded-xl shadow-lg py-1 w-40 z-20">
+                <div className="absolute right-0 top-10 bg-white border border-slate-100 rounded-xl shadow-lg py-1 w-40 z-20">
                   {FILTERS.map(f => (
                     <button
                       key={f}
                       onClick={() => { setStatusFilter(f); setFilterOpen(false); }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2 ${statusFilter === f ? 'text-violet-600 bg-violet-50 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2 ${statusFilter === f ? 'text-[#7c3aed] bg-violet-50 font-medium' : 'text-slate-700 hover:bg-slate-50'}`}
                     >
                       {statusFilter === f && <Check size={12} />}
                       {statusFilter !== f && <span className="w-3" />}
@@ -404,17 +404,17 @@ export default function Recordings() {
             </div>
 
             {/* View toggle */}
-            <div className="flex items-center bg-gray-100 rounded-xl p-0.5 gap-0.5">
+            <div className="flex items-center bg-slate-100 rounded-xl p-0.5 gap-0.5">
               <button
                 onClick={() => setView('grid')}
-                className={`p-2 rounded-lg transition-colors ${view === 'grid' ? 'bg-white shadow-sm text-violet-600' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded-lg transition-colors ${view === 'grid' ? 'bg-white shadow-sm text-[#7c3aed]' : 'text-slate-400 hover:text-slate-600'}`}
                 title="Grid view"
               >
                 <LayoutGrid size={15} />
               </button>
               <button
                 onClick={() => setView('list')}
-                className={`p-2 rounded-lg transition-colors ${view === 'list' ? 'bg-white shadow-sm text-violet-600' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded-lg transition-colors ${view === 'list' ? 'bg-white shadow-sm text-[#7c3aed]' : 'text-slate-400 hover:text-slate-600'}`}
                 title="List view"
               >
                 <List size={15} />
@@ -425,7 +425,7 @@ export default function Recordings() {
 
         {/* ── Bulk action bar ── */}
         {selected.length > 0 && (
-          <div className="bg-violet-600 text-white rounded-2xl px-5 py-3 flex items-center gap-4 shadow-md shadow-violet-200">
+          <div className="bg-[#7c3aed] text-white rounded-2xl px-5 py-3 flex items-center gap-4 shadow-md shadow-violet-200">
             <span className="text-sm font-medium">{selected.length} recording{selected.length > 1 ? 's' : ''} selected</span>
             <div className="flex gap-2 ml-auto">
               <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
@@ -443,12 +443,12 @@ export default function Recordings() {
 
         {/* ── Content ── */}
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-20 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-              <Video size={28} className="text-gray-300" />
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm py-20 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+              <Video size={28} className="text-slate-300" />
             </div>
-            <p className="text-gray-500 font-medium text-sm">No recordings found</p>
-            <p className="text-gray-400 text-xs mt-1">Try adjusting your search or filters</p>
+            <p className="text-slate-500 font-medium text-sm">No recordings found</p>
+            <p className="text-slate-400 text-xs mt-1">Try adjusting your search or filters</p>
           </div>
         ) : view === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -464,21 +464,21 @@ export default function Recordings() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto scrollbar-hide">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                  <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="pl-4 pr-2 py-3">
                       <div
                         onClick={toggleAll}
-                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected.length === filtered.length && filtered.length > 0 ? 'bg-violet-500 border-violet-500' : 'border-gray-300 hover:border-violet-400'}`}
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors ${selected.length === filtered.length && filtered.length > 0 ? 'bg-[#7c3aed] border-[#7c3aed]' : 'border-slate-300 hover:border-violet-400'}`}
                       >
                         {selected.length === filtered.length && filtered.length > 0 && <Check size={11} className="text-white" />}
                       </div>
                     </th>
                     {['Recording','Course','Date & Time','Duration','Students','Views','Status','Actions'].map(h => (
-                      <th key={h} className={`px-3 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider ${h === 'Course' ? 'hidden md:table-cell' : h === 'Date & Time' ? 'hidden lg:table-cell' : h === 'Duration' ? 'hidden sm:table-cell' : h === 'Students' ? 'hidden md:table-cell' : h === 'Views' ? 'hidden lg:table-cell' : ''} ${h === 'Actions' ? 'text-right' : ''}`}>
+                      <th key={h} className={`px-3 py-3 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider ${h === 'Course' ? 'hidden md:table-cell' : h === 'Date & Time' ? 'hidden lg:table-cell' : h === 'Duration' ? 'hidden sm:table-cell' : h === 'Students' ? 'hidden md:table-cell' : h === 'Views' ? 'hidden lg:table-cell' : ''} ${h === 'Actions' ? 'text-right' : ''}`}>
                         {h}
                       </th>
                     ))}
@@ -500,13 +500,13 @@ export default function Recordings() {
             </div>
 
             {/* Pagination */}
-            <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-              <p className="text-xs text-gray-400">Showing {filtered.length} of {data.length} recordings</p>
+            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <p className="text-xs text-slate-400">Showing {filtered.length} of {data.length} recordings</p>
               <div className="flex items-center gap-1">
-                <button className="px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed">Previous</button>
-                <button className="px-3 py-1 text-xs bg-violet-600 text-white rounded-lg">1</button>
-                <button className="px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">2</button>
-                <button className="px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Next</button>
+                <button className="px-3 py-1 text-xs border border-slate-200 rounded-lg text-slate-400 cursor-not-allowed">Previous</button>
+                <button className="px-3 py-1 text-xs bg-[#7c3aed] text-white rounded-lg">1</button>
+                <button className="px-3 py-1 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">2</button>
+                <button className="px-3 py-1 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">Next</button>
               </div>
             </div>
           </div>

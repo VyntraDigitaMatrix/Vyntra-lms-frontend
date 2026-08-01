@@ -76,20 +76,20 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-50" style={{ animation: "slideUp 0.2s ease" }}>
-      <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50" style={{ animation: "slideUp 0.2s ease" }}>
+      <div className="bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-3 px-4 py-3 max-w-4xl mx-auto w-full">
-          <button onClick={onClose} className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition px-2 py-1 rounded-lg hover:bg-gray-100 flex-shrink-0">
+          <button onClick={onClose} className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition px-2 py-1 rounded-lg hover:bg-slate-100 flex-shrink-0">
             <FaArrowLeft size={12} /> Back
           </button>
-          <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+          <div className="w-px h-5 bg-slate-200 flex-shrink-0" />
           <div className={`w-8 h-8 rounded-lg ${style.bg} text-white flex items-center justify-center text-[11px] font-black flex-shrink-0`}>
             {initials(discussion.groupName || discussion.courseTitle)}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm sm:text-base font-bold text-gray-800 truncate">{discussion.groupName || discussion.courseTitle}</h2>
+            <h2 className="text-sm sm:text-base font-bold text-slate-800 truncate">{discussion.groupName || discussion.courseTitle}</h2>
           </div>
-          <span className="hidden sm:flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
+          <span className="hidden sm:flex items-center gap-1 text-xs text-slate-500 flex-shrink-0">
             <FaUsers size={10} /> {discussion.totalMembers} members
           </span>
         </div>
@@ -97,7 +97,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
 
       <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-3 max-w-4xl mx-auto w-full">
         {messages.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-slate-400">
             <FaComments className="text-4xl mx-auto mb-2 opacity-30" />
             <p className="text-sm">No messages yet. Be the first to write!</p>
           </div>
@@ -118,18 +118,18 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
       </div>
 
       {replyTo && (
-        <div className="bg-violet-50 border-t border-violet-200 px-4 py-2 flex items-center gap-2 max-w-4xl mx-auto w-full">
+        <div className="bg-blue-50 border-t border-blue-200 px-4 py-2 flex items-center gap-2 max-w-4xl mx-auto w-full">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-violet-700">{replyTo.senderName}</p>
-            <p className="text-xs text-violet-600 truncate">{replyTo.content}</p>
+            <p className="text-xs font-semibold text-blue-900">{replyTo.senderName}</p>
+            <p className="text-xs text-[#043573] truncate">{replyTo.content}</p>
           </div>
-          <button onClick={() => setReplyTo(null)} className="text-violet-400 hover:text-violet-600 flex-shrink-0">
+          <button onClick={() => setReplyTo(null)} className="text-blue-400 hover:text-[#043573] flex-shrink-0">
             <FaTimes size={14} />
           </button>
         </div>
       )}
 
-      <div className="bg-white border-t border-gray-200 px-3 sm:px-6 py-3 flex-shrink-0">
+      <div className="bg-white border-t border-slate-200 px-3 sm:px-6 py-3 flex-shrink-0">
         <div className="flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
             <textarea
@@ -139,7 +139,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
               onKeyDown={handleKeyDown}
               placeholder={replyTo ? `Replying to ${replyTo.senderName}...` : "Write a message... (Enter to send)"}
               rows={1}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-violet-500 outline-none text-sm resize-none overflow-hidden"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#043573] outline-none text-sm resize-none overflow-hidden"
               style={{ minHeight: "42px", maxHeight: "120px" }}
               onInput={e => {
                 e.target.style.height = "auto";
@@ -151,7 +151,7 @@ const DiscussionChat = ({ discussion, currentUserId, onClose }) => {
             onClick={sendMessage}
             disabled={!input.trim() || sending}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm flex-shrink-0
-              ${input.trim() && !sending ? "bg-violet-600 hover:bg-violet-700 text-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+              ${input.trim() && !sending ? "bg-[#043573] hover:bg-blue-900 text-white" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
           >
             {sending ? <FaSpinner className="animate-spin" size={13} /> : <FaPaperPlane size={13} />}
           </button>

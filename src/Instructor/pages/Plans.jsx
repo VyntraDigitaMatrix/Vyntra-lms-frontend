@@ -10,12 +10,12 @@ import EditPlanView from "../components/Plans/EditPlanView";
 function Toast({ msg, type = "success", onClose }) {
     if (!msg) return null;
     return (
-        <div className="fixed top-5 right-5 z-[9999] bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl min-w-[260px]">
+        <div className="fixed top-5 right-5 z-[9999] bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl min-w-[260px]">
             {type === "success"
                 ? <MdCheckCircle className="text-emerald-500 text-xl flex-shrink-0" />
                 : <MdWarning className="text-amber-500 text-xl flex-shrink-0" />}
-            <span className="text-sm font-medium text-gray-800 flex-1">{msg}</span>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            <span className="text-sm font-medium text-slate-800 flex-1">{msg}</span>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
         </div>
     );
 }

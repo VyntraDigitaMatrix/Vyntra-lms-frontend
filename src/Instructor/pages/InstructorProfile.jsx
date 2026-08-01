@@ -307,7 +307,7 @@ const InstructorProfile = () => {
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition whitespace-nowrap
                 ${activeTab === key
                   ? "bg-violet-500 text-white shadow-sm"
-                  : "text-gray-500 hover:text-violet-500 hover:bg-blue-50"}`}
+                  : "text-gray-500 hover:text-violet-500 hover:bg-violet-50"}`}
             >
               {icon} {label}
             </button>
@@ -367,7 +367,7 @@ const InstructorProfile = () => {
                 {/* Stats */}
                 <div className="w-full mt-5 pt-5 border-t border-gray-50 grid grid-cols-3 gap-2 text-center">
                   <StatBadge icon={<FaStar className="text-yellow-400" />} value={Number(instructor.averageRating || 0).toFixed(1)} label="Rating" />
-                  <StatBadge icon={<FaUsers className="text-blue-500" />} value={instructor.totalStudents || 0} label="Students" />
+                  <StatBadge icon={<FaUsers className="text-violet-500" />} value={instructor.totalStudents || 0} label="Students" />
                   <StatBadge icon={<FaBookOpen className="text-emerald-500" />} value={instructor.totalCourses || 0} label="Courses" />
                 </div>
 
@@ -403,7 +403,7 @@ const InstructorProfile = () => {
                       </>
                     ) : (
                       <>
-                        <div className="flex items-start gap-3 p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-violet-600 font-medium">
+                        <div className="flex items-start gap-3 p-3.5 bg-violet-50 border border-violet-100 rounded-xl text-xs text-violet-600 font-medium">
                           <FaEnvelope size={13} className="mt-0.5 flex-shrink-0" />
                           OTP sent to <strong>{newEmail}</strong>. Check your inbox.
                         </div>
@@ -717,7 +717,7 @@ const InstructorProfile = () => {
       </div>
 
       {/* Global input style */}
-      <style>{`.input-base{width:100%;border:1px solid #e5e7eb;border-radius:0.75rem;padding:0.625rem 1rem;font-size:0.875rem;background:#f9fafb;outline:none;transition:all .15s}.input-base:focus{background:#fff;border-color:violet-500;box-shadow:0 0 0 3px rgba(4,53,115,0.1)}`}</style>
+      <style>{`.input-base{width:100%;border:1px solid #e5e7eb;border-radius:0.75rem;padding:0.625rem 1rem;font-size:0.875rem;background:#f9fafb;outline:none;transition:all .15s}.input-base:focus{background:#fff;border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124, 58, 237, 0.1)}`}</style>
     </div>
   );
 };
@@ -783,11 +783,13 @@ const PrimaryBtn = ({ onClick, disabled, children, variant = "blue" }) => {
   );
 };
 
-const GhostBtn = ({ onClick, children }) => (
-  <button onClick={onClick} className="px-5 py-2.5 rounded-xl text-gray-500 text-sm font-bold border border-gray-200 hover:bg-gray-50 transition">
-    {children}
-  </button>
-);
+const GhostBtn = ({ onClick, children }) => {
+  return (
+    <button onClick={onClick} className="px-5 py-2.5 rounded-xl text-gray-500 text-sm font-bold border border-gray-200 hover:bg-gray-50 transition">
+      {children}
+    </button>
+  );
+};
 
 const StatusPill = ({ status }) => {
   const map = {
@@ -827,7 +829,7 @@ const StudentRow = ({ student }) => {
       </div>
       <div className="flex-shrink-0 text-right">
         {student.enrollmentStatus && (
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-2 py-0.5">
             {student.enrollmentStatus}
           </span>
         )}
@@ -846,19 +848,19 @@ const Pagination = ({ page, totalPages, onChange }) => {
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 0}
-        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition"
+        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-200 transition"
       >
-        <FaChevronLeft className="text-[10px] text-gray-600" />
+        <FaChevronLeft className="text-[10px] text-slate-600" />
       </button>
-      <span className="text-xs font-semibold text-gray-500 px-2">
+      <span className="text-xs font-semibold text-slate-500 px-2">
         Page {page + 1} of {totalPages}
       </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages - 1}
-        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition"
+        className="w-8 h-8 rounded-lg bg-white border border-gray-200 disabled:opacity-40 flex items-center justify-center hover:bg-violet-50 hover:border-violet-200 transition"
       >
-        <FaChevronRight className="text-[10px] text-gray-600" />
+        <FaChevronRight className="text-[10px] text-slate-600" />
       </button>
     </div>
   );

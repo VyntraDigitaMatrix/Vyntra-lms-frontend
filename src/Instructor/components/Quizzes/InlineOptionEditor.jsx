@@ -34,7 +34,7 @@ const InlineOptionEditor = ({ questionId, existingOptions, sortOrder: initialSor
     };
 
     return (
-        <div className="flex items-center gap-2 p-2 bg-violet-50/50 border border-violet-200 border-dashed rounded-xl mt-2">
+        <div className="flex items-center gap-2 p-2 bg-blue-50/50 border border-blue-200 border-dashed rounded-xl mt-2">
             <input
                 autoFocus
                 placeholder="Option text..."
@@ -61,7 +61,7 @@ const InlineOptionEditor = ({ questionId, existingOptions, sortOrder: initialSor
             </label>
             <div className="w-px h-4 bg-slate-200 mx-1" />
             <button disabled={saving || !optText.trim()} onClick={handleSave}
-                className="px-3 py-1.5 text-[10px] font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg disabled:opacity-50 transition">
+                className="px-3 py-1.5 text-[10px] font-bold text-white bg-[#043573] hover:bg-blue-900 rounded-lg disabled:opacity-50 transition">
                 {saving ? "Saving..." : "Save"}
             </button>
             <button disabled={saving} onClick={onCancel}

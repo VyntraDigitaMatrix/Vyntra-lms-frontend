@@ -264,10 +264,10 @@ const Quizzes = () => {
     ];
     const totalQuestions = useMemo(() => quizzes.reduce((s, q) => s + (q.questions || 0), 0), [quizzes]);
     const statCards = [
-        { label: "Total Quizzes", value: totalQuizzes, icon: <MdQuiz />, iconBg: "bg-violet-50", iconColor: "text-violet-500" },
+        { label: "Total Quizzes", value: totalQuizzes, icon: <MdQuiz />, iconBg: "bg-violet-50", iconColor: "text-[#7c3aed]" },
         { label: "Published", value: publishedCount, icon: <MdCheckCircle />, iconBg: "bg-emerald-50", iconColor: "text-emerald-500" },
         { label: "Drafts", value: draftCount, icon: <MdPeople />, iconBg: "bg-amber-50", iconColor: "text-amber-500" },
-        { label: "Total Questions", value: totalQuestions, icon: <MdOutlineQuiz />, iconBg: "bg-blue-50", iconColor: "text-blue-500" },
+        { label: "Total Questions", value: totalQuestions, icon: <MdOutlineQuiz />, iconBg: "bg-indigo-50", iconColor: "text-indigo-500" },
     ];
     const isFiltering = typeFilter !== "ALL" || courseFilter !== "ALL";
 
@@ -275,15 +275,15 @@ const Quizzes = () => {
         <div className="min-h-screen bg-[#f8fafc]">
             <div className="max-w-7xl mx-auto px-5 py-8 space-y-6">
                 <div className="flex items-start justify-between gap-4">
-                    <div className="text-sm text-gray-400">
-                        <Link to="/instructor/dashboard" className="hover:text-violet-600 transition text-sm">Dashboard</Link>
+                    <div className="text-sm text-slate-400">
+                        <Link to="/instructor/dashboard" className="hover:text-[#7c3aed] transition text-sm">Dashboard</Link>
                         <span className="mx-2 text-sm">&gt;</span>
-                        <span className="text-gray-600 font-medium text-sm">Quizzes</span>
+                        <span className="text-slate-600 font-medium text-sm">Quizzes</span>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-3">Quizzes</h1>
                         <p className="text-sm text-slate-500 mt-0.5">Manage your assessments and track student performance</p>
                     </div>
                     <button onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0">
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#7c3aed] hover:bg-violet-750 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-violet-200 flex-shrink-0">
                         <MdAdd className="text-lg" /> Add Quiz
                     </button>
                 </div>
@@ -316,35 +316,35 @@ const Quizzes = () => {
                         </span>
                         {typeFilters.map(tf => (
                             <button key={tf.id} onClick={() => handleTypeFilterChange(tf.id)}
-                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${typeFilter === tf.id ? "bg-indigo-600 border-indigo-600 text-white shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600"}`}>
+                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${typeFilter === tf.id ? "bg-[#7c3aed] border-[#7c3aed] text-white shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300 hover:text-[#7c3aed]"}`}>
                                 <span className="text-sm">{tf.icon}</span>{tf.label}
                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${typeFilter === tf.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>{typeCounts[tf.id]}</span>
                             </button>
                         ))}
-                        {isFiltering && <button onClick={clearFilters} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 underline underline-offset-2 ml-1">Clear</button>}
+                        {isFiltering && <button onClick={clearFilters} className="text-[11px] font-bold text-[#7c3aed] hover:text-violet-750 underline underline-offset-2 ml-1">Clear</button>}
                     </div>
                     {typeFilter !== "ALL" && (
                         <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-slate-100">
                             <select value={courseFilter} onChange={e => setCourseFilter(e.target.value)}
-                                className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition">
+                                className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-violet-400 transition">
                                 <option value="ALL">Select Course…</option>
                                 {courses.map(c => <option key={c.id} value={c.id}>{c.title || c.name}</option>)}
                             </select>
                             {(typeFilter === "MODULE" || typeFilter === "LESSON") && courseFilter !== "ALL" && (
                                 <select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)}
-                                    className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition">
+                                    className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-violet-400 transition">
                                     <option value="ALL">Select Module…</option>
                                     {filterModules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                                 </select>
                             )}
                             {typeFilter === "LESSON" && moduleFilter !== "ALL" && (
                                 <select value={lessonFilter} onChange={e => setLessonFilter(e.target.value)}
-                                    className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition">
+                                    className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-violet-400 transition">
                                     <option value="ALL">Select Lesson…</option>
                                     {filterLessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
                                 </select>
                             )}
-                            {filterLoading && <span className="flex items-center gap-1.5 text-[11px] text-indigo-500 font-semibold"><AiOutlineLoading3Quarters className="animate-spin text-xs" /> Loading…</span>}
+                            {filterLoading && <span className="flex items-center gap-1.5 text-[11px] text-[#7c3aed] font-semibold"><AiOutlineLoading3Quarters className="animate-spin text-xs" /> Loading…</span>}
                         </div>
                     )}
                 </div>
@@ -353,7 +353,7 @@ const Quizzes = () => {
                     <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
                         {tabs.map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? "bg-violet-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}>
+                                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? "bg-[#7c3aed] text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}>
                                 {tab.label}
                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>{tab.count}</span>
                             </button>
@@ -362,7 +362,7 @@ const Quizzes = () => {
                     <div className="relative">
                         <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base" />
                         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search quizzes…"
-                            className="pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition w-56" />
+                            className="pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-violet-400 transition w-56" />
                     </div>
                 </div>
 
@@ -380,7 +380,7 @@ const Quizzes = () => {
                         <p className="text-sm font-black text-slate-700 mb-1">{search || isFiltering ? "No quizzes match your filters" : "No quizzes yet"}</p>
                         <p className="text-xs text-slate-400 mb-5">{search || isFiltering ? "Try a different filter or search term" : "Create your first quiz to get started"}</p>
                         {!search && !isFiltering && (
-                            <button onClick={() => setIsCreateModalOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                            <button onClick={() => setIsCreateModalOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#7c3aed] hover:bg-violet-750 text-white text-xs font-bold rounded-xl transition shadow-sm">
                                 <MdAdd className="text-base" /> Create First Quiz
                             </button>
                         )}

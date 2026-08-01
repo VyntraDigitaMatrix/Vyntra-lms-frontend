@@ -64,66 +64,66 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
             )}
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Plan Title</label>
+                <label className="text-sm font-semibold text-slate-700 block mb-1.5">Plan Title</label>
                 <input
                     value={form.title}
                     onChange={e => set("title", e.target.value)}
                     placeholder="Enter plan title"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Short Description</label>
+                <label className="text-sm font-semibold text-slate-700 block mb-1.5">Short Description</label>
                 <input
                     value={form.shortDesc}
                     onChange={e => set("shortDesc", e.target.value)}
                     placeholder="Enter a short description"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Long Description</label>
+                <label className="text-sm font-semibold text-slate-700 block mb-1.5">Long Description</label>
                 <textarea
                     value={form.longDesc}
                     onChange={e => set("longDesc", e.target.value)}
                     placeholder="Enter a long description"
                     rows={5}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition resize-none"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition resize-none"
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Price*</label>
-                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-100 transition">
-                    <span className="px-4 py-2.5 bg-gray-50 border-r border-gray-200 text-gray-600 font-semibold text-sm">₹</span>
+                <label className="text-sm font-semibold text-slate-700 block mb-1.5">Price*</label>
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition">
+                    <span className="px-4 py-2.5 bg-slate-50 border-r border-slate-200 text-slate-600 font-semibold text-sm">₹</span>
                     <input
                         type="number"
                         value={form.price}
                         onChange={e => set("price", e.target.value)}
                         placeholder="0"
-                        className="flex-1 px-4 py-2.5 text-sm text-gray-800 outline-none"
+                        className="flex-1 px-4 py-2.5 text-sm text-slate-800 outline-none"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Discount Price</label>
-                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-100 transition">
-                    <span className="px-4 py-2.5 bg-gray-50 border-r border-gray-200 text-gray-600 font-semibold text-sm">₹</span>
+                <label className="text-sm font-semibold text-slate-700 block mb-1.5">Discount Price</label>
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition">
+                    <span className="px-4 py-2.5 bg-slate-50 border-r border-slate-200 text-slate-600 font-semibold text-sm">₹</span>
                     <input
                         type="number"
                         value={form.discountPrice}
                         onChange={e => set("discountPrice", e.target.value)}
                         placeholder="0"
-                        className="flex-1 px-4 py-2.5 text-sm text-gray-800 outline-none"
+                        className="flex-1 px-4 py-2.5 text-sm text-slate-800 outline-none"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-2">Validity Type</label>
+                <label className="text-sm font-semibold text-slate-700 block mb-2">Validity Type</label>
                 <div className="flex gap-6 mb-3">
                     {[{ val: "validity", label: "Set Validity" }, { val: "lifetime", label: "Lifetime" }].map(o => (
                         <label key={o.val} className="flex items-center gap-2 cursor-pointer">
@@ -134,21 +134,21 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
                                 checked={form.validityType === o.val}
                                 onChange={() => set("validityType", o.val)}
                                 className="w-4 h-4"
-                                style={{ accentColor: "#7c3aed" }}
+                                style={{ accentColor: "#043573" }}
                             />
-                            <span className="text-sm font-medium text-gray-700">{o.label}</span>
+                            <span className="text-sm font-medium text-slate-700">{o.label}</span>
                         </label>
                     ))}
                 </div>
                 {form.validityType === "validity" && (
                     <div>
-                        <label className="text-sm font-semibold text-gray-700 block mb-1.5">Validity (Days)*</label>
+                        <label className="text-sm font-semibold text-slate-700 block mb-1.5">Validity (Days)*</label>
                         <input
                             type="number"
                             min="1"
                             value={form.validity}
                             onChange={e => set("validity", e.target.value)}
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition"
+                            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
                         />
                     </div>
                 )}
@@ -158,7 +158,7 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
 
     const renderPublishStatus = () => (
         <div className="max-w-2xl">
-            <p className="text-sm text-gray-500 mb-6">Publish / Unpublish plan for your learners</p>
+            <p className="text-sm text-slate-500 mb-6">Publish / Unpublish plan for your learners</p>
             <div className="space-y-3">
                 {[
                     { val: "PUBLISHED", label: "Published", desc: "Learners can enroll & access." },
@@ -166,15 +166,15 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
                 ].map(opt => (
                     <div key={opt.val} onClick={() => setPublishState(opt.val)}
                         className={`border rounded-xl p-5 cursor-pointer transition
-                            ${publishState === opt.val ? "border-violet-400 bg-violet-50" : "border-gray-200 hover:border-gray-300"}`}>
+                            ${publishState === opt.val ? "border-blue-400 bg-blue-50" : "border-slate-200 hover:border-slate-300"}`}>
                         <div className="flex items-start gap-3">
                             <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex-shrink-0 flex items-center justify-center
-                                ${publishState === opt.val ? "border-violet-500 bg-violet-500" : "border-gray-300"}`}>
+                                ${publishState === opt.val ? "border-[#043573] bg-[#043573]" : "border-slate-300"}`}>
                                 {publishState === opt.val && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-800">{opt.label}</p>
-                                <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+                                <p className="text-sm font-semibold text-slate-800">{opt.label}</p>
+                                <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
                             </div>
                         </div>
                     </div>
@@ -187,9 +187,9 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            <div className="border-b border-gray-100 px-6 py-3 flex items-center justify-between">
+            <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
                 <button onClick={onBack}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-violet-600 transition">
+                    className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-[#043573] transition">
                     <FaChevronLeft className="text-xs" /> Back
                 </button>
             </div>
@@ -197,21 +197,21 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
             <div className="flex-1 overflow-y-auto flex flex-col">
                 <div className="flex-1 px-8 py-6">
                     <div className="mb-6">
-                        <h2 className="text-xl font-bold text-gray-900">Edit Plan</h2>
-                        <p className="text-sm text-gray-500 mt-1">Edit your pricing plan and validity</p>
+                        <h2 className="text-xl font-bold text-slate-900">Edit Plan</h2>
+                        <p className="text-sm text-slate-500 mt-1">Edit your pricing plan and validity</p>
                     </div>
                     {activeTab === "edit_plan" && renderEditPlan()}
                     {activeTab === "publish_status" && renderPublishStatus()}
                 </div>
 
                 {hasFooter && (
-                    <div className="border-t border-gray-200 px-8 py-4 flex gap-3 bg-white sticky bottom-0">
+                    <div className="border-t border-slate-200 px-8 py-4 flex gap-3 bg-white sticky bottom-0">
                         <button onClick={handleSave} disabled={saving}
-                            className="px-8 py-2.5 bg-gray-800 hover:bg-gray-900 disabled:opacity-60 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
+                            className="px-8 py-2.5 bg-slate-800 hover:bg-slate-900 disabled:opacity-60 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
                             {saving && <AiOutlineLoading3Quarters className="animate-spin text-sm" />} SAVE
                         </button>
                         <button onClick={onBack}
-                            className="px-6 py-2.5 border border-gray-200 bg-white text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition">
+                            className="px-6 py-2.5 border border-slate-200 bg-white text-slate-600 text-sm font-semibold rounded-lg hover:bg-slate-50 transition">
                             CANCEL
                         </button>
                     </div>

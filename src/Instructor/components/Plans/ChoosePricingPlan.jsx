@@ -12,24 +12,24 @@ export const PLAN_TYPES = [
 
 export default function ChoosePricingPlan({ onBack, onSelectPlanType }) {
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="min-h-screen bg-slate-50">
+            <div className="bg-white border-b border-slate-200 px-6 py-4">
                 <button onClick={onBack}
-                    className="flex items-center gap-2 text-gray-600 hover:text-violet-600 transition">
+                    className="flex items-center gap-2 text-slate-600 hover:text-[#043573] transition">
                     <FaChevronLeft className="text-sm" />
                     <span className="text-sm font-medium">Back</span>
                 </button>
             </div>
             <div className="px-6 py-4 max-w-7xl">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">Choose Pricing Plan</h2>
-                <p className="text-sm text-gray-500 mb-8">Select the type of pricing plan you want to create.</p>
+                <h2 className="text-2xl font-bold text-slate-900 mb-1">Choose Pricing Plan</h2>
+                <p className="text-sm text-slate-500 mb-8">Select the type of pricing plan you want to create.</p>
                 <div className="grid grid-cols-2 gap-4">
                     {PLAN_TYPES.map(plan => (
                         <button key={plan.id} onClick={() => onSelectPlanType(plan.id)}
-                            className="p-6 bg-white border border-gray-200 rounded-xl text-left hover:border-violet-400 hover:shadow-md transition group">
+                            className="p-6 bg-white border border-slate-200 rounded-xl text-left hover:border-blue-400 hover:shadow-md transition group">
                             <div className="text-3xl mb-3">{plan.icon}</div>
-                            <h3 className="text-sm font-bold text-gray-900 mb-1.5 group-hover:text-violet-700 transition">{plan.title}</h3>
-                            <p className="text-xs text-gray-500 leading-relaxed">{plan.desc}</p>
+                            <h3 className="text-sm font-bold text-slate-900 mb-1.5 group-hover:text-blue-900 transition">{plan.title}</h3>
+                            <p className="text-xs text-slate-500 leading-relaxed">{plan.desc}</p>
                         </button>
                     ))}
                 </div>

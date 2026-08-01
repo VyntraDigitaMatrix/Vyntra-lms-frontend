@@ -4,17 +4,17 @@ import { FaCheck } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const QuestionEditor = ({ question, onChange, onCancel, onSave, saving, label, saveLabel }) => {
-    const inp = "w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 transition bg-white placeholder-slate-400";
+    const inp = "w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400/30 focus:border-blue-400 transition bg-white placeholder-slate-400";
     const up = (k, v) => onChange({ ...question, [k]: v });
 
     return (
-        <div className="rounded-2xl border border-violet-200 bg-gradient-to-b from-violet-50/60 to-white p-4 space-y-3">
+        <div className="rounded-2xl border border-blue-200 bg-gradient-to-b from-blue-50/60 to-white p-4 space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center">
-                        <MdHelpOutline className="text-violet-600 text-xs" />
+                    <div className="w-5 h-5 rounded-md bg-blue-100 flex items-center justify-center">
+                        <MdHelpOutline className="text-[#043573] text-xs" />
                     </div>
-                    <p className="text-xs font-black text-violet-700 uppercase tracking-wide">{label ?? "New Question"}</p>
+                    <p className="text-xs font-black text-blue-900 uppercase tracking-wide">{label ?? "New Question"}</p>
                 </div>
                 {onCancel && (
                     <button onClick={onCancel} className="w-6 h-6 rounded-lg bg-slate-100 text-slate-400 hover:bg-slate-200 flex items-center justify-center transition">

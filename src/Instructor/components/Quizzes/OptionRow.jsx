@@ -40,7 +40,7 @@ const OptionRow = ({ option, isCorrect, onSave, onDelete }) => {
 
     if (editing) {
         return (
-            <div className="flex items-center gap-2 p-2 bg-white border border-violet-200 rounded-xl">
+            <div className="flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-xl">
                 <input
                     autoFocus
                     className="flex-1 text-xs text-slate-700 bg-transparent border-0 focus:outline-none focus:ring-0"
@@ -66,7 +66,7 @@ const OptionRow = ({ option, isCorrect, onSave, onDelete }) => {
                 </label>
                 <div className="w-px h-4 bg-slate-200 mx-1" />
                 <button disabled={saving || !text.trim()} onClick={handleSave}
-                    className="px-3 py-1.5 text-[10px] font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg disabled:opacity-50 transition">
+                    className="px-3 py-1.5 text-[10px] font-bold text-white bg-[#043573] hover:bg-blue-900 rounded-lg disabled:opacity-50 transition">
                     {saving ? "Saving…" : "Save"}
                 </button>
                 <button disabled={saving} onClick={() => setEditing(false)}
@@ -90,7 +90,7 @@ const OptionRow = ({ option, isCorrect, onSave, onDelete }) => {
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => setEditing(true)}
-                    className="w-6 h-6 rounded-lg bg-violet-50 text-violet-500 hover:bg-violet-100 flex items-center justify-center transition">
+                    className="w-6 h-6 rounded-lg bg-blue-50 text-[#043573] hover:bg-blue-100 flex items-center justify-center transition">
                     <MdEdit className="text-xs" />
                 </button>
                 <button onClick={handleDelete} disabled={deleting}
