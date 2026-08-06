@@ -205,7 +205,7 @@ function App() {
                   <Route path="course-settings/:courseSlug" element={<AdminCourseSettings />} />
                   <Route path="plans" element={<AdminPlans />} />
                   <Route path="all-courses" element={<AllCourses />} />
-                  <Route path="course-preview/:id" element={<AdminCourseViewDetails />} />
+                  <Route path="course-preview/:courseSlug" element={<AdminCourseViewDetails />} />
                   <Route path="all-classes" element={<AllClasses />} />
                   <Route path="all-assignments" element={<AllAssignments />} />
                   <Route path="schedule" element={<Schedule1 />} />
@@ -222,7 +222,7 @@ function App() {
                   <Route path="certificates" element={<AdminCertificates />} />
                   <Route path="profile" element={<AdminProfile />} />
                 </Route>
-                <Route path="/admin/course/:courseId/lesson/:lessonId" element={<AdminLessonView />} />
+                <Route path="/admin/course/:courseSlug/lesson/:lessonSlug" element={<AdminLessonView />} />
               </Route>
 
               {/* Protected Instructor Routes */}

@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Vyntra One brand palette — sampled directly from the logo mark */
+@theme {
+  --color-navy-950: #060f26;
+  --color-navy-900: #0b1a3d;
+  --color-navy-800: #122a5e;
+  --color-navy-700: #1b3b77;
+  --color-navy-600: #274d95;
+  --color-navy-500: #35609f;
+  --color-navy-100: #e7ecf6;
+  --color-navy-50: #f3f5fb;
+
+  --color-brand-orange: #f5a623;
+  --color-brand-orange-dark: #d98c0f;
+  --color-brand-orange-light: #ffcf70;
+  --color-brand-orange-50: #fef6e7;
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
 }

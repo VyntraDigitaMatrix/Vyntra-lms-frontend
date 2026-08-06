@@ -13,7 +13,7 @@ import S1 from "../assets/S1.jpg";
 /* ── Status badge helper ── */
 const getStatusInfo = (progress, completed) => {
     if (completed) return { label: "Completed", color: "text-emerald-600 bg-emerald-50 border-emerald-200", bar: "bg-emerald-500" };
-    if (progress > 0) return { label: "In Progress", color: "text-[#043573] bg-blue-50 border-blue-200", bar: "bg-blue-500" };
+    if (progress > 0) return { label: "In Progress", color: "text-navy-800 bg-navy-50 border-navy-200", bar: "bg-navy-500" };
     return { label: "Not Started", color: "text-gray-500 bg-gray-50 border-gray-200", bar: "bg-gray-300" };
 };
 
@@ -117,35 +117,39 @@ const Courses = () => {
     }), [courses, totalElements]);
 
     return (
-        <div className="min-h-screen bg-slate-50/60 p-4 sm:p-6 md:p-8">
+        <div className="min-h-screen bg-navy-50/40 p-4 sm:p-6 md:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
 
-                {/* ── Header ── */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/70 shadow-xs">
-                    <div className="flex-1">
-                        <p className="text-xs text-slate-400 mb-1 flex items-center gap-1.5 font-medium">
-                            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
-                            <span>&gt;</span>
-                            <span className="text-slate-700 font-semibold">My Courses</span>
-                        </p>
-                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-3">My Courses</h1>
+                {/* ── Header Banner ── */}
+                <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 rounded-3xl p-5 sm:p-6 shadow-lg relative overflow-hidden">
+                    <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/15 blur-2xl pointer-events-none"></div>
+                    <p className="relative text-xs text-navy-100/60 mb-1 flex items-center gap-1.5 font-medium">
+                        <Link to="/student/dashboard" className="hover:text-brand-orange-light transition">Dashboard</Link>
+                        <span>&gt;</span>
+                        <span className="text-white font-semibold">My Courses</span>
+                    </p>
+                    <h1 className="relative text-xl sm:text-2xl font-black text-white tracking-tight">My Courses</h1>
+                    <div className="relative h-1 w-12 bg-brand-orange rounded-full mt-2 mb-3"></div>
+                    <p className="relative text-xs text-navy-100/70">Track your progress and jump back into your active learning paths.</p>
+                </div>
 
-                        {/* Tabs */}
-                        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                                        activeTab === tab
-                                            ? "bg-[#043573] text-white shadow-md shadow-[#043573]/20"
-                                            : "text-slate-600 bg-slate-100/70 hover:bg-slate-100 hover:text-[#043573]"
-                                    }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
+                {/* ── Tabs + Search ── */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/70 shadow-xs">
+                    {/* Tabs */}
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer border-none ${
+                                    activeTab === tab
+                                        ? "bg-brand-orange text-white shadow-md shadow-brand-orange/25"
+                                        : "text-slate-600 bg-slate-100/70 hover:bg-navy-50 hover:text-navy-800"
+                                }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
                     </div>
 
                     {/* Search */}
@@ -156,7 +160,7 @@ const Courses = () => {
                             placeholder="Search my courses..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 outline-none text-xs font-medium focus:border-[#043573] focus:ring-2 focus:ring-[#043573]/10 bg-slate-50/50 transition-all"
+                            className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 outline-none text-xs font-medium focus:border-navy-800 focus:ring-2 focus:ring-navy-800/10 bg-slate-50/50 transition-all"
                         />
                     </div>
                 </div>
@@ -164,7 +168,7 @@ const Courses = () => {
                 {/* ── Stats Cards ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                     {[
-                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-[#043573] bg-blue-50" },
+                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-navy-800 bg-navy-50" },
                         { label: "In Progress", value: stats.inProgress, icon: FaPlay, color: "text-amber-600 bg-amber-50" },
                         { label: "Completed", value: stats.completed, icon: FaTrophy, color: "text-emerald-600 bg-emerald-50" },
                         { label: "Not Started", value: stats.notStarted, icon: FaGraduationCap, color: "text-slate-500 bg-slate-100" },
@@ -198,8 +202,8 @@ const Courses = () => {
                     </div>
                 ) : filteredCourses.length === 0 ? (
                     <div className="bg-white rounded-2xl p-12 text-center border border-slate-200/70 shadow-xs">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                            <FaBookOpen className="text-[#043573] text-2xl" />
+                        <div className="w-16 h-16 rounded-2xl bg-navy-50 flex items-center justify-center mx-auto mb-4">
+                            <FaBookOpen className="text-navy-800 text-2xl" />
                         </div>
                         <h3 className="text-base font-bold text-slate-900 mb-1">
                             {searchTerm || activeTab !== "All" ? "No courses match your filters" : "No enrolled courses yet"}
@@ -212,7 +216,7 @@ const Courses = () => {
                         {(!searchTerm && activeTab === "All") && (
                             <Link
                                 to="/student/all-courses"
-                                className="inline-flex items-center gap-2 h-10 px-6 rounded-xl bg-[#043573] text-white text-xs font-bold hover:bg-blue-900 transition-all shadow-xs"
+                                className="inline-flex items-center gap-2 h-10 px-6 rounded-xl bg-navy-800 text-white text-xs font-bold hover:bg-navy-900 transition-all shadow-xs"
                             >
                                 Browse Courses
                             </Link>
@@ -240,7 +244,7 @@ const Courses = () => {
                                                 onError={(e) => { e.target.src = S1; }}
                                             />
                                             {/* Progress badge */}
-                                            <span className="absolute top-3 right-3 bg-[#043573] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md">
+                                            <span className="absolute top-3 right-3 bg-brand-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md">
                                                 {Math.round(progress)}%
                                             </span>
                                             {/* Status pill */}
@@ -251,7 +255,7 @@ const Courses = () => {
 
                                         {/* Content */}
                                         <div className="p-4 space-y-2">
-                                            <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#043573] transition-colors">
+                                            <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-navy-800 transition-colors">
                                                 {course.title || course.courseTitle}
                                             </h3>
                                             <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
@@ -300,8 +304,8 @@ const Courses = () => {
                                                 course.completed
                                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                                                     : progress > 0
-                                                        ? "bg-[#043573] text-white hover:bg-blue-900 shadow-xs"
-                                                        : "border border-slate-200 text-[#043573] hover:bg-[#043573] hover:text-white"
+                                                        ? "bg-navy-800 text-white hover:bg-navy-900 shadow-xs"
+                                                        : "border border-slate-200 text-navy-800 hover:bg-navy-800 hover:text-white"
                                             }`}
                                         >
                                             {course.completed ? (
@@ -335,8 +339,8 @@ const Courses = () => {
                                 onClick={() => setCurrentPage(i)}
                                 className={`w-9 h-9 rounded-xl text-xs font-bold transition cursor-pointer ${
                                     i === currentPage
-                                        ? "bg-[#043573] text-white shadow-xs"
-                                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                                        ? "bg-brand-orange text-white shadow-xs"
+                                        : "border border-slate-200 bg-white text-slate-600 hover:bg-navy-50"
                                 }`}
                             >
                                 {i + 1}

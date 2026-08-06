@@ -32,8 +32,9 @@ const Navbar = () => {
   return (
     <nav className="relative w-full h-[68px] bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between px-6 z-30">
       {/* Left branding / title placeholder */}
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Student Portal</span>
+      <div className="flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-brand-orange"></span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-navy-800/70">Student Portal</span>
       </div>
 
       {/* Right Actions */}
@@ -45,12 +46,12 @@ const Navbar = () => {
               setShowCalendarMenu(!showCalendarMenu);
               setShowProfileMenu(false);
             }}
-            className="w-10 h-10 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-slate-300 text-slate-600 transition-all duration-200 shadow-2xs"
+            className="w-10 h-10 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-200 text-slate-600 hover:text-navy-800 transition-all duration-200 shadow-2xs"
             title="Schedule & Attendance"
           >
-            <FaCalendarAlt className="text-slate-600 text-sm" />
+            <FaCalendarAlt className="text-sm" />
           </button>
-          
+
           {showCalendarMenu && (
             <div className="absolute right-0 top-12 w-[190px] bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               <div
@@ -58,9 +59,9 @@ const Navbar = () => {
                   navigate("/student/schedule");
                   setShowCalendarMenu(false);
                 }}
-                className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-100/80 hover:text-[#043573] cursor-pointer transition text-sm font-medium"
+                className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-navy-50 hover:text-navy-800 cursor-pointer transition text-sm font-medium"
               >
-                <FaCalendarAlt className="text-[#043573]" />
+                <FaCalendarAlt className="text-navy-800" />
                 <span>Schedule</span>
               </div>
               <div
@@ -68,9 +69,9 @@ const Navbar = () => {
                   navigate("/student/attendance");
                   setShowCalendarMenu(false);
                 }}
-                className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-100/80 hover:text-[#043573] cursor-pointer transition text-sm font-medium"
+                className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-navy-50 hover:text-navy-800 cursor-pointer transition text-sm font-medium"
               >
-                <FaBook className="text-[#043573]" />
+                <FaBook className="text-navy-800" />
                 <span>Attendance</span>
               </div>
             </div>
@@ -78,13 +79,13 @@ const Navbar = () => {
         </div>
 
         {/* Notifications button */}
-        <button 
+        <button
           onClick={() => navigate("/student/notifications")}
-          className="w-10 h-10 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-slate-300 text-slate-600 transition-all duration-200 shadow-2xs relative"
+          className="w-10 h-10 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-200 text-slate-600 hover:text-navy-800 transition-all duration-200 shadow-2xs relative"
           title="Notifications"
         >
-          <FaBell className="text-slate-600 text-sm" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full"></span>
+          <FaBell className="text-sm" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-brand-orange rounded-full ring-2 ring-white"></span>
         </button>
 
         {/* Profile Dropdown */}
@@ -94,9 +95,9 @@ const Navbar = () => {
               setShowProfileMenu(!showProfileMenu);
               setShowCalendarMenu(false);
             }}
-            className="flex items-center gap-3 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200 group focus:outline-none"
+            className="flex items-center gap-3 cursor-pointer p-1.5 rounded-xl hover:bg-navy-50 transition-all duration-200 group focus:outline-none"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#043573] to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-sm group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-navy-800 to-navy-600 flex items-center justify-center text-sm font-bold text-white shadow-sm group-hover:scale-105 transition-transform ring-2 ring-brand-orange/40">
               {student && student.fullName
                 ? student.fullName.charAt(0).toUpperCase()
                 : "S"}
@@ -111,7 +112,7 @@ const Navbar = () => {
 
             <FaChevronDown
               className={`text-[10px] text-slate-500 transition-transform duration-300 ${
-                showProfileMenu ? "rotate-180 text-[#043573]" : ""
+                showProfileMenu ? "rotate-180 text-brand-orange-dark" : ""
               }`}
             />
           </button>
@@ -149,10 +150,10 @@ const Navbar = () => {
                     className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium cursor-pointer transition-all duration-150 ${
                       item.label === "Logout"
                         ? "text-red-600 hover:bg-red-50"
-                        : "text-slate-700 hover:bg-slate-100/80 hover:text-[#043573]"
+                        : "text-slate-700 hover:bg-navy-50 hover:text-navy-800"
                     }`}
                   >
-                    <span className={item.label === "Logout" ? "text-red-500" : "text-[#043573]"}>
+                    <span className={item.label === "Logout" ? "text-red-500" : "text-navy-800"}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>

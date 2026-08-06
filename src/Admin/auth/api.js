@@ -68,6 +68,7 @@ api.interceptors.response.use(
 export const adminAuth = {
   login: (data) => api.post("/api/admin/auth/login", data),
   verifyOtp: (data) => api.post("/api/admin/auth/verify-otp", data),
+  resendOtp: (data) => api.post("/api/admin/auth/resend-otp", data),
   getProfile: () => api.get("/api/admin/auth/me"),
   changePassword: (data) => api.post("/api/admin/auth/change-password", data),
   forgotPassword: (data) => api.post("/api/admin/auth/forgot-password", data),
@@ -121,35 +122,100 @@ export const adminManagement = {
 };
 
 export const adminCourseApi = {
-  createCourse: (data) => {
-    if (data instanceof FormData) {
-      return api.post("/api/admin/courses", data, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-    }
-    return api.post("/api/admin/courses", data);
-  },
-  updateCourse: (courseId, formData) => api.put(`/api/admin/courses/${courseId}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  }),
-  publishCourse: (courseSlug) => api.post(`/api/admin/courses/${courseSlug}/publish`),
-  archiveCourse: (courseSlug) => api.post(`/api/admin/courses/${courseSlug}/archive`),
-  getPendingPublishRequests: (page = 0, size = 10) => {
-    return api.get(`/api/admin/courses/pending-publish?page=${page}&size=${size}`);
-  },
-  rejectPublishRequest: (courseId) => api.patch(`/api/admin/courses/${courseId}/reject-publish`),
+  // ── Core Course CRUD (all identifiers below are course SLUGS, not DB ids) ──
+  createCourse: (data) => api.post("/api/admin/courses", data),
   getAllCourses: (page = 0, size = 10) => {
     return api.get(`/api/admin/courses?page=${page}&size=${size}`);
   },
-  getCourseById: (courseId) => api.get(`/api/admin/courses/${courseId}`),
   getCourseBySlug: (courseSlug) => api.get(`/api/admin/courses/${courseSlug}`),
-  updateBasicInfo: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/basic-info`, data),
+  updateBasicInfo: (courseSlug, formData) => api.put(`/api/admin/courses/${courseSlug}/basic-info`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
   updatePricing: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/pricing`, data),
   updateFeatures: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/features`, data),
   updateFaqs: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/faqs`, data),
   updateTags: (courseSlug, data) => api.put(`/api/admin/courses/${courseSlug}/tags`, data),
-  getCourseModules: (courseId) => api.get(`/api/admin/modules/courses/${courseId}?page=0&size=100`),
-  getModuleLessons: (moduleId) => api.get(`/api/admin/lessons/modules/${moduleId}?page=0&size=100`),
+  addInstructorsToCourse: (courseSlug, data) => api.post(`/api/admin/courses/${courseSlug}/instructors`, data),
+  removeInstructorFromCourse: (courseSlug, instructorId) => api.delete(`/api/admin/courses/${courseSlug}/instructors/${instructorId}`),
+  deleteCourseTag: (courseSlug, tagId) => api.delete(`/api/admin/courses/${courseSlug}/tags/${tagId}`),
+  deleteCourseFaq: (courseSlug, faqId) => api.delete(`/api/admin/courses/${courseSlug}/faqs/${faqId}`),
+  publishCourse: (courseSlug) => api.patch(`/api/admin/courses/${courseSlug}/publish`),
+  archiveCourse: (courseSlug) => api.patch(`/api/admin/courses/${courseSlug}/archive`),
+
+  // ── Modules (identifiers are module SLUGS) ──
+  getCourseModules: (courseSlug, page = 0, size = 100) => api.get(`/api/admin/modules/courses/${courseSlug}?page=${page}&size=${size}`),
+  getModuleBySlug: (moduleSlug) => api.get(`/api/admin/modules/${moduleSlug}`),
+  createModule: (courseSlug, data) => api.post(`/api/admin/modules/courses/${courseSlug}`, data),
+  updateModule: (moduleSlug, data) => api.put(`/api/admin/modules/${moduleSlug}`, data),
+  deleteModule: (moduleSlug) => api.delete(`/api/admin/modules/${moduleSlug}`),
+
+  // ── Lessons (identifiers are lesson SLUGS) ──
+  getModuleLessons: (moduleSlug, page = 0, size = 100) => api.get(`/api/admin/lessons/modules/${moduleSlug}?page=${page}&size=${size}`),
+  getLessonBySlug: (lessonSlug) => api.get(`/api/admin/lessons/${lessonSlug}`),
+  createLesson: (moduleSlug, formData) => api.post(`/api/admin/lessons/modules/${moduleSlug}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  updateLesson: (lessonSlug, formData) => api.put(`/api/admin/lessons/${lessonSlug}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  deleteLesson: (lessonSlug) => api.delete(`/api/admin/lessons/${lessonSlug}`),
+};
+
+export const adminDashboardApi = {
+  getCourseCounts: () => api.get("/api/admin/dashboard/course-counts"),
+  getRegisteredStudentCount: () => api.get("/api/admin/dashboard/registered-students"),
+  getEnrolledStudentCount: () => api.get("/api/admin/dashboard/enrolled-students"),
+  getEnrollmentCount: () => api.get("/api/admin/dashboard/enrollments"),
+  getTransactionCounts: () => api.get("/api/admin/dashboard/transactions"),
+  getSuccessTransactionCount: () => api.get("/api/admin/dashboard/transactions/success"),
+  getPendingTransactionCount: () => api.get("/api/admin/dashboard/transactions/pending"),
+  getRevenueByCourse: () => api.get("/api/admin/dashboard/revenue/course"),
+  getAssignmentCountByCourse: () => api.get("/api/admin/dashboard/assignments/course"),
+  getQuizCountByCourse: () => api.get("/api/admin/dashboard/quizzes/course"),
+  getJobCount: () => api.get("/api/admin/dashboard/jobs"),
+  getCertificateCount: () => api.get("/api/admin/dashboard/certificates"),
+  getInstructorCount: () => api.get("/api/admin/dashboard/instructors"),
+  getInstructorCountByCourse: () => api.get("/api/admin/dashboard/instructors/course"),
+  getCourseRatingCount: () => api.get("/api/admin/dashboard/ratings"),
+  getCourseRatingCountByCourse: () => api.get("/api/admin/dashboard/ratings/course"),
+  getRevenueByTimeline: (fromDate, toDate) =>
+    api.get(`/api/admin/dashboard/revenue/timeline?fromDate=${fromDate}&toDate=${toDate}`),
+};
+
+export const adminPaymentApi = {
+  getAllTransactions: (page = 0, size = 10) =>
+    api.get(`/api/admin/payments/transactions?page=${page}&size=${size}`),
+  getStudentTransactions: (studentId, page = 0, size = 10) =>
+    api.get(`/api/admin/payments/students/${studentId}/transactions?page=${page}&size=${size}`),
+  getTransactionDetails: (paymentId) =>
+    api.get(`/api/admin/payments/transactions/${paymentId}`),
+  getCourseTransactions: (courseId, page = 0, size = 10) =>
+    api.get(`/api/admin/payments/courses/${courseId}/transactions?page=${page}&size=${size}`),
+};
+
+export const adminCourseRatingApi = {
+  getAllRatingsByCourse: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/admin/course-ratings/${courseSlug}?page=${page}&size=${size}`),
+  getApprovedRatings: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/admin/course-ratings/${courseSlug}/approved?page=${page}&size=${size}`),
+  getPendingRatings: (courseSlug, page = 0, size = 10) =>
+    api.get(`/api/admin/course-ratings/${courseSlug}/pending?page=${page}&size=${size}`),
+  approveRating: (ratingId) => api.post(`/api/admin/course-ratings/${ratingId}/approve`),
+  declineRating: (ratingId) => api.post(`/api/admin/course-ratings/${ratingId}/decline`),
+  deleteRating: (ratingId) => api.delete(`/api/admin/course-ratings/${ratingId}`),
+};
+
+export const adminInstructorRatingApi = {
+  getAllRatings: (page = 0, size = 10) =>
+    api.get(`/api/admin/instructor-ratings?page=${page}&size=${size}`),
+  getPendingRatings: (page = 0, size = 10) =>
+    api.get(`/api/admin/instructor-ratings/pending?page=${page}&size=${size}`),
+  getApprovedRatings: (page = 0, size = 10) =>
+    api.get(`/api/admin/instructor-ratings/approved?page=${page}&size=${size}`),
+  approveRating: (ratingId) => api.patch(`/api/admin/instructor-ratings/${ratingId}/approve`),
+  rejectRating: (ratingId) => api.patch(`/api/admin/instructor-ratings/${ratingId}/reject`),
+  updateRating: (ratingId, data) => api.put(`/api/admin/instructor-ratings/${ratingId}`, data),
+  deleteRating: (ratingId) => api.delete(`/api/admin/instructor-ratings/${ratingId}`),
 };
 
 export const discussionApi = {
@@ -268,6 +334,9 @@ export const adminJobsApi = {
 
 export const adminManagementApi = {
   // ── Students ──
+  createStudent: (data) =>
+    api.post(`/api/admin/management/create-student`, data),
+
   getAllStudents: (page = 0, size = 10) =>
     api.get(`/api/admin/management/students?page=${page}&size=${size}`),
 
@@ -282,6 +351,14 @@ export const adminManagementApi = {
 
   toggleStudentStatus: (studentCode) =>
     api.patch(`/api/admin/management/students/${studentCode}/toggle-status`),
+
+  // Note: these two endpoints return a bare PageResponse/ApiResponse (no outer "data" wrapper
+  // consistency guaranteed) — check response shape directly when consuming.
+  getStudentEnrolledCourses: (studentCode, page = 0, size = 10) =>
+    api.get(`/api/admin/management/students/${studentCode}/enrolled-courses?page=${page}&size=${size}`),
+
+  getStudentReferrals: (studentCode) =>
+    api.get(`/api/admin/management/students/${studentCode}/referrals`),
 
   // ── Instructors ──
   getAllInstructors: (page = 0, size = 10) =>

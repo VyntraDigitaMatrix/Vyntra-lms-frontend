@@ -1,525 +1,340 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   BookOpen,
   GraduationCap,
-  BarChart3,
-  Settings,
-  Bell,
-  Search,
-  Filter,
-  MoreVertical,
   UserPlus,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
   Clock,
   DollarSign,
-  MessageSquare,
-  Calendar,
   TrendingUp,
-  Award,
-  FileText,
-  Download,
-  Eye,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  ChevronDown,
-  PlusCircle,
   TrendingDown,
-  Activity
+  Award,
+  Briefcase,
+  Star,
+  PlusCircle,
 } from "lucide-react";
+import { adminDashboardApi } from "../auth/api";
+
+const currency = (n) =>
+  `₹${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Mock Data
-  const students = [
-    { id: 1, name: "Alice Johnson", email: "alice@example.com", course: "Web Development", progress: 75, status: "active", enrollmentDate: "2024-01-15", lastActive: "2024-03-20", completedCourses: 3, totalCourses: 5, averageGrade: 85 },
-    { id: 2, name: "Bob Smith", email: "bob@example.com", course: "Data Science", progress: 45, status: "active", enrollmentDate: "2024-02-01", lastActive: "2024-03-19", completedCourses: 2, totalCourses: 6, averageGrade: 78 },
-    { id: 3, name: "Carol Davis", email: "carol@example.com", course: "UI/UX Design", progress: 90, status: "inactive", enrollmentDate: "2023-12-10", lastActive: "2024-03-15", completedCourses: 4, totalCourses: 4, averageGrade: 92 },
-  ];
+  const [courseCounts, setCourseCounts] = useState(null);
+  const [registeredStudents, setRegisteredStudents] = useState(null);
+  const [enrollmentCount, setEnrollmentCount] = useState(null);
+  const [transactionCounts, setTransactionCounts] = useState(null);
+  const [pendingTransactions, setPendingTransactions] = useState(null);
+  const [instructorCount, setInstructorCount] = useState(null);
+  const [jobCount, setJobCount] = useState(null);
+  const [certificateCount, setCertificateCount] = useState(null);
+  const [courseRatingCount, setCourseRatingCount] = useState(null);
+  const [revenueByCourse, setRevenueByCourse] = useState([]);
+  const [ratingsByCourse, setRatingsByCourse] = useState([]);
 
-  const instructors = [
-    { id: 1, name: "Dr. John Williams", email: "john@example.com", department: "Computer Science", courses: 3, students: 45, rating: 4.8, status: "active", joinDate: "2023-06-01", lastActive: "2024-03-20", specialization: "Web Technologies", experience: "8 years" },
-    { id: 2, name: "Prof. Sarah Brown", email: "sarah@example.com", department: "Mathematics", courses: 2, students: 32, rating: 4.9, status: "active", joinDate: "2023-08-15", lastActive: "2024-03-19", specialization: "Statistics", experience: "6 years" },
-    { id: 3, name: "Michael Lee", email: "michael@example.com", department: "Design", courses: 2, students: 28, rating: 4.6, status: "inactive", joinDate: "2023-10-01", lastActive: "2024-03-10", specialization: "UI/UX", experience: "5 years" },
-  ];
+  useEffect(() => {
+    let isMounted = true;
 
-  const recentActivities = [
-    { id: 1, user: "Alice Johnson", action: "Completed Module 5", type: "student", timestamp: "2 hours ago" },
-    { id: 2, user: "Dr. John Williams", action: "Uploaded new lecture", type: "instructor", timestamp: "5 hours ago" },
-    { id: 3, user: "Bob Smith", action: "Submitted assignment", type: "student", timestamp: "1 day ago" },
-  ];
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const [
+          courseCountsRes,
+          studentsRes,
+          enrollmentsRes,
+          transactionsRes,
+          pendingTxRes,
+          instructorsRes,
+          jobsRes,
+          certificatesRes,
+          ratingCountRes,
+          revenueByCourseRes,
+          ratingsByCourseRes,
+        ] = await Promise.all([
+          adminDashboardApi.getCourseCounts(),
+          adminDashboardApi.getRegisteredStudentCount(),
+          adminDashboardApi.getEnrollmentCount(),
+          adminDashboardApi.getTransactionCounts(),
+          adminDashboardApi.getPendingTransactionCount(),
+          adminDashboardApi.getInstructorCount(),
+          adminDashboardApi.getJobCount(),
+          adminDashboardApi.getCertificateCount(),
+          adminDashboardApi.getCourseRatingCount(),
+          adminDashboardApi.getRevenueByCourse(),
+          adminDashboardApi.getCourseRatingCountByCourse(),
+        ]);
 
-  const pendingApprovals = [
-    { id: 1, name: "Emily White", type: "student", request: "Course Enrollment", date: "2024-03-20" },
-    { id: 2, name: "David Green", type: "instructor", request: "Application to teach", date: "2024-03-19" },
-  ];
+        if (!isMounted) return;
+
+        setCourseCounts(courseCountsRes.data?.data || null);
+        setRegisteredStudents(studentsRes.data?.data || null);
+        setEnrollmentCount(enrollmentsRes.data?.data || null);
+        setTransactionCounts(transactionsRes.data?.data || null);
+        setPendingTransactions(pendingTxRes.data?.data || null);
+        setInstructorCount(instructorsRes.data?.data || null);
+        setJobCount(jobsRes.data?.data || null);
+        setCertificateCount(certificatesRes.data?.data || null);
+        setCourseRatingCount(ratingCountRes.data?.data || null);
+        setRevenueByCourse(revenueByCourseRes.data?.data || []);
+        setRatingsByCourse(ratingsByCourseRes.data?.data || []);
+      } catch (err) {
+        console.error("Failed to load admin dashboard stats", err);
+        if (isMounted) setError("Failed to load dashboard data from the server.");
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const totalRevenue = revenueByCourse.reduce((sum, c) => sum + Number(c.revenue || 0), 0);
 
   const stats = [
     {
-      title: "Total Students",
-      value: 156,
-      change: "+12%",
-      changeType: "increase",
+      title: "Registered Students",
+      value: registeredStudents?.totalRegisteredStudents ?? 0,
       icon: GraduationCap,
-      color: "blue",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600",
-      borderColor: "border-blue-200"
+      bgColor: "bg-navy-50",
+      iconColor: "text-navy-700",
+      borderColor: "border-navy-700",
     },
     {
-      title: "Total Instructors",
-      value: 24,
-      change: "+5%",
-      changeType: "increase",
+      title: "Instructors",
+      value: instructorCount?.totalInstructors ?? 0,
       icon: Users,
-      color: "green",
-      bgColor: "bg-green-50",
-      iconColor: "text-green-600",
-      borderColor: "border-green-200"
+      bgColor: "bg-brand-orange-50",
+      iconColor: "text-brand-orange-dark",
+      borderColor: "border-brand-orange",
     },
     {
-      title: "Active Courses",
-      value: 18,
-      change: "+3",
-      changeType: "increase",
+      title: "Courses",
+      value: courseCounts?.totalCourses ?? 0,
+      subtitle: courseCounts ? `${courseCounts.publishedCourses} published · ${courseCounts.unpublishedCourses} unpublished` : "",
       icon: BookOpen,
-      color: "purple",
-      bgColor: "bg-purple-50",
-      iconColor: "text-purple-600",
-      borderColor: "border-purple-200"
+      bgColor: "bg-navy-50",
+      iconColor: "text-navy-700",
+      borderColor: "border-navy-700",
     },
     {
-      title: "Completion Rate",
-      value: "78%",
-      change: "+8%",
-      changeType: "increase",
+      title: "Total Enrollments",
+      value: enrollmentCount?.totalEnrollments ?? 0,
       icon: TrendingUp,
-      color: "yellow",
-      bgColor: "bg-yellow-50",
-      iconColor: "text-yellow-600",
-      borderColor: "border-yellow-200"
+      bgColor: "bg-brand-orange-50",
+      iconColor: "text-brand-orange-dark",
+      borderColor: "border-brand-orange",
     },
     {
-      title: "Revenue",
-      value: "$45,230",
-      change: "+18%",
-      changeType: "increase",
+      title: "Revenue (by course)",
+      value: currency(totalRevenue),
       icon: DollarSign,
-      color: "emerald",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-      borderColor: "border-emerald-200"
+      bgColor: "bg-navy-50",
+      iconColor: "text-navy-700",
+      borderColor: "border-navy-700",
     },
     {
-      title: "Pending Payments",
-      value: "$5,200",
-      change: "+2%",
-      changeType: "decrease",
+      title: "Pending Transactions",
+      value: pendingTransactions?.pendingTransactions ?? 0,
+      subtitle: transactionCounts ? `${transactionCounts.totalTransactions} total · ${transactionCounts.failedTransactions} failed` : "",
       icon: Clock,
-      color: "red",
-      bgColor: "bg-red-50",
-      iconColor: "text-red-600",
-      borderColor: "border-red-200"
-    }
+      bgColor: "bg-brand-orange-50",
+      iconColor: "text-brand-orange-dark",
+      borderColor: "border-brand-orange",
+    },
   ];
 
-  const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const secondaryStats = [
+    { title: "Open Job Postings", value: jobCount?.totalJobs ?? 0, icon: Briefcase },
+    { title: "Certificates Issued", value: certificateCount?.totalCertificatesIssued ?? 0, icon: Award },
+    { title: "Course Ratings", value: courseRatingCount?.totalCourseRatings ?? 0, icon: Star },
+  ];
 
-  const filteredInstructors = instructors.filter(i =>
-    i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    i.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const quickActions = [
+    { label: "Create Course", icon: PlusCircle, tone: "orange", onClick: () => navigate("/admin/create-course") },
+    { label: "View Students", icon: GraduationCap, tone: "navy", onClick: () => navigate("/admin/all-students") },
+    { label: "View Instructors", icon: UserPlus, tone: "navy", onClick: () => navigate("/admin/all-instructors") },
+    { label: "View Courses", icon: BookOpen, tone: "orange", onClick: () => navigate("/admin/all-courses") },
+  ];
+
+  const quickActionTones = {
+    navy: "from-navy-800 to-navy-900 text-white",
+    orange: "from-brand-orange to-brand-orange-dark text-white",
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              Admin Dashboard
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">Manage students, instructors, and course activities</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-
-            </div>
-
-          </div>
+    <div className="min-h-screen bg-navy-50/40">
+      {/* Header banner */}
+      <div className="mx-5 mt-5 rounded-2xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 px-6 py-6 shadow-lg relative overflow-hidden">
+        <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/10 blur-2xl" />
+        <div className="absolute right-16 bottom-0 w-24 h-24 rounded-full bg-brand-orange/20 blur-xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold text-white">
+            Admin Dashboard
+          </h1>
+          <div className="h-1 w-12 bg-brand-orange rounded-full mt-2 mb-2" />
+          <p className="text-sm text-navy-100/70">Live overview of students, instructors, and course activity</p>
         </div>
       </div>
-      <div className="p-5 -mt-3">
-        {/* Overview Dashboard */}
-        {activeTab === "overview" && (
-          <div className="space-y-5">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <div
-                    key={index}
-                    className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-l-4 ${stat.borderColor} overflow-hidden group`}
-                  >
-                    <div className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className={`${stat.bgColor} p-2 rounded-lg group-hover:scale-110 transition-transform duration-200`}>
-                          <Icon className={`w-5 h-5 ${stat.iconColor}`} />
-                        </div>
-                        <div className={`flex items-center space-x-1 text-xs font-medium ${stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                          {stat.changeType === 'increase' ? (
-                            <TrendingUp className="w-3 h-3" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3" />
-                          )}
-                          <span>{stat.change}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-                      </div>
-                    </div>
-                    <div className={`h-1 ${stat.bgColor}`}></div>
+
+      <div className="p-5 space-y-5">
+        {error && (
+          <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm font-semibold">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={index}
+                className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-l-4 ${stat.borderColor} overflow-hidden group`}
+              >
+                <div className="p-5">
+                  <div className={`${stat.bgColor} p-2 rounded-lg w-fit group-hover:scale-110 transition-transform duration-200 mb-3`}>
+                    <Icon className={`w-5 h-5 ${stat.iconColor}`} />
                   </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{stat.title}</p>
+                    <p className="text-2xl font-bold text-navy-900">{loading ? "…" : stat.value}</p>
+                    {stat.subtitle && <p className="text-[11px] text-gray-400 mt-1">{stat.subtitle}</p>}
+                  </div>
+                </div>
+                <div className={`h-1 ${stat.bgColor}`}></div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Secondary stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {secondaryStats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div key={i} className="bg-white rounded-xl shadow-sm p-5 flex items-center gap-4">
+                <div className="w-11 h-11 rounded-lg bg-navy-50 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-navy-700" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-xl font-bold text-navy-900">{loading ? "…" : stat.value}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Revenue & Ratings by Course */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-5 border-b border-navy-100 flex items-center gap-2">
+              <span className="w-1.5 h-5 rounded-full bg-brand-orange" />
+              <h2 className="font-semibold text-navy-900">Revenue by Course</h2>
+            </div>
+            <div className="p-5">
+              {loading ? (
+                <p className="text-sm text-gray-400">Loading…</p>
+              ) : revenueByCourse.length === 0 ? (
+                <p className="text-sm text-gray-400">No revenue data yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {revenueByCourse
+                    .slice()
+                    .sort((a, b) => Number(b.revenue || 0) - Number(a.revenue || 0))
+                    .slice(0, 8)
+                    .map((c, i) => {
+                      const max = Math.max(...revenueByCourse.map((x) => Number(x.revenue || 0)), 1);
+                      const pct = Math.round((Number(c.revenue || 0) / max) * 100);
+                      return (
+                        <div key={c.courseSlug || i}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="font-medium text-navy-800 truncate max-w-[70%]">{c.courseTitle}</span>
+                            <span className="text-gray-500">{currency(c.revenue)}</span>
+                          </div>
+                          <div className="w-full bg-navy-50 rounded-full h-2">
+                            <div
+                              className="bg-gradient-to-r from-brand-orange to-brand-orange-dark h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-5 border-b border-navy-100 flex items-center gap-2">
+              <span className="w-1.5 h-5 rounded-full bg-navy-700" />
+              <h2 className="font-semibold text-navy-900">Ratings by Course</h2>
+            </div>
+            <div className="p-5">
+              {loading ? (
+                <p className="text-sm text-gray-400">Loading…</p>
+              ) : ratingsByCourse.length === 0 ? (
+                <p className="text-sm text-gray-400">No ratings data yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {ratingsByCourse
+                    .slice()
+                    .sort((a, b) => Number(b.totalRatings || 0) - Number(a.totalRatings || 0))
+                    .slice(0, 8)
+                    .map((c, i) => (
+                      <div key={c.courseSlug || i} className="flex items-center justify-between p-2.5 hover:bg-navy-50/60 rounded-lg transition-colors">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-navy-800 truncate">{c.courseTitle}</p>
+                          <p className="text-xs text-gray-400">{c.totalRatings} rating(s)</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-brand-orange flex-shrink-0">
+                          <Star className="w-4 h-4 fill-brand-orange" />
+                          <span className="text-sm font-semibold text-navy-800">{Number(c.averageRating || 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-5 border-b border-navy-100 flex items-center gap-2">
+            <span className="w-1.5 h-5 rounded-full bg-brand-orange" />
+            <h2 className="font-semibold text-navy-900">Quick Actions</h2>
+          </div>
+          <div className="p-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {quickActions.map((action, i) => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={i}
+                    onClick={action.onClick}
+                    className={`flex flex-col items-center justify-center space-y-2 p-4 bg-gradient-to-br ${quickActionTones[action.tone]} rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-1 group border-none cursor-pointer`}
+                  >
+                    <div className="p-2 bg-white/15 rounded-full group-hover:scale-110 group-hover:bg-white/25 transition-all">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">{action.label}</span>
+                  </button>
                 );
               })}
             </div>
-
-            {/* Pending Approvals Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Pending Approvals */}
-              <div className="lg:col-span-1 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-5 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold text-gray-800">Pending Approvals</h2>
-                    <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
-                      {pendingApprovals.length} pending
-                    </span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="space-y-4">
-                    {pendingApprovals.map((approval) => (
-                      <div key={approval.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg hover:shadow-md transition-shadow">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${approval.type === 'student' ? 'bg-blue-100' : 'bg-purple-100'
-                            }`}>
-                            {approval.type === 'student' ?
-                              <GraduationCap className="w-5 h-5 text-blue-600" /> :
-                              <Users className="w-5 h-5 text-purple-600" />
-                            }
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-800">{approval.name}</p>
-                            <p className="text-xs text-gray-500">{approval.request} • {approval.date}</p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button className="p-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Activities */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-5 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold text-gray-800">Recent Activities</h2>
-                    <button className="text-blue-600 text-sm hover:text-blue-700">View All</button>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="space-y-4">
-                    {recentActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
-                          }`}>
-                          {activity.type === 'student' ?
-                            <GraduationCap className="w-4 h-4 text-blue-600" /> :
-                            <Users className="w-4 h-4 text-green-600" />
-                          }
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium text-gray-800">{activity.user}</span>
-                            <span className="text-gray-600"> {activity.action}</span>
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">{activity.timestamp}</p>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-5 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-800">Quick Actions</h2>
-              </div>
-              <div className="p-5">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <button className="flex flex-col items-center justify-center space-y-2 p-4 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-1 group">
-                    <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                      <UserPlus className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <span className="text-sm font-medium">Add Student</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center space-y-2 p-4 bg-gradient-to-br from-green-50 to-green-100 text-green-700 rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-1 group">
-                    <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                      <Users className="w-5 h-5 text-green-600" />
-                    </div>
-                    <span className="text-sm font-medium">Add Instructor</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center space-y-2 p-4 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-700 rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-1 group">
-                    <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                      <BookOpen className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <span className="text-sm font-medium">Create Course</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center space-y-2 p-4 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-700 rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-1 group">
-                    <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                      <MessageSquare className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <span className="text-sm font-medium">Send Notification</span>
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
-        )}
-
-        {/* Students Management */}
-        {activeTab === "students" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="relative flex-1 max-w-md w-full">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search students by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button className="flex items-center space-x-2 px-5 py-2 bg-[#2BB2A9] from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                <UserPlus className="w-4 h-4" />
-                <span>Add New Student</span>
-              </button>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Active</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="font-medium text-gray-900">{student.name}</div>
-                          <div className="text-sm text-gray-500">{student.email}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">{student.course}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-1 w-24 bg-gray-200 rounded-full h-2 mr-2">
-                            <div className="bg-[#2BB2A9] to-[#2BB2A9] h-2 rounded-full transition-all duration-500" style={{ width: `${student.progress}%` }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-gray-600">{student.progress}%</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${student.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                          }`}>
-                          <span className="inline-block w-1.5 h-1.5 rounded-full mr-1 ${
-                            student.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                          }"></span>
-                          {student.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.lastActive}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex space-x-2">
-                          <button className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        {/* Activities Log */}
-        {activeTab === "activities" && (
-          <div className="bg-white rounded-xl shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-800 text-lg">System Activity Log</h2>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {[...recentActivities, ...recentActivities].map((activity, idx) => (
-                  <div key={idx} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'student' ? 'bg-blue-100' : 'bg-green-100'
-                      }`}>
-                      {activity.type === 'student' ?
-                        <GraduationCap className="w-5 h-5 text-blue-600" /> :
-                        <Users className="w-5 h-5 text-green-600" />
-                      }
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-medium text-gray-800">{activity.user}</span>
-                        <span className="text-gray-600"> {activity.action}</span>
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">{activity.timestamp}</p>
-                    </div>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Analytics */}
-        {activeTab === "analytics" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="font-semibold text-gray-800 mb-4">Course Enrollment Trends</h3>
-              <div className="h-64 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
-                <div className="text-center">
-                  <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Chart Component Here</p>
-                  <p className="text-xs text-gray-400 mt-1">Integration with charting library</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="font-semibold text-gray-800 mb-4">Student Performance Overview</h3>
-              <div className="space-y-5">
-                {["Web Development", "Data Science", "UI/UX Design", "Mobile Development"].map((course, idx) => (
-                  <div key={idx}>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium text-gray-700">{course}</span>
-                      <span className="text-gray-600">{85 - idx * 7}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-[#2BB2A9] to-[#2BB2A9] h-2.5 rounded-full transition-all duration-500"
-                        style={{ width: `${85 - idx * 7}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Settings */}
-        {activeTab === "settings" && (
-          <div className="bg-white rounded-xl shadow-sm max-w-3xl mx-auto">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">System Settings</h2>
-              <p className="text-sm text-gray-500 mt-1">Configure your LMS platform settings</p>
-            </div>
-            <div className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Default Student Role</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>Learner</option>
-                    <option>Premium Learner</option>
-                    <option>Guest Learner</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Max Courses Per Student</label>
-                  <input
-                    type="number"
-                    defaultValue="5"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Maximum number of courses a student can enroll in</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notification Settings</label>
-                  <div className="space-y-3">
-                    <label className="flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500" />
-                      <span className="text-sm text-gray-700">Email notifications for new enrollments</span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500" />
-                      <span className="text-sm text-gray-700">Notify admin about pending approvals</span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input type="checkbox" className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500" />
-                      <span className="text-sm text-gray-700">Send weekly performance reports</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-gray-200">
-                  <button className="px-6 py-2 bg-[#2BB2A9] from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                    Save All Settings
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

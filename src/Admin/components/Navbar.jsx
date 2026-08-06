@@ -29,20 +29,33 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="relative w-full h-[70px] bg-white border-b border-gray-200 flex items-center justify-end px-6">
+    <nav className="relative w-full h-[70px] bg-white border-b border-navy-100 flex items-center justify-between px-6">
+      {/* Left greeting */}
+      <div className="hidden sm:block">
+        <p className="text-sm text-gray-400">
+          Welcome back,{" "}
+          <span className="font-semibold text-navy-800">
+            {admin && admin.fullName ? admin.fullName.split(" ")[0] : "Admin"}
+          </span>
+        </p>
+      </div>
+
       {/* Right */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4">
         <button
           onClick={() => navigate("/admin/attendance")}
-          className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition"
+          className="w-9 h-9 rounded-full border border-navy-100 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-600 transition text-navy-700"
           title="Attendance"
         >
-          <FaCalendarAlt className="text-gray-600 text-sm" />
+          <FaCalendarAlt className="text-sm" />
         </button>
 
-        <button className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition">
-          <FaBell className="text-gray-600 text-sm" />
+        <button className="relative w-9 h-9 rounded-full border border-navy-100 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-600 transition text-navy-700">
+          <FaBell className="text-sm" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-orange border border-white"></span>
         </button>
+
+        <div className="w-px h-8 bg-navy-100" />
 
         {/* Profile Dropdown */}
         <div className="relative">
@@ -50,25 +63,31 @@ const Navbar = () => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 cursor-pointer focus:outline-none"
           >
-            <div className="w-8 h-8 rounded-full bg-[#e8f5e9] flex items-center justify-center text-sm font-bold text-green-700">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center text-sm font-bold text-white shadow-sm ring-2 ring-brand-orange/30">
               {admin && admin.fullName
                 ? admin.fullName.charAt(0).toUpperCase()
                 : "A"}
             </div>
 
-            <span className="text-sm font-semibold text-gray-700">
+            <span className="hidden md:block text-sm font-semibold text-navy-800">
               {admin && admin.fullName ? admin.fullName : "Admin"}
             </span>
 
             <FaChevronDown
-              className={`text-xs text-gray-600 transition duration-300 ${
+              className={`hidden md:block text-xs text-navy-500 transition duration-300 ${
                 showProfileMenu ? "rotate-180" : ""
               }`}
             />
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 top-12 w-[240px] bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
+            <div className="absolute right-0 top-12 w-[240px] bg-white border border-navy-100 rounded-2xl shadow-xl py-2 z-50 overflow-hidden">
+              <div className="px-5 py-3 border-b border-navy-100 bg-navy-50">
+                <p className="text-sm font-semibold text-navy-900">
+                  {admin && admin.fullName ? admin.fullName : "Admin"}
+                </p>
+                <p className="text-xs text-navy-500 truncate">{admin?.email || "admin@vyntraone.com"}</p>
+              </div>
               {profileItems.map((item, index) => (
                 <div
                   key={index}
@@ -91,9 +110,13 @@ const Navbar = () => {
 
                     setShowProfileMenu(false);
                   }}
-                  className="flex items-center gap-3 px-5 py-3 text-[#250c42] hover:bg-[#2BB2A9]/10 hover:text-[#2BB2A9] cursor-pointer transition text-[15px] font-medium"
+                  className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition text-[14px] font-medium ${
+                    item.label === "Logout"
+                      ? "text-red-500 hover:bg-red-50"
+                      : "text-navy-800 hover:bg-brand-orange-50 hover:text-brand-orange-dark"
+                  }`}
                 >
-                  <span className="text-[#2BB2A9]">{item.icon}</span>
+                  <span className={item.label === "Logout" ? "text-red-500" : "text-brand-orange"}>{item.icon}</span>
                   <span>{item.label}</span>
                 </div>
               ))}

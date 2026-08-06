@@ -39,49 +39,20 @@ const CreateCourse = () => {
         setError("");
 
         try {
-            const plan = plans.find(p => p.id === selectedPlan);
-            
+            // Matches the backend's AdminCreateCourseRequestDTO exactly: title, free,
+            // pricingPlanId (reference to an existing plan, not an embedded object),
+            // encrypted, instructorIds. Everything else (description, tags, FAQs,
+            // features, etc.) is edited afterwards on the Course Settings page.
             const body = {
                 title: title.trim(),
-                description: "",
-                shortDescription: "",
-                language: "ENGLISH",
-                level: "BEGINNER",
-                visibility: "PUBLIC",
-                thumbnailInputType: null,
-                thumbnailUrl: null,
-                promoVideoInputType: null,
-                promoVideoUrl: null,
                 free: isFree,
+                pricingPlanId: isFree ? null : (selectedPlan || null),
                 encrypted: encryption === "ENCRYPTION",
-                instructorIds: [selectedInstructor],
-                tags: [],
-                faqs: [],
-                pricingPlans: plan ? [{
-                    id: plan.id,
-                    planTitle: plan.planTitle || plan.title,
-                    description: plan.description || "",
-                    shortDescription: plan.shortDescription || "",
-                    pricingType: plan.pricingType || "FREE",
-                    actualPrice: Number(plan.actualPrice) || 0,
-                    discountPrice: Number(plan.discountPrice) || 0,
-                    lifetimeAccess: plan.lifetimeAccess ?? true,
-                    validityInDays: Number(plan.validityInDays) || 0,
-                    offerStartDate: plan.offerStartDate || null,
-                    offerEndDate: plan.offerEndDate || null,
-                    installmentMonths: Number(plan.installmentMonths) || 0,
-                    amountPerMonth: Number(plan.amountPerMonth) || 0,
-                    active: true,
-                    defaultPlan: true
-                }] : [],
-                certificateEnabled: true,
-                discussionEnabled: true,
-                downloadableResourcesEnabled: true,
-                lifetimeAccessEnabled: true,
-                mobileAccessEnabled: true,
-                assignmentsEnabled: true,
-                quizzesEnabled: true,
-                autoApprovalEnabled: true
+                // NOTE: the admin instructor list (adminManagement.getAllInstructors) only
+                // exposes instructorCode, not the instructor's UUID id, so this currently
+                // cannot be populated with a value the backend will accept as a UUID.
+                // Left as-is until the backend instructor summary DTO exposes an id field.
+                instructorIds: selectedInstructor ? [selectedInstructor] : [],
             };
 
             const res = await adminCourseApi.createCourse(body);
@@ -125,17 +96,25 @@ const CreateCourse = () => {
 
 
     return (
-        <div className="min-h-screen bg-[#f7f8fc] p-5">
+        <div className="min-h-screen bg-navy-50/40 p-5">
             <div className="max-w-4xl mx-auto">
-                <p className="text-xs text-gray-400 mb-2">
-                    <Link to="/admin/all-courses" className="hover:text-[#2BB2A9] transition font-medium">
+                <p className="text-xs text-gray-400 mb-4">
+                    <Link to="/admin/all-courses" className="hover:text-brand-orange-dark transition font-medium">
                         All Courses
                     </Link>
                     <span className="mx-2">&gt;</span>
                     <span className="text-gray-600">Create Course</span>
                 </p>
-                <h1 className="text-xl font-bold text-gray-900">Create Course</h1>
-                <p className="text-sm text-gray-500 mt-1 mb-8">Start creating a new course for an instructor</p>
+
+                <div className="rounded-2xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 px-6 py-6 shadow-lg relative overflow-hidden mb-6">
+                    <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/10 blur-2xl" />
+                    <div className="absolute right-16 bottom-0 w-24 h-24 rounded-full bg-brand-orange/20 blur-xl" />
+                    <div className="relative">
+                        <h1 className="text-2xl font-bold text-white">Create Course</h1>
+                        <div className="h-1 w-12 bg-brand-orange rounded-full mt-2 mb-2" />
+                        <p className="text-sm text-navy-100/70">Start creating a new course for an instructor</p>
+                    </div>
+                </div>
 
                 {error && (
                     <div className="mb-5 p-3 bg-red-50 border border-red-100 text-red-700 rounded-xl text-sm font-medium">
@@ -158,7 +137,7 @@ const CreateCourse = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="e.g. Complete Digital Marketing Course"
-                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-[#2BB2A9] focus:bg-white transition placeholder:text-gray-400"
+                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-navy-600 focus:bg-white transition placeholder:text-gray-400"
                             disabled={submitting}
                         />
                     </div>
@@ -175,7 +154,7 @@ const CreateCourse = () => {
                                 setSelectedInstructor(e.target.value);
                                 setError("");
                             }}
-                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-[#2BB2A9] focus:bg-white transition"
+                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-navy-600 focus:bg-white transition"
                             disabled={submitting}
                         >
                             <option value="">Select Instructor</option>
@@ -202,7 +181,7 @@ const CreateCourse = () => {
                                 setIsFree(type === "FREE");
                                 setError("");
                             }}
-                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-[#2BB2A9] focus:bg-white transition"
+                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-navy-600 focus:bg-white transition"
                             disabled={submitting}
                         >
                             <option value="">Select Pricing Plan</option>
@@ -288,10 +267,10 @@ const CreateCourse = () => {
                     <div>
                         <label className="block text-sm font-semibold text-gray-800 mb-3">Content Security</label>
                         <div className="space-y-3">
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${encryption === "ENCRYPTION" ? "border-[#2BB2A9] bg-[#2BB2A9]/5" : "border-gray-200 hover:border-gray-300"
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${encryption === "ENCRYPTION" ? "border-navy-600 bg-navy-50" : "border-gray-200 hover:border-gray-300"
                                 }`}>
                                 <div className="mt-0.5 flex-shrink-0">
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${encryption === "ENCRYPTION" ? "border-[#2BB2A9] bg-[#2BB2A9]" : "border-gray-300"
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${encryption === "ENCRYPTION" ? "border-navy-600 bg-navy-600" : "border-gray-300"
                                         }`}>
                                         {encryption === "ENCRYPTION" && <div className="w-2 h-2 rounded-full bg-white" />}
                                     </div>
@@ -311,10 +290,10 @@ const CreateCourse = () => {
                                 </div>
                             </label>
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${encryption === "NONE" ? "border-[#2BB2A9] bg-[#2BB2A9]/5" : "border-gray-200 hover:border-gray-300"
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${encryption === "NONE" ? "border-navy-600 bg-navy-50" : "border-gray-200 hover:border-gray-300"
                                 }`}>
                                 <div className="mt-0.5 flex-shrink-0">
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${encryption === "NONE" ? "border-[#2BB2A9] bg-[#2BB2A9]" : "border-gray-300"
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${encryption === "NONE" ? "border-navy-600 bg-navy-600" : "border-gray-300"
                                         }`}>
                                         {encryption === "NONE" && <div className="w-2 h-2 rounded-full bg-white" />}
                                     </div>
@@ -339,7 +318,7 @@ const CreateCourse = () => {
                             type="button"
                             onClick={handleSubmit}
                             disabled={submitting || !title.trim()}
-                            className="h-10 px-8 rounded-xl bg-[#2BB2A9] hover:bg-[#2BB2A9]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition shadow-sm mt-4"
+                            className="h-10 px-8 rounded-xl bg-brand-orange hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition shadow-sm mt-4 border-none cursor-pointer"
                         >
                             {submitting ? "Creating..." : "CREATE COURSE"}
                         </button>

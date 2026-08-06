@@ -162,35 +162,36 @@ const CourseSettings = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#f7f8fc] pb-10">
+        <div className="min-h-screen bg-navy-50/40 pb-10">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-                <div className="max-w-6xl mx-auto px-5 py-4">
+            <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 sticky top-0 z-10 shadow-lg relative overflow-hidden">
+                <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/10 blur-2xl pointer-events-none" />
+                <div className="max-w-6xl mx-auto px-5 py-4 relative">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <Link to="/admin/all-courses" className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">
+                            <Link to="/admin/all-courses" className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition">
                                 <FaChevronLeft size={12} />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">{course.title}</h1>
-                                <p className="text-sm text-gray-500 flex items-center gap-2">
-                                    Course Settings • <span className={`px-2 py-0.5 rounded text-xs font-bold ${course.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{course.status}</span>
+                                <h1 className="text-xl font-bold text-white">{course.title}</h1>
+                                <p className="text-sm text-navy-100/70 flex items-center gap-2">
+                                    Course Settings • <span className={`px-2 py-0.5 rounded text-xs font-bold ${course.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700' : 'bg-white/20 text-white'}`}>{course.status}</span>
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button onClick={handleArchive} className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Archive</button>
-                            <button onClick={handlePublish} className="px-4 py-2 text-sm font-semibold text-white bg-[#2BB2A9] rounded-lg hover:bg-[#2BB2A9]/90">Publish Course</button>
+                            <button onClick={handleArchive} className="px-4 py-2 text-sm font-semibold text-white bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition cursor-pointer">Archive</button>
+                            <button onClick={handlePublish} className="px-4 py-2 text-sm font-semibold text-white bg-brand-orange rounded-lg hover:bg-brand-orange-dark transition cursor-pointer border-none">Publish Course</button>
                         </div>
                     </div>
-                    
+
                     {/* Tabs Navigation */}
                     <div className="flex items-center gap-1 overflow-x-auto">
                         {tabs.map(tab => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === tab.id ? 'border-[#2BB2A9] text-[#2BB2A9]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                                className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors bg-transparent cursor-pointer ${activeTab === tab.id ? 'border-brand-orange text-white' : 'border-transparent text-navy-100/60 hover:text-white hover:border-white/30'}`}
                             >
                                 {tab.label}
                             </button>
@@ -201,7 +202,7 @@ const CourseSettings = () => {
 
             <div className="max-w-4xl mx-auto px-5 mt-8">
                 {error && <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-100 rounded-lg text-sm">{error}</div>}
-                {success && <div className="mb-4 p-3 bg-green-50 text-green-600 border border-green-100 rounded-lg text-sm">{success}</div>}
+                {success && <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-sm">{success}</div>}
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     {/* BASIC INFO TAB */}
@@ -211,19 +212,19 @@ const CourseSettings = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Course Title</label>
-                                    <input type="text" value={basicInfo.title} onChange={e => setBasicInfo({ ...basicInfo, title: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]" />
+                                    <input type="text" value={basicInfo.title} onChange={e => setBasicInfo({ ...basicInfo, title: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600" />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
-                                    <textarea rows={2} value={basicInfo.shortDescription} onChange={e => setBasicInfo({ ...basicInfo, shortDescription: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]" />
+                                    <textarea rows={2} value={basicInfo.shortDescription} onChange={e => setBasicInfo({ ...basicInfo, shortDescription: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600" />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
-                                    <textarea rows={5} value={basicInfo.description} onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]" />
+                                    <textarea rows={5} value={basicInfo.description} onChange={e => setBasicInfo({ ...basicInfo, description: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                                    <select value={basicInfo.language} onChange={e => setBasicInfo({ ...basicInfo, language: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]">
+                                    <select value={basicInfo.language} onChange={e => setBasicInfo({ ...basicInfo, language: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600">
                                         <option value="ENGLISH">English</option>
                                         <option value="HINDI">Hindi</option>
                                         <option value="SPANISH">Spanish</option>
@@ -231,7 +232,7 @@ const CourseSettings = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
-                                    <select value={basicInfo.level} onChange={e => setBasicInfo({ ...basicInfo, level: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]">
+                                    <select value={basicInfo.level} onChange={e => setBasicInfo({ ...basicInfo, level: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600">
                                         <option value="BEGINNER">Beginner</option>
                                         <option value="INTERMEDIATE">Intermediate</option>
                                         <option value="ADVANCED">Advanced</option>
@@ -239,7 +240,7 @@ const CourseSettings = () => {
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail URL</label>
-                                    <input type="text" value={basicInfo.thumbnailUrl} onChange={e => setBasicInfo({ ...basicInfo, thumbnailUrl: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]" />
+                                    <input type="text" value={basicInfo.thumbnailUrl} onChange={e => setBasicInfo({ ...basicInfo, thumbnailUrl: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600" />
                                 </div>
                             </div>
                         </div>
@@ -263,7 +264,7 @@ const CourseSettings = () => {
                                             actualPrice: plan ? (plan.actualPrice || 0) : 0,
                                             discountPrice: plan ? (plan.discountPrice || 0) : 0,
                                         });
-                                    }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]">
+                                    }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600">
                                         <option value="">-- Choose Plan --</option>
                                         {plans.map(p => <option key={p.id} value={p.id}>{p.planTitle}</option>)}
                                     </select>
@@ -278,20 +279,20 @@ const CourseSettings = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Actual Price</label>
-                                    <input type="number" readOnly={pricing.free} value={pricing.actualPrice} onChange={e => setPricing({...pricing, actualPrice: parseFloat(e.target.value)})} className={`w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9] ${pricing.free ? 'bg-gray-50' : ''}`} />
+                                    <input type="number" readOnly={pricing.free} value={pricing.actualPrice} onChange={e => setPricing({...pricing, actualPrice: parseFloat(e.target.value)})} className={`w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600 ${pricing.free ? 'bg-gray-50' : ''}`} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Discount Price</label>
-                                    <input type="number" readOnly={pricing.free} value={pricing.discountPrice} onChange={e => setPricing({...pricing, discountPrice: parseFloat(e.target.value)})} className={`w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9] ${pricing.free ? 'bg-gray-50' : ''}`} />
+                                    <input type="number" readOnly={pricing.free} value={pricing.discountPrice} onChange={e => setPricing({...pricing, discountPrice: parseFloat(e.target.value)})} className={`w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600 ${pricing.free ? 'bg-gray-50' : ''}`} />
                                 </div>
                                 <div className="flex items-center gap-2 mt-4">
-                                    <input type="checkbox" id="lifetime" checked={pricing.lifetimeAccess} onChange={e => setPricing({...pricing, lifetimeAccess: e.target.checked})} className="w-4 h-4 text-[#2BB2A9] rounded" />
+                                    <input type="checkbox" id="lifetime" checked={pricing.lifetimeAccess} onChange={e => setPricing({...pricing, lifetimeAccess: e.target.checked})} className="w-4 h-4 text-navy-600 rounded" />
                                     <label htmlFor="lifetime" className="text-sm font-medium text-gray-700">Lifetime Access</label>
                                 </div>
                                 {!pricing.lifetimeAccess && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Validity (Days)</label>
-                                        <input type="number" value={pricing.validityInDays} onChange={e => setPricing({...pricing, validityInDays: parseInt(e.target.value)})} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9]" />
+                                        <input type="number" value={pricing.validityInDays} onChange={e => setPricing({...pricing, validityInDays: parseInt(e.target.value)})} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600" />
                                     </div>
                                 )}
                             </div>
@@ -308,7 +309,7 @@ const CourseSettings = () => {
                                         <span className="text-sm font-medium text-gray-700">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input type="checkbox" className="sr-only peer" checked={features[key]} onChange={e => setFeatures({...features, [key]: e.target.checked})} />
-                                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2BB2A9]"></div>
+                                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-navy-600"></div>
                                         </label>
                                     </div>
                                 ))}
@@ -321,7 +322,7 @@ const CourseSettings = () => {
                         <div className="space-y-5">
                             <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                                 <h2 className="text-lg font-bold text-gray-800">Frequently Asked Questions</h2>
-                                <button onClick={() => setFaqs([...faqs, { question: "", answer: "" }])} className="text-sm text-[#2BB2A9] font-medium flex items-center gap-1 hover:underline"><FaPlus size={10} /> Add FAQ</button>
+                                <button onClick={() => setFaqs([...faqs, { question: "", answer: "" }])} className="text-sm text-brand-orange-dark font-medium flex items-center gap-1 hover:underline bg-transparent border-none cursor-pointer"><FaPlus size={10} /> Add FAQ</button>
                             </div>
                             
                             {faqs.length === 0 ? (
@@ -338,12 +339,12 @@ const CourseSettings = () => {
                                                     const newFaqs = [...faqs];
                                                     newFaqs[idx].question = e.target.value;
                                                     setFaqs(newFaqs);
-                                                }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9] text-sm font-medium text-gray-800" />
+                                                }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600 text-sm font-medium text-gray-800" />
                                                 <textarea placeholder="Answer" rows={2} value={faq.answer} onChange={e => {
                                                     const newFaqs = [...faqs];
                                                     newFaqs[idx].answer = e.target.value;
                                                     setFaqs(newFaqs);
-                                                }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9] text-sm text-gray-600" />
+                                                }} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600 text-sm text-gray-600" />
                                             </div>
                                         </div>
                                     ))}
@@ -364,13 +365,13 @@ const CourseSettings = () => {
                                     setNewTag("");
                                 }
                             }} className="flex items-center gap-2">
-                                <input type="text" placeholder="Add a new tag..." value={newTag} onChange={e => setNewTag(e.target.value)} className="flex-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#2BB2A9] text-sm" />
+                                <input type="text" placeholder="Add a new tag..." value={newTag} onChange={e => setNewTag(e.target.value)} className="flex-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-navy-600 text-sm" />
                                 <button type="submit" className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-800">Add</button>
                             </form>
 
                             <div className="flex flex-wrap gap-2 mt-4">
                                 {tags.map((tag, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 bg-[#2BB2A9]/10 text-[#2BB2A9] px-3 py-1.5 rounded-full text-sm font-medium border border-[#2BB2A9]/20">
+                                    <div key={idx} className="flex items-center gap-2 bg-navy-50 text-navy-700 px-3 py-1.5 rounded-full text-sm font-medium border border-navy-200">
                                         {tag}
                                         <button onClick={() => setTags(tags.filter((_, i) => i !== idx))} className="hover:text-red-500 font-bold">&times;</button>
                                     </div>
@@ -385,7 +386,7 @@ const CourseSettings = () => {
                         <button 
                             onClick={handleSave} 
                             disabled={submitting}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-[#2BB2A9] hover:bg-[#2BB2A9]/90 text-white font-bold rounded-lg transition shadow-sm disabled:opacity-70"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white font-bold rounded-lg transition shadow-sm disabled:opacity-70 border-none cursor-pointer"
                         >
                             {submitting ? "Saving..." : <><FaSave /> Save Changes</>}
                         </button>

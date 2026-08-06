@@ -9,7 +9,7 @@ import { adminCourseApi } from "../auth/api";
 import S1 from "../../assets/S1.jpg";
 
 const CourseViewDetails = () => {
-  const { id } = useParams();
+  const { courseSlug } = useParams();
 
   // State
   const [courseData, setCourseData] = useState(null);
@@ -25,36 +25,16 @@ const CourseViewDetails = () => {
     setLoading(true);
     setError("");
     try {
-      const courseRes = await adminCourseApi.getCourseById(id);
+      const courseRes = await adminCourseApi.getCourseBySlug(courseSlug);
       if (courseRes.data && courseRes.data.data) {
         setCourseData(courseRes.data.data);
       }
 
-      // Try fetching modules
-      try {
-        const modulesRes = await adminCourseApi.getCourseModules(id);
-        if (modulesRes.data && modulesRes.data.data) {
-          const fetchedModules = modulesRes.data.data.content || [];
-          fetchedModules.sort((a, b) => a.sortOrder - b.sortOrder);
-          setModules(fetchedModules);
-        }
-      } catch (modErr) {
-        console.warn("Could not fetch real modules, using mock/fallback curriculum.", modErr);
-        // Fallback placeholder modules
-        setModules([
-          { id: "mock1", title: "Module 1: Introduction & Basics", description: "Get started with the fundamentals.", sortOrder: 1 },
-          { id: "mock2", title: "Module 2: Advanced Core Concepts", description: "Deep dive into core mechanics.", sortOrder: 2 }
-        ]);
-        setModuleLessons({
-          "mock1": [
-            { id: "ml1", title: "1. Welcome & Orientation", durationInMinutes: 5, previewAllowed: true, lessonType: "VIDEO" },
-            { id: "ml2", title: "2. Setting Up Your Workspace", durationInMinutes: 12, previewAllowed: false, lessonType: "VIDEO" }
-          ],
-          "mock2": [
-            { id: "ml3", title: "3. First Practical Project", durationInMinutes: 20, previewAllowed: false, lessonType: "VIDEO" },
-            { id: "ml4", title: "4. Performance Optimization", durationInMinutes: 15, previewAllowed: false, lessonType: "PDF" }
-          ]
-        });
+      const modulesRes = await adminCourseApi.getCourseModules(courseSlug);
+      if (modulesRes.data && modulesRes.data.data) {
+        const fetchedModules = modulesRes.data.data.content || [];
+        fetchedModules.sort((a, b) => a.sortOrder - b.sortOrder);
+        setModules(fetchedModules);
       }
     } catch (err) {
       console.error(err);
@@ -66,22 +46,22 @@ const CourseViewDetails = () => {
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [courseSlug]);
 
-  const toggleModule = async (idx, moduleId) => {
+  const toggleModule = async (idx, moduleSlug) => {
     const isExpanding = !expandedModules[idx];
     setExpandedModules((p) => ({ ...p, [idx]: isExpanding }));
 
-    if (isExpanding && moduleId && !moduleId.toString().startsWith("mock")) {
+    if (isExpanding && moduleSlug && !moduleLessons[moduleSlug]) {
       try {
-        const res = await adminCourseApi.getModuleLessons(moduleId);
+        const res = await adminCourseApi.getModuleLessons(moduleSlug);
         if (res.data && res.data.data) {
           const fetchedLessons = res.data.data.content || [];
           fetchedLessons.sort((a, b) => a.sortOrder - b.sortOrder);
-          setModuleLessons(prev => ({ ...prev, [moduleId]: fetchedLessons }));
+          setModuleLessons(prev => ({ ...prev, [moduleSlug]: fetchedLessons }));
         }
       } catch (err) {
-        console.error("Failed to fetch lessons for module " + moduleId, err);
+        console.error("Failed to fetch lessons for module " + moduleSlug, err);
       }
     }
   };
@@ -90,7 +70,7 @@ const CourseViewDetails = () => {
     if (window.confirm("Are you sure you want to PUBLISH this course? It will become visible to all students.")) {
       setActionLoading(true);
       try {
-        await adminCourseApi.publishCourse(id);
+        await adminCourseApi.publishCourse(courseSlug);
         alert("Course published successfully!");
         fetchData();
       } catch (err) {
@@ -102,27 +82,11 @@ const CourseViewDetails = () => {
     }
   };
 
-  const handleRejectPublish = async () => {
-    if (window.confirm("Are you sure you want to REJECT this publish request? The instructor will be notified.")) {
-      setActionLoading(true);
-      try {
-        await adminCourseApi.rejectPublishRequest(id);
-        alert("Publish request rejected successfully.");
-        fetchData();
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Failed to reject publish request.");
-      } finally {
-        setActionLoading(false);
-      }
-    }
-  };
-
   const handleArchive = async () => {
     if (window.confirm("Are you sure you want to ARCHIVE this course? Students won't be able to buy it anymore.")) {
       setActionLoading(true);
       try {
-        await adminCourseApi.archiveCourse(id);
+        await adminCourseApi.archiveCourse(courseSlug);
         alert("Course archived successfully!");
         fetchData();
       } catch (err) {
@@ -160,17 +124,19 @@ const CourseViewDetails = () => {
     );
   }
 
+  const instructor = courseData.instructors?.[0];
   const course = {
     ...courseData,
-    rating: courseData.averageRating || "4.7",
-    reviews: courseData.totalRatings || "0",
-    students: courseData.studentsEnrolled || "0",
-    level: courseData.level || "Beginner",
-    duration: courseData.duration || "4h 35m",
-    price: courseData.price ? `₹${courseData.price}` : "₹999",
-    oldPrice: courseData.price ? `₹${courseData.price}` : "₹2,499",
+    rating: courseData.averageRating ?? 0,
+    reviews: courseData.totalRatings ?? 0,
+    students: courseData.totalEnrollments ?? 0,
+    level: courseData.level || "BEGINNER",
+    price: courseData.free ? "Free" : courseData.actualPrice != null ? `₹${courseData.actualPrice}` : "—",
+    discountPrice: courseData.discountPrice,
     image: courseData.thumbnailUrl || S1,
-    language: courseData.language || "English"
+    language: courseData.language || "English",
+    instructorName: instructor?.fullName,
+    instructorCode: instructor?.instructorCode,
   };
 
   const tabs = [
@@ -235,12 +201,14 @@ const CourseViewDetails = () => {
                   </span>
                   <span className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white">
                     <FaClock className="text-gray-400" />
-                    {course.duration}
+                    {modules.length} Modules
                   </span>
-                  <span className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white">
-                    <FaTrophy className="text-gray-400" />
-                    Certificate included
-                  </span>
+                  {courseData.settings?.certificatesEnabled && (
+                    <span className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white">
+                      <FaTrophy className="text-gray-400" />
+                      Certificate included
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -302,11 +270,11 @@ const CourseViewDetails = () => {
                     <p className="text-sm text-gray-500 italic py-4">No modules found for this course.</p>
                   ) : (
                     modules.map((mod, i) => {
-                      const lessonsList = moduleLessons[mod.id] || [];
+                      const lessonsList = moduleLessons[mod.slug] || [];
                       return (
                         <div key={mod.id || i} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50/35">
                           <button
-                            onClick={() => toggleModule(i, mod.id)}
+                            onClick={() => toggleModule(i, mod.slug)}
                             className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition text-left"
                           >
                             <div>
@@ -314,7 +282,7 @@ const CourseViewDetails = () => {
                               {mod.description && <span className="block text-[11px] text-gray-400 mt-0.5">{mod.description}</span>}
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-400">{lessonsList.length || 0} Lessons</span>
+                              <span className="text-xs text-gray-400">{mod.totalLessons ?? lessonsList.length ?? 0} Lessons</span>
                               <FaChevronDown className={`text-gray-400 transition-transform ${expandedModules[i] ? 'rotate-180' : ''}`} />
                             </div>
                           </button>
@@ -329,7 +297,7 @@ const CourseViewDetails = () => {
                                     <div className="flex items-center gap-2">
                                       {lesson.lessonType === "PDF" ? <FaFilePdf className="text-amber-500" /> : <FaVideo className="text-teal-500" />}
                                       <Link
-                                        to={`/admin/course/${id}/lesson/${lesson.id}`}
+                                        to={`/admin/course/${courseSlug}/lesson/${lesson.lessonSlug}`}
                                         className="font-semibold text-gray-700 hover:text-teal-600 transition-colors no-underline"
                                       >
                                         {lesson.title}
@@ -381,12 +349,14 @@ const CourseViewDetails = () => {
                 <div>
                   <p className="text-xs font-semibold text-gray-500 mb-1">Course Price</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-extrabold text-gray-900">{course.price}</span>
-                    {courseData.discountPrice && (
+                    <span className="text-xl font-extrabold text-gray-900">
+                      {course.free ? "Free" : course.discountPrice != null ? `₹${course.discountPrice}` : course.price}
+                    </span>
+                    {!course.free && course.discountPrice != null && courseData.actualPrice > 0 && (
                       <>
-                        <span className="text-sm text-gray-400 line-through">₹{courseData.price}</span>
+                        <span className="text-sm text-gray-400 line-through">₹{courseData.actualPrice}</span>
                         <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
-                          {Math.round(((courseData.price - courseData.discountPrice) / courseData.price) * 100)}% OFF
+                          {Math.round(((courseData.actualPrice - courseData.discountPrice) / courseData.actualPrice) * 100)}% OFF
                         </span>
                       </>
                     )}
@@ -399,11 +369,11 @@ const CourseViewDetails = () => {
                     <span className="text-gray-400 font-medium">System Status</span>
                     <span className={`font-bold px-2.5 py-0.5 rounded-full ${course.status === "PUBLISHED"
                         ? "bg-green-100 text-green-700"
-                        : course.publishRequested
-                          ? "bg-blue-100 text-blue-700"
+                        : course.status === "ARCHIVED"
+                          ? "bg-gray-200 text-gray-700"
                           : "bg-yellow-100 text-yellow-700"
                       }`}>
-                      {course.status === "PUBLISHED" ? "PUBLISHED" : course.publishRequested ? "PUBLISH PENDING" : course.status || "DRAFT"}
+                      {course.status || "DRAFT"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -420,31 +390,15 @@ const CourseViewDetails = () => {
                 <div className="border-t border-gray-100 pt-4 space-y-2">
                   <p className="text-xs font-bold text-gray-800 mb-2 uppercase tracking-wide">Review Actions</p>
 
-                  {course.publishRequested && course.status !== "PUBLISHED" && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handlePublish}
-                        disabled={actionLoading}
-                        className="w-full h-10 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border-none cursor-pointer"
-                      >
-                        <FaCheck /> Publish Course
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleRejectPublish}
-                        disabled={actionLoading}
-                        className="w-full h-10 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold border border-red-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <FaTimesCircle /> Reject Request
-                      </button>
-                    </>
-                  )}
-
-                  {!course.publishRequested && course.status !== "PUBLISHED" && (
-                    <div className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-center text-xs text-gray-500 font-medium">
-                      Instructor has not requested course publication yet.
-                    </div>
+                  {course.status !== "PUBLISHED" && (
+                    <button
+                      type="button"
+                      onClick={handlePublish}
+                      disabled={actionLoading}
+                      className="w-full h-10 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border-none cursor-pointer"
+                    >
+                      <FaCheck /> Publish Course
+                    </button>
                   )}
 
                   {course.status === "PUBLISHED" && (

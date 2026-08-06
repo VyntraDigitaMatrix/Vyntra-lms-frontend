@@ -12,12 +12,13 @@ import {
 } from "react-icons/fa";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { MdOutlineQuiz, MdAssignment, MdInfoOutline, MdCloudUpload } from "react-icons/md";
+import ReactPlayer from "react-player";
 
 
 /* NOTE COLORS CONFIG */
 const NOTE_COLORS = [
     { bg: "bg-yellow-50", border: "border-yellow-200", dot: "bg-yellow-400", label: "Yellow" },
-    { bg: "bg-blue-50", border: "border-blue-200", dot: "bg-blue-400", label: "Blue" },
+    { bg: "bg-navy-50", border: "border-navy-200", dot: "bg-navy-500", label: "Blue" },
     { bg: "bg-green-50", border: "border-green-200", dot: "bg-green-400", label: "Green" },
     { bg: "bg-pink-50", border: "border-pink-200", dot: "bg-pink-400", label: "Pink" },
     { bg: "bg-purple-50", border: "border-purple-200", dot: "bg-purple-400", label: "Purple" },
@@ -115,11 +116,11 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
             <div className="fixed inset-0 bg-black/20 z-40 sm:hidden" onClick={onClose} />
             <div className={panelClass}>
                 {/* Header */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#043573] to-indigo-600 rounded-t-2xl flex-shrink-0">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-navy-800 to-navy-950 rounded-t-2xl flex-shrink-0">
                     <FaStickyNote className="text-white text-sm" />
                     <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-white leading-none">My Notes</p>
-                        <p className="text-[10px] text-blue-200 truncate mt-0.5">{lessonTitle}</p>
+                        <p className="text-[10px] text-navy-100 truncate mt-0.5">{lessonTitle}</p>
                     </div>
                     <div className="flex items-center gap-1">
                         <button onClick={() => setIsExpanded(v => !v)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition text-xs">
@@ -135,7 +136,7 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                     {/* Notes List Sidebar */}
                     <div className="w-36 sm:w-44 border-r border-gray-100 flex flex-col bg-gray-50 flex-shrink-0">
                         <div className="px-2.5 py-2 border-b border-gray-100">
-                            <button onClick={createNote} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#043573] hover:bg-blue-700 text-white text-xs font-bold transition">
+                            <button onClick={createNote} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold transition">
                                 <FaPlus className="text-[9px]" /> New Note
                             </button>
                         </div>
@@ -150,7 +151,7 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                                 const c = NOTE_COLORS[note.color];
                                 return (
                                     <div key={note.id} onClick={() => openNote(note)}
-                                        className={`relative rounded-lg p-2 cursor-pointer border transition group ${activeNoteId === note.id ? "border-blue-400 bg-blue-50 shadow-sm" : `${c.border} ${c.bg} hover:shadow-sm`}`}>
+                                        className={`relative rounded-lg p-2 cursor-pointer border transition group ${activeNoteId === note.id ? "border-navy-500 bg-navy-50 shadow-sm" : `${c.border} ${c.bg} hover:shadow-sm`}`}>
                                         {note.pinned && <FaThumbtack className="absolute top-1.5 right-1.5 text-[8px] text-amber-400" />}
                                         <p className="text-[11px] font-bold text-gray-800 truncate leading-tight">{note.title}</p>
                                         <p className="text-[9px] text-gray-400 mt-0.5 line-clamp-2 leading-tight">{note.text || "Empty note"}</p>
@@ -172,14 +173,14 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                     <div className="flex-1 flex flex-col overflow-hidden">
                         {!activeNoteId ? (
                             <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
-                                <div className="w-16 h-16 rounded-2xl bg-blue-50 border-2 border-dashed border-blue-200 flex items-center justify-center">
-                                    <FaEdit className="text-blue-300 text-xl" />
+                                <div className="w-16 h-16 rounded-2xl bg-navy-50 border-2 border-dashed border-navy-200 flex items-center justify-center">
+                                    <FaEdit className="text-navy-400 text-xl" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-gray-700 mb-1">Start taking notes</p>
                                     <p className="text-xs text-gray-400">Create a new note or select one from the list.</p>
                                 </div>
-                                <button onClick={createNote} className="flex items-center gap-1.5 px-4 py-2 bg-[#043573] hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition">
+                                <button onClick={createNote} className="flex items-center gap-1.5 px-4 py-2 bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold rounded-lg transition">
                                     <FaPlus className="text-[9px]" /> Create First Note
                                 </button>
                             </div>
@@ -210,13 +211,13 @@ const TakeNotesPanel = ({ lessonId, lessonTitle, onClose }) => {
                                         { icon: <FaListOl />, action: "number", tip: "Numbered list" },
                                     ].map(({ icon, action, tip }) => (
                                         <button key={action} onClick={() => insertFormat(action)} title={tip}
-                                            className="w-6 h-6 flex items-center justify-center rounded text-[10px] text-gray-500 hover:bg-blue-100 hover:text-[#043573] transition">
+                                            className="w-6 h-6 flex items-center justify-center rounded text-[10px] text-gray-500 hover:bg-navy-100 hover:text-navy-800 transition">
                                             {icon}
                                         </button>
                                     ))}
                                     <div className="flex-1" />
                                     <button onClick={saveNote}
-                                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${savedFlash ? "bg-green-100 text-green-600" : "bg-[#043573] text-white hover:bg-blue-700"}`}>
+                                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${savedFlash ? "bg-green-100 text-green-600" : "bg-navy-800 text-white hover:bg-navy-900"}`}>
                                         {savedFlash ? <><FaCheck className="text-[8px]" /> Saved!</> : <><FaSave className="text-[8px]" /> Save</>}
                                     </button>
                                 </div>
@@ -324,8 +325,8 @@ const QuizView = ({ quizData, moduleColor, onComplete, isCompleted }) => {
                 </div>
                 <div className="mb-6 flex flex-col items-center">
                     {requestSent ? (
-                        <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
-                            <FaCheckCircle className="text-blue-400" /> Quiz request already sent
+                        <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-navy-500/10 border border-navy-500/20 text-navy-500 text-xs font-bold">
+                            <FaCheckCircle className="text-navy-500" /> Quiz request already sent
                         </div>
                     ) : (
                         <button onClick={() => setRequestSent(true)}
@@ -1215,13 +1216,13 @@ const noteCount = (() => {
    RENDER
 ══════════════════════════════════════════ */
 return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col antialiased selection:bg-indigo-500/20">
+    <div className="min-h-screen bg-navy-50/40 flex flex-col antialiased selection:bg-brand-orange/20">
 
         {/* ── Top Bar ── */}
         <div className="bg-white border-b border-slate-200/80 px-5 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
             <div className="flex items-center gap-3">
                 <Link to={`/student/continue-learning/${courseSlug}`}
-                    className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#043573] transition">
+                    className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-800 transition">
                     <FaChevronLeft className="w-2.5 h-2.5" /> Course
                 </Link>
                 <span className="text-slate-200 font-light">|</span>
@@ -1232,20 +1233,20 @@ return (
             <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-3 py-1.5 border border-slate-200/60 rounded-xl">
                     <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#043573] rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                        <div className="h-full bg-gradient-to-r from-navy-700 to-brand-orange rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
                     </div>
-                    <span className="text-[11px] text-[#043573]/90 font-extrabold tracking-wide uppercase">{progressPct}% Done</span>
+                    <span className="text-[11px] text-navy-800/90 font-extrabold tracking-wide uppercase">{progressPct}% Done</span>
                 </div>
                 <button onClick={() => {
                     localStorage.setItem("openNoteEditor", "true");
                     localStorage.setItem("notesCourseId", courseId);
                     navigate(`/student/notes`);
                 }}
-                    className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex-shrink-0 bg-white border-gray-200 text-gray-600 hover:border-[#043573]/90 hover:text-[#043573] hover:bg-blue-50">
+                    className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all flex-shrink-0 bg-white border-gray-200 text-gray-600 hover:border-navy-800/90 hover:text-navy-800 hover:bg-navy-50">
                     <FaStickyNote className="text-[11px]" />
                     <span className="hidden sm:inline">Notes</span>
                     {noteCount > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center bg-[#043573] text-white">
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center bg-navy-800 text-white">
                             {noteCount}
                         </span>
                     )}
@@ -1265,23 +1266,23 @@ return (
 
                     {/* Breadcrumb */}
                     <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] tracking-wide text-blue-400 font-bold uppercase flex items-center flex-wrap gap-x-1">
-                            <Link to={`/student/continue-learning/${courseId}`} className="hover:text-blue-700 transition">{courseName}</Link>
-                            <span className="font-normal text-blue-300">/</span>
-                            <span className="text-blue-500">{moduleName}</span>
-                            <span className="font-normal text-blue-300">/</span>
-                            <span className="text-blue-600 font-extrabold truncate max-w-[200px]">{content.title}</span>
+                        <p className="text-[11px] tracking-wide text-navy-500 font-bold uppercase flex items-center flex-wrap gap-x-1">
+                            <Link to={`/student/continue-learning/${courseId}`} className="hover:text-navy-900 transition">{courseName}</Link>
+                            <span className="font-normal text-navy-400">/</span>
+                            <span className="text-navy-500">{moduleName}</span>
+                            <span className="font-normal text-navy-400">/</span>
+                            <span className="text-navy-800 font-extrabold truncate max-w-[200px]">{content.title}</span>
                         </p>
                         <button onClick={() => {
                             localStorage.setItem("openNoteEditor", "true");
                             localStorage.setItem("notesCourseId", String(courseId));
                             navigate(`/student/notes`);
                         }}
-                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition flex-shrink-0 border bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-[#043573]">
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition flex-shrink-0 border bg-white text-gray-600 border-gray-200 hover:border-navy-500 hover:bg-navy-50 hover:text-navy-800">
                             <FaStickyNote className="w-3 h-3" />
                             Take Notes
                             {noteCount > 0 && (
-                                <span className="bg-[#043573] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{noteCount}</span>
+                                <span className="bg-navy-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{noteCount}</span>
                             )}
                         </button>
                     </div>
@@ -1318,14 +1319,29 @@ return (
                             ) : isAssignment ? (
                                 <AssignmentView lessonData={lessonData} moduleColor={moduleColor} onSubmit={markComplete} isSubmitted={isDone} />
                             ) : isVideo && content.videoUrl ? (
-                                <video className="w-full h-full object-cover" controls key={content.videoUrl} poster={lessonData?.thumbnailUrl || lessonData?.thumbnail || undefined}>
-                                    <source src={content.videoUrl} />
-                                    Your browser does not support the video tag.
-                                </video>
+                                <ReactPlayer
+                                    url={content.videoUrl}
+                                    className="react-player"
+                                    width="100%"
+                                    height="100%"
+                                    controls
+                                    playing={isPlaying}
+                                    onPlay={() => setIsPlaying(true)}
+                                    onPause={() => setIsPlaying(false)}
+                                    onEnded={markComplete}
+                                    light={content.thumbnailUrl || false}
+                                    playIcon={
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-all cursor-pointer">
+                                            <div className="w-16 h-16 rounded-full bg-navy-800 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                                                <FaPlay className="ml-1 text-lg" />
+                                            </div>
+                                        </div>
+                                    }
+                                />
                             ) : isVideo ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                                    <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
-                                        <FaPlay className="text-blue-400 text-2xl" />
+                                    <div className="w-16 h-16 rounded-2xl bg-navy-800/20 flex items-center justify-center">
+                                        <FaPlay className="text-navy-500 text-2xl" />
                                     </div>
                                     <p className="text-white/60 text-xs font-semibold">No content available for this lesson</p>
                                 </div>
@@ -1336,8 +1352,8 @@ return (
                                     </div>
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                                        <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
-                                            <FaBook className="text-blue-400 text-2xl" />
+                                        <div className="w-16 h-16 rounded-2xl bg-navy-800/20 flex items-center justify-center">
+                                            <FaBook className="text-navy-500 text-2xl" />
                                         </div>
                                         <p className="text-white/60 text-xs font-semibold">No content available for this article</p>
                                     </div>
@@ -1351,16 +1367,16 @@ return (
                                     />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                                        <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
-                                            <FaDownload className="text-blue-400 text-2xl" />
+                                        <div className="w-16 h-16 rounded-2xl bg-navy-800/20 flex items-center justify-center">
+                                            <FaDownload className="text-navy-500 text-2xl" />
                                         </div>
                                         <p className="text-white/60 text-xs font-semibold">No document available for this lesson</p>
                                     </div>
                                 )
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                                    <div className="w-16 h-16 rounded-2xl bg-[#043573]/20 flex items-center justify-center">
-                                        <FaPlay className="text-blue-400 text-2xl" />
+                                    <div className="w-16 h-16 rounded-2xl bg-navy-800/20 flex items-center justify-center">
+                                        <FaPlay className="text-navy-500 text-2xl" />
                                     </div>
                                     <p className="text-white/60 text-xs font-semibold">No content available for this lesson</p>
                                 </div>
@@ -1374,7 +1390,7 @@ return (
                             <div>
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider uppercase text-white shadow-2xs"
-                                        style={{ backgroundColor: "#043573" }}>
+                                        style={{ backgroundColor: "#122a5e" }}>
                                         {moduleName.split(": ")[0] || moduleName}
                                     </span>
                                     {isDone && (
@@ -1410,8 +1426,8 @@ return (
                                         onClick={markComplete}
                                         disabled={markCompleteLoading}
                                         className={`flex items-center gap-2 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs flex-shrink-0 ${markCompleteLoading
-                                                ? "bg-blue-400 cursor-not-allowed"
-                                                : "bg-blue-600 hover:bg-blue-500"
+                                                ? "bg-navy-500 cursor-not-allowed"
+                                                : "bg-brand-orange hover:bg-brand-orange-dark"
                                             }`}>
                                         {markCompleteLoading ? (
                                             <>
@@ -1483,7 +1499,7 @@ return (
                         <button
                             onClick={() => nextEntry && goTo(nextEntry.moduleSlug, nextEntry.lessonSlug)}
                             disabled={!nextEntry}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${nextEntry ? "bg-[#043573] text-white shadow-xs hover:bg-[#043573]/90" : "border-slate-100 text-slate-300 bg-slate-50/50 cursor-not-allowed"}`}>
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${nextEntry ? "bg-navy-800 text-white shadow-xs hover:bg-navy-800/90" : "border-slate-100 text-slate-300 bg-slate-50/50 cursor-not-allowed"}`}>
                             Next <FaChevronRight className="w-2.5 h-2.5" />
                         </button>
                     </div>
@@ -1494,12 +1510,12 @@ return (
             {sidebarOpen && (
                 <div className="w-80 bg-white border-l border-slate-200 flex-shrink-0 overflow-y-auto hidden lg:block shadow-sm">
                     <div className="sticky top-0 bg-white border-b border-slate-100 px-4 py-4 z-10">
-                        <h2 className="text-xs font-black text-[#043573] uppercase tracking-wider">Course Outline</h2>
+                        <h2 className="text-xs font-black text-navy-800 uppercase tracking-wider">Course Outline</h2>
                         <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wide">
                             {completedCount} of {totalLessons} Lessons Done
                         </p>
                         <div className="w-full h-1 bg-slate-100 rounded-full mt-2.5 overflow-hidden">
-                            <div className="h-full bg-[#043573] rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                            <div className="h-full bg-gradient-to-r from-navy-700 to-brand-orange rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
                         </div>
                     </div>
 
@@ -1579,7 +1595,7 @@ return (
 
                                                             let itemClass = "w-full flex items-center gap-3 px-4 py-2.5 text-left border-l-2 border-transparent transition-all ";
                                                             if (isActive)
-                                                                itemClass += "bg-[#043573] text-white font-semibold border-l-[#043573]";
+                                                                itemClass += "bg-navy-800 text-white font-semibold border-l-navy-800";
                                                             else if (isAssignLesson)
                                                                 itemClass += "hover:bg-amber-50/50 text-slate-700 hover:border-l-amber-300";
                                                             else if (isQuizLesson)
@@ -1606,7 +1622,7 @@ return (
                                                                         <p className={`text-xs truncate leading-tight ${isActive ? "text-white" : isAssignLesson ? "text-amber-800 font-semibold" : isQuizLesson ? "text-indigo-800 font-semibold" : "text-slate-700 font-medium"}`}>
                                                                             {lesson.title}
                                                                         </p>
-                                                                        <p className={`text-[10px] mt-0.5 ${isActive ? "text-blue-100" : isAssignLesson ? "text-amber-500" : isQuizLesson ? "text-indigo-400" : "text-slate-400"}`}>
+                                                                        <p className={`text-[10px] mt-0.5 ${isActive ? "text-navy-100" : isAssignLesson ? "text-amber-500" : isQuizLesson ? "text-indigo-400" : "text-slate-400"}`}>
                                                                             {isAssignLesson ? "Assignment" : isQuizLesson ? "Quiz" : lesson.durationInMinutes ? `${lesson.durationInMinutes} min` : lesson.duration || ""}
                                                                         </p>
                                                                     </div>

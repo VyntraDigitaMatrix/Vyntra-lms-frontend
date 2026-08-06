@@ -51,7 +51,7 @@ const qaData = [
 
 /* ── Main Component ── */
 const LessonView = () => {
-    const { courseId, lessonId } = useParams();
+    const { courseSlug, lessonSlug } = useParams();
     const [curriculum, setCurriculum] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -66,61 +66,38 @@ const LessonView = () => {
     // Fetch modules and lessons
     useEffect(() => {
         let isMounted = true;
-        
+
         const fetchCurriculum = async () => {
             setLoading(true);
             setError("");
             try {
                 // Fetch modules
-                const modulesRes = await adminCourseApi.getCourseModules(courseId);
+                const modulesRes = await adminCourseApi.getCourseModules(courseSlug);
                 const fetchedModules = modulesRes.data?.data?.content || [];
                 fetchedModules.sort((a, b) => a.sortOrder - b.sortOrder);
-                
+
                 // Fetch lessons for all modules in parallel
                 const curriculumWithLessons = await Promise.all(
                     fetchedModules.map(async (mod) => {
                         try {
-                            const lessonsRes = await adminCourseApi.getModuleLessons(mod.id);
+                            const lessonsRes = await adminCourseApi.getModuleLessons(mod.slug);
                             const lessons = lessonsRes.data?.data?.content || [];
                             lessons.sort((a, b) => a.sortOrder - b.sortOrder);
                             return { ...mod, lessons };
                         } catch (err) {
-                            console.error(`Error fetching lessons for module ${mod.id}:`, err);
+                            console.error(`Error fetching lessons for module ${mod.slug}:`, err);
                             return { ...mod, lessons: [] };
                         }
                     })
                 );
-                
+
                 if (isMounted) {
                     setCurriculum(curriculumWithLessons);
                 }
             } catch (err) {
-                console.error("Error loading curriculum, falling back to mock:", err);
+                console.error("Error loading curriculum:", err);
                 if (isMounted) {
-                    // Fallback to match CourseViewDetails.jsx fallbacks
-                    const fallbackCurriculum = [
-                        {
-                            id: "mock1",
-                            title: "Module 1: Introduction & Basics",
-                            description: "Get started with the fundamentals.",
-                            sortOrder: 1,
-                            lessons: [
-                                { id: "ml1", title: "1. Welcome & Orientation", durationInMinutes: 5, previewAllowed: true, lessonType: "VIDEO", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-                                { id: "ml2", title: "2. Setting Up Your Workspace", durationInMinutes: 12, previewAllowed: false, lessonType: "VIDEO", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" }
-                            ]
-                        },
-                        {
-                            id: "mock2",
-                            title: "Module 2: Advanced Core Concepts",
-                            description: "Deep dive into core mechanics.",
-                            sortOrder: 2,
-                            lessons: [
-                                { id: "ml3", title: "3. First Practical Project", durationInMinutes: 20, previewAllowed: false, lessonType: "VIDEO", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-                                { id: "ml4", title: "4. Performance Optimization", durationInMinutes: 15, previewAllowed: false, lessonType: "PDF", resourceUrl: "https://www.w3schools.com/html/mov_bbb.mp4" }
-                            ]
-                        }
-                    ];
-                    setCurriculum(fallbackCurriculum);
+                    setError("Failed to load course curriculum from the server.");
                 }
             } finally {
                 if (isMounted) {
@@ -129,21 +106,21 @@ const LessonView = () => {
             }
         };
 
-        if (courseId) {
+        if (courseSlug) {
             fetchCurriculum();
         }
-        
+
         return () => {
             isMounted = false;
         };
-    }, [courseId]);
+    }, [courseSlug]);
 
     // Derived values
     const allLessons = curriculum.flatMap(m => m.lessons || []);
-    
+
     // Find current lesson. Fallback to first lesson if not found.
-    const currentLesson = allLessons.find(l => String(l.id) === String(lessonId)) || allLessons[0];
-    
+    const currentLesson = allLessons.find(l => String(l.lessonSlug) === String(lessonSlug)) || allLessons[0];
+
     // Index mapping for prev / next navigation
     const currentIndex = allLessons.findIndex(l => String(l.id) === String(currentLesson?.id));
     const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
@@ -234,7 +211,7 @@ const LessonView = () => {
                     <p className="text-sm font-bold mb-2">⚠️ Error Loading Lesson</p>
                     <p className="text-xs text-gray-600 mb-4">{error}</p>
                     <Link
-                        to={`/admin/course-preview/${courseId}`}
+                        to={`/admin/course-preview/${courseSlug}`}
                         className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition no-underline"
                     >
                         Back to Course Preview
@@ -251,7 +228,7 @@ const LessonView = () => {
                     <p className="text-sm font-bold mb-2">📚 No Lessons Found</p>
                     <p className="text-xs text-gray-600 mb-4">There are no lessons created for this course yet.</p>
                     <Link
-                        to={`/admin/course-preview/${courseId}`}
+                        to={`/admin/course-preview/${courseSlug}`}
                         className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition no-underline"
                     >
                         Back to Course Preview
@@ -267,7 +244,7 @@ const LessonView = () => {
             {/* ══ TOP NAV ══ */}
             <nav className="bg-white border-b border-gray-200 px-5 h-18 flex items-center gap-4 sticky top-0 z-40 shadow-sm">
                 <Link
-                    to={`/admin/course-preview/${courseId}`}
+                    to={`/admin/course-preview/${courseSlug}`}
                     className="flex items-center gap-1.5 text-gray-500 text-sm font-semibold px-3 py-1.5 rounded-lg bg-[#F6F7FB] border border-gray-200 hover:border-teal-500 hover:text-teal-600 transition-all no-underline"
                 >
                     <FaChevronLeft className="text-[10px]" />
@@ -579,7 +556,7 @@ const LessonView = () => {
                         <div className="flex items-center justify-between gap-3 mt-10 pt-6 border-t border-gray-200">
                             {prevLesson ? (
                                 <Link
-                                    to={`/admin/course/${courseId}/lesson/${prevLesson.id}`}
+                                    to={`/admin/course/${courseSlug}/lesson/${prevLesson.lessonSlug}`}
                                     className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl no-underline max-w-[46%] hover:border-teal-400 hover:shadow-sm transition-all group"
                                 >
                                     <div className="w-8 h-8 rounded-lg bg-[#F6F7FB] border border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-teal-300 transition-colors">
@@ -594,7 +571,7 @@ const LessonView = () => {
 
                             {nextLesson ? (
                                 <Link
-                                    to={`/admin/course/${courseId}/lesson/${nextLesson.id}`}
+                                    to={`/admin/course/${courseSlug}/lesson/${nextLesson.lessonSlug}`}
                                     className="flex items-center gap-3 px-4 py-3 bg-teal-600 rounded-xl no-underline max-w-[46%] ml-auto shadow-[0_3px_14px_rgba(13,148,136,0.3)] hover:bg-teal-700 hover:-translate-y-0.5 transition-all"
                                 >
                                     <div className="min-w-0 text-right">
@@ -684,7 +661,7 @@ const LessonView = () => {
                                                     return (
                                                         <Link
                                                             key={lesson.id}
-                                                            to={`/admin/course/${courseId}/lesson/${lesson.id}`}
+                                                            to={`/admin/course/${courseSlug}/lesson/${lesson.lessonSlug}`}
                                                             onClick={() => setSidebarOpen(false)}
                                                             className={`flex items-start gap-2.5 pl-12 pr-3 py-2.5 no-underline transition-colors duration-150
                                                             ${isActive

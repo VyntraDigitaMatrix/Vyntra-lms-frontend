@@ -75,21 +75,23 @@ const AllCourses = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f7fb] p-3 sm:p-4 md:p-6">
+    <div className="min-h-screen bg-navy-50/40 p-3 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-4 sm:mb-5">
-          <p className="text-xs sm:text-sm text-gray-400 mb-1">
-            <Link to="/student/dashboard" className="hover:text-[#043573] transition">
+        {/* Header Banner */}
+        <div className="mb-4 sm:mb-5 bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 rounded-3xl p-5 sm:p-6 shadow-lg relative overflow-hidden">
+          <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/15 blur-2xl pointer-events-none"></div>
+          <p className="relative text-xs sm:text-sm text-navy-100/60 mb-1">
+            <Link to="/student/dashboard" className="hover:text-brand-orange-light transition">
               Dashboard
             </Link>
             <span className="mx-2">&gt;</span>
-            <span className="text-gray-700 font-medium text-xs sm:text-sm">All Courses</span>
+            <span className="text-white font-medium text-xs sm:text-sm">All Courses</span>
           </p>
-          <h1 className="text-lg sm:text-xl font-bold text-gray-900 mt-2 sm:mt-3">
+          <h1 className="relative text-lg sm:text-xl font-bold text-white mt-2 sm:mt-3">
             All Courses
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
+          <div className="relative h-1 w-12 bg-brand-orange rounded-full mt-2 mb-2"></div>
+          <p className="relative text-xs sm:text-sm text-navy-100/70">
             Explore our comprehensive digital marketing courses and enhance your skills.
           </p>
         </div>
@@ -105,7 +107,7 @@ const AllCourses = () => {
               setSortBy(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-9 sm:h-10 px-3 sm:px-5 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm outline-none focus:ring-0 focus:border-gray-200 order-1 sm:order-2 w-full sm:w-auto"
+            className="h-9 sm:h-10 px-3 sm:px-5 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm outline-none focus:ring-1 focus:ring-navy-600 focus:border-navy-600 order-1 sm:order-2 w-full sm:w-auto"
           >
             <option value="Popular">Sort by: Popular</option>
             <option value="Latest">Sort by: Latest</option>
@@ -115,7 +117,7 @@ const AllCourses = () => {
         {/* Courses Grid - Responsive */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="w-8 h-8 border-4 border-t-[#043573] border-gray-200 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-t-navy-800 border-gray-200 rounded-full animate-spin"></div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-xs font-semibold">
@@ -135,7 +137,7 @@ const AllCourses = () => {
                     className="w-full h-[120px] sm:h-[150px] object-cover"
                   />
                   {course.badge && (
-                    <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#043573] text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                    <span className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-brand-orange text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
                       {course.badge}
                     </span>
                   )}
@@ -178,8 +180,8 @@ const AllCourses = () => {
                   <Link
                     to={course.enrolled ? `/student/continue-learning/${course.slug || course.id}` : `/student/course-preview/${course.slug || course.courseId || course.id}`}
                     className={`block mt-3 sm:mt-4 text-center text-xs sm:text-sm font-medium px-3 py-1.5 sm:py-2 rounded-lg transition ${course.enrolled
-                      ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
-                      : "text-white bg-[#043573] hover:bg-blue-900"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                      : "text-white bg-brand-orange hover:bg-brand-orange-dark"
                       }`}
                   >
                     {course.enrolled ? "Continue Learning" : "View Course"}
@@ -195,7 +197,7 @@ const AllCourses = () => {
           <button
             onClick={() => changePage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-800/10 transition-colors shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-navy-100 transition-colors shrink-0"
           >
             <FaChevronLeft size={12} className="sm:text-sm" />
           </button>
@@ -205,8 +207,8 @@ const AllCourses = () => {
               key={page}
               onClick={() => changePage(page)}
               className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md text-xs sm:text-sm font-semibold transition-colors shrink-0 ${currentPage === page
-                ? "bg-[#043573] text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-"
+                ? "bg-brand-orange text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:bg-navy-50"
                 }`}
             >
               {page}
@@ -216,7 +218,7 @@ const AllCourses = () => {
           <button
             onClick={() => changePage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-blue-800/10 transition-colors shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-gray-100 disabled:text-gray-300 flex items-center justify-center hover:bg-navy-100 transition-colors shrink-0"
           >
             <FaChevronRight size={12} className="sm:text-sm" />
           </button>

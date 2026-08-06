@@ -73,6 +73,7 @@ export const studentAuth = {
   forgotPassword: (data) => api.post("/api/student/auth/forgot-password", data),
   resetPassword: (data) => api.post("/api/student/auth/reset-password", data),
   logout: () => api.post("/api/student/auth/logout"),
+  googleLogin: (data) => api.post("/api/oauth/google", data),
 };
 
 export const studentCourseApi = {

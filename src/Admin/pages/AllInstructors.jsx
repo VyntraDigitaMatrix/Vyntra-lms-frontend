@@ -4,11 +4,9 @@ import {
   Search,
   UserPlus,
   Edit,
-  Trash2,
   X,
   ChevronDown,
   ChevronUp,
-  Mail,
   Eye,
   CheckSquare,
   Square,
@@ -20,6 +18,16 @@ import {
   RefreshCw
 } from "lucide-react";
 import { adminManagement } from "../auth/api";
+
+const initials = (name) => (name ? name.trim().charAt(0).toUpperCase() : "I");
+
+const Avatar = ({ name, size = "w-9 h-9", textSize = "text-xs" }) => (
+  <div
+    className={`${size} rounded-full bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center ${textSize} font-bold text-white flex-shrink-0`}
+  >
+    {initials(name)}
+  </div>
+);
 
 const InstructorsManagement = () => {
   // ---------- API State ----------
@@ -36,8 +44,7 @@ const InstructorsManagement = () => {
   const [sortField, setSortField] = useState("fullName");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedInstructors, setSelectedInstructors] = useState([]);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
-  
+
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -215,12 +222,12 @@ const InstructorsManagement = () => {
   const sortedInstructors = [...instructors].sort((a, b) => {
     let aVal = a[sortField] || "";
     let bVal = b[sortField] || "";
-    
+
     if (typeof aVal === "string") {
       aVal = aVal.toLowerCase();
       bVal = bVal.toLowerCase();
     }
-    
+
     if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
     if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
     return 0;
@@ -250,89 +257,92 @@ const InstructorsManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-navy-50/40 p-5">
       {/* Breadcrumbs */}
-      <div className="max-w-7xl mx-auto mb-4">
-        <p className="text-sm text-gray-400 mb-1 flex items-center">
-          <Link to="/admin/dashboard" className="hover:text-teal-600 transition">
-            Dashboard
-          </Link>
-          <span className="mx-2">&gt;</span>
-          <span className="text-none font-medium text-gray-600">All Instructors</span>
-        </p>
-      </div>
+      <p className="text-sm text-gray-400 mb-4 flex items-center">
+        <Link to="/admin/dashboard" className="hover:text-brand-orange-dark transition">
+          Dashboard
+        </Link>
+        <span className="mx-2">&gt;</span>
+        <span className="font-medium text-gray-600">All Instructors</span>
+      </p>
 
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Instructors Management</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage your teaching staff, track status, and register instructors</p>
-        </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => { fetchInstructors(); fetchStats(); }}
-            className="p-2 text-gray-600 hover:text-teal-600 border border-gray-200 bg-white rounded-lg transition"
-            title="Refresh Data"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button 
-            onClick={handleOpenAddModal} 
-            className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow-sm font-semibold text-sm"
-          >
-            <UserPlus size={18} />
-            Add Instructor
-          </button>
+      {/* Header banner */}
+      <div className="rounded-2xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 px-6 py-6 shadow-lg relative overflow-hidden mb-6">
+        <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/10 blur-2xl" />
+        <div className="absolute right-16 bottom-0 w-24 h-24 rounded-full bg-brand-orange/20 blur-xl" />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Instructors Management</h1>
+            <div className="h-1 w-12 bg-brand-orange rounded-full mt-2 mb-2" />
+            <p className="text-sm text-navy-100/70">Manage your teaching staff, track status, and register instructors</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { fetchInstructors(); fetchStats(); }}
+              className="p-2.5 text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg transition cursor-pointer"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={handleOpenAddModal}
+              className="flex items-center gap-2 bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-brand-orange-dark transition shadow-sm font-semibold text-sm cursor-pointer"
+            >
+              <UserPlus size={18} />
+              Add Instructor
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-navy-50 text-navy-700 flex items-center justify-center">
               <Users size={18} />
             </div>
           </div>
           <div className="mt-2">
             <p className="text-gray-500 text-xs">Total Instructors</p>
-            <h3 className="text-xl font-bold text-gray-800">{totalCount}</h3>
+            <h3 className="text-xl font-bold text-navy-900">{totalCount}</h3>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <ShieldCheck size={18} />
             </div>
           </div>
           <div className="mt-2">
             <p className="text-gray-500 text-xs">Active Instructors</p>
-            <h3 className="text-xl font-bold text-gray-800">{activeCount}</h3>
+            <h3 className="text-xl font-bold text-navy-900">{activeCount}</h3>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <X size={18} className="text-amber-600" />
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center">
+              <X size={18} />
             </div>
           </div>
           <div className="mt-2">
             <p className="text-gray-500 text-xs">Inactive Instructors</p>
-            <h3 className="text-xl font-bold text-gray-800">{totalCount - activeCount}</h3>
+            <h3 className="text-xl font-bold text-navy-900">{totalCount - activeCount}</h3>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <ShieldCheck size={18} className="text-blue-600" />
+            <div className="w-8 h-8 rounded-lg bg-brand-orange-50 text-brand-orange-dark flex items-center justify-center">
+              <ShieldCheck size={18} />
             </div>
           </div>
           <div className="mt-2">
             <p className="text-gray-500 text-xs">Verified (Page)</p>
-            <h3 className="text-xl font-bold text-gray-800">
+            <h3 className="text-xl font-bold text-navy-900">
               {instructors.filter(i => i.emailVerified).length}
             </h3>
           </div>
@@ -341,13 +351,13 @@ const InstructorsManagement = () => {
 
       {/* Error Banner */}
       {error && (
-        <div className="max-w-7xl mx-auto bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 mb-6 text-sm">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 mb-6 text-sm">
           {error}
         </div>
       )}
 
       {/* Filter Bar & Table */}
-      <div className="max-w-7xl mx-auto bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
         {/* Filters */}
         <div className="p-4 flex flex-wrap items-center gap-3 border-b border-gray-100">
           <div className="relative flex-1 min-w-[200px]">
@@ -360,17 +370,17 @@ const InstructorsManagement = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+              className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:ring-1 focus:ring-navy-600 focus:border-navy-600 outline-none"
             />
           </div>
           <div className="relative">
-            <select 
-              value={statusFilter} 
+            <select
+              value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
-              }} 
-              className="appearance-none border border-gray-200 rounded-lg px-3 py-1.5 pr-7 bg-white focus:ring-1 focus:ring-teal-500 outline-none text-sm cursor-pointer"
+              }}
+              className="appearance-none border border-gray-200 rounded-lg px-3 py-1.5 pr-7 bg-white focus:ring-1 focus:ring-navy-600 outline-none text-sm cursor-pointer"
             >
               <option value="all">All Status</option>
               <option value="active">Active Only</option>
@@ -382,11 +392,11 @@ const InstructorsManagement = () => {
 
         {/* Bulk Actions Bar */}
         {selectedInstructors.length > 0 && (
-          <div className="bg-teal-50/40 px-4 py-2 flex items-center justify-between border-b border-gray-100">
+          <div className="bg-navy-50 px-4 py-2 flex items-center justify-between border-b border-navy-100">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-teal-800">{selectedInstructors.length} instructor(s) selected</span>
+              <span className="text-xs font-medium text-navy-800">{selectedInstructors.length} instructor(s) selected</span>
             </div>
-            <button className="text-xs text-teal-700 bg-white border border-teal-200 px-3 py-1 rounded hover:bg-teal-50 transition">
+            <button className="text-xs text-navy-800 bg-white border border-navy-200 px-3 py-1 rounded hover:bg-navy-50 transition">
               Group Message
             </button>
           </div>
@@ -396,61 +406,64 @@ const InstructorsManagement = () => {
         <div className="overflow-x-auto scrollbar-hide">
           {loading ? (
             <div className="p-20 text-center text-gray-500">
-              <div className="w-10 h-10 border-4 border-t-teal-600 border-gray-200 rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-10 h-10 border-4 border-t-navy-700 border-gray-200 rounded-full animate-spin mx-auto mb-4"></div>
               <span>Fetching instructors...</span>
             </div>
           ) : (
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-navy-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 w-10">
-                    <button 
-                      onClick={toggleSelectAll} 
-                      className="text-gray-400 hover:text-teal-600 transition"
+                    <button
+                      onClick={toggleSelectAll}
+                      className="text-gray-400 hover:text-navy-700 transition"
                       disabled={instructors.length === 0}
                     >
-                      {selectedInstructors.length === instructors.length && instructors.length > 0 ? 
-                        <CheckSquare size={14} className="text-teal-600" /> : <Square size={14} />
+                      {selectedInstructors.length === instructors.length && instructors.length > 0 ?
+                        <CheckSquare size={14} className="text-navy-700" /> : <Square size={14} />
                       }
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[15%]">Instructor Code</th>
-                  <th 
-                    className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:text-teal-600 w-[25%]"
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[15%]">Instructor Code</th>
+                  <th
+                    className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider cursor-pointer hover:text-brand-orange-dark w-[25%]"
                     onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center gap-1">
                       Instructor Name
                       {sortField === 'fullName' && (
-                        sortDirection === 'asc' ? <ChevronUp size={12} className="text-teal-600" /> : <ChevronDown size={12} className="text-teal-600" />
+                        sortDirection === 'asc' ? <ChevronUp size={12} className="text-brand-orange" /> : <ChevronDown size={12} className="text-brand-orange" />
                       )}
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">Email</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[15%]">Mobile</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Email Verified</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[10%]">Actions</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[25%]">Email</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[15%]">Mobile</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[10%]">Email Verified</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[10%]">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-navy-800 uppercase tracking-wider w-[10%]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {sortedInstructors.map((instructor) => (
-                  <tr key={instructor.instructorCode} className="hover:bg-gray-50 transition group">
+                  <tr key={instructor.instructorCode} className="hover:bg-navy-50/50 transition group">
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleSelectInstructor(instructor.instructorCode)} className="text-gray-400 hover:text-teal-600 transition">
+                      <button onClick={() => toggleSelectInstructor(instructor.instructorCode)} className="text-gray-400 hover:text-navy-700 transition">
                         {selectedInstructors.includes(instructor.instructorCode) ? (
-                          <CheckSquare size={14} className="text-teal-600" />
+                          <CheckSquare size={14} className="text-navy-700" />
                         ) : (
                           <Square size={14} />
                         )}
                       </button>
                     </td>
-                    <td className="px-4 py-3 font-mono text-gray-600 text-xs">
+                    <td className="px-4 py-3 font-mono text-gray-500 text-xs">
                       {instructor.instructorCode}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900 text-sm group-hover:text-teal-600 transition-colors">
-                        {instructor.fullName}
+                      <div className="flex items-center gap-3">
+                        <Avatar name={instructor.fullName} />
+                        <div className="font-medium text-gray-900 text-sm group-hover:text-navy-800 transition-colors">
+                          {instructor.fullName}
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-500 text-sm">
@@ -461,11 +474,11 @@ const InstructorsManagement = () => {
                     </td>
                     <td className="px-4 py-3">
                       {instructor.emailVerified ? (
-                        <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                        <span className="text-emerald-600 text-xs font-semibold flex items-center gap-1">
                           <ShieldCheck size={14} /> Yes
                         </span>
                       ) : (
-                        <span className="text-red-500 text-xs font-semibold">
+                        <span className="text-rose-500 text-xs font-semibold">
                           ✕ No
                         </span>
                       )}
@@ -474,28 +487,28 @@ const InstructorsManagement = () => {
                       <button
                         onClick={() => handleToggleStatus(instructor.instructorCode)}
                         className={`px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center cursor-pointer transition ${
-                          instructor.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          instructor.isActive ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
                         }`}
                         title="Click to toggle status"
                       >
                         <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          instructor.isActive ? 'bg-green-500' : 'bg-red-500'
+                          instructor.isActive ? 'bg-emerald-500' : 'bg-rose-500'
                         }`}></span>
                         <span>{instructor.isActive ? "Active" : "Inactive"}</span>
                       </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <button 
-                          onClick={() => handleViewInstructor(instructor.instructorCode)} 
-                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-teal-600 transition" 
+                        <button
+                          onClick={() => handleViewInstructor(instructor.instructorCode)}
+                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-navy-50 hover:text-navy-700 hover:border-navy-300 transition"
                           title="View Details"
                         >
                           <Eye size={14} />
                         </button>
-                        <button 
-                          onClick={() => handleOpenEditModal(instructor)} 
-                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-teal-600 transition" 
+                        <button
+                          onClick={() => handleOpenEditModal(instructor)}
+                          className="p-1 rounded border border-gray-200 text-gray-500 hover:bg-brand-orange-50 hover:text-brand-orange-dark hover:border-brand-orange/40 transition"
                           title="Edit Instructor"
                         >
                           <Edit size={14} />
@@ -507,6 +520,7 @@ const InstructorsManagement = () => {
                 {sortedInstructors.length === 0 && (
                   <tr>
                     <td colSpan="8" className="text-center py-10 text-gray-400">
+                      <Users className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                       No instructors found.
                     </td>
                   </tr>
@@ -518,23 +532,23 @@ const InstructorsManagement = () => {
 
         {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-gray-100 flex justify-between items-center">
+          <div className="px-4 py-3 border-t border-navy-100 flex justify-between items-center">
             <div className="text-xs text-gray-500">
               Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalElements)} of {totalElements} instructors
             </div>
             <div className="flex gap-1.5">
-              <button 
-                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
-                disabled={currentPage === 1} 
-                className="p-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-gray-50 transition"
+              <button
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-navy-50 hover:border-navy-300 transition"
               >
                 Previous
               </button>
-              <span className="px-3 py-1 bg-teal-600 text-white rounded text-xs font-medium">{currentPage}</span>
-              <button 
-                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
-                disabled={currentPage === totalPages} 
-                className="p-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-gray-50 transition"
+              <span className="px-3 py-1 bg-brand-orange text-white font-semibold rounded text-xs">{currentPage}</span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1 border border-gray-200 rounded disabled:opacity-50 hover:bg-navy-50 hover:border-navy-300 transition"
               >
                 Next
               </button>
@@ -545,13 +559,13 @@ const InstructorsManagement = () => {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-md shadow-xl overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-bold text-gray-800">Add New Instructor</h2>
-              <button 
-                onClick={() => setShowAddModal(false)} 
-                className="text-gray-400 hover:text-gray-600 transition"
+            <div className="flex justify-between items-center p-4 border-b border-navy-100">
+              <h2 className="text-lg font-bold text-navy-900">Add New Instructor</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-rose-500 transition"
                 disabled={formSubmitting}
               >
                 <X size={18} />
@@ -565,24 +579,24 @@ const InstructorsManagement = () => {
             <form onSubmit={handleAddSubmit} className="p-4 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name</label>
-                <input 
-                  required 
-                  placeholder="Enter full name" 
-                  value={addForm.fullName} 
-                  onChange={e => setAddForm({...addForm, fullName: e.target.value})} 
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                <input
+                  required
+                  placeholder="Enter full name"
+                  value={addForm.fullName}
+                  onChange={e => setAddForm({...addForm, fullName: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                   disabled={formSubmitting}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Email Address</label>
-                <input 
-                  required 
-                  type="email" 
-                  placeholder="Enter email address" 
-                  value={addForm.email} 
-                  onChange={e => setAddForm({...addForm, email: e.target.value})} 
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                <input
+                  required
+                  type="email"
+                  placeholder="Enter email address"
+                  value={addForm.email}
+                  onChange={e => setAddForm({...addForm, email: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                   disabled={formSubmitting}
                 />
               </div>
@@ -590,12 +604,12 @@ const InstructorsManagement = () => {
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mobile Number</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                  <input 
+                  <input
                     required
-                    placeholder="Enter mobile number" 
-                    value={addForm.mobileNumber} 
-                    onChange={e => setAddForm({...addForm, mobileNumber: e.target.value})} 
-                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    placeholder="Enter mobile number"
+                    value={addForm.mobileNumber}
+                    onChange={e => setAddForm({...addForm, mobileNumber: e.target.value})}
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                     disabled={formSubmitting}
                   />
                 </div>
@@ -604,20 +618,20 @@ const InstructorsManagement = () => {
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                  <input 
-                    required 
+                  <input
+                    required
                     type="password"
-                    placeholder="Password for verification" 
-                    value={addForm.password} 
-                    onChange={e => setAddForm({...addForm, password: e.target.value})} 
-                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                    placeholder="Password for verification"
+                    value={addForm.password}
+                    onChange={e => setAddForm({...addForm, password: e.target.value})}
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                     disabled={formSubmitting}
                   />
                 </div>
               </div>
-              <button 
-                type="submit" 
-                className="w-full bg-teal-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-teal-700 hover:shadow-md transition"
+              <button
+                type="submit"
+                className="w-full bg-brand-orange text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark hover:shadow-md transition"
                 disabled={formSubmitting}
               >
                 {formSubmitting ? "Registering Instructor..." : "Register Instructor"}
@@ -629,13 +643,13 @@ const InstructorsManagement = () => {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-md shadow-xl overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-bold text-gray-800">Edit Instructor Profile</h2>
-              <button 
-                onClick={() => setShowEditModal(false)} 
-                className="text-gray-400 hover:text-gray-600 transition"
+            <div className="flex justify-between items-center p-4 border-b border-navy-100">
+              <h2 className="text-lg font-bold text-navy-900">Edit Instructor Profile</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-rose-500 transition"
                 disabled={formSubmitting}
               >
                 <X size={18} />
@@ -649,21 +663,21 @@ const InstructorsManagement = () => {
             <form onSubmit={handleEditSubmit} className="p-4 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Instructor Code</label>
-                <input 
+                <input
                   type="text"
-                  value={editForm.instructorCode} 
-                  disabled 
+                  value={editForm.instructorCode}
+                  disabled
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500 outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name</label>
-                <input 
-                  required 
-                  placeholder="Enter full name" 
-                  value={editForm.fullName} 
-                  onChange={e => setEditForm({...editForm, fullName: e.target.value})} 
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                <input
+                  required
+                  placeholder="Enter full name"
+                  value={editForm.fullName}
+                  onChange={e => setEditForm({...editForm, fullName: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                   disabled={formSubmitting}
                 />
               </div>
@@ -671,11 +685,11 @@ const InstructorsManagement = () => {
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mobile Number</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                  <input 
-                    placeholder="Enter mobile number" 
-                    value={editForm.mobileNumber} 
-                    onChange={e => setEditForm({...editForm, mobileNumber: e.target.value})} 
-                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                  <input
+                    placeholder="Enter mobile number"
+                    value={editForm.mobileNumber}
+                    onChange={e => setEditForm({...editForm, mobileNumber: e.target.value})}
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                     disabled={formSubmitting}
                   />
                 </div>
@@ -684,18 +698,18 @@ const InstructorsManagement = () => {
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Profile Image URL</label>
                 <div className="relative">
                   <Image className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                  <input 
-                    placeholder="Enter image URL" 
-                    value={editForm.profileImage} 
-                    onChange={e => setEditForm({...editForm, profileImage: e.target.value})} 
-                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none"
+                  <input
+                    placeholder="Enter image URL"
+                    value={editForm.profileImage}
+                    onChange={e => setEditForm({...editForm, profileImage: e.target.value})}
+                    className="w-full pl-9 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-navy-600 outline-none"
                     disabled={formSubmitting}
                   />
                 </div>
               </div>
-              <button 
-                type="submit" 
-                className="w-full bg-teal-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-teal-700 hover:shadow-md transition"
+              <button
+                type="submit"
+                className="w-full bg-brand-orange text-white py-2 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark hover:shadow-md transition"
                 disabled={formSubmitting}
               >
                 {formSubmitting ? "Saving Changes..." : "Save Changes"}
@@ -707,55 +721,55 @@ const InstructorsManagement = () => {
 
       {/* View Details Modal */}
       {viewInstructor && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden relative">
-            <button 
-              onClick={() => setViewInstructor(null)} 
-              className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-lg transition"
+            <button
+              onClick={() => setViewInstructor(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-rose-500 text-lg transition"
             >
               ✕
             </button>
             <div className="p-6">
               <div className="text-center mb-6">
                 {viewInstructor.profileImage ? (
-                  <img 
-                    src={viewInstructor.profileImage} 
-                    alt={viewInstructor.fullName} 
-                    className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-teal-600"
+                  <img
+                    src={viewInstructor.profileImage}
+                    alt={viewInstructor.fullName}
+                    className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-brand-orange"
                   />
                 ) : (
-                  <div className="w-20 h-20 mx-auto rounded-full bg-teal-50 flex items-center justify-center text-teal-600 text-2xl font-bold">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-brand-orange/20">
                     {viewInstructor.fullName?.charAt(0)}
                   </div>
                 )}
-                <h3 className="font-bold text-gray-900 text-lg mt-3">{viewInstructor.fullName}</h3>
+                <h3 className="font-bold text-navy-900 text-lg mt-3">{viewInstructor.fullName}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{viewInstructor.email}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Instructor Code</p>
-                  <p className="font-semibold font-mono">{viewInstructor.instructorCode}</p>
+                  <p className="font-semibold font-mono text-navy-900">{viewInstructor.instructorCode}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Username</p>
-                  <p className="font-semibold">{viewInstructor.username}</p>
+                  <p className="font-semibold text-navy-900">{viewInstructor.username}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Mobile Number</p>
-                  <p className="font-semibold">{viewInstructor.mobileNumber || "—"}</p>
+                  <p className="font-semibold text-navy-900">{viewInstructor.mobileNumber || "—"}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Active Status</p>
-                  <p className="font-semibold capitalize">{viewInstructor.isActive ? "Active" : "Inactive"}</p>
+                  <p className="font-semibold capitalize text-navy-900">{viewInstructor.isActive ? "Active" : "Inactive"}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Email Verified</p>
-                  <p className="font-semibold">{viewInstructor.emailVerified ? "Verified" : "Unverified"}</p>
+                  <p className="font-semibold text-navy-900">{viewInstructor.emailVerified ? "Verified" : "Unverified"}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-navy-50 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs">Auth Type</p>
-                  <p className="font-semibold uppercase">{viewInstructor.authType}</p>
+                  <p className="font-semibold uppercase text-navy-900">{viewInstructor.authType}</p>
                 </div>
               </div>
             </div>

@@ -30,7 +30,7 @@ import ContactSupport from "./ContactSupport"; const DashboardLayout = ({ childr
   };
 
   return (
-    <div className="h-screen bg-slate-50 overflow-hidden font-sans antialiased">
+    <div className="h-screen bg-navy-50/40 overflow-hidden font-sans antialiased">
       <div className="flex h-full">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
@@ -40,7 +40,7 @@ import ContactSupport from "./ContactSupport"; const DashboardLayout = ({ childr
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <Navbar />
 
-          <main className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/60">
+          <main className="flex-1 overflow-y-auto scrollbar-hide bg-navy-50/40">
             {children}
           </main>
         </div>

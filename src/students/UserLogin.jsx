@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../students/auth/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -136,13 +136,45 @@ function OrDivider() {
   );
 }
 
-function GoogleBtn({ onClick }) {
+function GoogleBtn({ googleLoaded }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!window.google || !googleLoaded) return;
+
+    try {
+      window.google.accounts.id.renderButton(
+        containerRef.current,
+        {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          logo_alignment: "left",
+          width: containerRef.current?.offsetWidth || 350,
+        }
+      );
+    } catch (err) {
+      console.error("Failed to render Google button:", err);
+    }
+  }, [googleLoaded]);
+
   return (
-    <button onClick={onClick}
-      className="w-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-4 h-4 lg:w-5 lg:h-5" />
-      <span className="hidden xs:inline">Continue with Google</span>
-    </button>
+    <div className="relative w-full overflow-hidden h-[42px] lg:h-[46px]">
+      {/* Our premium custom button */}
+      <button type="button"
+        className="w-full h-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 bg-white transition pointer-events-none">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-4 h-4 lg:w-5 lg:h-5" />
+        <span className="hidden xs:inline">Continue with Google</span>
+      </button>
+
+      {/* Invisible overlay containing the official Google button */}
+      <div
+        ref={containerRef}
+        className="google-signin-overlay absolute inset-0 opacity-0 cursor-pointer z-10"
+      />
+    </div>
   );
 }
 
@@ -162,6 +194,45 @@ const UserLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+
+  useEffect(() => {
+    const handleCredentialResponse = async (response) => {
+      setError("");
+      setLoading(true);
+      const result = await googleLogin(response.credential);
+      setLoading(false);
+      if (!result.success) {
+        setError(result.message);
+      }
+    };
+
+    const initializeGoogle = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: "256766214617-fh3iv47c8c2guocmftnuekvlne6agljd.apps.googleusercontent.com",
+          callback: handleCredentialResponse,
+        });
+        setGoogleLoaded(true);
+      }
+    };
+
+    const scriptId = "google-jssdk";
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogle;
+      document.body.appendChild(script);
+    } else {
+      initializeGoogle();
+    }
+  }, [googleLogin]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -260,6 +331,10 @@ const UserLogin = () => {
         * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
         .xs\\:inline { @media (min-width: 400px) { display: inline; } }
         .xs\\:hidden { @media (max-width: 399px) { display: none; } }
+        .google-signin-overlay iframe {
+          width: 100% !important;
+          height: 100% !important;
+        }
       `}</style>
 
       {/* ══ DESKTOP ══ */}
@@ -313,7 +388,7 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn onClick={googleLogin} />
+                <GoogleBtn googleLoaded={googleLoaded} />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Don't have an account?{" "}
@@ -379,7 +454,7 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn onClick={googleLogin} />
+                <GoogleBtn googleLoaded={googleLoaded} />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Already have an account?{" "}
@@ -457,7 +532,7 @@ const UserLogin = () => {
               </div>
               <PrimaryBtn onClick={handleSignIn} disabled={loading}>{loading ? "Signing In…" : "Sign In"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
+              <GoogleBtn googleLoaded={googleLoaded} />
               <p className="text-center text-xs text-gray-500">Don't have an account? <button onClick={() => switchTo(true)} className="text-[#043573] font-bold">Sign Up</button></p>
             </div>
           ) : (
@@ -492,7 +567,7 @@ const UserLogin = () => {
               </label>
               <PrimaryBtn onClick={handleSignUp} disabled={loading}>{loading ? "Creating Account…" : "Create Account"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
+              <GoogleBtn googleLoaded={googleLoaded} />
               <p className="text-center text-xs text-gray-500">Already have an account? <button onClick={() => switchTo(false)} className="text-[#043573] font-bold">Sign In</button></p>
             </div>
           )}

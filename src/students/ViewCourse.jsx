@@ -92,9 +92,9 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
     };
 
     return (
-        <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-blue-200 shadow-sm" : "border-gray-100"} bg-white`}>
+        <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${open ? "border-navy-200 shadow-sm" : "border-gray-100"} bg-white`}>
             <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-3 p-3.5 hover:bg-gray-50 transition text-left">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-blue-50">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0 bg-navy-50">
                     📚
                 </div>
                 <div className="flex-1 min-w-0">
@@ -127,21 +127,21 @@ const ModuleAccordionItem = ({ mod, index, navigate, activeLesson, setActiveLess
                                     key={lesson.id || li}
                                     onClick={() => handleLessonClick(lesson)}
                                     className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${canAccess ? "cursor-pointer group" : "cursor-not-allowed opacity-60"
-                                        } ${isActive ? "bg-blue-50 border-l-2 border-blue-500" : canAccess ? "hover:bg-blue-50" : ""} ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""
+                                        } ${isActive ? "bg-navy-50 border-l-2 border-navy-500" : canAccess ? "hover:bg-navy-50" : ""} ${li !== lessons.length - 1 ? "border-b border-gray-50" : ""
                                         }`}
                                 >
                                     <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
                                         {canAccess ? (
-                                            <FaPlayCircle className={`transition-colors ${isActive ? "text-blue-600" : "text-blue-400 group-hover:text-blue-600"}`} size={13} />
+                                            <FaPlayCircle className={`transition-colors ${isActive ? "text-navy-800" : "text-navy-500 group-hover:text-navy-800"}`} size={13} />
                                         ) : (
                                             <FaLock className="text-gray-300" size={11} />
                                         )}
                                     </div>
-                                    <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-blue-700 font-semibold" : canAccess ? "text-gray-700 font-medium group-hover:text-blue-700" : "text-gray-400 font-medium"}`}>
+                                    <span className={`flex-1 text-[11px] sm:text-xs truncate ${isActive ? "text-navy-900 font-semibold" : canAccess ? "text-gray-700 font-medium group-hover:text-navy-900" : "text-gray-400 font-medium"}`}>
                                         {`${li + 1}. ${lesson.title}`}
                                     </span>
                                     {lesson.durationInMinutes && (
-                                        <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-blue-500" : "text-gray-400"}`}>
+                                        <span className={`text-[10px] sm:text-[11px] flex-shrink-0 ml-1 ${isActive ? "text-navy-500" : "text-gray-400"}`}>
                                             {lesson.durationInMinutes} mins
                                         </span>
                                     )}
@@ -171,9 +171,9 @@ const CurriculumSection = ({ modules, isEnrolled, courseId, navigate }) => {
     return (
         <div>
             {hasFreeModules && (
-                <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
-                    <FaPlayCircle className="text-blue-500 mt-0.5 flex-shrink-0" size={13} />
-                    <p className="text-[11px] sm:text-xs text-blue-700">
+                <div className="flex items-start gap-2 bg-navy-50 border border-navy-100 rounded-xl p-3 mb-4">
+                    <FaPlayCircle className="text-navy-500 mt-0.5 flex-shrink-0" size={13} />
+                    <p className="text-[11px] sm:text-xs text-navy-900">
                         <span className="font-bold">Free Preview: </span>
                         Some lessons are available as a free preview. Enrol to unlock all modules.
                     </p>
@@ -216,7 +216,7 @@ const loadRazorpayScript = () => {
 const FaqAccordionItem = ({ faq }) => {
     const [open, setOpen] = useState(false);
     return (
-        <div className={`border rounded-xl overflow-hidden transition-all duration-200 bg-white ${open ? "border-blue-200 shadow-sm" : "border-gray-100"}`}>
+        <div className={`border rounded-xl overflow-hidden transition-all duration-200 bg-white ${open ? "border-navy-200 shadow-sm" : "border-gray-100"}`}>
             <button
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between gap-3 p-3.5 hover:bg-gray-50 transition text-left"
@@ -506,7 +506,7 @@ const ViewCourse = () => {
     const PriceCard = () => (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
             <div className="relative">
-                <div className="absolute top-0 right-0 z-10 bg-blue-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-bl-xl text-center leading-tight">
+                <div className="absolute top-0 right-0 z-10 bg-brand-orange text-white text-[10px] font-extrabold px-3 py-1.5 rounded-bl-xl text-center leading-tight">
                     Best Deal
                 </div>
             </div>
@@ -552,7 +552,7 @@ const ViewCourse = () => {
                                 type="button"
                                 onClick={handlePayment}
                                 disabled={paymentLoading}
-                                className={`w-full h-11 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition flex items-center justify-center gap-2 border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                                className={`w-full h-11 rounded-xl bg-brand-orange text-white font-bold text-sm hover:bg-brand-orange-dark transition flex items-center justify-center gap-2 border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                             >
                                 {paymentLoading ? (
                                     <span className="w-4 h-4 border-2 border-t-white border-white/20 rounded-full animate-spin"></span>
@@ -565,7 +565,7 @@ const ViewCourse = () => {
                             </button>
                             <button
                                 type="button"
-                                className="w-full h-11 rounded-xl border-2 border-blue-600 text-blue-700 font-bold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2 border-none cursor-pointer bg-white"
+                                className="w-full h-11 rounded-xl border-2 border-navy-800 text-navy-800 font-bold text-sm hover:bg-navy-50 transition flex items-center justify-center gap-2 cursor-pointer bg-white"
                             >
                                 <IoCartOutline className="w-4 h-4" />
                                 Add to Cart
@@ -585,15 +585,15 @@ const ViewCourse = () => {
                         <div className="flex items-center gap-2">
                             <span className="text-gray-500 font-medium w-12">UPI:</span>
                             <div className="flex gap-1 flex-wrap">
-                                <span className="font-bold text-blue-600 px-1.5 py-0.5 bg-blue-50 rounded text-[10px]">G Pay</span>
+                                <span className="font-bold text-navy-800 px-1.5 py-0.5 bg-navy-50 rounded text-[10px]">G Pay</span>
                                 <span className="font-bold text-purple-600 px-1.5 py-0.5 bg-purple-50 rounded text-[10px]">PhonePe</span>
                                 <span className="font-bold text-sky-500 px-1.5 py-0.5 bg-sky-50 rounded text-[10px]">Paytm</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="text-gray-500 font-medium w-12">Cards:</span>
-                            <span className="font-extrabold text-blue-800 px-1.5 py-0.5 bg-blue-50 rounded italic text-[10px]">VISA</span>
-                            <span className="font-bold text-blue-900 px-1.5 py-0.5 bg-blue-50 rounded text-[10px]">RuPay</span>
+                            <span className="font-extrabold text-navy-900 px-1.5 py-0.5 bg-navy-50 rounded italic text-[10px]">VISA</span>
+                            <span className="font-bold text-navy-950 px-1.5 py-0.5 bg-navy-50 rounded text-[10px]">RuPay</span>
                         </div>
                     </div>
                 </div>
@@ -608,8 +608,8 @@ const ViewCourse = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <FaClock className="text-blue-600 text-xs" />
+                        <div className="w-7 h-7 rounded-full bg-navy-50 flex items-center justify-center flex-shrink-0">
+                            <FaClock className="text-navy-800 text-xs" />
                         </div>
                         <div>
                             <p className="text-[11px] font-bold text-gray-800">Lifetime Full Dashboard Access</p>
@@ -633,8 +633,8 @@ const ViewCourse = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#f6f7fb] flex flex-col items-center justify-center p-5">
-                <div className="w-10 h-10 border-4 border-t-blue-600 border-gray-200 rounded-full animate-spin mb-4"></div>
+            <div className="min-h-screen bg-navy-50/40 flex flex-col items-center justify-center p-5">
+                <div className="w-10 h-10 border-4 border-t-navy-800 border-gray-200 rounded-full animate-spin mb-4"></div>
                 <span className="text-sm text-gray-500 font-semibold font-sans">Loading course details...</span>
             </div>
         );
@@ -642,13 +642,13 @@ const ViewCourse = () => {
 
     if (error || !courseData) {
         return (
-            <div className="min-h-screen bg-[#f6f7fb] flex flex-col items-center justify-center p-5">
+            <div className="min-h-screen bg-navy-50/40 flex flex-col items-center justify-center p-5">
                 <div className="bg-red-50 text-red-700 p-6 rounded-2xl border border-red-100 max-w-md text-center">
                     <p className="text-sm font-bold mb-2">⚠️ Error Loading Course</p>
                     <p className="text-xs text-gray-600 mb-4">{error || "Course details not found"}</p>
                     <Link
                         to="/student/all-courses"
-                        className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition"
+                        className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-brand-orange text-white text-xs font-bold hover:bg-brand-orange-dark transition"
                     >
                         Back to All Courses
                     </Link>
@@ -658,12 +658,12 @@ const ViewCourse = () => {
     }
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-[#f7f8fc]">
+        <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-navy-50/40">
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumb */}
                 <div className="mb-4">
                     <p className="text-[11px] sm:text-xs text-gray-400">
-                        <Link to="/student/all-courses" className="hover:text-blue-600 transition-colors">All Courses</Link>
+                        <Link to="/student/all-courses" className="hover:text-navy-800 transition-colors">All Courses</Link>
                         <span className="text-gray-300"> &gt; </span>
                         <span className="text-gray-700 font-medium truncate inline-block max-w-[180px] align-bottom">{course.title}</span>
                     </p>
@@ -686,7 +686,7 @@ const ViewCourse = () => {
                             <div className="flex-1 flex flex-col justify-between py-0.5 space-y-3 md:space-y-0">
                                 <div className="space-y-1.5">
                                     {course.badge && (
-                                        <span className="inline-block text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{course.badge}</span>
+                                        <span className="inline-block text-[10px] font-bold bg-navy-50 text-navy-800 px-2 py-0.5 rounded-md">{course.badge}</span>
                                     )}
                                     <h1 className="text-base sm:text-lg md:text-xl font-extrabold text-gray-900 leading-snug">{course.title}</h1>
                                     <p className="text-xs text-gray-500 line-clamp-2 md:line-clamp-none">{course.shortDescription}</p>
@@ -726,10 +726,10 @@ const ViewCourse = () => {
                                     <button
                                         key={key}
                                         onClick={() => setActiveTab(key)}
-                                        className={`relative pb-2.5 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === key ? "text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                                        className={`relative pb-2.5 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === key ? "text-navy-800" : "text-gray-400 hover:text-gray-600"}`}
                                     >
                                         {label}
-                                        {activeTab === key && <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-full" />}
+                                        {activeTab === key && <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand-orange rounded-full" />}
                                     </button>
                                 ))}
                             </div>
@@ -781,15 +781,15 @@ const ViewCourse = () => {
                                             <div key={inst.instructorId} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                                                 <div className="flex flex-col sm:flex-row gap-3.5 items-center sm:items-start text-center sm:text-left">
                                                     {inst.profileImage ? (
-                                                        <img src={inst.profileImage} alt={inst.fullName} className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-blue-100" />
+                                                        <img src={inst.profileImage} alt={inst.fullName} className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-navy-100" />
                                                     ) : (
-                                                        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                                                             {inst.fullName?.charAt(0).toUpperCase()}
                                                         </div>
                                                     )}
                                                     <div className="space-y-1.5 flex-1">
                                                         <h4 className="font-bold text-gray-900 text-sm sm:text-base">{inst.fullName}</h4>
-                                                        {inst.headline && <p className="text-xs text-blue-600 font-medium">{inst.headline}</p>}
+                                                        {inst.headline && <p className="text-xs text-navy-800 font-medium">{inst.headline}</p>}
                                                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-gray-400">
                                                             {inst.averageRating > 0 && (
                                                                 <span className="flex items-center gap-0.5"><FaStar className="text-yellow-400" size={10} /> {inst.averageRating.toFixed(1)} Rating</span>
@@ -814,7 +814,7 @@ const ViewCourse = () => {
                                                                 <h5 className="text-[11px] font-bold text-gray-800 mb-1.5">Other Courses</h5>
                                                                 <div className="flex flex-wrap gap-1.5">
                                                                     {inst.courses.map(c => (
-                                                                        <Link key={c.courseId} to={`/student/course/${c.slug}`} className="text-[9px] bg-white border border-blue-100 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-50 transition">
+                                                                        <Link key={c.courseId} to={`/student/course/${c.slug}`} className="text-[9px] bg-white border border-navy-100 text-navy-800 px-1.5 py-0.5 rounded hover:bg-navy-50 transition">
                                                                             {c.title}
                                                                         </Link>
                                                                     ))}
@@ -870,7 +870,7 @@ const ViewCourse = () => {
                                             <div className="flex justify-between items-start">
                                                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">My Review</h3>
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => setIsEditingReview(true)} className="text-xs text-blue-600 font-semibold hover:underline">Edit</button>
+                                                    <button onClick={() => setIsEditingReview(true)} className="text-xs text-navy-800 font-semibold hover:underline">Edit</button>
                                                     <button onClick={handleReviewDelete} className="text-xs text-red-600 font-semibold hover:underline">Delete</button>
                                                 </div>
                                             </div>
@@ -908,14 +908,14 @@ const ViewCourse = () => {
                                                 rows="3" placeholder="Share your experience..."
                                                 value={newReview.comment}
                                                 onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-navy-600"
                                             />
                                             {submitError && <p className="text-[11px] text-red-500 font-medium">{submitError}</p>}
                                             {submitSuccess && <p className="text-[11px] text-green-600 font-medium">{submitSuccess}</p>}
                                             <button
                                                 onClick={handleReviewSubmit}
                                                 disabled={submitLoading || !newReview.comment.trim()}
-                                                className={`bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-700 transition ${submitLoading || !newReview.comment.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
+                                                className={`bg-brand-orange text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-brand-orange-dark transition ${submitLoading || !newReview.comment.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
                                             >
                                                 {submitLoading ? "Submitting..." : (hasReviewed ? "Update Review" : "Submit Review")}
                                             </button>
@@ -925,7 +925,7 @@ const ViewCourse = () => {
                                     <div className="bg-white border border-gray-100 rounded-2xl px-4 shadow-sm">
                                         {reviewsLoading ? (
                                             <div className="flex justify-center py-8">
-                                                <div className="w-6 h-6 border-2 border-t-blue-500 border-gray-200 rounded-full animate-spin" />
+                                                <div className="w-6 h-6 border-2 border-t-navy-500 border-gray-200 rounded-full animate-spin" />
                                             </div>
                                         ) : reviewsError ? (
                                             <p className="text-center text-xs text-gray-400 py-8">Reviews are not available at the moment.</p>
@@ -946,7 +946,7 @@ const ViewCourse = () => {
                                                                 {avatar ? (
                                                                     <img src={avatar} alt={name} className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                                                                 ) : (
-                                                                    <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                                                    <div className="w-7 h-7 rounded-full bg-navy-50 text-navy-800 font-bold text-xs flex items-center justify-center flex-shrink-0">
                                                                         {initial}
                                                                     </div>
                                                                 )}
@@ -1021,7 +1021,7 @@ const ViewCourse = () => {
                             type="button"
                             onClick={handlePayment}
                             disabled={paymentLoading}
-                            className={`h-11 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                            className={`h-11 bg-brand-orange hover:bg-brand-orange-dark text-white text-xs font-bold px-6 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border-none cursor-pointer ${paymentLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                         >
                             {paymentLoading ? (
                                 <span className="w-3.5 h-3.5 border-2 border-t-white border-white/20 rounded-full animate-spin"></span>

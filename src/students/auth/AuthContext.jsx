@@ -103,9 +103,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const googleLogin = () => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-    window.location.href = `${apiBaseUrl}/oauth2/authorization/google`;
+  const googleLogin = async (idToken) => {
+    try {
+      const res = await studentAuth.googleLogin({ idToken });
+      if (res.data && res.data.data) {
+        const { accessToken, refreshToken } = res.data.data;
+        localStorage.setItem("student_accessToken", accessToken);
+        localStorage.setItem("student_refreshToken", refreshToken);
+
+        // Fetch current profile
+        const profileRes = await studentAuth.getProfile();
+        if (profileRes.data && profileRes.data.data) {
+          setStudent(profileRes.data.data);
+          setIsAuthenticated(true);
+          navigate("/student/dashboard");
+          return { success: true };
+        }
+      }
+      return { success: false, message: "Google login response did not contain token information" };
+    } catch (err) {
+      console.error("Google login error:", err);
+      const message = err.response?.data?.message || "Google login failed";
+      return { success: false, message };
+    }
   };
 
   return (

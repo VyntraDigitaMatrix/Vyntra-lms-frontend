@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import LogoName from "../assets/LOGO BG.jpg.jpeg";
 import LogoPlain from "../assets/Vyntra One Plain BG Image.png";
 import {
   FaHome,
@@ -57,6 +56,14 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
   const collapsed = isMobile ? false : isCollapsed;
 
+  const activeNav =
+    "bg-navy-800 text-white shadow-md shadow-navy-800/25 font-semibold border-l-[3px] border-brand-orange";
+  const inactiveNav =
+    "text-slate-600 border-l-[3px] border-transparent hover:bg-navy-50 hover:text-navy-800";
+
+  const activeSub = "bg-navy-800 text-white font-semibold";
+  const inactiveSub = "text-slate-500 hover:bg-navy-50 hover:text-navy-800";
+
   const SidebarContent = () => (
     <nav
       className="flex-1 flex flex-col gap-1 mt-3 px-2 overflow-y-auto overflow-x-hidden pb-6 scrollbar-hide"
@@ -69,11 +76,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           onClick={() => isMobile && setMobileOpen(false)}
           className={({ isActive }) =>
             `group relative flex items-center ${
-              collapsed ? "justify-center py-3 px-2" : "gap-3.5 px-3.5 py-2.5"
+              collapsed ? "justify-center py-3 px-2" : "gap-3.5 pl-3 pr-3.5 py-2.5"
             } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium ${
-              isActive
-                ? "bg-[#043573] text-white shadow-md shadow-[#043573]/25 font-semibold"
-                : "text-slate-600 hover:bg-slate-100/80 hover:text-[#043573]"
+              isActive ? activeNav : inactiveNav
             }`
           }
         >
@@ -89,8 +94,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         type="button"
         onClick={() => setOpenClasses(!openClasses)}
         className={`group flex items-center ${
-          collapsed ? "justify-center py-3 px-2" : "justify-between px-3.5 py-2.5"
-        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 hover:bg-slate-100/80 hover:text-[#043573]`}
+          collapsed ? "justify-center py-3 px-2" : "justify-between pl-3 pr-3.5 py-2.5"
+        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 border-l-[3px] border-transparent hover:bg-navy-50 hover:text-navy-800 bg-transparent`}
       >
         <div className={`flex items-center ${collapsed ? "" : "gap-3.5"}`}>
           <FaUsers className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -99,21 +104,19 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         {!collapsed && (
           <FaChevronDown
             size={11}
-            className={`transition-transform duration-300 ${openClasses ? "rotate-180" : ""}`}
+            className={`transition-transform duration-300 ${openClasses ? "rotate-180 text-brand-orange-dark" : ""}`}
           />
         )}
       </button>
 
       {openClasses && !collapsed && (
-        <div className="ml-5 pl-3 border-l-2 border-slate-200 my-1 flex flex-col gap-1">
+        <div className="ml-5 pl-3 border-l-2 border-navy-100 my-1 flex flex-col gap-1">
           <NavLink
             to="/student/classes"
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                isActive
-                  ? "bg-[#043573] text-white font-semibold"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-[#043573]"
+                isActive ? activeSub : inactiveSub
               }`
             }
           >
@@ -125,9 +128,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                isActive
-                  ? "bg-[#043573] text-white font-semibold"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-[#043573]"
+                isActive ? activeSub : inactiveSub
               }`
             }
           >
@@ -144,11 +145,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           onClick={() => isMobile && setMobileOpen(false)}
           className={({ isActive }) =>
             `group relative flex items-center ${
-              collapsed ? "justify-center py-3 px-2" : "gap-3.5 px-3.5 py-2.5"
+              collapsed ? "justify-center py-3 px-2" : "gap-3.5 pl-3 pr-3.5 py-2.5"
             } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium ${
-              isActive
-                ? "bg-[#043573] text-white shadow-md shadow-[#043573]/25 font-semibold"
-                : "text-slate-600 hover:bg-slate-100/80 hover:text-[#043573]"
+              isActive ? activeNav : inactiveNav
             }`
           }
         >
@@ -164,8 +163,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         type="button"
         onClick={() => setOpenSettings(!openSettings)}
         className={`group flex items-center ${
-          collapsed ? "justify-center py-3 px-2" : "justify-between px-3.5 py-2.5"
-        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 hover:bg-slate-100/80 hover:text-[#043573]`}
+          collapsed ? "justify-center py-3 px-2" : "justify-between pl-3 pr-3.5 py-2.5"
+        } rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-slate-600 border-l-[3px] border-transparent hover:bg-navy-50 hover:text-navy-800 bg-transparent`}
       >
         <div className={`flex items-center ${collapsed ? "" : "gap-3.5"}`}>
           <FaCog className="text-[15px] shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -174,21 +173,19 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         {!collapsed && (
           <FaChevronDown
             size={11}
-            className={`transition-transform duration-300 ${openSettings ? "rotate-180" : ""}`}
+            className={`transition-transform duration-300 ${openSettings ? "rotate-180 text-brand-orange-dark" : ""}`}
           />
         )}
       </button>
 
       {openSettings && !collapsed && (
-        <div className="ml-5 pl-3 border-l-2 border-slate-200 my-1 flex flex-col gap-1">
+        <div className="ml-5 pl-3 border-l-2 border-navy-100 my-1 flex flex-col gap-1">
           <NavLink
             to="/student/change-password"
             onClick={() => isMobile && setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                isActive
-                  ? "bg-[#043573] text-white font-semibold"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-[#043573]"
+                isActive ? activeSub : inactiveSub
               }`
             }
           >
@@ -207,7 +204,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         {/* Hamburger / toggle button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="fixed top-4 left-4 z-[100] w-9 h-9 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-slate-600 hover:text-[#043573] hover:border-[#043573] transition-all"
+          className="fixed top-4 left-4 z-[100] w-9 h-9 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-slate-600 hover:text-navy-800 hover:border-navy-800 transition-all"
           aria-label="Toggle sidebar"
         >
           {mobileOpen ? "‹" : "›"}
@@ -216,7 +213,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         {/* Backdrop */}
         {mobileOpen && (
           <div
-            className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 z-[60] bg-navy-950/40 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileOpen(false)}
           />
         )}
@@ -228,8 +225,9 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           }`}
         >
           {/* Logo */}
-          <div className="flex items-center mt-6 mb-4 justify-center gap-2 px-4 pb-3 border-b border-slate-100">
+          <div className="relative flex items-center mt-6 mb-4 justify-center gap-2 px-4 pb-4 border-b border-navy-100">
             <img src={LogoPlain} alt="Vyntra" className="h-10 w-auto object-contain" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-[3px] rounded-full bg-brand-orange" />
           </div>
 
           <SidebarContent />
@@ -248,7 +246,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
       {/* Collapse toggle button */}
       <button
         onClick={toggleSidebar}
-        className="absolute top-5 -right-3.5 w-7 h-7 bg-white border border-slate-200 rounded-full shadow-md flex items-center justify-center text-slate-500 hover:text-[#043573] hover:border-[#043573] hover:scale-110 transition-all z-50 cursor-pointer"
+        className="absolute top-5 -right-3.5 w-7 h-7 bg-brand-orange text-navy-900 border-none rounded-full shadow-md flex items-center justify-center hover:bg-brand-orange-dark hover:text-white hover:scale-110 transition-all z-50 cursor-pointer"
         title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
       >
         <span className="text-sm font-bold leading-none">{isCollapsed ? "›" : "‹"}</span>
@@ -256,8 +254,8 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
 
       {/* Logo Container */}
       <div
-        className={`flex items-center justify-center border-b border-slate-100 transition-all ${
-          isCollapsed ? "py-4 px-2" : "py-3 px-4"
+        className={`relative flex items-center justify-center border-b border-navy-100 bg-gradient-to-b from-navy-50/70 to-white transition-all ${
+          isCollapsed ? "py-4 px-2" : "py-4 px-4"
         }`}
       >
         <img
@@ -265,6 +263,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
           alt="Vyntra Icon"
           className={`h-11 w-auto object-contain transition-all ${isCollapsed ? "scale-90" : ""}`}
         />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-[3px] rounded-full bg-brand-orange" />
       </div>
 
       <SidebarContent />
