@@ -92,6 +92,7 @@ import ZoomMeetings from "./Instructor/pages/ZoomMeetings";
 import PendingDetail from "./students/components/PendingDetail";
 import Attendance from "./students/Attendance";
 import AdminProfile from "./Admin/pages/Profile";
+import AdminCommunity from "./Admin/pages/Community";
 // create these admin files
 import AdminDashboardLayout from "./Admin/components/AdminDashboardLayout";
 import AdminDashboard from "./Admin/components/AdminDashboard";
@@ -102,6 +103,7 @@ import InstructorDashboardLayout from "./Instructor/DashboardLayout";
 import InstructorDashboard from "./Instructor/InstructorDashboard";
 
 import InstructorCertificates from "./Instructor/pages/Certificate";
+import Homepage from './Website/Homepage'
 
 function StudentLayoutRoutes() {
   return (
@@ -135,7 +137,7 @@ function App() {
           <InstructorAuthProvider>
             <Routes>
               {/* Default route */}
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Homepage />} />
 
               {/* Login pages */}
               <Route path="/AdminLogin" element={<AdminLogin />} />
@@ -211,6 +213,7 @@ function App() {
                   <Route path="schedule" element={<Schedule1 />} />
                   <Route path="recordings" element={<Recordings1 />} />
                   <Route path="discussions" element={<Discussions1 />} />
+                  <Route path="community" element={<AdminCommunity />} />
                   <Route path="resources" element={<Resources1 />} />
                   <Route path="notes" element={<Notes1 />} />
                   <Route path="downloads" element={<Downloads1 />} />

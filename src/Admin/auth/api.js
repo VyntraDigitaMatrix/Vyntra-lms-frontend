@@ -399,4 +399,42 @@ export const adminManagementApi = {
   },
 };
 
+export const adminCommunityApi = {
+  // ── Admin's own community posts ──
+  createPost: (formData) =>
+    api.post(`/api/admin/community/my-posts`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  updatePost: (postId, formData) =>
+    api.patch(`/api/admin/community/my-posts/${postId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  deleteOwnPost: (postId) =>
+    api.delete(`/api/admin/community/my-posts/${postId}`),
+
+  getMyPosts: (page = 0, size = 10) =>
+    api.get(`/api/admin/community/my-posts?page=${page}&size=${size}`),
+
+  // ── Community moderation ──
+  getPendingPosts: (page = 0, size = 10) =>
+    api.get(`/api/admin/community/moderation/pending-posts?page=${page}&size=${size}`),
+
+  getApprovedPosts: (page = 0, size = 10) =>
+    api.get(`/api/admin/community/moderation/approved-posts?page=${page}&size=${size}`),
+
+  getRejectedPosts: (page = 0, size = 10) =>
+    api.get(`/api/admin/community/moderation/rejected-posts?page=${page}&size=${size}`),
+
+  approvePost: (postId) =>
+    api.patch(`/api/admin/community/moderation/posts/${postId}/approve`),
+
+  rejectPost: (postId, data) =>
+    api.patch(`/api/admin/community/moderation/posts/${postId}/reject`, data),
+
+  deleteAnyPost: (postId) =>
+    api.delete(`/api/admin/community/moderation/posts/${postId}`),
+};
+
 export default api;

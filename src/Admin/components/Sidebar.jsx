@@ -18,6 +18,7 @@ import {
   FaBriefcase,
   FaChevronLeft,
   FaChevronRight,
+  FaHashtag,
 } from "react-icons/fa";
 import vyntraMark from "../../assets/vyntra-mark.png";
 
@@ -51,6 +52,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
     { icon: <FaCalendarAlt />, label: "Schedule", path: "/admin/schedule" },
     { icon: <FaVideo />, label: "Recordings", path: "/admin/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/admin/discussions" },
+    { icon: <FaHashtag />, label: "Community", path: "/admin/community" },
     { icon: <FaFolder />, label: "Resources", path: "/admin/resources" },
     { icon: <FaStickyNote />, label: "Notes", path: "/admin/notes" },
     { icon: <FaCertificate />, label: "Certificates", path: "/admin/certificates" },

@@ -1,0 +1,63 @@
+/* Custom styles scoped exclusively to Website Homepage */
+.website-homepage-scope .animate-marquee-left {
+  animation: marquee-left 35s linear infinite;
+}
+
+.website-homepage-scope .animate-marquee-right {
+  animation: marquee-right 40s linear infinite;
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.website-homepage-scope .pause-on-hover:hover {
+  animation-play-state: paused;
+}
+
+.website-homepage-scope .animate-spin-slow {
+  animation: spin 30s linear infinite;
+}
+
+.website-homepage-scope .animate-spin-reverse-slow {
+  animation: spin-reverse 30s linear infinite;
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.website-homepage-scope .animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.website-homepage-scope .fade-in {
+  animation-name: website-fade-in;
+}
+
+.website-homepage-scope .slide-in-from-top-2 {
+  animation-name: website-slide-in-from-top-2;
+}
+
+@keyframes website-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes website-slide-in-from-top-2 {
+  from { transform: translateY(-0.5rem); }
+  to { transform: translateY(0); }
+}
