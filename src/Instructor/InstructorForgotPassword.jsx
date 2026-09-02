@@ -102,7 +102,7 @@ const InstructorForgotPassword = () => {
         </div>
       </div>
 
-      <p className="text-[11px] text-slate-400 mt-6">© 2024 VYNTRA ONE. All rights reserved.</p>
+      <p className="text-[11px] text-slate-400 mt-6">© 2026 VYNTRA ONE. All rights reserved.</p>
     </div>
   );
 };

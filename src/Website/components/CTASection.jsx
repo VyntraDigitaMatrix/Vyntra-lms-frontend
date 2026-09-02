@@ -27,10 +27,10 @@ const CTASection = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-5">
-            <button className="bg-gradient-to-r from-[#F0B429] to-[#C9922A] hover:from-[#e0a820] hover:to-[#b88425] px-8 py-3 rounded-full transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(240,180,41,0.3)]" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#15130F' }}>
+            <button onClick={() => window.location.href = '/UserLogin'} className="bg-gradient-to-r from-[#F0B429] to-[#C9922A] hover:from-[#e0a820] hover:to-[#b88425] px-8 py-3 rounded-full transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(240,180,41,0.3)]" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#15130F' }}>
               Start Learning
             </button>
-            <button className="bg-transparent border border-[#ffffff] hover:border-[#9CA3AF] px-8 py-3 rounded-full transition-all w-full sm:w-auto" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#FFFFFF' }}>
+            <button onClick={() => window.location.href = '/UserLogin'} className="bg-transparent border border-[#ffffff] hover:border-[#9CA3AF] px-8 py-3 rounded-full transition-all w-full sm:w-auto" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#FFFFFF' }}>
               Explore the Ecosystem
             </button>
           </div>

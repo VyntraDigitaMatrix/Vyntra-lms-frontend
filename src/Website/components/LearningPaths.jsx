@@ -12,7 +12,7 @@ const LearningPaths = () => {
 
       {/* Header */}
       <div className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex justify-between items-end mb-10">
-        <div className="flex flex-col text-left">
+        <div id="courses" className="flex flex-col text-left scroll-mt-14">
           <h2 style={{ fontFamily: 'Outfit', fontWeight: 600, fontSize: '32px', color: '#1B2347' }} className="mb-2">
             Learning Paths
           </h2>
@@ -20,7 +20,7 @@ const LearningPaths = () => {
             Choose from carefully curated paths designed to take you from beginner to expert in your chosen field.
           </p>
         </div>
-        <button className="hidden md:flex items-center gap-2 text-[#0A2640] font-semibold text-[15px] group hover:opacity-80 transition-opacity">
+        <button onClick={() => window.location.href='/UserLogin'} className="hidden md:flex items-center gap-2 text-[#0A2640] font-semibold text-[15px] group hover:opacity-80 transition-opacity">
           Explore Paths
           <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </button>
@@ -48,7 +48,7 @@ const LearningPaths = () => {
           </div>
 
           <div className="flex justify-between items-center mt-auto">
-            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#278C16'}}>
+            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#278C16' }}>
               12+ Courses
             </span>
             <div className="flex items-center -space-x-2">
@@ -81,7 +81,7 @@ const LearningPaths = () => {
           </div>
 
           <div className="flex justify-between items-center mt-auto">
-            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#e46112'}}>
+            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#e46112' }}>
               10+ Courses
             </span>
             <div className="flex items-center -space-x-2">
@@ -114,7 +114,7 @@ const LearningPaths = () => {
           </div>
 
           <div className="flex justify-between items-center mt-auto">
-            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#3375D7'}}>
+            <span className="bg-white/80 px-3 py-1.5 rounded-full" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '12px', color: '#3375D7' }}>
               15+ Courses
             </span>
             <div className="flex items-center -space-x-2">

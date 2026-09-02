@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="w-full bg-white pt-16 pb-8 border-t border-gray-100">
@@ -43,10 +43,10 @@ const Footer = () => {
             <div className="flex flex-col">
               <h4 style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#111535', marginBottom: '20px' }}>Navigation</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>About Vyntra</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Learning Paths</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Sessions</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Community</a></li>
+                <li><a href="/#testimonials" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>About Vyntra</a></li>
+                <li><a href="/#courses" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Learning Paths</a></li>
+                <li><a href="/#how-it-works" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Sessions</a></li>
+                <li><a href="/#community" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Community</a></li>
               </ul>
             </div>
 
@@ -57,11 +57,11 @@ const Footer = () => {
             <div className="flex flex-col">
               <h4 style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#111535', marginBottom: '20px' }}>Explore</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Career Opportunities</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Success Stories</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Blog</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Help Center</a></li>
-                <li><a href="#" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Contact Us</a></li>
+                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Career Opportunities</a></li>
+                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Success Stories</a></li>
+                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Blog</a></li>
+                <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=info@vyntraone.com" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Help Center</a></li>
+                <li><a href="tel:9849742233" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Contact Us</a></li>
               </ul>
             </div>
 
@@ -80,11 +80,10 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center text-[#60646B] text-[13px] pt-8 font-inter border-t border-gray-100/50">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 md:gap-10">
-            <span>© 2024 Vyntra</span>
-            <span>All Rights Reserved</span>
-            <a href="#" className="hover:text-[#0F172A] transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-[#0F172A] transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-[#0F172A] transition-colors">Refund Policy</a>
+            <span>© 2026 Vyntra One. All rights reserved.</span>
+
+            <Link to="/privacy-policy" className="hover:text-[#0F172A] transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-[#0F172A] transition-colors">Terms of Service</Link>
           </div>
 
           <button className="flex items-center gap-1 hover:text-[#0F172A] transition-colors ml-2">

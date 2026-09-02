@@ -105,7 +105,7 @@ function BrandPanel() {
 
       {/* Footer - hidden on mobile */}
       <p className="hidden lg:block relative z-10 text-[11px] text-blue-100/60 mt-6">
-        © 2024 VYNTRA ONE. All rights reserved.
+        © 2026 VYNTRA ONE. All rights reserved.
       </p>
     </div>
   );
@@ -217,7 +217,7 @@ const InstructorLogin = () => {
           </form>
 
           <p className="text-center text-[11px] text-slate-400 mt-6">
-            © 2024 VYNTRA ONE. All rights reserved.
+            © 2026 VYNTRA ONE. All rights reserved.
           </p>
         </>
       ) : (

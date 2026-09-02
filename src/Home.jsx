@@ -39,14 +39,14 @@ const Home = () => {
       {/* Background gradients */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none" />
-      
+
       {/* Decorative top border */}
       <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 via-violet-500 to-fuchsia-500" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-24 flex-grow flex flex-col justify-center items-center relative z-10 w-full">
         {/* Logo / Brand Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -77,7 +77,7 @@ const Home = () => {
                 whileHover={{ y: -6 }}
                 className="group"
               >
-                <Link 
+                <Link
                   to={card.path}
                   className={`flex flex-col h-full bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 transition-all duration-300 hover:border-slate-700/80 hover:bg-slate-900/60 shadow-xl ${card.shadow}`}
                 >
@@ -119,8 +119,8 @@ const Home = () => {
           &copy; {new Date().getFullYear()} Vyntra LMS. All rights reserved.
         </div>
         <div className="flex gap-6">
-          <a href="#" className="hover:text-slate-400 transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+          <Link to="/terms-of-service" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
+          <Link to="/privacy-policy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
           <a href="#" className="hover:text-slate-400 transition-colors">Contact Support</a>
         </div>
       </footer>

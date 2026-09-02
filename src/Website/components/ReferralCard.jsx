@@ -20,7 +20,7 @@ const ReferralCard = () => {
         </div>
 
         <div className="flex-shrink-0 md:ml-8">
-          <button style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#FFFFFF', marginBottom: '12px' }} className="bg-[#080F1D] hover:bg-[#1F2937] px-7 py-3 rounded-full transition-all whitespace-nowrap shadow-md">
+          <button onClick={() => window.location.href='/UserLogin'} style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#FFFFFF', marginBottom: '12px' }} className="bg-[#080F1D] hover:bg-[#1F2937] px-7 py-3 rounded-full transition-all whitespace-nowrap shadow-md">
             Invite & Earn
           </button>
         </div>

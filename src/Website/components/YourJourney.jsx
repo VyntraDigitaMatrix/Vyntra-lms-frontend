@@ -14,7 +14,7 @@ const YourJourney = () => {
       <div className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col items-center z-10">
 
         {/* Title Section */}
-        <div className="mb-16 relative text-center">
+        <div id="progress" className="mb-16 relative text-center">
           <h2
             className="text-4xl md:text-[48px] lg:text-[50px] text-[#15130F] leading-tight"
             style={{ fontFamily: 'Sk-Modernist', fontWeight: 400 }}
@@ -162,7 +162,7 @@ const YourJourney = () => {
 
           {/* Explore the Ecosystem Button */}
           <div className="mt-8 pb-12 flex justify-center">
-            <button className="bg-white border-[2px] border-[#00000047] px-8 py-3 rounded-full hover:bg-gray-50 transition-colors shadow-sm" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontStyle: '14px', color: '#000000' }}>
+            <button onClick={() => window.location.href = '/UserLogin'} className="bg-white border-[2px] border-[#00000047] px-8 py-3 rounded-full hover:bg-gray-50 transition-colors shadow-sm" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontStyle: '14px', color: '#000000' }}>
               Explore the Ecosystem
             </button>
           </div>

@@ -11,7 +11,7 @@ import Logo from '../assets/LOGO BG.jpg.jpeg';
 
 const BetterLearningExperiencesSection = () => {
   return (
-    <div className="w-full bg-gradient-to-b from-white to-[#F2F2F2] pt-20 pb-10">
+    <div id="community" className="w-full bg-gradient-to-b from-white to-[#F2F2F2] pt-20 pb-10">
       <div className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-[125px] xl:px-32 2xl:px-40 flex flex-col md:flex-row items-center justify-between relative z-10 overflow-visible overflow-x-clip lg:overflow-visible">
         {/* Left Column - Text */}
         <div className="w-full md:w-[55%] lg:w-[60%] flex flex-col items-start transform -translate-y-4 lg:-translate-y-5">

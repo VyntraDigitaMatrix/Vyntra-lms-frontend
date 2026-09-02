@@ -120,7 +120,7 @@ function BrandPanel({ isSignUp }) {
 
       {/* Footer - hidden on mobile */}
       <p className="hidden lg:block relative z-10 text-[11px] text-gray-400 mt-3">
-        © 2024 VYNTRA ONE. All rights reserved.
+        © 2026 VYNTRA ONE. All rights reserved.
       </p>
     </div>
   );
@@ -394,9 +394,9 @@ const UserLogin = () => {
                   Don't have an account?{" "}
                   <button onClick={() => switchTo(true)} className="text-[#043573] font-bold hover:underline">Sign Up</button>
                 </p>
-                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
-                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
-                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5 relative z-[2147483647]">
+                  <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
+                  <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
                 </div>
               </div>
             )}
@@ -438,14 +438,14 @@ const UserLogin = () => {
                   </div>
                 </div>
 
-                <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5">
+                <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5 relative z-[2147483647]">
                   <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)}
                     className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
                   <span className="text-xs text-gray-600 leading-relaxed">
                     I agree to the{" "}
-                    <Link to="/terms" className="text-[#043573] font-semibold hover:underline">Terms of Service</Link>
+                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Terms check clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[#043573] font-semibold hover:underline relative z-[2147483647] cursor-pointer">Terms of Service</button>
                     {" "}and{" "}
-                    <Link to="/privacy" className="text-[#043573] font-semibold hover:underline">Privacy Policy</Link>
+                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Privacy check clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[#043573] font-semibold hover:underline relative z-[2147483647] cursor-pointer">Privacy Policy</button>
                   </span>
                 </label>
 
@@ -460,9 +460,9 @@ const UserLogin = () => {
                   Already have an account?{" "}
                   <button onClick={() => switchTo(false)} className="text-[#043573] font-bold hover:underline">Sign In</button>
                 </p>
-                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
-                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
-                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5 relative z-[2147483647]">
+                  <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
+                  <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
                 </div>
               </div>
             )}
@@ -561,9 +561,9 @@ const UserLogin = () => {
                   value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
                   right={<button type="button" onClick={() => setShowConfPwd(v => !v)} className="text-gray-400 hover:text-gray-600 transition">{showConfPwd ? <FaEyeSlash /> : <FaEye />}</button>} />
               </div>
-              <label className="flex items-start gap-2.5 cursor-pointer">
+              <label className="flex items-start gap-2.5 cursor-pointer relative z-[2147483647]">
                 <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
-                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <Link to="/terms" className="text-[#043573] font-semibold">Terms of Service</Link> and <Link to="/privacy" className="text-[#043573] font-semibold">Privacy Policy</Link></span>
+                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Terms check clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[#043573] font-semibold relative z-[2147483647] cursor-pointer">Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Privacy check clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[#043573] font-semibold relative z-[2147483647] cursor-pointer">Privacy Policy</button></span>
               </label>
               <PrimaryBtn onClick={handleSignUp} disabled={loading}>{loading ? "Creating Account…" : "Create Account"}</PrimaryBtn>
               <OrDivider />
@@ -572,11 +572,11 @@ const UserLogin = () => {
             </div>
           )}
 
-          <div className="flex justify-center gap-4 mt-6 pt-4 border-t border-gray-100">
-            <Link to="/privacy" className="text-[10px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
-            <Link to="/terms" className="text-[10px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
+          <div className="flex justify-center gap-4 mt-6 pt-4 border-t border-gray-100 relative z-[2147483647]">
+            <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
+            <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
           </div>
-          <p className="text-center text-[10px] text-gray-400 mt-3">© 2024 VYNTRA ONE. All rights reserved.</p>
+          <p className="text-center text-[10px] text-gray-400 mt-3">© 2026 VYNTRA ONE. All rights reserved.</p>
         </div>
       </div>
     </div>

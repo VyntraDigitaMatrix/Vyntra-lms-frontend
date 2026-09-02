@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
+import { notificationApi } from "./auth/api";
+import NotificationDropdown from "../components/NotificationDropdown";
 import {
   FaBell,
   FaChevronDown,
@@ -79,14 +81,7 @@ const Navbar = () => {
         </div>
 
         {/* Notifications button */}
-        <button
-          onClick={() => navigate("/student/notifications")}
-          className="w-10 h-10 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-200 text-slate-600 hover:text-navy-800 transition-all duration-200 shadow-2xs relative"
-          title="Notifications"
-        >
-          <FaBell className="text-sm" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-brand-orange rounded-full ring-2 ring-white"></span>
-        </button>
+        <NotificationDropdown notificationApi={notificationApi} rolePathPrefix="student" />
 
         {/* Profile Dropdown */}
         <div className="relative">

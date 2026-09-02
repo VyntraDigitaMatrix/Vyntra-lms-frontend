@@ -68,9 +68,9 @@ const TestimonialCard = ({ testimonial }) => (
       {testimonial.quote}
     </p>
     <div className="flex items-center gap-3 mt-auto">
-      <img 
-        src={testimonial.avatar} 
-        alt={testimonial.name} 
+      <img
+        src={testimonial.avatar}
+        alt={testimonial.name}
         className="w-10 h-10 rounded-full object-cover"
       />
       <div>
@@ -85,15 +85,15 @@ const TestimonialCard = ({ testimonial }) => (
 const Testimonials = () => {
   const row1 = testimonialsData.slice(0, 3);
   const row2 = testimonialsData.slice(3, 7);
-  
+
   // Duplicate arrays to allow seamless infinite scrolling
   const duplicatedRow1 = [...row1, ...row1, ...row1];
   const duplicatedRow2 = [...row2, ...row2, ...row2];
 
   return (
     <div className="w-full pt-20 pb-10 overflow-hidden relative">
-      <div className="max-w-[1440px] mx-auto w-full flex flex-col px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
-        
+      <div id="testimonials" className="max-w-[1440px] mx-auto w-full flex flex-col px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20 scroll-mt-14">
+
         {/* Header Area */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full mb-14">
           <div className="flex flex-col items-start xl:col-span-2">
@@ -101,11 +101,11 @@ const Testimonials = () => {
               <span className="text-[#9333EA] text-[13px]">❤️</span>
               <span style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '11px', color: '#292553' }}>Loved by Learners</span>
             </div>
-            
+
             <h2 style={{ fontFamily: 'Sk-Modernist', fontWeight: 400, fontStyle: 'Regular', fontSize: '45px', color: '#111318' }}>
               What people are saying about Vyntra?
             </h2>
-            
+
             <p style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '15px', color: '#484B53', marginTop: '18px', marginBottom: '15px' }}>
               Don't just take our word for it—see what our learners have to say
               <br className="hidden md:block" />
@@ -125,7 +125,7 @@ const Testimonials = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Bottom Row: Scrolls Right */}
         <div className="flex w-max animate-marquee-right pause-on-hover gap-6 ml-[-200px]">
           {duplicatedRow2.map((testimonial, index) => (
@@ -135,7 +135,7 @@ const Testimonials = () => {
           ))}
         </div>
       </div>
-      
+
     </div>
   );
 };

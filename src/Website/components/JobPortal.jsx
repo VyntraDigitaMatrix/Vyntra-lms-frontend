@@ -116,9 +116,9 @@ const JobPortal = () => {
     <div className="w-full bg-transparent pt-10 flex flex-col items-center text-left">
 
       {/* Header Section */}
-      <div className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col items-center text-left mb-16">
+      <div id="job-portal" className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col items-center text-left mb-16 scroll-mt-14">
         {/* Badge */}
-        <div className="bg-[linear-gradient(135deg,_#F1EDFF_15%,_#F8F5FF_85%)] px-5 py-3 rounded-xl mb-6" style={{fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#000000'}}>
+        <div className="bg-[linear-gradient(135deg,_#F1EDFF_15%,_#F8F5FF_85%)] px-5 py-3 rounded-xl mb-6" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#000000' }}>
           Placements & Job Portal
         </div>
 
@@ -131,7 +131,7 @@ const JobPortal = () => {
         <p style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '15px', color: '#656C88' }} className="max-w-[700px] leading-relaxed">
           Explore thousands of active job openings from top companies.<br />
           <span className='ml-2'>
-          Find the right role that matches your skills and career goals.
+            Find the right role that matches your skills and career goals.
           </span>
         </p>
       </div>
@@ -178,7 +178,7 @@ const JobPortal = () => {
 
             {/* Link */}
             <div className="flex justify-end mt-auto">
-              <a href="#" className="text-[#5931E9] font-Inter font-semibold-700 text-[15px]  flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+              <a href="/UserLogin" className="text-[#5931E9] font-Inter font-semibold-700 text-[15px]  flex items-center gap-1 whitespace-nowrap flex-shrink-0">
                 View Job <span className="text-lg  leading-none">→</span>
               </a>
             </div>
@@ -188,7 +188,7 @@ const JobPortal = () => {
 
       {/* Explore More Button */}
       <div className="mt-16 flex justify-center">
-        <button className="bg-white w-[210px] h-[55px] rounded-full border-[2px] border-black/[0.28] text-[#000000] font-Inter text-[15px] font-medium flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-black/50 transition-all shadow-sm">
+        <button onClick={() => window.location.href = '/UserLogin'} className="bg-white w-[210px] h-[55px] rounded-full border-[2px] border-black/[0.28] text-[#000000] font-Inter text-[15px] font-medium flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-black/50 transition-all shadow-sm">
           Explore more jobs <span className="text-xl leading-none mb-0.5">→</span>
         </button>
       </div>

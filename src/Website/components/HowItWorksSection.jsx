@@ -95,7 +95,7 @@ const StepCard = ({ number, title, description, colorText, bgColor, icon, isPinn
 
 const HowItWorksSection = () => {
   return (
-    <>
+    <section id="how-it-works" className="scroll-mt-24">
       {/* Badge */}
       <div className="flex justify-center w-full mb-16 relative z-20 mt-10">
         <div className="flex items-center gap-2 px-4 py-2.5 bg-[#FFF8DF] border border-[#F0D98B] rounded-full shadow-sm">
@@ -118,7 +118,7 @@ const HowItWorksSection = () => {
           ))}
         </div>
       </div>
-    </>
+    </section>
   );
 };
 

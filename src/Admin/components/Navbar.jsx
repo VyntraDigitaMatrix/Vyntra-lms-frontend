@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../auth/AuthContext";
+import { notificationApi } from "../auth/api";
+import NotificationDropdown from "../../components/NotificationDropdown";
 import {
   FaBell,
   FaChevronDown,
@@ -50,10 +52,7 @@ const Navbar = () => {
           <FaCalendarAlt className="text-sm" />
         </button>
 
-        <button className="relative w-9 h-9 rounded-full border border-navy-100 flex items-center justify-center cursor-pointer hover:bg-navy-50 hover:border-navy-600 transition text-navy-700">
-          <FaBell className="text-sm" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-orange border border-white"></span>
-        </button>
+        <NotificationDropdown notificationApi={notificationApi} rolePathPrefix="admin" />
 
         <div className="w-px h-8 bg-navy-100" />
 

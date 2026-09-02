@@ -13,7 +13,7 @@ import S1 from "../assets/S1.jpg";
 /* ── Status badge helper ── */
 const getStatusInfo = (progress, completed) => {
     if (completed) return { label: "Completed", color: "text-emerald-600 bg-emerald-50 border-emerald-200", bar: "bg-emerald-500" };
-    if (progress > 0) return { label: "In Progress", color: "text-navy-800 bg-navy-50 border-navy-200", bar: "bg-navy-500" };
+    if (progress > 0) return { label: "In Progress", color: "text-blue-600 bg-blue-50 border-blue-200", bar: "bg-blue-500" };
     return { label: "Not Started", color: "text-gray-500 bg-gray-50 border-gray-200", bar: "bg-gray-300" };
 };
 
@@ -51,7 +51,7 @@ const Courses = () => {
             if (res.data?.data) {
                 const pageData = res.data.data;
                 const rawCourses = pageData.content || [];
-
+                
                 // Fetch progress for each course in parallel
                 const enriched = await Promise.all(
                     rawCourses.map(async (course) => {
@@ -73,7 +73,7 @@ const Courses = () => {
                         }
                     })
                 );
-
+                
                 setCourses(enriched);
                 setTotalPages(pageData.totalPages || 0);
                 setTotalElements(pageData.totalElements || 0);
@@ -92,8 +92,8 @@ const Courses = () => {
 
     const filteredCourses = useMemo(() => {
         return courses.filter((c) => {
-           const title = (c.title || "").toLowerCase();
-            const instructor = (c.instructorNames || []) .join(", ").toLowerCase();
+            const title = (c.courseTitle || "").toLowerCase();
+            const instructor = (c.instructorName || "").toLowerCase();
             const query = searchTerm.toLowerCase();
             const matchesSearch = title.includes(query) || instructor.includes(query);
 
@@ -120,36 +120,31 @@ const Courses = () => {
         <div className="min-h-screen bg-navy-50/40 p-4 sm:p-6 md:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
 
-                {/* ── Header Banner ── */}
-                <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-700 rounded-3xl p-5 sm:p-6 shadow-lg relative overflow-hidden">
-                    <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-brand-orange/15 blur-2xl pointer-events-none"></div>
-                    <p className="relative text-xs text-navy-100/60 mb-1 flex items-center gap-1.5 font-medium">
-                        <Link to="/student/dashboard" className="hover:text-brand-orange-light transition">Dashboard</Link>
-                        <span>&gt;</span>
-                        <span className="text-white font-semibold">My Courses</span>
-                    </p>
-                    <h1 className="relative text-xl sm:text-2xl font-black text-white tracking-tight">My Courses</h1>
-                    <div className="relative h-1 w-12 bg-brand-orange rounded-full mt-2 mb-3"></div>
-                    <p className="relative text-xs text-navy-100/70">Track your progress and jump back into your active learning paths.</p>
-                </div>
+                {/* ── Header ── */}
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-5">
+                    <div className="flex-1">
+                        <p className="text-xs sm:text-sm text-gray-400 mb-1">
+                            <Link to="/student/dashboard" className="hover:text-[#043573] transition">Dashboard</Link>
+                            <span className="mx-2">&gt;</span>
+                            <span className="text-gray-600 font-medium">My Courses</span>
+                        </p>
+                        <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">My Courses</h1>
 
-                {/* ── Tabs + Search ── */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/70 shadow-xs">
-                    {/* Tabs */}
-                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer border-none ${
-                                    activeTab === tab
-                                        ? "bg-brand-orange text-white shadow-md shadow-brand-orange/25"
-                                        : "text-slate-600 bg-slate-100/70 hover:bg-navy-50 hover:text-navy-800"
-                                }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                        {/* Tabs */}
+                        <div className="flex gap-1 overflow-x-auto pb-1">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${activeTab === tab
+                                        ? "bg-blue-600 text-white shadow-sm"
+                                        : "text-gray-500 hover:bg-gray-100"
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Search */}
@@ -168,7 +163,7 @@ const Courses = () => {
                 {/* ── Stats Cards ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                     {[
-                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-navy-800 bg-navy-50" },
+                        { label: "Enrolled", value: stats.total, icon: FaBookOpen, color: "text-blue-600 bg-blue-50" },
                         { label: "In Progress", value: stats.inProgress, icon: FaPlay, color: "text-amber-600 bg-amber-50" },
                         { label: "Completed", value: stats.completed, icon: FaTrophy, color: "text-emerald-600 bg-emerald-50" },
                         { label: "Not Started", value: stats.notStarted, icon: FaGraduationCap, color: "text-slate-500 bg-slate-100" },
@@ -201,9 +196,9 @@ const Courses = () => {
                         {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                     </div>
                 ) : filteredCourses.length === 0 ? (
-                    <div className="bg-white rounded-2xl p-12 text-center border border-slate-200/70 shadow-xs">
-                        <div className="w-16 h-16 rounded-2xl bg-navy-50 flex items-center justify-center mx-auto mb-4">
-                            <FaBookOpen className="text-navy-800 text-2xl" />
+                    <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-sm">
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+                            <FaBookOpen className="text-blue-400 text-2xl" />
                         </div>
                         <h3 className="text-base font-bold text-slate-900 mb-1">
                             {searchTerm || activeTab !== "All" ? "No courses match your filters" : "No enrolled courses yet"}
@@ -216,7 +211,7 @@ const Courses = () => {
                         {(!searchTerm && activeTab === "All") && (
                             <Link
                                 to="/student/all-courses"
-                                className="inline-flex items-center gap-2 h-10 px-6 rounded-xl bg-navy-800 text-white text-xs font-bold hover:bg-navy-900 transition-all shadow-xs"
+                                className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition"
                             >
                                 Browse Courses
                             </Link>
@@ -228,40 +223,41 @@ const Courses = () => {
                             const progress = course.progressPercentage || 0;
                             const status = getStatusInfo(progress, course.completed);
                             const thumbnail = course.thumbnailUrl || S1;
+                            const courseId = course.courseId;
 
                             return (
                                 <div
                                     key={course.courseId || course.slug || course.id}
-                                    className="bg-white rounded-2xl overflow-hidden border border-slate-200/70 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                                    className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col"
                                 >
-                                    <div>
-                                        {/* Thumbnail */}
-                                        <div className="relative overflow-hidden h-[170px]">
-                                            <img
-                                                src={thumbnail}
-                                                alt={course.title || course.courseTitle}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                onError={(e) => { e.target.src = S1; }}
-                                            />
-                                            {/* Progress badge */}
-                                            <span className="absolute top-3 right-3 bg-brand-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md">
-                                                {Math.round(progress)}%
-                                            </span>
-                                            {/* Status pill */}
-                                            <span className={`absolute bottom-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-lg border backdrop-blur-xs ${status.color}`}>
-                                                {status.label}
-                                            </span>
-                                        </div>
+                                    {/* Thumbnail */}
+                                    <div className="relative">
+                                        <img
+                                            src={thumbnail}
+                                            alt={course.courseTitle}
+                                            className="w-full h-[130px] object-cover"
+                                            onError={(e) => { e.target.src = S1; }}
+                                        />
+                                        {/* Progress badge */}
+                                        <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                                            {Math.round(progress)}%
+                                        </span>
+                                        {/* Status pill */}
+                                        <span className={`absolute bottom-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${status.color}`}>
+                                            {status.label}
+                                        </span>
+                                    </div>
 
-                                        {/* Content */}
-                                        <div className="p-4 space-y-2">
-                                            <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-navy-800 transition-colors">
+                                    {/* Content */}
+                                    <div className="p-4 flex flex-col flex-1">
+                                        <div className="flex-1">
+                                            <h2 className="font-bold text-gray-900 text-sm leading-snug mb-1 line-clamp-2 min-h-[40px]">
                                                 {course.title || course.courseTitle}
-                                            </h3>
+                                            </h2>
                                             <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
                                                 By {course.instructorNames?.join(", ") || course.instructorName || "Instructor"}
                                             </p>
-                                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                                 {course.level && (
                                                     <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2.5 py-0.5 rounded-md">
                                                         {course.level}
@@ -299,14 +295,13 @@ const Courses = () => {
                                         </div>
 
                                         <button
-                                            onClick={() => navigate(`/student/continue-learning/${course.slug || course.courseSlug || course.courseId || course.id}`)}
-                                            className={`w-full h-10 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
-                                                course.completed
-                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-                                                    : progress > 0
-                                                        ? "bg-navy-800 text-white hover:bg-navy-900 shadow-xs"
-                                                        : "border border-slate-200 text-navy-800 hover:bg-navy-800 hover:text-white"
-                                            }`}
+                                            onClick={() => navigate(`/student/continue-learning/${course.slug || courseId}`)}
+                                            className={`w-full mt-3 h-10 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${course.completed
+                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                                                : progress > 0
+                                                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                                                    : "border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white"
+                                                }`}
                                         >
                                             {course.completed ? (
                                                 <><FaTrophy className="text-xs" /> Review Course</>
@@ -337,11 +332,10 @@ const Courses = () => {
                             <button
                                 key={i}
                                 onClick={() => setCurrentPage(i)}
-                                className={`w-9 h-9 rounded-xl text-xs font-bold transition cursor-pointer ${
-                                    i === currentPage
-                                        ? "bg-brand-orange text-white shadow-xs"
-                                        : "border border-slate-200 bg-white text-slate-600 hover:bg-navy-50"
-                                }`}
+                                className={`w-9 h-9 rounded-xl text-xs font-bold transition ${i === currentPage
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                    }`}
                             >
                                 {i + 1}
                             </button>

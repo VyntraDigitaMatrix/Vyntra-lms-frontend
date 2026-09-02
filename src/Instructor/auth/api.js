@@ -453,6 +453,7 @@ export const instructorCalendarApi = {
     api.get(`/api/instructor/calendar?startDate=${startDate}&endDate=${endDate}`),
 };
 
+
 export const instructorCertificateApi = {
   // GET /api/instructor/certificates/pending
   getPendingCertificates: (page = 0, size = 20) =>
@@ -473,8 +474,7 @@ export const instructorCertificateApi = {
   // PUT /api/instructor/certificates/{certificateId}/reject
   rejectCertificate: (certificateId) =>
     api.put(`/api/instructor/certificates/${certificateId}/reject`),
-
-}
+};
 
 export const instructorResourceApi = {
   // GET /api/instructor/resources/{resourceId} — full detail (includes description, fileUrl, uploader info)
@@ -509,7 +509,17 @@ export const instructorResourceApi = {
   // GET /api/instructor/resources/course/{courseSlug} — paginated list (summary fields only)
   getCourseResources: (courseSlug, page = 0, size = 50) =>
     api.get(`/api/instructor/resources/course/${courseSlug}?page=${page}&size=${size}`),
+
 };
 
 
 export default api;
+
+
+export const notificationApi = {
+  markAsRead: (notificationId) => api.patch('/api/notifications/read', { notificationId }),
+  markAllAsRead: () => api.patch('/api/notifications/read-all'),
+  getNotifications: (page = 0, size = 10) => api.get(`/api/notifications?page=${page}&size=${size}`),
+  getUnreadNotifications: (page = 0, size = 10) => api.get(`/api/notifications/unread?page=${page}&size=${size}`),
+  getUnreadCount: () => api.get('/api/notifications/unread-count')
+};
