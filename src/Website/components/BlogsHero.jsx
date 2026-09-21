@@ -85,16 +85,17 @@ const BlogsHero = () => {
           <div className="lg:col-span-5 flex justify-center lg:justify-center items-center relative mt-4 lg:mt-0 lg:-translate-x-8 xl:-translate-x-12">
             <div className="relative w-[300px] sm:w-[380px] md:w-[420px] lg:w-[450px] flex items-end justify-center">
 
-              {/* Rounded Vector Card behind student (Linear Gradient #F4F9FF to #E5F0FF) */}
+              {/* Rounded Vector Card behind student */}
               <div
                 className="absolute bottom-0 w-full max-w-[450px] h-[220px] sm:h-[250px] md:h-[280px] lg:h-[295px] rounded-[32px] sm:rounded-[72px] lg:rounded-[90px]"
                 style={{
-                  background: 'linear-gradient(180deg, #F4F9FF 0%, #E5F0FF 100%)',
+                  background:
+                    'linear-gradient(130.1deg, #F4F9FF 14.74%, rgba(229, 240, 255, 0) 85.26%)',
                 }}
               />
 
-              {/* Floating Badge 1: Top Left */}
-              <div className="absolute top-4 sm:top-6 -left-2 sm:left-1 z-20 bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl px-3 sm:px-3.5 py-1.5 sm:py-2 shadow-[0_6px_20px_rgba(16,24,40,0.08)] border border-white flex items-center gap-2.5">
+              {/* Floating Badge 1: Top Left — sits behind student image (z-0 < student z-10) */}
+              <div className="absolute top-4 sm:top-15 -left-2 sm:left-15 z-0 bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl px-3 sm:px-3.5 py-1.5 sm:py-5 shadow-[0_6px_20px_rgba(16,24,40,0.08)] border border-white flex items-center gap-2.5 mt-10">
                 <div className="flex items-center gap-[7px]">
                   <span className="w-1 h-3.5 bg-[#25AE72]"></span>
                   <span className="w-1 h-3.5 bg-[#25AE72]"></span>
@@ -110,7 +111,7 @@ const BlogsHero = () => {
               </div>
 
               {/* Floating Badge 2: Bottom Right */}
-              <div className="absolute bottom-8 sm:bottom-12 -right-2 sm:-right-3 z-0 bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl px-3 sm:px-3.5 py-1.5 sm:py-2 shadow-[0_6px_20px_rgba(16,24,40,0.08)] border border-white flex items-center gap-2.5">
+              <div className="absolute bottom-8 sm:bottom-12 -right-2 sm:right-4 z-0 bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl px-3 sm:px-5 py-1.5 sm:py-5 shadow-[0_6px_20px_rgba(16,24,40,0.08)] border border-white flex items-center gap-2.5">
                 <div className="flex flex-col text-left">
                   <span className="text-[#027A48] font-bold text-[12px] sm:text-[13px] leading-tight">
                     Better Skills
@@ -131,7 +132,7 @@ const BlogsHero = () => {
                 {/* Handwritten Annotations (Hidden on very small screens, visible md+) */}
 
 
-                <div className="hidden lg:block absolute -top-[6%] -right-[10%] text-[#8D8D8D] font-['Handlee'] text-[22px] transform -rotate-[38.67deg] z-30 pointer-events-none text-center flex flex-col items-center">
+                <div className="hidden lg:block absolute top-25 -right-10 text-[#8D8D8D] font-['Handlee'] text-[22px] transform -rotate-[38.67deg] z-30 pointer-events-none text-center flex flex-col items-center">
                   engaging <br /> learning <br /> experiences
                   <img src={Arrow1} className="w-15 h-15 absolute -left-[20%] -top-[50%] rotate-[18deg]" />
                 </div>
