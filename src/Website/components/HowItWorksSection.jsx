@@ -98,9 +98,8 @@ const HowItWorksSection = () => {
     <section id="how-it-works" className="scroll-mt-24">
       {/* Badge */}
       <div className="flex justify-center w-full mb-16 relative z-20 mt-10">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#FFF8DF] border border-[#F0D98B] rounded-full shadow-sm">
-          <svg className="w-[18px] h-[18px] text-[#F5A624]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"></path></svg>
-          <span className="text-[12px] font-bold text-[#D97706] tracking-widest uppercase">HOW IT WORKS</span>
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F0F1F4] rounded-full">
+          <span style={{ fontFamily: "Inter", fontWeight: 700, fontSize: '12px', fontStyle: 'Bold', color: '#111318' }}>How it Works</span>
         </div>
       </div>
 

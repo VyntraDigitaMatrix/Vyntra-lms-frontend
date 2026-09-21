@@ -24,3 +24,30 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Gilroy Font Family */
+@font-face {
+  font-family: 'Gilroy-SemiBold';
+  src: url('/Gilroy-SemiBold.woff2') format('woff2'),
+       url('/Gilroy-SemiBold.woff') format('woff');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/Gilroy-SemiBold.woff2') format('woff2'),
+       url('/Gilroy-SemiBold.woff') format('woff');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.vyntra-footer-gradient {
+  background: linear-gradient(179.86deg, #000000 -326.1%, rgba(255, 255, 255, 0.52) 99.88%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}

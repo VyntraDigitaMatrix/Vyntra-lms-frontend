@@ -36,84 +36,12 @@ const jobs = [
     logoBg: 'bg-transparent',
     logoColor: 'text-[#0284C7]',
     isSquare: false
-  },
-  {
-    title: 'Digital Marketing Specialist',
-    company: 'HubSpot',
-    location: 'Remote',
-    type: 'Full-time',
-    time: '4d ago',
-    tags: ['Digital Marketing', 'SEO'],
-    logoText: 'H',
-    logoBg: 'bg-transparent',
-    logoColor: 'text-[#EA580C]',
-    isSquare: false
-  },
-  {
-    title: 'Content Strategist',
-    company: 'LinkedIn',
-    location: 'Delhi, India',
-    type: 'Full-time',
-    time: '5d ago',
-    tags: ['Content', 'Strategy'],
-    logoText: 'in',
-    logoBg: 'bg-[#0A66C2]',
-    logoColor: 'text-white',
-    isSquare: true
-  },
-  {
-    title: 'Visual Designer',
-    company: 'Dribbble',
-    location: 'Mumbai, India',
-    type: 'Full-time',
-    time: '2d ago',
-    tags: ['Visual Design', 'Branding'],
-    logoText: '●',
-    logoBg: 'bg-transparent',
-    logoColor: 'text-[#DB2777]',
-    isSquare: false
-  },
-  {
-    title: 'Web Designer',
-    company: 'Behance',
-    location: 'Remote',
-    type: 'Contract',
-    time: '6d ago',
-    tags: ['Web Design', 'HTML/CSS'],
-    logoText: 'Bē',
-    logoBg: 'bg-[#0057FF]',
-    logoColor: 'text-white',
-    isSquare: true
-  },
-  {
-    title: 'UI Designer',
-    company: 'Shopify',
-    location: 'Bangalore, India',
-    type: 'Full-time',
-    time: '3d ago',
-    tags: ['UI Design', 'E-commerce'],
-    logoText: 'S',
-    logoBg: 'bg-transparent',
-    logoColor: 'text-[#16A34A]',
-    isSquare: false
-  },
-  {
-    title: 'Product Design Intern',
-    company: 'Notion',
-    location: 'Remote',
-    type: 'Internship',
-    time: '1d ago',
-    tags: ['UI/UX', 'Product Design'],
-    logoText: 'N',
-    logoBg: 'bg-transparent',
-    logoColor: 'text-black',
-    isSquare: true
   }
 ];
 
 const JobPortal = () => {
   return (
-    <div className="w-full bg-transparent pt-10 flex flex-col items-center text-left">
+    <div className="w-full bg-transparent pt-10 flex flex-col items-center text-left pb-15">
 
       {/* Header Section */}
       <div id="job-portal" className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col items-center text-left mb-16 scroll-mt-14">
@@ -184,13 +112,6 @@ const JobPortal = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Explore More Button */}
-      <div className="mt-16 flex justify-center">
-        <button onClick={() => window.location.href = '/UserLogin'} className="bg-white w-[210px] h-[55px] rounded-full border-[2px] border-black/[0.28] text-[#000000] font-Inter text-[15px] font-medium flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-black/50 transition-all shadow-sm">
-          Explore more jobs <span className="text-xl leading-none mb-0.5">→</span>
-        </button>
       </div>
 
     </div>

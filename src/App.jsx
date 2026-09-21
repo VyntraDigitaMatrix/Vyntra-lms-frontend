@@ -104,6 +104,7 @@ import InstructorDashboard from "./Instructor/InstructorDashboard";
 
 import InstructorCertificates from "./Instructor/pages/Certificate";
 import Homepage from './Website/Homepage';
+import BlogsPage from './Website/BlogsPage';
 import PrivacyPolicy from './Website/components/PrivacyPolicy';
 import TermsOfService from './Website/components/TermsOfService';
 function StudentLayoutRoutes() {
@@ -139,6 +140,8 @@ function App() {
             <Routes>
               {/* Default route */}
               <Route path="/" element={<Homepage />} />
+              <Route path="/blogs" element={<BlogsPage />} />
+              <Route path="/blog" element={<BlogsPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               {/* Login pages */}

@@ -11,13 +11,17 @@ const CTASection = () => {
         <div className="relative z-10 flex flex-col items-center w-full px-4">
           <span className="uppercase mb-8" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '11px', color: '#F0B429' }}>GET STARTED</span>
 
-          <h2 className="text-4xl sm:text-5xl md:text-6xl text-white mb-6 leading-tight relative z-20 px-4" style={{ fontFamily: 'Sk-Modernist', fontWeight: 400 }}>
-            <div className="flex flex-wrap justify-center items-center gap-x-3 md:gap-x-4">
-              <span>Your</span>
-              <span className="bg-[#FEC453] text-[#000000] px-6 md:px-8 py-1 md:py-1 rounded-[42px] inline-flex items-center justify-center -mt-1 md:-mt-2 text-[45px] md:text-[60px]">journey</span>
-              <span>starts here.</span>
+          <h2 className="text-3xl sm:text-5xl md:text-6xl text-white mb-6 leading-tight relative z-20 px-4 flex flex-col items-center w-full" style={{ fontFamily: 'Sk-Modernist', fontWeight: 400 }}>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 md:gap-x-4 w-full max-w-2xl">
+              <span className="text-right">Your</span>
+              <span className="bg-[#FEC453] text-[#000000] px-5 sm:px-8 py-0.5 sm:py-0 rounded-[42px] inline-flex items-center justify-center -mt-1 md:mt-3 text-[32px] sm:text-[45px] md:text-[60px]">
+                journey
+              </span>
+              <span className="text-left">starts</span>
             </div>
-
+            <div className="mt-1 md:mt-2 text-center">
+              <span>here.</span>
+            </div>
           </h2>
 
           <p className="text-gray-300 text-[14px] sm:text-[15px] max-w-2xl mx-auto mb-10 px-6 relative z-20" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', color: '#B9AE95' }}>

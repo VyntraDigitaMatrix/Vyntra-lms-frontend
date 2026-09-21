@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
-    <footer className="w-full bg-white pt-16 pb-8 border-t border-gray-100">
+    <footer className="w-full bg-white pt-10 pb-8">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 2xl:px-24 flex flex-col">
         {/* Top Section */}
         {/* Top Section */}
@@ -59,7 +59,7 @@ const Footer = () => {
               <ul className="flex flex-col gap-4">
                 <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Career Opportunities</a></li>
                 <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Success Stories</a></li>
-                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Blog</a></li>
+                <li><a href="/blogs" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Blog</a></li>
                 <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=info@vyntraone.com" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Help Center</a></li>
                 <li><a href="tel:9849742233" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Contact Us</a></li>
               </ul>
@@ -69,24 +69,39 @@ const Footer = () => {
         </div>
 
         {/* Huge Text Section */}
-        <div className="w-full relative overflow-hidden flex justify-center mt-2 md:-mt-8">
-          <h1 className="text-[55px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[200px] whitespace-nowrap relative z-10" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', color: '#111633', lineHeight: '0.9' }}>
+        <div className="w-full relative flex flex-col items-center mt-2 md:-mt-8">
+          <h1
+            className="vyntra-footer-gradient bg-clip-text text-transparent text-[55px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[200px] whitespace-nowrap relative z-10 select-none pointer-events-none inline-block text-center"
+            style={{
+              fontFamily: 'Inter',
+              fontWeight: 700,
+              fontStyle: 'Bold',
+              lineHeight: '1.15',
+              paddingBottom: '14px',
+              background: 'linear-gradient(179.86deg, #000000 -326.1%, rgba(255, 255, 255, 0.52) 99.88%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
             Vyntra One
           </h1>
-          {/* Masking div to hide the text below the line */}
-          <div className="absolute bottom-0 left-0 w-full h-[12%] bg-white border-t-[3px] border-[#DFE1E8] z-20"></div>
+          {/* Divider line cleanly below text */}
+          <div className="w-full border-t-[3px] border-[#DFE1E8] z-20 -mt-3"></div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-[#60646B] text-[13px] pt-8 font-inter border-t border-gray-100/50">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 md:gap-10">
-            <span>© 2026 Vyntra One. All rights reserved.</span>
-
+        <div className="flex flex-col md:flex-row justify-between items-center text-[#60646B] text-[13px] pt-8 font-inter">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 md:gap-8">
+            <span>© 2026 Vyntraone</span>
+            <span>All Rights Reserved</span>
             <Link to="/privacy-policy" className="hover:text-[#0F172A] transition-colors">Privacy Policy</Link>
             <Link to="/terms-of-service" className="hover:text-[#0F172A] transition-colors">Terms of Service</Link>
+            <Link to="/refund-policy" className="hover:text-[#0F172A] transition-colors">Refund Policy</Link>
           </div>
 
-          <button className="flex items-center gap-1 hover:text-[#0F172A] transition-colors ml-2">
+          <button className="flex items-center gap-1 hover:text-[#0F172A] transition-colors ml-2 mt-4 md:mt-0">
             English
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
           </button>
