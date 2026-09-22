@@ -139,17 +139,6 @@ export const studentLearningApi = {
   getCourseReviews: (courseSlug, page = 0, size = 10) =>
     api.get(`/api/student/course-ratings/${courseSlug}?page=${page}&size=${size}`),
 
-  submitCourseReview: (courseSlug, data) =>
-    api.post(`/api/student/course-ratings/${courseSlug}`, data),
-
-  updateCourseReview: (courseSlug, data) =>
-    api.put(`/api/student/course-ratings/${courseSlug}`, data),
-
-  getMyRating: (courseSlug) =>
-    api.get(`/api/student/course-ratings/${courseSlug}/my-rating`),
-
-  deleteCourseReview: (courseSlug) =>
-    api.delete(`/api/student/course-ratings/${courseSlug}`),
 
   // POST /api/student/learning/courses/{courseSlug}/reviews
   submitCourseReview: (courseSlug, data) =>
@@ -405,9 +394,6 @@ export const studentCertificateApi = {
   getCertificate: (certificateNumber) =>
     api.get(`/api/student/certificates/${certificateNumber}`),
 };
-
-
-
 export const studentResourceApi = {
   // GET /api/student/resources/{resourceId}
   getResource: (resourceId) =>
@@ -417,8 +403,6 @@ export const studentResourceApi = {
   getCourseResources: (courseSlug, page = 0, size = 100) =>
     api.get(`/api/student/resources/course/${courseSlug}?page=${page}&size=${size}`),
 };
-
-export default api;
 
 export const notificationApi = {
   markAsRead: (notificationId) => api.patch('/api/notifications/read', { notificationId }),

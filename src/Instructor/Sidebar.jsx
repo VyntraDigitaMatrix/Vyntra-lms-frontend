@@ -15,8 +15,7 @@ import {
   FaChalkboardTeacher,
   FaChartBar,
   FaCreditCard,
-  FaLaptop,
-  FaCertificate,
+  FaCertificate
 } from "react-icons/fa";
 import { MdQuiz } from "react-icons/md";
 
@@ -36,13 +35,16 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   const topMenuItems = [
     { icon: <FaHome />, label: "Dashboard", path: "/instructor/dashboard" },
     { icon: <FaChalkboardTeacher />, label: "My Courses", path: "/instructor/courses" },
+    { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans"},
+    { icon: <FaUsers />, label: "Live Classes", path: "/instructor/live-classes" },
     { icon: <FaUsers />, label: "Students", path: "/instructor/students" },
   ];
 
   const menuItems = [
     { icon: <FaClipboardList />, label: "Assignments", path: "/instructor/assignments" },
     { icon: <MdQuiz />, label: "Quiz", path: "/instructor/quiz" },
-    { icon: <FaCertificate />, label: "Certificates", path: "/instructor/certificates" },
+    { icon: <FaCalendarAlt />, label: "Schedule", path: "/instructor/schedule" },
+    { icon: <FaVideo />, label: "Recordings", path: "/instructor/recordings" },
     { icon: <FaComments />, label: "Discussions", path: "/instructor/discussions" },
     { icon: <FaFolder />, label: "Resources", path: "/instructor/resources" },
     { icon: <FaCreditCard />, label: "Plans", path: "/instructor/plans" },

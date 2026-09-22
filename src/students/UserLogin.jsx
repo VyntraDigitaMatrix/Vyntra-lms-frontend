@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../students/auth/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -16,7 +16,7 @@ const FEATURES = [
 ];
 
 /* ── Reusable input ──────────────────────────────────── */
-function Field({ icon: Icon, type = "text", placeholder, value, onChange, right, maxLength }) {
+function Field({ icon: Icon, type = "text", placeholder, value, onChange, right }) {
   return (
     <div className="relative w-full">
       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">
@@ -27,8 +27,7 @@ function Field({ icon: Icon, type = "text", placeholder, value, onChange, right,
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        maxLength={maxLength}
-        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
+        className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:border-[#043573] focus:ring-2 focus:ring-blue-100 transition bg-white placeholder-gray-400"
       />
       {right && (
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center">{right}</span>
@@ -120,7 +119,7 @@ function BrandPanel({ isSignUp }) {
 
       {/* Footer - hidden on mobile */}
       <p className="hidden lg:block relative z-10 text-[11px] text-gray-400 mt-3">
-        © 2026 VYNTRA ONE. All rights reserved.
+        © 2024 VYNTRA ONE. All rights reserved.
       </p>
     </div>
   );
@@ -136,45 +135,13 @@ function OrDivider() {
   );
 }
 
-function GoogleBtn({ googleLoaded }) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (!window.google || !googleLoaded) return;
-
-    try {
-      window.google.accounts.id.renderButton(
-        containerRef.current,
-        {
-          type: "standard",
-          theme: "outline",
-          size: "large",
-          text: "continue_with",
-          shape: "rectangular",
-          logo_alignment: "left",
-          width: containerRef.current?.offsetWidth || 350,
-        }
-      );
-    } catch (err) {
-      console.error("Failed to render Google button:", err);
-    }
-  }, [googleLoaded]);
-
+function GoogleBtn({ onClick }) {
   return (
-    <div className="relative w-full overflow-hidden h-[42px] lg:h-[46px]">
-      {/* Our premium custom button */}
-      <button type="button"
-        className="w-full h-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 bg-white transition pointer-events-none">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-4 h-4 lg:w-5 lg:h-5" />
-        <span className="hidden xs:inline">Continue with Google</span>
-      </button>
-
-      {/* Invisible overlay containing the official Google button */}
-      <div
-        ref={containerRef}
-        className="google-signin-overlay absolute inset-0 opacity-0 cursor-pointer z-10"
-      />
-    </div>
+    <button onClick={onClick}
+      className="w-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-4 h-4 lg:w-5 lg:h-5" />
+      <span className="hidden xs:inline">Continue with Google</span>
+    </button>
   );
 }
 
@@ -194,45 +161,6 @@ const UserLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
-
-  const [googleLoaded, setGoogleLoaded] = useState(false);
-
-  useEffect(() => {
-    const handleCredentialResponse = async (response) => {
-      setError("");
-      setLoading(true);
-      const result = await googleLogin(response.credential);
-      setLoading(false);
-      if (!result.success) {
-        setError(result.message);
-      }
-    };
-
-    const initializeGoogle = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: "256766214617-fh3iv47c8c2guocmftnuekvlne6agljd.apps.googleusercontent.com",
-          callback: handleCredentialResponse,
-        });
-        setGoogleLoaded(true);
-      }
-    };
-
-    const scriptId = "google-jssdk";
-    let script = document.getElementById(scriptId);
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogle;
-      document.body.appendChild(script);
-    } else {
-      initializeGoogle();
-    }
-  }, [googleLogin]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -255,22 +183,7 @@ const UserLogin = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    if (!loginEmail) { setError("Please enter your email"); return; }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(loginEmail)) {
-      setError("Invalid email");
-      return;
-    }
-
-    if (!loginPassword) { setError("Please enter your password"); return; }
-
-    const specialCharRegex = /[@$!%*?&]/;
-    if (!specialCharRegex.test(loginPassword)) {
-      setError("Invalid password");
-      return;
-    }
-
+    if (!loginEmail || !loginPassword) { setError("Please enter email and password"); return; }
     setError(""); setLoading(true);
     const result = await login(loginEmail, loginPassword);
     setLoading(false);
@@ -280,35 +193,16 @@ const UserLogin = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (!regName || !regEmail || !regPhone || !regPassword) { setError("Please fill in all required fields"); return; }
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(regPhone)) {
-      setError("Invalid mobile number. It must be 10 digits.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(regEmail)) {
-      setError("Invalid email");
-      return;
-    }
-
-    const specialCharRegex = /[@$!%*?&]/;
-    if (!specialCharRegex.test(regPassword)) {
-      setError("Invalid password");
-      return;
-    }
-
     if (regPassword !== regConfirm) { setError("Passwords do not match"); return; }
     if (!agreeTerms) { setError("Please agree to the Terms of Service"); return; }
-
     setError(""); setLoading(true);
     const username = regEmail.split('@')[0];
-    const result = await register({
-      fullName: regName,
-      email: regEmail,
+    const result = await register({ 
+      fullName: regName, 
+      email: regEmail, 
       username: username,
-      password: regPassword,
-      mobileNumber: regPhone
+      password: regPassword, 
+      mobileNumber: regPhone 
     });
     setLoading(false);
     if (result.success) {
@@ -320,21 +214,17 @@ const UserLogin = () => {
 
   const EyeToggle = ({ show, onToggle }) => (
     <button type="button" onClick={onToggle} className="text-gray-400 hover:text-gray-600 transition flex items-center justify-center p-1 focus:outline-none focus:ring-2 focus:ring-blue-100 rounded">
-      {show ? <FaEye size={16} /> : <FaEyeSlash size={16} />}
+      {show ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
     </button>
   );
 
   return (
-    <div className="w-full min-h-screen bg-[#F7F9FC] font-sans overflow-y-auto lg:overflow-hidden">
+    <div className="w-screen min-h-screen bg-[#F7F9FC] font-sans overflow-y-auto lg:overflow-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
         .xs\\:inline { @media (min-width: 400px) { display: inline; } }
         .xs\\:hidden { @media (max-width: 399px) { display: none; } }
-        .google-signin-overlay iframe {
-          width: 100% !important;
-          height: 100% !important;
-        }
       `}</style>
 
       {/* ══ DESKTOP ══ */}
@@ -388,15 +278,15 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn googleLoaded={googleLoaded} />
+                <GoogleBtn onClick={googleLogin} />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Don't have an account?{" "}
                   <button onClick={() => switchTo(true)} className="text-[#043573] font-bold hover:underline">Sign Up</button>
                 </p>
-                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5 relative z-[2147483647]">
-                  <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
-                  <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
+                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
+                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
                 </div>
               </div>
             )}
@@ -422,7 +312,7 @@ const UserLogin = () => {
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-gray-600 block mb-1">Phone Number</label>
-                    <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value.replace(/\D/g, ''))} maxLength={10} />
+                    <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value)} />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-gray-600 block mb-1">Password</label>
@@ -438,14 +328,14 @@ const UserLogin = () => {
                   </div>
                 </div>
 
-                <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5 relative z-[2147483647]">
+                <label className="flex items-start gap-2.5 cursor-pointer mt-3 lg:mt-3 mb-4 lg:mb-5">
                   <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)}
                     className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
                   <span className="text-xs text-gray-600 leading-relaxed">
                     I agree to the{" "}
-                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Terms check clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[#043573] font-semibold hover:underline relative z-[2147483647] cursor-pointer">Terms of Service</button>
+                    <Link to="/terms" className="text-[#043573] font-semibold hover:underline">Terms of Service</Link>
                     {" "}and{" "}
-                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Privacy check clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[#043573] font-semibold hover:underline relative z-[2147483647] cursor-pointer">Privacy Policy</button>
+                    <Link to="/privacy" className="text-[#043573] font-semibold hover:underline">Privacy Policy</Link>
                   </span>
                 </label>
 
@@ -454,15 +344,15 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn googleLoaded={googleLoaded} />
+                <GoogleBtn onClick={googleLogin} />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Already have an account?{" "}
                   <button onClick={() => switchTo(false)} className="text-[#043573] font-bold hover:underline">Sign In</button>
                 </p>
-                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5 relative z-[2147483647]">
-                  <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
-                  <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
+                <div className="flex justify-center gap-4 lg:gap-6 mt-4 lg:mt-5">
+                  <Link to="/privacy" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
+                  <Link to="/terms" className="text-[10px] lg:text-[11px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
                 </div>
               </div>
             )}
@@ -475,7 +365,7 @@ const UserLogin = () => {
         {/* Mobile Header with Logo */}
         <div className="px-5 pt-5 pb-3 border-b border-gray-100 flex items-center justify-between">
           <img src={logo} alt="VYNTRA ONE" className="h-8 object-contain" />
-
+          <span className="text-[10px] text-gray-400">© 2024</span>
         </div>
 
         {/* Mobile Tabs */}
@@ -532,7 +422,7 @@ const UserLogin = () => {
               </div>
               <PrimaryBtn onClick={handleSignIn} disabled={loading}>{loading ? "Signing In…" : "Sign In"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn googleLoaded={googleLoaded} />
+              <GoogleBtn onClick={googleLogin} />
               <p className="text-center text-xs text-gray-500">Don't have an account? <button onClick={() => switchTo(true)} className="text-[#043573] font-bold">Sign Up</button></p>
             </div>
           ) : (
@@ -546,10 +436,6 @@ const UserLogin = () => {
                 <Field icon={MdEmail} type="email" placeholder="Enter your email" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-600 block mb-1.5">Phone Number</label>
-                <Field icon={MdPhone} type="tel" placeholder="Enter your phone number" value={regPhone} onChange={e => setRegPhone(e.target.value.replace(/\D/g, ''))} maxLength={10} />
-              </div>
-              <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1.5">Password</label>
                 <Field icon={MdLock} type={showRegPwd ? "text" : "password"} placeholder="Create a password"
                   value={regPassword} onChange={e => setRegPassword(e.target.value)}
@@ -561,22 +447,22 @@ const UserLogin = () => {
                   value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
                   right={<button type="button" onClick={() => setShowConfPwd(v => !v)} className="text-gray-400 hover:text-gray-600 transition">{showConfPwd ? <FaEyeSlash /> : <FaEye />}</button>} />
               </div>
-              <label className="flex items-start gap-2.5 cursor-pointer relative z-[2147483647]">
+              <label className="flex items-start gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="w-4 h-4 mt-0.5 rounded border-gray-300 accent-[#043573] flex-shrink-0" />
-                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Terms check clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[#043573] font-semibold relative z-[2147483647] cursor-pointer">Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); alert('Privacy check clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[#043573] font-semibold relative z-[2147483647] cursor-pointer">Privacy Policy</button></span>
+                <span className="text-xs text-gray-600 leading-relaxed">I agree to the <Link to="/terms" className="text-[#043573] font-semibold">Terms of Service</Link> and <Link to="/privacy" className="text-[#043573] font-semibold">Privacy Policy</Link></span>
               </label>
               <PrimaryBtn onClick={handleSignUp} disabled={loading}>{loading ? "Creating Account…" : "Create Account"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn googleLoaded={googleLoaded} />
+              <GoogleBtn onClick={googleLogin} />
               <p className="text-center text-xs text-gray-500">Already have an account? <button onClick={() => switchTo(false)} className="text-[#043573] font-bold">Sign In</button></p>
             </div>
           )}
 
-          <div className="flex justify-center gap-4 mt-6 pt-4 border-t border-gray-100 relative z-[2147483647]">
-            <button type="button" onClick={() => { alert('Privacy clicked!'); window.scrollTo(0,0); navigate('/privacy-policy'); }} className="text-[10px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Privacy Policy</button>
-            <button type="button" onClick={() => { alert('Terms clicked!'); window.scrollTo(0,0); navigate('/terms-of-service'); }} className="text-[10px] text-gray-400 hover:text-gray-600 transition cursor-pointer">Terms of Service</button>
+          <div className="flex justify-center gap-4 mt-6 pt-4 border-t border-gray-100">
+            <Link to="/privacy" className="text-[10px] text-gray-400 hover:text-gray-600 transition">Privacy Policy</Link>
+            <Link to="/terms" className="text-[10px] text-gray-400 hover:text-gray-600 transition">Terms of Service</Link>
           </div>
-          <p className="text-center text-[10px] text-gray-400 mt-3">© 2026 VYNTRA ONE. All rights reserved.</p>
+          <p className="text-center text-[10px] text-gray-400 mt-3">© 2024 VYNTRA ONE. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -107,6 +107,7 @@ import Homepage from './Website/Homepage';
 import BlogsPage from './Website/BlogsPage';
 import PrivacyPolicy from './Website/components/PrivacyPolicy';
 import TermsOfService from './Website/components/TermsOfService';
+import StockMarket from "./Website/components/StockMarket";
 function StudentLayoutRoutes() {
   return (
     <DashboardLayout>
@@ -144,6 +145,8 @@ function App() {
               <Route path="/blog" element={<BlogsPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
+               {/* Stock Market */}
+  <Route path="/stock-market" element={<StockMarket />} />
               {/* Login pages */}
               <Route path="/login" element={<Home />} />
               <Route path="/AdminLogin" element={<AdminLogin />} />
@@ -187,9 +190,10 @@ function App() {
                   <Route path="job-notifications" element={<JobNotifications />} />
                   <Route path="/student/notes/new" element={<NoteEditor />} />
                   <Route path="notifications" element={<Notifications />} />
-                  <Route path="continue-learning" element={<ContinueLearning />} />
+
                   <Route path="assignments/:assignmentSlug" element={<Assignments />} />
                   <Route path="/student/attendance" element={<Attendance />} />
+                  <Route path="/student/continue-learning/:courseSlug" element={<ContinueLearning />} />
                   <Route
                     path="/student/course/:courseId/module/:moduleId/assignment/:assignmentId"
                     element={<AssignmentDetail />}

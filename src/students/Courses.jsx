@@ -44,47 +44,42 @@ const Courses = () => {
     const PAGE_SIZE = 12;
 
     const fetchCourses = useCallback(async () => {
-        setLoading(true);
-        setError("");
-        try {
-            const res = await studentLearningApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
-            if (res.data?.data) {
-                const pageData = res.data.data;
-                const rawCourses = pageData.content || [];
-                
-                // Fetch progress for each course in parallel
-                const enriched = await Promise.all(
-                    rawCourses.map(async (course) => {
-                        const slug = course.slug || course.courseSlug || course.courseId;
-                        if (!slug) return course;
-                        try {
-                            const progRes = await studentLearningApi.getCourseProgress(slug);
-                            const prog = progRes.data?.data || {};
-                            return {
-                                ...course,
-                                progressPercentage: prog.progressPercentage ?? course.progressPercentage ?? 0,
-                                completed: prog.completed ?? course.completed ?? false,
-                                totalLessons: prog.totalLessons ?? course.totalLessons ?? 0,
-                                completedLessons: prog.completedLessons ?? course.completedLessons ?? 0,
-                                certificateEligible: prog.certificateEligible ?? false,
-                            };
-                        } catch {
-                            return course;
-                        }
-                    })
-                );
-                
-                setCourses(enriched);
-                setTotalPages(pageData.totalPages || 0);
-                setTotalElements(pageData.totalElements || 0);
-            }
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load your courses. Please try again.");
-        } finally {
-            setLoading(false);
+    setLoading(true);
+    setError("");
+    try {
+        const res = await studentLearningApi.getMyEnrolledCourses(currentPage, PAGE_SIZE);
+        if (res.data?.data) {
+            const pageData = res.data.data;
+            const baseCourses = pageData.content || [];
+            setCourses(baseCourses);
+            setTotalPages(pageData.totalPages || 0);
+            setTotalElements(pageData.totalElements || 0);
+
+            // The list endpoint's progress fields can be stale — fetch live
+            // progress per course (same endpoint ModuleLesson uses) and merge in.
+            const liveProgress = await Promise.allSettled(
+                baseCourses.map(c => studentLearningApi.getCourseProgress(c.slug))
+            );
+
+            setCourses(prev => prev.map((c, i) => {
+                const result = liveProgress[i];
+                if (result.status !== "fulfilled") return c;
+                const data = result.value.data?.data;
+                if (!data) return c;
+                return {
+                    ...c,
+                    progressPercentage: data.progressPercentage,
+                    completed: data.completed,
+                };
+            }));
         }
-    }, [currentPage]);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load your courses. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+}, [currentPage]);
 
     useEffect(() => { fetchCourses(); }, [fetchCourses]);
 

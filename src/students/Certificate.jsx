@@ -527,31 +527,7 @@ const Certificate = () => {
                     </div>
                 </div>
 
-                {/* Request a certificate */}
-                <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 mb-5 sm:mb-6 shadow-sm">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Request a certificate</p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                            type="text"
-                            value={requestSlug}
-                            onChange={(e) => setRequestSlug(e.target.value)}
-                            placeholder="Enter the course slug (e.g. seo-and-digital-marketing-essentials)"
-                            className="flex-1 h-10 px-3 rounded-lg border border-gray-200 text-sm outline-none focus:border-purple-500"
-                        />
-                        <button
-                            onClick={handleRequestCertificate}
-                            disabled={!requestSlug.trim() || requesting}
-                            className="h-10 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-semibold transition"
-                        >
-                            {requesting ? "Requesting…" : "Request Certificate"}
-                        </button>
-                    </div>
-                    {requestError && <p className="text-xs text-red-500 font-medium mt-2">{requestError}</p>}
-                    <p className="text-[11px] text-gray-400 mt-2">
-                        You can only request a certificate for a course you've completed. Course completion is normally where you'd trigger this — this box is here as a manual fallback.
-                    </p>
-                </div>
-
+                
                 {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
                     {[

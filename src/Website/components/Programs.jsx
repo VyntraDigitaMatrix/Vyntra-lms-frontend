@@ -99,10 +99,10 @@ const Programs = () => {
               >
                 10+ Courses
               </span>
-              <button
-                onClick={() => window.location.href = '/UserLogin'}
-                className="w-8.5 h-8.5 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-900 hover:scale-110 transition-transform cursor-pointer"
-              >
+             <button
+  onClick={() => window.location.href = '/stock-market'}
+  className="w-8.5 h-8.5 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-900 hover:scale-110 transition-transform cursor-pointer"
+>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
