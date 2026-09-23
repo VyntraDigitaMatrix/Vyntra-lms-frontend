@@ -45,11 +45,11 @@ const Navbar = () => {
         <div className="md:hidden w-6 h-6"></div>
 
         {/* Links */}
-        <div className="font-inter font-normal text-[16px] md:text-[14px] lg:text-[15px] xl:text-[15px] 2xl:text-[18px] text-[#43506A] hidden md:flex items-center gap-8 lg:gap-12 xl:gap-15 2xl:gap-20">
-          <a href="/#home" className="hover:text-[#03448E] transition-colors">Home</a>
+        <div className="font-inter font-normal text-[16px] md:text-[14px] lg:text-[15px] xl:text-[15px] 2xl:text-[18px] text-[#43506A] hidden md:flex items-center gap-8 lg:gap-12 xl:gap-10 2xl:gap-20">
+          <a href="/" className="hover:text-[#03448E] transition-colors">Home</a>
           <a href="/#how-it-works" className="hover:text-[#03448E] transition-colors">How it Works</a>
           <a href="/#programs" className="hover:text-[#03448E] transition-colors">Programs</a>
-          <a href="/#success-stories" className="hover:text-[#03448E] transition-colors">Success Stories</a>
+          <a href="/#community" className="hover:text-[#03448E] transition-colors">Success Stories</a>
           <a href="/blogs" className="hover:text-[#03448E] transition-colors">Blog</a>
           <a href="/#faq" className="hover:text-[#03448E] transition-colors">FAQ</a>
         </div>
@@ -67,7 +67,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-xl z-40 border-t border-gray-100 pb-6 px-6 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex flex-col gap-4" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '15px', color: '#43506A' }}>
-            <a href="/#home" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#03448E] py-2 border-b border-gray-50">Home</a>
+            <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#03448E] py-2 border-b border-gray-50">Home</a>
             <a href="/#programs" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#03448E] py-2 border-b border-gray-50">Programs</a>
             <a href="/#success-stories" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#03448E] py-2 border-b border-gray-50">Success Stories</a>
             <a href="/blogs" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#03448E] py-2 border-b border-gray-50">Blogs</a>

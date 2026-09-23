@@ -97,7 +97,7 @@ const HowItWorksSection = () => {
   return (
     <section id="how-it-works" className="scroll-mt-24">
       {/* Badge */}
-      <div className="flex justify-center w-full mb-16 relative z-20 mt-10">
+      <div className="flex justify-center w-full mb-4 relative z-20 -mt-10">
         <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F0F1F4] rounded-full">
           <span style={{ fontFamily: "Inter", fontWeight: 700, fontSize: '12px', fontStyle: 'Bold', color: '#111318' }}>How it Works</span>
         </div>

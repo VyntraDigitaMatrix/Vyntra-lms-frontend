@@ -9,12 +9,12 @@ import image108 from '../assets/image 108.png';
 const Programs = () => {
   return (
     <section id="programs" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         {/* Header */}
         <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-12 sm:mb-10">
           {/* Left: Badge + Heading */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-10">
+            <div className="inline-flex items-center px-4 py-3 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs mt-0 sm:-mt-10">
               <span
                 style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '13px', color: '#111318' }}
               >

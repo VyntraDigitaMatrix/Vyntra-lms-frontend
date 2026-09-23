@@ -2,15 +2,16 @@ import React from 'react';
 import portraitCard from '../assets/portrait-card1.png';
 import portfolioImage from '../assets/portfolio-image2.png';
 import sreemanImg from '../assets/Sreeman.png';
+import GraduationCap from '../assets/GraduationCap-1.png';
 
 const WhyChooseUsSection = () => {
   return (
-    <section className="w-full py-16 sm:py-14 bg-white relative overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="why-vyntra" className="w-full py-16 sm:py-14 bg-white relative overflow-hidden scroll-mt-14">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         {/* Header Section: Badge, Heading, Description, Button in the same line */}
         <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-5 mb-12 sm:mb-10">
           {/* Pill Badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs">
+          <div className="inline-flex items-center px-4 py-3 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs -mt-0 sm:-mt-10">
             <span
               style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '13px', color: '#111318' }}
             >
@@ -74,8 +75,8 @@ const WhyChooseUsSection = () => {
                 <h3 className="sm:w-[195px] shrink-0" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '17px', color: '#11162A' }}>
                   Personalized learning<br className="hidden sm:inline" /> experience
                 </h3>
-                <p className="max-w-[340px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
-                  Customized learning paths designed to match your goals, pace, and interests.
+                <p className="max-w-[200px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
+                  Customized learning paths <br />designed <br />to match your goals, pace, and interests.
                 </p>
               </div>
             </div>
@@ -92,7 +93,7 @@ const WhyChooseUsSection = () => {
                 <h3 className="sm:w-[195px] shrink-0" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '17px', color: '#11162A' }}>
                   Learn anytime,<br className="hidden sm:inline" /> anywhere
                 </h3>
-                <p className="max-w-[340px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
+                <p className="max-w-[200px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
                   Access your courses, notes and live classes on any device with complete flexibility.
                 </p>
               </div>
@@ -109,7 +110,7 @@ const WhyChooseUsSection = () => {
                 <h3 className="sm:w-[195px] shrink-0" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '17px', color: '#11162A' }}>
                   Track progress<br className="hidden sm:inline" /> with insights
                 </h3>
-                <p className="max-w-[340px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
+                <p className="max-w-[200px]" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#73799A' }}>
                   Leverage powerful analytics to identify strengths, track progress, and achieve your goals faster.
                 </p>
               </div>
@@ -117,8 +118,14 @@ const WhyChooseUsSection = () => {
           </div>
 
           {/* Column 3: Right Student Card (portfolio-image2.png) with Rotating Badge */}
-          <div className="w-full lg:w-auto flex justify-center">
-            <div className="relative w-[280px] sm:w-[210px] rounded-xl bg-white border border-gray-100 shadow-xl shadow-gray-200/70 p-3.5 flex justify-center items-center group">
+          <div className="w-full lg:w-auto flex justify-center relative">
+            {/* Figma Ellipse 599 Background Blur Glow (#6D38F5 at 64%) */}
+            <div
+              className="absolute -top-6 right-10 w-[217px] h-[221px] bg-[#6D38F5] rounded-full pointer-events-none z-0"
+              style={{ filter: 'blur(75px)', opacity: 0.50 }}
+            />
+
+            <div className="relative z-10 w-[280px] sm:w-[210px] rounded-xl bg-white border border-gray-100 shadow-xl shadow-gray-200/70 p-3.5 flex justify-center items-center group">
               <div className="w-[210px] h-[210px] rounded-[26px] overflow-hidden bg-white">
                 <img
                   src={portfolioImage}
@@ -149,10 +156,8 @@ const WhyChooseUsSection = () => {
                 </svg>
 
                 {/* Inner Purple Cap Circle */}
-                <div className="absolute w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#7C3AED] flex items-center justify-center text-white shadow-inner">
-                  <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
-                  </svg>
+                <div className="absolute w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center">
+                  <img src={GraduationCap} alt="Graduation Cap Icon" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
               </div>
             </div>

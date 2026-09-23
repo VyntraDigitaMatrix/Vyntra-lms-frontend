@@ -1,6 +1,6 @@
 import React from 'react';
 import studentImg from '../assets/Blogs-HeroImage.png';
-import Arrow2 from '../assets/Arrow1.png';
+import FeaturedStory from "../components/FeaturedStory";
 import Arrow1 from '../assets/Arrow2.png';
 
 const trendingItems = [
@@ -31,7 +31,7 @@ const BlogsHero = () => {
         style={{ filter: 'blur(150px)', opacity: 0.6 }}
       />
 
-      <div className="relative z-10 max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-between">
+      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 flex flex-col justify-between">
         {/* Top Grid: Left (Typography) & Right (Visual Graphic) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
 
@@ -194,6 +194,7 @@ const BlogsHero = () => {
         </div>
 
       </div>
+      <FeaturedStory />
     </section>
   );
 };

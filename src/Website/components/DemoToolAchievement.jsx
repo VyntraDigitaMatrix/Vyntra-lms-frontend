@@ -393,7 +393,7 @@ const DemoToolAchievement = () => {
       {/* OUR ACHIEVEMENTS (own section) */}
       {/* ========================================================= */}
 
-      <section className="w-full bg-[#FAFBFD] py-14 sm:py-16">
+      <section className="w-full bg-[#FFFFFF] py-14 sm:py-16">
         <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <div className="mb-8">
             <p className="text-[9px] sm:text-[12px] font-semibold uppercase tracking-wide text-[#08A866] mb-2">

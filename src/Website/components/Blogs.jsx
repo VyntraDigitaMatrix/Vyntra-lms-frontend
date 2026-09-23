@@ -97,17 +97,17 @@ const Blogs = () => {
       e.preventDefault();
       return;
     }
-    window.location.href = '/UserLogin';
+    window.location.href = '/blog-detail';
   };
 
   return (
     <section id="blogs" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         {/* Header: Badge on Left, Heading on Right as shown in image */}
         <div className="w-full flex items-center justify-between mb-8 sm:mb-10">
           {/* Pill Badge */}
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs">
-            <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: '13px', color: '#111318', fontStyle: 'Bold' }}>
+            <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: '13px', color: '#111318' }}>
               Blogs
             </span>
           </div>
@@ -115,7 +115,7 @@ const Blogs = () => {
           {/* Heading on the right side */}
           <h2
             className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#111318] leading-tight text-right"
-            style={{ fontFamily: "'Gilroy-SemiBold', 'Gilroy', Inter, sans-serif", fontWeight: 400, color: '#111318', fontSize: '42px' }}
+            style={{ fontFamily: "'Gilroy-SemiBold', 'Gilroy', Inter, sans-serif" }}
           >
             Our Latest Blog
           </h2>
@@ -150,7 +150,7 @@ const Blogs = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.location.href = '/UserLogin';
+                      window.location.href = '/blog-detail';
                     }}
                     aria-label="Read full article"
                     className="w-8.5 h-8.5 rounded-full bg-white shadow-xs flex items-center justify-center text-gray-800 group-hover:scale-110 transition-transform shrink-0 cursor-pointer mt-0.5"
@@ -170,15 +170,15 @@ const Blogs = () => {
                 {/* Title */}
                 <h3
                   className="text-[#11162A] font-bold text-[17px] sm:text-[18px] leading-[1.35] mb-2.5 group-hover:text-[#1167D8] transition-colors line-clamp-2"
-                  style={{ fontFamily: "Inter", fontWeight: 700, fontSize: "17px", fontStyle: "Bold", color: "#071424" }}
+                  style={{ fontFamily: "'Gilroy-SemiBold', 'Gilroy', Inter, sans-serif" }}
                 >
                   {blog.title}
                 </h3>
 
                 {/* Description */}
                 <p
-                  className="mb-2 line-clamp-3"
-                  style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#767676' }}
+                  className="text-[#73799A] text-[13px] sm:text-[13.5px] leading-relaxed mb-4 line-clamp-3"
+                  style={{ fontFamily: 'Inter', fontWeight: 400 }}
                 >
                   {blog.description}
                 </p>
@@ -186,8 +186,8 @@ const Blogs = () => {
 
               {/* Meta Info: Date and Read Time */}
               <div
-                className="pt-1 flex items-center"
-                style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#8190A2' }}
+                className="text-[#8E95A5] text-[12px] sm:text-[12.5px] font-normal pt-2 border-t border-gray-200/50 flex items-center"
+                style={{ fontFamily: 'Inter', fontWeight: 400 }}
               >
                 <span>{blog.date}</span>
                 <span className="mx-2">·</span>

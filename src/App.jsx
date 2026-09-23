@@ -105,6 +105,7 @@ import InstructorDashboard from "./Instructor/InstructorDashboard";
 import InstructorCertificates from "./Instructor/pages/Certificate";
 import Homepage from './Website/Homepage';
 import BlogsPage from './Website/BlogsPage';
+import BlogDetail from './Website/BlogDetail';
 import PrivacyPolicy from './Website/components/PrivacyPolicy';
 import TermsOfService from './Website/components/TermsOfService';
 import StockMarket from "./Website/components/StockMarket";
@@ -143,6 +144,8 @@ function App() {
               <Route path="/" element={<Homepage />} />
               <Route path="/blogs" element={<BlogsPage />} />
               <Route path="/blog" element={<BlogsPage />} />
+              <Route path="/blog-detail" element={<BlogDetail />} />
+              <Route path="/blog-details" element={<BlogDetail />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
                {/* Stock Market */}

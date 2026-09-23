@@ -17,21 +17,21 @@ import WhyChooseUsSection from './components/WhyChooseUsSection';
 
 const Home = () => {
   return (
-    <div className="relative w-full overflow-hidden flex flex-col items-center pt-8 bg-[#FFFFFF]">
+    <div className="relative w-full overflow-hidden flex flex-col items-center bg-[#FFFFFF]">
       <HeroSection />
-      
-    
-        <HowItWorksSection />
-        <WhyChooseUsSection />
-        <Programs />
-        <LiveClasses />
-        <JobPortal />
-        <Community />
-        <Blogs />
-        <ReferralCard />
-        <FAQSection />
-        <CTASection />
-      
+
+
+      <HowItWorksSection />
+      <WhyChooseUsSection />
+      <Programs />
+      <LiveClasses />
+      <JobPortal />
+      <Community />
+      <Blogs />
+      <ReferralCard />
+      <FAQSection />
+      <CTASection />
+
       <Footer />
     </div>
   );

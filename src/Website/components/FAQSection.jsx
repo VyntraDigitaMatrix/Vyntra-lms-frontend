@@ -31,8 +31,8 @@ const FAQSection = () => {
   };
 
   return (
-    <section id="faq" className="w-full py-16 sm:py-24 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="w-full py-16 sm:py-24 bg-white relative overflow-hidden scroll-mt-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         <div className="flex flex-col lg:flex-row items-stretch justify-between gap-8 lg:gap-12">
           {/* Left Column: Badge, Heading, Subtitle, Location Card */}
           <div className="w-full lg:w-[340px] xl:w-[360px] shrink-0 flex flex-col justify-between self-stretch">

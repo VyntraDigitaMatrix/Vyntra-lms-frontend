@@ -69,7 +69,7 @@ const Community = () => {
 
   return (
     <section id="community" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-12">
 
           {/* Left Column: Badge, Heading, Description, Navigation */}
@@ -108,11 +108,10 @@ const Community = () => {
               <button
                 onClick={handlePrev}
                 aria-label="Previous testimonial"
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 ${
-                  activeArrow === 'prev'
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 ${activeArrow === 'prev'
                     ? 'bg-[#0B0F19] text-white border border-[#0B0F19] hover:bg-gray-800'
                     : 'bg-white text-gray-700 border border-[#D9DCE3] hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -121,11 +120,10 @@ const Community = () => {
               <button
                 onClick={handleNext}
                 aria-label="Next testimonial"
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 ${
-                  activeArrow === 'next'
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 ${activeArrow === 'next'
                     ? 'bg-[#0B0F19] text-white border border-[#0B0F19] hover:bg-gray-800'
                     : 'bg-white text-gray-700 border border-[#D9DCE3] hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

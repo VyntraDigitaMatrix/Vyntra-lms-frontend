@@ -44,28 +44,28 @@ const JobPortal = () => {
     <div className="w-full bg-transparent pt-10 flex flex-col items-center text-left pb-15">
 
       {/* Header Section */}
-      <div id="job-portal" className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col items-center text-left mb-16 scroll-mt-14">
+      <div id="job-portal" className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-left mb-16 scroll-mt-14">
         {/* Badge */}
         <div className="bg-[linear-gradient(135deg,_#F1EDFF_15%,_#F8F5FF_85%)] px-5 py-3 rounded-xl mb-6" style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '14px', color: '#000000' }}>
           Placements & Job Portal
         </div>
 
         {/* Main Title */}
-        <h2 style={{ fontFamily: 'Sk-Modernist', fontWeight: 400, fontSize: '50px', color: '#111633' }} className="mb-4">
+        <h2 style={{ fontFamily: 'Sk-Modernist', fontWeight: 400, color: '#111633' }} className="text-3xl sm:text-4xl lg:text-[40px] leading-tight mb-4 text-center">
           Top Opportunities Just for You
         </h2>
 
         {/* Subtitle */}
-        <p style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '15px', color: '#656C88' }} className="max-w-[700px] leading-relaxed">
+        <p style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: '13px', color: '#656C88' }} className="max-w-[700px] leading-relaxed text-center">
           Explore thousands of active job openings from top companies.<br />
-          <span className='ml-2'>
+          <span className="ml-2">
             Find the right role that matches your skills and career goals.
           </span>
         </p>
       </div>
 
       {/* Grid Section */}
-      <div className="w-full max-w-full 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 text-left">
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
         {jobs.map((job, index) => (
           <div key={index} className="bg-white rounded-[24px] p-5 flex flex-col justify-between border-2 border-transparent hover:border-[#4F46E5]/20 shadow-[0px_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-300 group cursor-pointer">
             {/* Header (Logo + Title + Company) */}
@@ -106,8 +106,8 @@ const JobPortal = () => {
 
             {/* Link */}
             <div className="flex justify-end mt-auto">
-              <a href="/UserLogin" className="text-[#5931E9] font-Inter font-semibold-700 text-[15px]  flex items-center gap-1 whitespace-nowrap flex-shrink-0">
-                View Job <span className="text-lg  leading-none">→</span>
+              <a href="/UserLogin" className="text-[#5931E9] font-Inter font-semibold text-[15px] flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+                View Job <span className="text-lg leading-none">→</span>
               </a>
             </div>
           </div>

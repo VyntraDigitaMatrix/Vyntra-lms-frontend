@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="w-full bg-white pt-10 pb-8">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 2xl:px-24 flex flex-col">
+      <div className="max-w-full mx-auto px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20 2xl:px-24 flex flex-col pt-10">
         {/* Top Section */}
         {/* Top Section */}
         <div className="flex flex-col lg:flex-row justify-between mb-15 gap-12 lg:gap-8">
@@ -29,7 +29,8 @@ const Footer = () => {
                 <svg className="w-4 h-4 text-[#10142F]" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
               </a>
 
-              <button className="flex items-center gap-3 bg-[#F0EAFF] hover:bg-[#DED2F0] text-[#4323CA] font-medium text-[13px] md:text-[14px] px-4 py-3 rounded-full transition-colors ml-2">
+              <button className="flex items-center gap-3 text-[#797979] font-medium text-[13px] md:text-[14px] px-4 py-3 rounded-full transition-colors ml-2"
+                style={{ background: 'linear-gradient(144.73deg, #E6E6E6 30%, #E6E6E6 30%, #FFFFFF 80%)' }}>
                 Sign up for our newsletter
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
               </button>
@@ -43,9 +44,9 @@ const Footer = () => {
             <div className="flex flex-col">
               <h4 style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#111535', marginBottom: '20px' }}>Navigation</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="/#testimonials" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>About Vyntra</a></li>
-                <li><a href="/#courses" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Learning Paths</a></li>
-                <li><a href="/#how-it-works" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Sessions</a></li>
+                <li><a href="/#why-vyntra" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>About Vyntra</a></li>
+                <li><a href="/#how-it-works" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Learning Paths</a></li>
+                <li><a href="/#live-classes" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Sessions</a></li>
                 <li><a href="/#community" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Community</a></li>
               </ul>
             </div>
@@ -57,8 +58,8 @@ const Footer = () => {
             <div className="flex flex-col">
               <h4 style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '15px', color: '#111535', marginBottom: '20px' }}>Explore</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Career Opportunities</a></li>
-                <li><a href="/UserLogin" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Success Stories</a></li>
+                <li><a href="/#job-portal" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Career Opportunities</a></li>
+                <li><a href="/#community" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Success Stories</a></li>
                 <li><a href="/blogs" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Blog</a></li>
                 <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=info@vyntraone.com" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Help Center</a></li>
                 <li><a href="tel:9849742233" style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '14px', color: '#4D5268' }}>Contact Us</a></li>

@@ -54,13 +54,13 @@ const liveClassesData = [
 
 const LiveClasses = () => {
   return (
-    <section id="live-classes" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
+    <section id="live-classes" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-10">
       {/* Container matches Programs section width and padding exactly */}
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
           {/* Left Column: Aligned straight with left edge of Programs */}
-          <div className="lg:col-span-5 flex flex-col justify-between h-full">
+          <div className="lg:col-span-4 flex flex-col justify-between h-full">
             <div>
               {/* Badge */}
               <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#F0F1F4] shrink-0 shadow-xs mb-4">
@@ -124,23 +124,23 @@ const LiveClasses = () => {
           </div>
 
           {/* Right Column: 4 Live Class Cards + View All Button */}
-          <div className="lg:col-span-7 flex flex-col justify-between">
-            <div className="flex flex-col gap-3.5 sm:gap-4">
+          <div className="lg:col-span-8 flex flex-col justify-between">
+            <div className="flex flex-col gap-2.5 sm:gap-3">
               {liveClassesData.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => window.location.href = '/UserLogin'}
-                  className="group bg-white rounded-[22px] p-4 sm:p-5 border border-[#ECEEF2] flex items-center justify-between gap-3 sm:gap-5 hover:border-gray-300 hover:shadow-md transition-all duration-300 cursor-pointer"
+                  className="group bg-white rounded-[18px] py-2.5 px-3.5 sm:py-3 sm:px-5 border border-[#ECEEF2] flex items-center justify-between gap-3 sm:gap-5 hover:border-gray-300 hover:shadow-md transition-all duration-300 cursor-pointer"
                 >
                   {/* Left: Date */}
-                  <div className="flex flex-col items-center justify-center w-11 sm:w-13 shrink-0 text-center">
+                  <div className="flex flex-col items-center justify-center w-10 sm:w-12 shrink-0 text-center">
                     <span
-                      style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '22px', color: '#111318' }}
+                      style={{ fontFamily: 'Inter', fontWeight: 700, fontStyle: 'Bold', fontSize: '18px', color: '#111318' }}
                     >
                       {item.date}
                     </span>
                     <span
-                      style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '15px', color: '#111318' }}
+                      style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#111318' }}
                     >
                       {item.month}
                     </span>
@@ -148,7 +148,7 @@ const LiveClasses = () => {
 
                   {/* Thumbnail with centered faces */}
                   <div
-                    className={`w-16 h-14 sm:w-[78px] sm:h-[62px] rounded-[16px] overflow-hidden shrink-0 flex items-center justify-center ${item.imageBg}`}
+                    className={`w-14 h-12 sm:w-[64px] sm:h-[48px] rounded-[12px] overflow-hidden shrink-0 flex items-center justify-center ${item.imageBg}`}
                   >
                     <img
                       src={item.image}
@@ -160,17 +160,17 @@ const LiveClasses = () => {
                   {/* Details */}
                   <div className="flex-1 min-w-0">
                     <h4
-                      style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '15px' }}
+                      style={{ fontFamily: 'Inter', fontWeight: 500, fontStyle: 'Medium', fontSize: '14px' }}
                     >
                       {item.title}
                     </h4>
                     <p
                       className="mt-0.5"
-                      style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#777983' }}
+                      style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '12px', color: '#777983' }}
                     >
                       {item.instructor}
                     </p>
-                    <div className="flex items-center gap-1.5 text-xs text-[#777983] mt-1.5">
+                    <div className="flex items-center gap-1.5 text-xs text-[#777983] mt-0.5">
                       <svg
                         className="w-3.5 h-3.5 text-[#464850] shrink-0"
                         fill="none"
@@ -181,7 +181,7 @@ const LiveClasses = () => {
                         <circle cx="12" cy="12" r="9" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
                       </svg>
-                      <span style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '13px', color: '#464850' }}>{item.time}</span>
+                      <span style={{ fontFamily: 'Inter', fontWeight: 400, fontStyle: 'Regular', fontSize: '12px', color: '#464850' }}>{item.time}</span>
                     </div>
                   </div>
 

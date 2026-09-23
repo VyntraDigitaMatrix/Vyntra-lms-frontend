@@ -1,6 +1,9 @@
 import React from "react";
 import stockMarketHero from "../../Website/assets/StockMarketHero.png";
-import Navbar from "./Navbar";
+import CertificationsSection from "../components/CertificationsSection";
+import Navbar from "../components/Navbar";
+import OtherCoursesSection from "../components/OtherCoursesSection";
+import Footer from "../components/Footer";
 
 // TODO: replace these with your actual filenames from the assets folder
 import stockFoundationImg from "../../Website/assets/stockMarcketFoundation.png";
@@ -21,6 +24,7 @@ import {
 
 import ExpertsAndReviews from "../components/ExpertsandReviews";
 import DemoToolAchievement from "../components/DemoToolAchievement";
+import BlogFAQ from "./BlogFAQ";
 
 const StockMarket = () => {
   return (
@@ -460,10 +464,13 @@ const StockMarket = () => {
           </div>
         </section>
         <ExpertsAndReviews />
-      <DemoToolAchievement />
+        <DemoToolAchievement />
+        <CertificationsSection />
+        <OtherCoursesSection />
+        <BlogFAQ />
       </section>
+      <Footer />
 
-      
     </div>
   );
 };

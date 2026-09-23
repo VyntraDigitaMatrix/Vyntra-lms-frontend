@@ -2,7 +2,7 @@ import React from 'react';
 
 const CTASection = () => {
   return (
-    <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 py-15 flex justify-center">
+    <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 2xl:px-24 py-15 flex justify-center">
       <div className="max-w-full 2xl:max-w-[1536px] w-full bg-[#000000] rounded-[30px] relative overflow-hidden flex flex-col items-center text-center py-12 md:py-16 z-10">
         {/* Background Glows */}
         <div className="absolute w-[445px] h-[445px] bg-[#0056C1] rounded-full -top-[332px] left-0 md:-left-[100px] pointer-events-none opacity-80" style={{ filter: 'blur(150px)' }} />

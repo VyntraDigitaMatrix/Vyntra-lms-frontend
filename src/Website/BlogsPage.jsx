@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import BlogsHero from './components/BlogsHero';
+import LatestArticle from './components/LatestArticle';
+import FeaturedStory from './components/FeaturedStory';
 import Blogs from './components/Blogs';
+import BlogsCTA from './components/BlogsCTA';
+import MoreFromVyntra from './components/MoreFromVyntra';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
 import './index.css';
@@ -21,14 +25,17 @@ const BlogsPage = () => {
       {/* Navigation */}
       <Navbar />
 
-      {/* Exact Hero Section as requested */}
+      {/* Hero Section */}
       <BlogsHero />
 
-      {/* Blog Listing Section */}
-      <main className="flex-grow">
-        <Blogs />
-        <CTASection />
-      </main>
+      <LatestArticle />
+
+      <BlogsCTA />
+
+      {/* More from Vyntra One, Popular Topics & Sidebar */}
+      <MoreFromVyntra />
+
+
 
       {/* Footer */}
       <Footer />
