@@ -9,21 +9,20 @@ import {
 } from "react-icons/fa";
 
 // Background image already saved in assets
-import takeFirstStepBg from "../../Website/assets/TakeTheFirstStep_BG.png";
+import takeFirstStepBg from "../assets/TakeTheFirstStep_BG.png";
 
-// TODO: confirm these match your actual saved filenames in the assets folder
-import tradingViewLogo from "../../Website/assets/TradingView.png";
-import zerodhaLogo from "../../Website/assets/Zerodha.png";
-import nseLogo from "../../Website/assets/NSE.png";
-import bseLogo from "../../Website/assets/BSE.png";
-import screenerLogo from "../../Website/assets/Screener.png";
-import moneycontrolLogo from "../../Website/assets/Moneycontrol.png";
-import growwLogo from "../../Website/assets/Groww.png";
-import upstoxLogo from "../../Website/assets/upstox.png";
-import sensibullLogo from "../../Website/assets/Sensibull.png";
-import tickertapeLogo from "../../Website/assets/TickerTape.png";
-import bloombergLogo from "../../Website/assets/Bloomberg.png";
-import investingLogo from "../../Website/assets/Investing.com.png";
+import tradingViewLogo from "../assets/TradingView.png";
+import zerodhaLogo from "../assets/Zerodha.png";
+import nseLogo from "../assets/NSE.png";
+import bseLogo from "../assets/BSE.png";
+import screenerLogo from "../assets/screener.png";
+import moneycontrolLogo from "../assets/Moneycontrol.png";
+import growwLogo from "../assets/Groww.png";
+import upstoxLogo from "../assets/upstox.png";
+import sensibullLogo from "../assets/Sensibull.png";
+import tickertapeLogo from "../assets/TickerTape.png";
+import bloombergLogo from "../assets/Bloomberg.png";
+import investingLogo from "../assets/Investing.com.png";
 
 const DemoToolAchievement = () => {
   const tools = [

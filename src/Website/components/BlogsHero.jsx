@@ -1,7 +1,7 @@
 import React from 'react';
 import studentImg from '../assets/Blogs-HeroImage.png';
 import FeaturedStory from "../components/FeaturedStory";
-import Arrow1 from '../assets/Arrow2.png';
+import Arrow1 from '../assets/arrow2.png';
 
 const trendingItems = [
   {
