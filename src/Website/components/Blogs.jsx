@@ -102,7 +102,7 @@ const Blogs = () => {
 
   return (
     <section id="blogs" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         {/* Header: Badge on Left, Heading on Right as shown in image */}
         <div className="w-full flex items-center justify-between mb-8 sm:mb-10">
           {/* Pill Badge */}

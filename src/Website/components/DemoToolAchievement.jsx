@@ -69,7 +69,7 @@ const DemoToolAchievement = () => {
       {/* TAKE THE FIRST STEP (own section) */}
       {/* ========================================================= */}
       <section className="w-full bg-white py-12 sm:py-08">
-        <div className="max-w-[1500px] mx-auto px-5 py-4 sm:px-8 lg:px-12 xl:px-16">
+        <div className="max-w-[1500px] mx-auto px-5 py-4 sm:px-8 lg:px-20 xl:px-20">
   <div
     className="
       relative
@@ -163,7 +163,7 @@ const DemoToolAchievement = () => {
               </div>
 
               {/* ================= RIGHT FORM ================= */}
-              <div className="relative z-10 w-full max-w-[480px] mx-auto lg:mx-0 lg:ml-auto right-[50%]">
+              <div className="relative z-10 w-full max-w-[380px] mx-auto lg:mx-0 lg:ml-auto right-[50%]">
   <div
     className="
       bg-white
@@ -310,7 +310,7 @@ const DemoToolAchievement = () => {
       {/* ========================================================= */}
 
       <section className="w-full bg-white py-14 sm:py-16">
-        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>
               <p className="text-[9px] sm:text-[12px] font-semibold uppercase tracking-wide text-[#64748B] mb-2">
@@ -393,7 +393,7 @@ const DemoToolAchievement = () => {
       {/* ========================================================= */}
 
       <section className="w-full bg-[#FFFFFF] py-14 sm:py-16">
-        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
           <div className="mb-8">
             <p className="text-[9px] sm:text-[12px] font-semibold uppercase tracking-wide text-[#08A866] mb-2">
               Our Achievements

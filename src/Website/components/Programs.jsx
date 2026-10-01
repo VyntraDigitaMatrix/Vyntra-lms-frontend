@@ -9,7 +9,7 @@ import image108 from '../assets/image 108.png';
 const Programs = () => {
   return (
     <section id="programs" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         {/* Header */}
         <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-12 sm:mb-10">
           {/* Left: Badge + Heading */}

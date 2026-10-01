@@ -8,7 +8,7 @@ const BlogsCTA = () => {
 
   return (
     <section className="w-full py-10 sm:py-14 bg-white relative">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         <div className="relative w-full rounded-[24px] sm:rounded-[28px] overflow-hidden bg-[#060D17] shadow-xl min-h-[260px] sm:min-h-[290px] lg:min-h-[310px] flex items-center p-6 sm:p-10 lg:p-12">
 
           {/* Background Globe Image anchored at right end */}

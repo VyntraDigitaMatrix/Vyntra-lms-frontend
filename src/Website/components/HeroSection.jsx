@@ -16,9 +16,9 @@ const HeroSection = () => {
           style={{ filter: 'blur(160px)', opacity: 0.6 }}
         />
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-6 sm:gap-20 xl:gap-20">
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 sm:gap-20 xl:gap-20">
           {/* Left Column: Content & Actions */}
-          <div className="w-full lg:w-[480px] xl:w-[560px] shrink-0 flex flex-col items-start z-10 lg:-mt-8 xl:-mt-20">
+          <div className="w-full lg:w-[560px] xl:w-[560px] shrink-0 flex flex-col items-start z-10 lg:-mt-20 xl:-mt-20">
             {/* Top Badge */}
             <div
               className="inline-flex items-center gap-2.5 bg-[#F4F5F8] backdrop-blur-sm px-1.5 py-1 rounded-full border border-gray-200/80 shadow-xs mb-3 sm:mb-2"

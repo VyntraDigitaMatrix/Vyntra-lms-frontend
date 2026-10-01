@@ -31,7 +31,7 @@ const BlogsHero = () => {
         style={{ filter: 'blur(150px)', opacity: 0.6 }}
       />
 
-      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 flex flex-col justify-between">
+      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20 flex flex-col justify-between">
         {/* Top Grid: Left (Typography) & Right (Visual Graphic) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
 

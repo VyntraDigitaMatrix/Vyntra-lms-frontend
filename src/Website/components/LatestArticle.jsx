@@ -82,7 +82,7 @@ const LatestArticle = () => {
 
   return (
     <section id="blogs" className="w-full py-10 sm:py-12 lg:py-7 bg-white relative">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         {/* Section Heading */}
         <h2
           className="text-[#071424] mb-6 sm:mb-8"

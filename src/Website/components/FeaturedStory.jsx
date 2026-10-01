@@ -48,7 +48,7 @@ const FeaturedStory = () => {
         style={{ filter: 'blur(130px)', opacity: 0.4, top: '0px', left: '15%' }}
       />
 
-      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 mt-6 sm:mt-8 lg:mt-4">
+      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20 mt-6 sm:mt-8 lg:mt-4">
         {/* Section Heading */}
         <h2
           className="text-[#0D1117] mb-6 sm:mb-8"

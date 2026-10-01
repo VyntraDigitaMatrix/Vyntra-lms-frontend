@@ -199,7 +199,7 @@ const BlogDetail = () => {
       <Navbar />
 
       {/* Main Container */}
-      <main className="flex-grow max-w-full w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 py-8 sm:py-12">
+      <main className="flex-grow max-w-full w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative">
 
           {/* LEFT COLUMN: Main Article Content (lg:col-span-8) */}
@@ -695,7 +695,7 @@ const BlogDetail = () => {
 
       {/* Related Blogs Section (Single Row of 4 Cards) */}
       <section className="w-full py-10 sm:py-8 bg-white mb-10">
-        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
           <h2
             className="text-[#071424] mb-6 sm:mb-8"
             style={{ fontFamily: "Gilroy-SemiBold, Inter, sans-serif", fontWeight: 400, fontSize: "25px", color: "#071424" }}

@@ -65,7 +65,7 @@ const JobPortal = () => {
       </div>
 
       {/* Grid Section */}
-      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
         {jobs.map((job, index) => (
           <div key={index} className="bg-white rounded-[24px] p-5 flex flex-col justify-between border-2 border-transparent hover:border-[#4F46E5]/20 shadow-[0px_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-300 group cursor-pointer">
             {/* Header (Logo + Title + Company) */}

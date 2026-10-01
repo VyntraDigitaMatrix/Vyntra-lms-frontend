@@ -76,7 +76,7 @@ const StockMarket = () => {
         />
 
         {/* ================= HERO CONTENT ================= */}
-        <div className="relative z-10 max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20 py-8 sm:py-10 lg:py-8 pb-16 sm:pb-20">
+        <div className="relative z-10 max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20 py-8 sm:py-10 lg:py-8 pb-16 sm:pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-[45%_55%] items-center">
             {/* LEFT CONTENT */}
             <div className="relative z-10 pr-2 lg:pr-3 xl:pr-4">
@@ -226,7 +226,7 @@ const StockMarket = () => {
 
         {/* ================= WHY CHOOSE SECTION ================= */}
         <section className="w-full py-14 sm:py-0 relative z-10">
-          <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+          <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
             <div className="mb-7">
               <p className="text-[10px] sm:text-[12px] font-semibold uppercase tracking-wide text-[#64748B] mb-3">
                 Why Choose Vyntra One
@@ -300,7 +300,7 @@ const StockMarket = () => {
 
         {/* ================= OUR PROGRAMS ================= */}
         <section className="w-full bg-gradient-to-br py-14 sm:py-17 relative z-10">
-          <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+          <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
               <div>
                 <p className="text-[9px] sm:text-[12px] font-semibold uppercase tracking-wide text-[#64748B] mb-2">

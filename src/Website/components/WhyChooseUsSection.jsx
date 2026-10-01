@@ -7,7 +7,7 @@ import GraduationCap from '../assets/GraduationCap-1.png';
 const WhyChooseUsSection = () => {
   return (
     <section id="why-vyntra" className="w-full py-16 sm:py-14 bg-white relative overflow-hidden scroll-mt-14">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         {/* Header Section: Badge, Heading, Description, Button in the same line */}
         <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-5 mb-12 sm:mb-10">
           {/* Pill Badge */}

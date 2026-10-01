@@ -56,7 +56,7 @@ const LiveClasses = () => {
   return (
     <section id="live-classes" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-10">
       {/* Container matches Programs section width and padding exactly */}
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
           {/* Left Column: Aligned straight with left edge of Programs */}

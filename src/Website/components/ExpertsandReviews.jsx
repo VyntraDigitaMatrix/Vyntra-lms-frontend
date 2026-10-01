@@ -22,7 +22,7 @@ const ExpertsAndReviews = () => {
       {/* ========================================================= */}
 
       <section className="w-full bg-white py-14 sm:py-0">
-        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
           {/* ================= SECTION HEADER ================= */}
           <div className="mb-9">
             <h2 className="text-[28px] sm:text-[28px] font-bold text-[#13233F] leading-tight " >
@@ -193,7 +193,7 @@ const ExpertsAndReviews = () => {
       {/* ========================================================= */}
 
       <section className="w-full bg-[#FAFBFD] py-14 sm:py-20">
-        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
+        <div className="max-w-full mx-auto px-5 sm:px-8 lg:px-20 xl:px-20">
           {/* ================= SECTION HEADER ================= */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>

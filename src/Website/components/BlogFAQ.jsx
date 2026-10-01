@@ -57,7 +57,7 @@ const BlogFAQ = () => {
 
   return (
     <section className="w-full py-10 sm:py-14 bg-white">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-14 xl:px-14">
 
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-10 gap-3">

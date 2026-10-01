@@ -53,7 +53,7 @@ const MoreFromVyntra = () => {
 
   return (
     <section className="w-full py-10 sm:py-8 bg-white relative">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         <div className="grid grid-cols-1 md:grid-cols-11 gap-6 lg:gap-6">
 
           {/* COLUMN 1: More from Vyntra One (Left ~4 cols) */}

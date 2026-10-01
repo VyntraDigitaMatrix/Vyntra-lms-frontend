@@ -69,7 +69,7 @@ const Community = () => {
 
   return (
     <section id="community" className="w-full py-16 sm:py-20 bg-white relative overflow-hidden scroll-mt-24">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-20">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20 xl:px-20">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-12">
 
           {/* Left Column: Badge, Heading, Description, Navigation */}
