@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://vyntra.swipengrow.in";
+const API_BASE_URL =  "https://backend.vyntraone.com";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -217,8 +217,8 @@ export const instructorQuizApi = {
 
 /* ── Quiz Questions ── */
 export const instructorQuizQuestionApi = {
-  getQuizQuestions: (quizSlug) =>
-    api.get(`/api/instructor/quiz-questions/quizzes/${quizSlug}`),
+  getQuizQuestions: (quizSlug, page = 0, size = 100) =>
+    api.get(`/api/instructor/quiz-questions/quizzes/${quizSlug}?page=${page}&size=${size}`),
   createQuestion: (quizSlug, data) =>
     api.post(`/api/instructor/quiz-questions/quizzes/${quizSlug}`, data),
   bulkCreateQuestions: (quizSlug, questions) =>

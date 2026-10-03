@@ -5,6 +5,7 @@ import {
     instructorCourseApi,
     instructorModuleApi,
     instructorLessonApi,
+    instructorQuizQuestionApi,
 } from "../auth/api";
 import {
     MdOutlineQuiz, MdAdd, MdCheckCircle,
@@ -73,12 +74,32 @@ const Quizzes = () => {
             );
 
             const seen = new Set();
-            setQuizzes(all.flat().filter(q => {
+            const dedupedQuizzes = all.flat().filter(q => {
                 if (!q.id) return false;
                 if (seen.has(q.id)) return false;
                 seen.add(q.id);
                 return true;
-            }));
+            });
+
+            // Always fetch real question count from the questions API.
+            // The list endpoint's totalQuestions is unreliable (stale from backend).
+            const enriched = await Promise.allSettled(
+                dedupedQuizzes.map(async (quiz) => {
+                    try {
+                        const qRes = await instructorQuizQuestionApi.getQuizQuestions(quiz.slug);
+                        const body = qRes?.data?.data ?? qRes?.data;
+                        const qList = Array.isArray(body) ? body
+                            : Array.isArray(body?.content) ? body.content
+                            : Array.isArray(body?.questions) ? body.questions
+                            : [];
+                        return { ...quiz, questions: qList.length };
+                    } catch {
+                        return quiz;
+                    }
+                })
+            );
+
+            setQuizzes(enriched.map(r => r.status === "fulfilled" ? r.value : r.reason));
         } catch (err) {
             console.error("Failed to load quizzes", err);
             setFetchError("Couldn't load your quizzes. Please try again.");
