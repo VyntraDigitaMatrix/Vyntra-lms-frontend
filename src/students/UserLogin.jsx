@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../students/auth/AuthContext";
+import { GoogleLogin, useGoogleOneTapLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import {
   MdEmail, MdLock, MdPerson, MdPhone,
@@ -135,13 +136,29 @@ function OrDivider() {
   );
 }
 
-function GoogleBtn({ onClick }) {
+function GoogleAuthButton({ isSignUp = false, onSuccess, onError, loading = false }) {
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-500 bg-gray-50 transition">
+        <div className="w-4 h-4 border-2 border-[#043573] border-t-transparent rounded-full animate-spin" />
+        <span>Signing in with Google…</span>
+      </div>
+    );
+  }
+
   return (
-    <button onClick={onClick}
-      className="w-full flex items-center justify-center gap-2 lg:gap-3 py-2.5 lg:py-3 border border-gray-200 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-4 h-4 lg:w-5 lg:h-5" />
-      <span className="hidden xs:inline">Continue with Google</span>
-    </button>
+    <div className="w-full flex justify-center items-center my-1 [&>div]:!w-full [&_iframe]:!w-full [&_iframe]:!mx-auto">
+      <GoogleLogin
+        onSuccess={onSuccess}
+        onError={() => onError("Google sign-in was cancelled or failed. Please try again.")}
+        text={isSignUp ? "signup_with" : "continue_with"}
+        shape="rectangular"
+        theme="outline"
+        size="large"
+        width="100%"
+        logo_alignment="left"
+      />
+    </div>
   );
 }
 
@@ -180,6 +197,34 @@ const UserLogin = () => {
   const [loading, setLoading] = useState(false);
 
   const switchTo = (signup) => { setError(""); setIsSignUp(signup); };
+
+  // Google OAuth — receives verified ID token (JWT) from Google Identity Services
+  // Same protocol and verification endpoint as mobile authentication
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse?.credential;
+    if (!idToken) {
+      setError("Failed to retrieve Google credentials. Please try again.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    const result = await googleLogin(idToken);
+    setLoading(false);
+    if (!result.success) {
+      setError(result.message || "We couldn't sign you in with Google. Please try again.");
+    }
+  };
+
+  const handleGoogleError = (customMsg) => {
+    setError(customMsg || "Google sign-in was cancelled or failed. Please try again.");
+  };
+
+  // Google One Tap support for instant 1-tap sign-in
+  useGoogleOneTapLogin({
+    onSuccess: (credentialResponse) => handleGoogleSuccess(credentialResponse),
+    onError: () => {},
+    disabled: loading,
+  });
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -278,7 +323,12 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn onClick={googleLogin} />
+                <GoogleAuthButton
+                  isSignUp={false}
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  loading={loading}
+                />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Don't have an account?{" "}
@@ -344,7 +394,12 @@ const UserLogin = () => {
                 </PrimaryBtn>
 
                 <OrDivider />
-                <GoogleBtn onClick={googleLogin} />
+                <GoogleAuthButton
+                  isSignUp={true}
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  loading={loading}
+                />
 
                 <p className="text-center text-xs text-gray-500 mt-5 lg:mt-6">
                   Already have an account?{" "}
@@ -422,7 +477,12 @@ const UserLogin = () => {
               </div>
               <PrimaryBtn onClick={handleSignIn} disabled={loading}>{loading ? "Signing In…" : "Sign In"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
+              <GoogleAuthButton
+                isSignUp={false}
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                loading={loading}
+              />
               <p className="text-center text-xs text-gray-500">Don't have an account? <button onClick={() => switchTo(true)} className="text-[#043573] font-bold">Sign Up</button></p>
             </div>
           ) : (
@@ -453,7 +513,12 @@ const UserLogin = () => {
               </label>
               <PrimaryBtn onClick={handleSignUp} disabled={loading}>{loading ? "Creating Account…" : "Create Account"}</PrimaryBtn>
               <OrDivider />
-              <GoogleBtn onClick={googleLogin} />
+              <GoogleAuthButton
+                isSignUp={true}
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                loading={loading}
+              />
               <p className="text-center text-xs text-gray-500">Already have an account? <button onClick={() => switchTo(false)} className="text-[#043573] font-bold">Sign In</button></p>
             </div>
           )}

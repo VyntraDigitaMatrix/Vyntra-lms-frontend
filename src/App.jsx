@@ -33,6 +33,7 @@ import Resources from "./students/Resources";
 import Notes from "./students/NotesComponent";
 import Downloads from "./students/Downloads";
 import Settings from "./students/Settings";
+import PaymentStatus from "./students/PaymentStatus";
 import Profile from "./students/Profile";
 import ContactSupport from "./students/ContactSupport";
 import ViewCourse from "./students/ViewCourse";
@@ -167,6 +168,9 @@ function App() {
               {/* Google OAuth redirect handler */}
               <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
               <Route path="/login/oauth2/code/google" element={<OAuth2RedirectHandler />} />
+
+              {/* Cashfree Payment return & status handler */}
+              <Route path="/payment-status" element={<PaymentStatus />} />
 
               {/* Protected Student Routes */}
               <Route element={<PrivateRoute />}>

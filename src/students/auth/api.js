@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://vyntra.swipengrow.in";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://backend.vyntraone.com";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -86,12 +86,21 @@ export const studentCourseApi = {
 };
 
 export const studentPaymentApi = {
-  createOrder: (courseId) => {
-    return api.post(`/api/student/payments/orders/courses/${courseId}`);
+  createOrder: (courseId, useWallet = false) => {
+    return api.post(`/api/student/payments/orders/courses/${courseId}?useWallet=${useWallet}`);
   },
   verifyPayment: (data) => {
     return api.post("/api/student/payments/verify", data);
-  }
+  },
+  getCheckoutSummary: (courseId, useWallet = false) => {
+    return api.get(`/api/student/payments/checkout-summary/${courseId}?useWallet=${useWallet}`);
+  },
+  getMyTransactions: (page = 0, size = 10) => {
+    return api.get(`/api/student/payments/transactions?page=${page}&size=${size}`);
+  },
+  getTransactionDetails: (paymentId) => {
+    return api.get(`/api/student/payments/transactions/${paymentId}`);
+  },
 };
 
 export const studentEnrolledCourseApi = {

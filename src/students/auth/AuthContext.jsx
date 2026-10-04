@@ -107,23 +107,31 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await studentAuth.googleLogin({ idToken });
       if (res.data && res.data.data) {
-        const { accessToken, refreshToken } = res.data.data;
+        const { accessToken, refreshToken, studentCode, fullName, email } = res.data.data;
         localStorage.setItem("student_accessToken", accessToken);
         localStorage.setItem("student_refreshToken", refreshToken);
 
-        // Fetch current profile
-        const profileRes = await studentAuth.getProfile();
-        if (profileRes.data && profileRes.data.data) {
-          setStudent(profileRes.data.data);
-          setIsAuthenticated(true);
-          navigate("/student/dashboard");
-          return { success: true };
+        // Fetch current profile with graceful fallback to login payload
+        try {
+          const profileRes = await studentAuth.getProfile();
+          if (profileRes.data && profileRes.data.data) {
+            setStudent(profileRes.data.data);
+          } else {
+            setStudent({ studentCode, fullName, email });
+          }
+        } catch (profileErr) {
+          console.warn("Could not fetch full student profile, using login payload:", profileErr);
+          setStudent({ studentCode, fullName, email });
         }
+
+        setIsAuthenticated(true);
+        navigate("/student/dashboard");
+        return { success: true };
       }
       return { success: false, message: "Google login response did not contain token information" };
     } catch (err) {
       console.error("Google login error:", err);
-      const message = err.response?.data?.message || "Google login failed";
+      const message = err.response?.data?.message || err.message || "Google login failed";
       return { success: false, message };
     }
   };

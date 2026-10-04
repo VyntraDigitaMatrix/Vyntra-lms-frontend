@@ -18,7 +18,7 @@ export default function EditPlanView({ plan, onBack, onSave, setError }) {
         discountPrice: plan?.discountPrice ?? "",
         location: "Rest Of The World",
         renewalPlan: "",
-        paymentGateway: "Razorpay",
+        paymentGateway: "Cashfree",
         couponCode: true,
         planType: "normal",
         pricingType: plan?.pricingType || "ONE_TIME_PURCHASE",

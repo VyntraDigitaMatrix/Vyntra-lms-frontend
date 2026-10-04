@@ -197,14 +197,14 @@ const CurriculumSection = ({ modules, isEnrolled, courseId, navigate }) => {
     );
 };
 
-const loadRazorpayScript = () => {
+const loadCashfreeScript = () => {
     return new Promise((resolve) => {
-        if (window.Razorpay) {
+        if (window.Cashfree || window.loadCashfree) {
             resolve(true);
             return;
         }
         const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
         script.async = true;
         script.onload = () => resolve(true);
         script.onerror = () => resolve(false);
@@ -266,9 +266,9 @@ const ViewCourse = () => {
         setPaymentLoading(true);
 
         try {
-            const scriptLoaded = await loadRazorpayScript();
-            if (!scriptLoaded) {
-                alert("Razorpay SDK failed to load. Please check your internet connection.");
+            const scriptLoaded = await loadCashfreeScript();
+            if (!scriptLoaded || (!window.Cashfree && !window.loadCashfree)) {
+                alert("Payment gateway SDK failed to load. Please check your internet connection.");
                 setPaymentLoading(false);
                 return;
             }
@@ -279,58 +279,78 @@ const ViewCourse = () => {
             }
 
             const orderData = orderRes.data.data;
-            const options = {
-                key: orderData.keyId,
-                amount: orderData.amount,          // backend already returns paise
-                currency: orderData.currency || "INR",
-                name: "Vyntra LMS",
-                description: orderData.courseTitle || courseData?.title || "Course Enrollment",
-                order_id: orderData.razorpayOrderId,
-                handler: async (response) => {
-                    try {
-                        setPaymentLoading(true);
-                        const verifyRes = await studentPaymentApi.verifyPayment({
-                            razorpayOrderId: response.razorpay_order_id,
-                            razorpayPaymentId: response.razorpay_payment_id,
-                            razorpaySignature: response.razorpay_signature
-                        });
-                        if (verifyRes.status === 200 || (verifyRes.data && verifyRes.data.success)) {
-                            alert("Payment successful! You are now enrolled.");
-                            fetchCourseStructure();
-                        } else {
-                            alert("Verification failed. Please contact support.");
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        alert("Error verifying payment: " + (err.response?.data?.message || err.message));
-                    } finally {
-                        setPaymentLoading(false);
-                    }
-                },
-                prefill: {
-                    name: student?.fullName || student?.name || "",
-                    email: student?.email || "",
-                    contact: student?.phone || student?.phoneNumber || ""
-                },
-                theme: {
-                    color: "#2563EB"
-                },
-                modal: {
-                    ondismiss: () => {
-                        setPaymentLoading(false);
-                    }
-                }
+
+            // If order was 100% covered by student wallet balance:
+            if (orderData.isPaid) {
+                alert("Course enrolled successfully using your wallet balance!");
+                await fetchCourseStructure();
+                setPaymentLoading(false);
+                return;
+            }
+
+            if (!orderData.paymentSessionId) {
+                throw new Error("Unable to obtain payment session from server");
+            }
+
+            const mode = (orderData.environment && String(orderData.environment).toLowerCase() === "production")
+                ? "production"
+                : "sandbox";
+
+            const cashfree = typeof window.Cashfree === "function"
+                ? window.Cashfree({ mode })
+                : await window.loadCashfree({ mode });
+
+            const checkoutOptions = {
+                paymentSessionId: orderData.paymentSessionId,
+                redirectTarget: "_modal",
             };
 
-            const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response) {
-                alert("Payment failed: " + response.error.description);
-                setPaymentLoading(false);
-            });
-            rzp.open();
+            const checkoutResult = await cashfree.checkout(checkoutOptions);
+
+            // After modal interaction completes or is closed, verify the order with our backend
+            try {
+                setPaymentLoading(true);
+                let verified = false;
+                const maxAttempts = 3;
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                    try {
+                        const verifyRes = await studentPaymentApi.verifyPayment({
+                            orderId: orderData.orderId,
+                        });
+                        if (verifyRes.status === 200 || (verifyRes.data && verifyRes.data.success)) {
+                            verified = true;
+                            alert("Payment successful! You are now enrolled.");
+                            await fetchCourseStructure();
+                            break;
+                        }
+                    } catch (err) {
+                        const errMsg = err.response?.data?.message || err.message || "";
+                        if (
+                            attempt < maxAttempts &&
+                            (errMsg.toLowerCase().includes("not completed") || errMsg.toLowerCase().includes("active"))
+                        ) {
+                            await new Promise((resolve) => setTimeout(resolve, 1500));
+                        } else {
+                            if (
+                                errMsg.toLowerCase().includes("not completed") ||
+                                errMsg.toLowerCase().includes("active")
+                            ) {
+                                console.log("Payment not completed or modal closed:", errMsg);
+                            } else {
+                                console.error(err);
+                                alert("Payment verification note: " + errMsg);
+                            }
+                            break;
+                        }
+                    }
+                }
+            } catch (vErr) {
+                console.error("Verification error:", vErr);
+            }
         } catch (err) {
             console.error(err);
             alert("Error placing order: " + (err.response?.data?.message || err.message));
+        } finally {
             setPaymentLoading(false);
         }
     };
